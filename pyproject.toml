@@ -23,6 +23,7 @@ pydantic = "^1.10.1"
 httpx = "^0.23.0"
 starlette = "^0.19.1"
 alembic = "^1.8.1"
+PyJWT = "^2.4.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
@@ -49,6 +50,7 @@ test = "pytest -v tests"
 pre-commit = ["lint", "coverage"]
 alembic = { cmd = "alembic", envfile = ".env" }
 migrate = { cmd = "alembic upgrade head", envfile = ".env" }
+sign = { cmd = """python -c 'from api.utils import jwt; import sys, json; print(jwt.encode_jwt(json.loads(sys.argv[1]), jwt.timedelta(seconds=int(sys.argv[2]))))'""", envfile = ".env" }
 
 [tool.poe.tasks.coverage]
 shell = """
