@@ -23,6 +23,7 @@ httpx = "^0.23.0"
 starlette = "^0.19.1"
 alembic = "^1.8.1"
 PyJWT = "^2.4.0"
+PyYAML = "^6.0"
 
 [tool.poetry.dev-dependencies]
 flake8 = "^4.0.1"
