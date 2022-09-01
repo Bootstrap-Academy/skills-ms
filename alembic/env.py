@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from api.database.database import Base, get_url
 
 
-NAME = None
+NAME = "skills"
 
 
 # this is the Alembic Config object, which provides
