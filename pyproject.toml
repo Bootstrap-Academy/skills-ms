@@ -1,10 +1,9 @@
 [tool.poetry]
-name = "fastapi-template"
+name = "skills-ms"
 version = "0"
 description = ""
 authors = ["Defelo <defelo@the-morpheus.de>"]
 readme = "README.md"
-license = "GPL-3.0-only"
 homepage = "https://github.com/Bootstrap-Academy/skills-ms"
 repository = "https://github.com/Bootstrap-Academy/skills-ms"
 packages = [{ include = "api" }]
