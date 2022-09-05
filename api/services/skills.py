@@ -14,7 +14,7 @@ class SkillDescription(BaseModel):
 
 
 def _load_skills() -> dict[str, SkillDescription]:
-    with open("skills.yml") as f:
+    with open("config/skills.yml") as f:
         return pydantic.parse_obj_as(dict[str, SkillDescription], safe_load(f))
 
 

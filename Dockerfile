@@ -39,7 +39,7 @@ COPY alembic /app/alembic
 COPY alembic.ini /app/
 COPY --from=builder /build/VERSION /app/
 
-COPY skills.yml /app/
+COPY config /app/config/
 COPY api /app/api/
 
 HEALTHCHECK --interval=20s --timeout=5s --retries=1 \
