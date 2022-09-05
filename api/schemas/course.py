@@ -3,8 +3,10 @@ from __future__ import annotations
 from enum import Enum
 from typing import Any
 
-from pydantic import BaseModel, ValidationError, validator
+from pydantic import BaseModel, Field, ValidationError, validator
 from pydantic.validators import dict_validator
+
+from api.utils.docs import example, get_example
 
 
 class LectureType(Enum):
@@ -13,9 +15,9 @@ class LectureType(Enum):
 
 
 class Lecture(BaseModel):
-    name: str
-    description: str | None
-    type: LectureType
+    title: str = Field(description="Title of the lecture")
+    description: str | None = Field(description="Description of the lecture")
+    type: LectureType = Field(description="Type of the lecture")
 
     @classmethod
     def validate(cls, value: Any) -> Lecture:
@@ -32,7 +34,11 @@ class Lecture(BaseModel):
 
 class YoutubeLecture(Lecture):
     type = LectureType.YOUTUBE
-    id: str
+    id: str = Field(description="Youtube Video ID of the lecture")
+
+    Config = example(
+        title="Introduction", description="Introduction to the course", type=LectureType.YOUTUBE, id="dQw4w9WgXcQ"
+    )
 
     @validator("type")
     def _validate_type(cls, v: LectureType) -> LectureType:  # noqa: N805
@@ -43,7 +49,14 @@ class YoutubeLecture(Lecture):
 
 class Mp4Lecture(Lecture):
     type = LectureType.MP4
-    url: str
+    url: str = Field(description="URL of the MP4 file")
+
+    Config = example(
+        title="Introduction",
+        description="Introduction to the course",
+        type=LectureType.MP4,
+        url="https://example.com/introduction.mp4",
+    )
 
     @validator("type")
     def _validate_type(cls, v: LectureType) -> LectureType:  # noqa: N805
@@ -53,21 +66,31 @@ class Mp4Lecture(Lecture):
 
 
 class Section(BaseModel):
-    name: str
-    description: str | None
-    lectures: list[Lecture]
+    title: str = Field(description="Title of the section")
+    description: str | None = Field(description="Description of the section")
+    lectures: list[Lecture] = Field(description="Lectures in the section")
+
+    Config = example(
+        title="Introduction", description="Introduction to the course", lectures=[get_example(YoutubeLecture)]
+    )
 
 
 class BaseCourse(BaseModel):
-    id: str
-    name: str
-    description: str | None
+    id: str = Field(description="ID of the course")
+    title: str = Field(description="Title of the course")
+    description: str | None = Field(description="Description of the course")
+
+    Config = example(id="python", title="Python", description="Course description")
 
 
 class Course(BaseCourse):
-    sections: list[Section]
+    sections: list[Section] = Field(description="Sections in the course")
+
+    Config = example(**get_example(BaseCourse), sections=[get_example(Section)])
 
 
 class CourseSummary(BaseCourse):
-    sections: int
-    lectures: int
+    sections: int = Field(description="Number of sections in the course")
+    lectures: int = Field(description="Number of lectures in the course")
+
+    Config = example(**get_example(BaseCourse), sections=42, lectures=1337)

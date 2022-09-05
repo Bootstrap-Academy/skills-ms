@@ -18,7 +18,7 @@ async def list_courses() -> Any:
     return [
         {
             "id": course.id,
-            "name": course.name,
+            "title": course.title,
             "description": course.description,
             "sections": len(course.sections),
             "lectures": sum(len(section.lectures) for section in course.sections),

@@ -1,206 +1,206 @@
-name: "JavaScript Lernen für Anfänger bis Profis"
+title: "JavaScript Lernen für Anfänger bis Profis"
 description:
 sections:
-  - name: "JavaScript Lernen für Anfänger bis Profis"
+  - title: "JavaScript Lernen für Anfänger bis Profis"
     description:
     lectures:
-      - name: "JavaScript Tutorial für Anfänger #1 - Einleitung und Einbinden"
+      - title: "JavaScript Tutorial für Anfänger #1 - Einleitung und Einbinden"
         description:
         type: youtube
         id: "UeZi8a99iS0"
-      - name: "JavaScript Tutorial für Anfänger #2 - Ausgaben"
+      - title: "JavaScript Tutorial für Anfänger #2 - Ausgaben"
         description:
         type: youtube
         id: "8WpNm5lQoyk"
-      - name: "JavaScript Tutorial für Anfänger #3 - Variablen"
+      - title: "JavaScript Tutorial für Anfänger #3 - Variablen"
         description:
         type: youtube
         id: "HuAFOK4vqZs"
-      - name: "JavaScript Tutorial für Anfänger #4   Operatoren"
+      - title: "JavaScript Tutorial für Anfänger #4   Operatoren"
         description:
         type: youtube
         id: "0uyMhfpVgXs"
-      - name: "JavaScript Tutorial für Anfänger #5 - Strings"
+      - title: "JavaScript Tutorial für Anfänger #5 - Strings"
         description:
         type: youtube
         id: "UFQo9mIovpo"
-      - name: "JavaScript Tutorial für Anfänger #6 - Booleans"
+      - title: "JavaScript Tutorial für Anfänger #6 - Booleans"
         description:
         type: youtube
         id: "ClF-2WZcE3w"
-      - name: "JavaScript Tutorial für Anfänger #7 - if-Abfragen"
+      - title: "JavaScript Tutorial für Anfänger #7 - if-Abfragen"
         description:
         type: youtube
         id: "R7yRD_1qp_0"
-      - name: "JavaScript Tutorial für Anfänger #8 - Switch Case Statements"
+      - title: "JavaScript Tutorial für Anfänger #8 - Switch Case Statements"
         description:
         type: youtube
         id: "ZHgGIWru5Ec"
-      - name: "JavaScript Tutorial für Anfänger #9 - Arrays"
+      - title: "JavaScript Tutorial für Anfänger #9 - Arrays"
         description:
         type: youtube
         id: "1iae6R8zAoI"
-      - name: "JavaScript Tutorial für Anfänger #10 - Arrays Part 2"
+      - title: "JavaScript Tutorial für Anfänger #10 - Arrays Part 2"
         description:
         type: youtube
         id: "-VruqDKhryM"
-      - name: "JavaScript Tutorial für Anfänger #11 - For Schleifen"
+      - title: "JavaScript Tutorial für Anfänger #11 - For Schleifen"
         description:
         type: youtube
         id: "HixeTVkfyn4"
-      - name: "JavaScript Tutorial für Anfänger #12 - For In Schleifen"
+      - title: "JavaScript Tutorial für Anfänger #12 - For In Schleifen"
         description:
         type: youtube
         id: "rSMrSyW_baw"
-      - name: "JavaScript Tutorial für Anfänger #13 - While Schleifen"
+      - title: "JavaScript Tutorial für Anfänger #13 - While Schleifen"
         description:
         type: youtube
         id: "MtdHUmt2w20"
-      - name: "JavaScript Tutorial für Anfänger #14 - Break und Continue"
+      - title: "JavaScript Tutorial für Anfänger #14 - Break und Continue"
         description:
         type: youtube
         id: "M8VbJhWIGCI"
-      - name: "JavaScript Tutorial für Anfänger #15 - Mathematische Funktionen"
+      - title: "JavaScript Tutorial für Anfänger #15 - Mathematische Funktionen"
         description:
         type: youtube
         id: "WkWVjhURF9s"
-      - name: "JavaScript Tutorial für Anfänger #16 - Funktionen"
+      - title: "JavaScript Tutorial für Anfänger #16 - Funktionen"
         description:
         type: youtube
         id: "pt0YqMbZO8Q"
-      - name: "JavaScript Tutorial für Anfänger #17 - Parameter und Rückgabewerte"
+      - title: "JavaScript Tutorial für Anfänger #17 - Parameter und Rückgabewerte"
         description:
         type: youtube
         id: "KRIkAnbFq3A"
-      - name: "JavaScript Tutorial für Anfänger #18 - Rekursive Funktionen"
+      - title: "JavaScript Tutorial für Anfänger #18 - Rekursive Funktionen"
         description:
         type: youtube
         id: "qhi9f8E0Kps"
-      - name: "JavaScript Tutorial für Anfänger #19 - Auslagern von Scripts"
+      - title: "JavaScript Tutorial für Anfänger #19 - Auslagern von Scripts"
         description:
         type: youtube
         id: "Z5uhFcg4lRg"
-      - name: "JavaScript Tutorial für Anfänger #20 - Variablenscopes"
+      - title: "JavaScript Tutorial für Anfänger #20 - Variablenscopes"
         description:
         type: youtube
         id: "LGefU5nrQbg"
-      - name: "JavaScript Tutorial für Anfänger #21 - Events - Auf Klick Javascript ausführen"
+      - title: "JavaScript Tutorial für Anfänger #21 - Events - Auf Klick Javascript ausführen"
         description:
         type: youtube
         id: "K0PIQ7hispI"
-      - name: "JavaScript Tutorial für Anfänger #22 - Das Document Object Model DOM"
+      - title: "JavaScript Tutorial für Anfänger #22 - Das Document Object Model DOM"
         description:
         type: youtube
         id: "7jyy4OcX_FA"
-      - name: "JavaScript Tutorial für Anfänger #23 - DOM #2 - Elemente"
+      - title: "JavaScript Tutorial für Anfänger #23 - DOM #2 - Elemente"
         description:
         type: youtube
         id: "Lkpfu_doJQc"
-      - name: "JavaScript Tutorial für Anfänger #24 - DOM 3 - Elemente verändern"
+      - title: "JavaScript Tutorial für Anfänger #24 - DOM 3 - Elemente verändern"
         description:
         type: youtube
         id: "BdukNYP5Aow"
-      - name: "JavaScript Tutorial für Anfänger #25 - DOM 4 - Animationen"
+      - title: "JavaScript Tutorial für Anfänger #25 - DOM 4 - Animationen"
         description:
         type: youtube
         id: "QIy874Wn1kM"
-      - name: "JavaScript Tutorial für Anfänger #26 - DOM 5 - this und Events"
+      - title: "JavaScript Tutorial für Anfänger #26 - DOM 5 - this und Events"
         description:
         type: youtube
         id: "1pUiyWP8jAU"
-      - name: "JavaScript Tutorial für Anfänger #27 - DOM 6 - dynamisch neue Elemente erstellen - Nodes"
+      - title: "JavaScript Tutorial für Anfänger #27 - DOM 6 - dynamisch neue Elemente erstellen - Nodes"
         description:
         type: youtube
         id: "sZDjqTnfiGA"
-      - name: "JavaScript Tutorial #28 - DOM 7 - dynamisch neue Elemente erstellen #2"
+      - title: "JavaScript Tutorial #28 - DOM 7 - dynamisch neue Elemente erstellen #2"
         description:
         type: youtube
         id: "LkYmKRo7-Ak"
-      - name: "JavaScript Tutorial #29 - Das Browser Object Model BOM"
+      - title: "JavaScript Tutorial #29 - Das Browser Object Model BOM"
         description:
         type: youtube
         id: "TkoBFAmVgbQ"
-      - name: "JavaScript Tutorial #30 - Das Browser Object Model BOM #2"
+      - title: "JavaScript Tutorial #30 - Das Browser Object Model BOM #2"
         description:
         type: youtube
         id: "dtl9_Ob2Hx0"
-      - name: "JavaScript Tutorial #31 - Cookies [German / Deutsch]"
+      - title: "JavaScript Tutorial #31 - Cookies [German / Deutsch]"
         description:
         type: youtube
         id: "-7fvXr97RDc"
-      - name: "JavaScript Tutorial #32 - Objektorientierung"
+      - title: "JavaScript Tutorial #32 - Objektorientierung"
         description:
         type: youtube
         id: "kmvpCw0Q0DY"
-      - name: "JavaScript Tutorial #33 - Konstruktoren"
+      - title: "JavaScript Tutorial #33 - Konstruktoren"
         description:
         type: youtube
         id: "-YOx-2BhNhs"
-      - name: "JavaScript Tutorial #34 - Methoden"
+      - title: "JavaScript Tutorial #34 - Methoden"
         description:
         type: youtube
         id: "XGI1e_dthlk"
-      - name: "JavaScript Tutorial #35 - Prototypes"
+      - title: "JavaScript Tutorial #35 - Prototypes"
         description:
         type: youtube
         id: "XTOKcXRionI"
-      - name: "JavaScript Tutorial #36 - Errorhandling"
+      - title: "JavaScript Tutorial #36 - Errorhandling"
         description:
         type: youtube
         id: "HgR6X6QigE0"
-      - name: "JavaScript Tutorial #37 - Datum und Uhrzeit"
+      - title: "JavaScript Tutorial #37 - Datum und Uhrzeit"
         description:
         type: youtube
         id: "NPPJWmEe0EY"
-      - name: "JavaScript Tutorial - var, let und const"
+      - title: "JavaScript Tutorial - var, let und const"
         description:
         type: youtube
         id: "OGe8OlfibQI"
-      - name: "JavaScript Tutorial - Generatoren und Yield"
+      - title: "JavaScript Tutorial - Generatoren und Yield"
         description:
         type: youtube
         id: "k2dLCL-hudE"
-      - name: "JavaScript Tutorial - Mehr Informationen zu Generatoren"
+      - title: "JavaScript Tutorial - Mehr Informationen zu Generatoren"
         description:
         type: youtube
         id: "vYoMEYTaBYE"
-      - name: "JavaScript Tutorial - Arrow Functions"
+      - title: "JavaScript Tutorial - Arrow Functions"
         description:
         type: youtube
         id: "mvS450Y2FH4"
-      - name: "TypeScript Tutorial Deutsch #1 - Die Rettung für JavaScript"
+      - title: "TypeScript Tutorial Deutsch #1 - Die Rettung für JavaScript"
         description:
         type: youtube
         id: "uo4PWU-R96k"
-      - name: "JavaScript - kann (a ==1 && a== 2 && a==3) jemals True werden?"
+      - title: "JavaScript - kann (a ==1 && a== 2 && a==3) jemals True werden?"
         description:
         type: youtube
         id: "joVJKCGM2RE"
-      - name: "Sichere Passwörter in JavaScript mit @Unleashed Design"
+      - title: "Sichere Passwörter in JavaScript mit @Unleashed Design"
         description:
         type: youtube
         id: "OXW1lu-bLk8"
-      - name: "Clean JavaScript Code"
+      - title: "Clean JavaScript Code"
         description:
         type: youtube
         id: "LQrWkq6_hQQ"
-      - name: "NodeJS: JavaScript sinnvoll erweitern"
+      - title: "NodeJS: JavaScript sinnvoll erweitern"
         description:
         type: youtube
         id: "IyNpu4t30e8"
-      - name: "NPM - Paketmanager für Javascript"
+      - title: "NPM - Paketmanager für Javascript"
         description:
         type: youtube
         id: "f15kMS0z5iU"
-      - name: "JavaScript - NPM: Abhängigkeiten definieren und Projekte weitergeben mit der Package.json"
+      - title: "JavaScript - NPM: Abhängigkeiten definieren und Projekte weitergeben mit der Package.json"
         description:
         type: youtube
         id: "pRZ5qdJxxgE"
-      - name: "NPM - Automatisierte Builds und Browserify"
+      - title: "NPM - Automatisierte Builds und Browserify"
         description:
         type: youtube
         id: "Ei7-YOR8oRU"
-      - name: "NodeJS Tutorial - Mit nodemon unkompliziert schnelleres serverseitiges Arbeiten ermöglichen"
+      - title: "NodeJS Tutorial - Mit nodemon unkompliziert schnelleres serverseitiges Arbeiten ermöglichen"
         description:
         type: youtube
         id: "9mTQPlhNvb8"

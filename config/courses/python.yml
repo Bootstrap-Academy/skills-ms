@@ -1,338 +1,338 @@
-name: "Python Tutorials Deutsch"
+title: "Python Tutorials Deutsch"
 description:
 sections:
-  - name: "Python Tutorials Deutsch"
+  - title: "Python Tutorials Deutsch"
     description:
     lectures:
-      - name: "Python 3 Tutorial: Einleitung, Installation, Scripte ausführen und PyCharm"
+      - title: "Python 3 Tutorial: Einleitung, Installation, Scripte ausführen und PyCharm"
         description:
         type: youtube
         id: "DiidEp6DqCo"
-      - name: "Python 3 Tutorial #1 - Einleitung und Installation"
+      - title: "Python 3 Tutorial #1 - Einleitung und Installation"
         description:
         type: youtube
         id: "dyJdLalc7TA"
-      - name: "Python Tutorial #2 - Zahlen"
+      - title: "Python Tutorial #2 - Zahlen"
         description:
         type: youtube
         id: "mNcexeCI-G4"
-      - name: "Python Tutorial #3 - Strings"
+      - title: "Python Tutorial #3 - Strings"
         description:
         type: youtube
         id: "BiVQJ4dTD9o"
-      - name: "Python Tutorial #4 - Listen"
+      - title: "Python Tutorial #4 - Listen"
         description:
         type: youtube
         id: "3ykwB-M2-mg"
-      - name: "Python Tutorial #5 - Strings als Listen"
+      - title: "Python Tutorial #5 - Strings als Listen"
         description:
         type: youtube
         id: "3eV-iDePwG4"
-      - name: "Python Tutorial #6 - Das erste echte Script"
+      - title: "Python Tutorial #6 - Das erste echte Script"
         description:
         type: youtube
         id: "blFbmXYl_iA"
-      - name: "Python Tutorial #7 - Die if-Abfrage"
+      - title: "Python Tutorial #7 - Die if-Abfrage"
         description:
         type: youtube
         id: "MDxgzWCV3oM"
-      - name: "Python Tutorial #8 - Die while-Schleife"
+      - title: "Python Tutorial #8 - Die while-Schleife"
         description:
         type: youtube
         id: "5FNVcHUjYCM"
-      - name: "Python Tutorial #9 - Die for-Schleife"
+      - title: "Python Tutorial #9 - Die for-Schleife"
         description:
         type: youtube
         id: "jZxa1IKAgOo"
-      - name: "Python Tutorial #10 - die range-Funktion"
+      - title: "Python Tutorial #10 - die range-Funktion"
         description:
         type: youtube
         id: "cKpPvhnxfCY"
-      - name: "Python Tutorial #11 - Break & Continue [GERMAN/DEUTSCH]"
+      - title: "Python Tutorial #11 - Break & Continue [GERMAN/DEUTSCH]"
         description:
         type: youtube
         id: "PhipXSUFXOg"
-      - name: "Python Tutorial #12 - Funktionen"
+      - title: "Python Tutorial #12 - Funktionen"
         description:
         type: youtube
         id: "mgA-Ytr32Ys"
-      - name: "Python Tutorial #13 - Rückgabewerte und Rekursion"
+      - title: "Python Tutorial #13 - Rückgabewerte und Rekursion"
         description:
         type: youtube
         id: "qLRY2zGXovc"
-      - name: "Python Tutorial #14 - Default Werte für Funktionsargumente"
+      - title: "Python Tutorial #14 - Default Werte für Funktionsargumente"
         description:
         type: youtube
         id: "ct2olB0GyLQ"
-      - name: "Python Tutorial #15 - Module"
+      - title: "Python Tutorial #15 - Module"
         description:
         type: youtube
         id: "AagRwg6WZE0"
-      - name: "Python Tutorial #16 - Main"
+      - title: "Python Tutorial #16 - Main"
         description:
         type: youtube
         id: "bNk14P3vsRk"
-      - name: "Python Übung - Temperaturen umrechnen"
+      - title: "Python Übung - Temperaturen umrechnen"
         description:
         type: youtube
         id: "GPXEVsOxZVw"
-      - name: "Python Tutorial #17 - User Input"
+      - title: "Python Tutorial #17 - User Input"
         description:
         type: youtube
         id: "xTwGWLijyX8"
-      - name: "Python Tutorial #18 - Dateien lesen"
+      - title: "Python Tutorial #18 - Dateien lesen"
         description:
         type: youtube
         id: "EMETm7hRonM"
-      - name: "Python Tutorial #19 - Dateien schreiben"
+      - title: "Python Tutorial #19 - Dateien schreiben"
         description:
         type: youtube
         id: "2A3ZDOUsrOg"
-      - name: "Python Tutorial #20 - Gültigkeitsbereich von Variablen"
+      - title: "Python Tutorial #20 - Gültigkeitsbereich von Variablen"
         description:
         type: youtube
         id: "zGGGwzexDfM"
-      - name: "Python Tutorial #21 - Klassen"
+      - title: "Python Tutorial #21 - Klassen"
         description:
         type: youtube
         id: "ce5Ks2xAXo4"
-      - name: "Python Tutorial #22 - Konstruktoren"
+      - title: "Python Tutorial #22 - Konstruktoren"
         description:
         type: youtube
         id: "fKjwwXoyUOw"
-      - name: "Python Tutorial #23 - Instanz- und Klassenvariablen"
+      - title: "Python Tutorial #23 - Instanz- und Klassenvariablen"
         description:
         type: youtube
         id: "sKSsAhiaqQ8"
-      - name: "Python Übung - Tic Tac Toe"
+      - title: "Python Übung - Tic Tac Toe"
         description:
         type: youtube
         id: "EdSCvzXwzw4"
-      - name: "Python #24 - Vererbung"
+      - title: "Python #24 - Vererbung"
         description:
         type: youtube
         id: "1FMCzUPaHzQ"
-      - name: "Python #25 - Überschreibung von Attributen und Methoden"
+      - title: "Python #25 - Überschreibung von Attributen und Methoden"
         description:
         type: youtube
         id: "3AgG7eTLJGM"
-      - name: "Python #26 - Mehrfachvererbung"
+      - title: "Python #26 - Mehrfachvererbung"
         description:
         type: youtube
         id: "1w40nctG2Qg"
-      - name: "Python #27 - Exceptions"
+      - title: "Python #27 - Exceptions"
         description:
         type: youtube
         id: "9A3GtZxB4ug"
-      - name: "Python Übung - Ein Textadventure"
+      - title: "Python Übung - Ein Textadventure"
         description:
         type: youtube
         id: "KLQvQLU5bvI"
-      - name: "Python #28 - Multithreading"
+      - title: "Python #28 - Multithreading"
         description:
         type: youtube
         id: "_ynNrBP2lWA"
-      - name: "Python #29 - Multithreading Locks"
+      - title: "Python #29 - Multithreading Locks"
         description:
         type: youtube
         id: "fS6jcEKNiSg"
-      - name: "Python #30 - Kommunikation zwischen Threads"
+      - title: "Python #30 - Kommunikation zwischen Threads"
         description:
         type: youtube
         id: "lqjWl13-Huw"
-      - name: "Python Tutorial - Multiprocessing vs Multithreading"
+      - title: "Python Tutorial - Multiprocessing vs Multithreading"
         description:
         type: youtube
         id: "BjalncvFfYs"
-      - name: "Python Tutorial - Multiprocessing"
+      - title: "Python Tutorial - Multiprocessing"
         description:
         type: youtube
         id: "Tu0KbXWr5uA"
-      - name: "Python Tutorial - Multiprocessing vs Multithreading Performance Benchmark"
+      - title: "Python Tutorial - Multiprocessing vs Multithreading Performance Benchmark"
         description:
         type: youtube
         id: "4sEsHa6S58M"
-      - name: "Python #31 - partielle Funktionen"
+      - title: "Python #31 - partielle Funktionen"
         description:
         type: youtube
         id: "nlQlajr5Dt8"
-      - name: "Python #32 - Lambda und Map"
+      - title: "Python #32 - Lambda und Map"
         description:
         type: youtube
         id: "_5e0CBcXTZo"
-      - name: "Python #33 - Filtern einer Liste"
+      - title: "Python #33 - Filtern einer Liste"
         description:
         type: youtube
         id: "5qQ5EKeO9bo"
-      - name: "Python #34 - Logging"
+      - title: "Python #34 - Logging"
         description:
         type: youtube
         id: "F1ODsSWi9nk"
-      - name: "Python #35 - Vokabeltrainer"
+      - title: "Python #35 - Vokabeltrainer"
         description:
         type: youtube
         id: "jUcQGAvtSCc"
-      - name: "Python #36 - Turtle Grafiken"
+      - title: "Python #36 - Turtle Grafiken"
         description:
         type: youtube
         id: "kwmrJDSxBXw"
-      - name: "Python Tutorial #37 - PyCharm [DEUTSCH/GERMAN]"
+      - title: "Python Tutorial #37 - PyCharm [DEUTSCH/GERMAN]"
         description:
         type: youtube
         id: "KUSeRnQT7TE"
-      - name: "Python Tutorial #38 - Abstrakte Klassen"
+      - title: "Python Tutorial #38 - Abstrakte Klassen"
         description:
         type: youtube
         id: "GGkXzHawnCc"
-      - name: "Python Tutorial #39 - Enums"
+      - title: "Python Tutorial #39 - Enums"
         description:
         type: youtube
         id: "58lV5lLnuCI"
-      - name: "Python Tutorial #40 - Operatoren überladen"
+      - title: "Python Tutorial #40 - Operatoren überladen"
         description:
         type: youtube
         id: "H44_Ztv-9N8"
-      - name: "Python Tutorial #41 - Regex"
+      - title: "Python Tutorial #41 - Regex"
         description:
         type: youtube
         id: "QHtYAMkmS1Y"
-      - name: "Python Tutorial #42 - Py2Exe: Python-Programme als Ausführbare Datei"
+      - title: "Python Tutorial #42 - Py2Exe: Python-Programme als Ausführbare Datei"
         description:
         type: youtube
         id: "nWOoky0PTVY"
-      - name: "Python Tutorial #43 - Generatoren und Yield"
+      - title: "Python Tutorial #43 - Generatoren und Yield"
         description:
         type: youtube
         id: "m1QG2YuO3gc"
-      - name: "Python Tutorial #44 - Argument Unpacking, Tupel und Dictionaries"
+      - title: "Python Tutorial #44 - Argument Unpacking, Tupel und Dictionaries"
         description:
         type: youtube
         id: "C7bVzLauLEg"
-      - name: "Python Tutorial #45 - Dekoratoren"
+      - title: "Python Tutorial #45 - Dekoratoren"
         description:
         type: youtube
         id: "T7oF-ywGxk4"
-      - name: "Python Tutorial #46 - Staticmethod und Classmethod"
+      - title: "Python Tutorial #46 - Staticmethod und Classmethod"
         description:
         type: youtube
         id: "2jHuDKB_veg"
-      - name: "Python Tutorial #47 - else an komischen Orten"
+      - title: "Python Tutorial #47 - else an komischen Orten"
         description:
         type: youtube
         id: "RkYaszX2q_8"
-      - name: "Python Tutorial #48 - Versteckte Features"
+      - title: "Python Tutorial #48 - Versteckte Features"
         description:
         type: youtube
         id: "db3r3k0B5Es"
-      - name: "Python Tutorial #49 - Funktionsklassen"
+      - title: "Python Tutorial #49 - Funktionsklassen"
         description:
         type: youtube
         id: "ytOytMdqD7Y"
-      - name: "Python Tutorial #50 - Gleichheitsoperatoren überladen"
+      - title: "Python Tutorial #50 - Gleichheitsoperatoren überladen"
         description:
         type: youtube
         id: "vy0AuHleY_k"
-      - name: "Python Tutorial #51 - Konversions-Magic-Methods"
+      - title: "Python Tutorial #51 - Konversions-Magic-Methods"
         description:
         type: youtube
         id: "xSaabBunOto"
-      - name: "Python Tutorial #52 - Sockets [GERMAN/DEUTSCH]"
+      - title: "Python Tutorial #52 - Sockets [GERMAN/DEUTSCH]"
         description:
         type: youtube
         id: "nKwVn0k1krQ"
-      - name: "Python Crashkurs für Programmierer in einem Video [DEUTSCH/GERMAN]"
+      - title: "Python Crashkurs für Programmierer in einem Video [DEUTSCH/GERMAN]"
         description:
         type: youtube
         id: "ikuyDZNsbNk"
-      - name: "Python Tutorial #53 - Zeit und Datum"
+      - title: "Python Tutorial #53 - Zeit und Datum"
         description:
         type: youtube
         id: "c5uj8M3fOa4"
-      - name: "Python Tutorial #54 - Json"
+      - title: "Python Tutorial #54 - Json"
         description:
         type: youtube
         id: "drord9gbr3Y"
-      - name: "Python Tutorial #55 - Json und Online APIs"
+      - title: "Python Tutorial #55 - Json und Online APIs"
         description:
         type: youtube
         id: "Fl6lBCZecdU"
-      - name: "Python Tutorial - Den Webbrowser ansprechen"
+      - title: "Python Tutorial - Den Webbrowser ansprechen"
         description:
         type: youtube
         id: "AaRlQ8KuFak"
-      - name: "Python Tutorial - Hashing [GERMAN/DEUTSCH]"
+      - title: "Python Tutorial - Hashing [GERMAN/DEUTSCH]"
         description:
         type: youtube
         id: "FVfhKgSfsfc"
-      - name: "Python Tutorial - HMAC"
+      - title: "Python Tutorial - HMAC"
         description:
         type: youtube
         id: "cPC0DCpFKJY"
-      - name: "Python Tutorial - Kommandozeilenargumente einfach auslesen"
+      - title: "Python Tutorial - Kommandozeilenargumente einfach auslesen"
         description:
         type: youtube
         id: "wo6A5IiPEQI"
-      - name: "Python Programme als Ausführbare Dateien mit PyInstaller"
+      - title: "Python Programme als Ausführbare Dateien mit PyInstaller"
         description:
         type: youtube
         id: "wFj58Li_JhI"
-      - name: "Python Tutorial - Requirements eines Python Projektes automatisch erstellen"
+      - title: "Python Tutorial - Requirements eines Python Projektes automatisch erstellen"
         description:
         type: youtube
         id: "vngpiMFHICM"
-      - name: "Python Tutorial - Multithreading Queues"
+      - title: "Python Tutorial - Multithreading Queues"
         description:
         type: youtube
         id: "KYu4bts4dPI"
-      - name: "Python Tutorial - Typen angeben"
+      - title: "Python Tutorial - Typen angeben"
         description:
         type: youtube
         id: "c6k-UWkT_Og"
-      - name: "Python Tutorial - Dataclasses - Neu in Python 3.7"
+      - title: "Python Tutorial - Dataclasses - Neu in Python 3.7"
         description:
         type: youtube
         id: "AXfNKyuutCs"
-      - name: "Python Tutorial - Subprocess - auf die Commandline zugreifen"
+      - title: "Python Tutorial - Subprocess - auf die Commandline zugreifen"
         description:
         type: youtube
         id: "PmEM4IODkZk"
-      - name: "Python Tutorial- AsyncIO - Einführung"
+      - title: "Python Tutorial- AsyncIO - Einführung"
         description:
         type: youtube
         id: "HzpdMDYEstA"
-      - name: "Python Tutorial - AsyncIO #2 - Queues und Tasks"
+      - title: "Python Tutorial - AsyncIO #2 - Queues und Tasks"
         description:
         type: youtube
         id: "f_oyk1GpOJg"
-      - name: "Python Tutorial - AsyncIO #3 - Events"
+      - title: "Python Tutorial - AsyncIO #3 - Events"
         description:
         type: youtube
         id: "LYTiaSXso_4"
-      - name: "Python Tutorial - assert [German/Deutsch]"
+      - title: "Python Tutorial - assert [German/Deutsch]"
         description:
         type: youtube
         id: "OwUVlPvXwrI"
-      - name: "Neu in Python 3.8 Tutorial - Der Walrus Operator / Assignment Expressions"
+      - title: "Neu in Python 3.8 Tutorial - Der Walrus Operator / Assignment Expressions"
         description:
         type: youtube
         id: "-v_wzrAXVm0"
-      - name: "Python Tutorial - Format Strings"
+      - title: "Python Tutorial - Format Strings"
         description:
         type: youtube
         id: "xzju0BCRoEI"
-      - name: "Neu in Python 3.9 - Update Operator für Dictionaries, PEG Parser und Type Hinting für Listen"
+      - title: "Neu in Python 3.9 - Update Operator für Dictionaries, PEG Parser und Type Hinting für Listen"
         description:
         type: youtube
         id: "rSFFVI5_LB4"
-      - name: "Debugging in Python mit PyCharm"
+      - title: "Debugging in Python mit PyCharm"
         description:
         type: youtube
         id: "WI3oSdDR1Vs"
-      - name: "Neu in Python 3.10: Bessere Fehlermeldungen, Union Types, Bessere Kontextmanager"
+      - title: "Neu in Python 3.10: Bessere Fehlermeldungen, Union Types, Bessere Kontextmanager"
         description:
         type: youtube
         id: "ytKrvEwCvnU"
-      - name: "Neu in Python 3.10: Pattern Matching"
+      - title: "Neu in Python 3.10: Pattern Matching"
         description:
         type: youtube
         id: "so1kKz74R3Q"
