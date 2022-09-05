@@ -2,6 +2,11 @@ import pydantic
 from pydantic import BaseModel
 from yaml import safe_load
 
+from api.logger import get_logger
+
+
+logger = get_logger(__name__)
+
 
 class SkillDescription(BaseModel):
     name: str
@@ -18,6 +23,8 @@ def _check_skill_dependencies() -> None:
         for dependency in description.dependencies:
             if dependency not in SKILLS:
                 raise ValueError(f"Skill {skill} depends on {dependency}, but {dependency} is not defined!")
+
+    logger.debug("skills dependencies are valid")
 
 
 SKILLS: dict[str, SkillDescription] = _load_skills()
