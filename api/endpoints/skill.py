@@ -1,4 +1,5 @@
 """Endpoints related to the skilltree"""
+
 from typing import Any
 
 from fastapi import APIRouter
