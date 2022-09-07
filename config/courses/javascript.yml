@@ -7,200 +7,200 @@ sections:
       - title: "JavaScript Tutorial für Anfänger #1 - Einleitung und Einbinden"
         description:
         type: youtube
-        id: "UeZi8a99iS0"
+        video_id: "UeZi8a99iS0"
       - title: "JavaScript Tutorial für Anfänger #2 - Ausgaben"
         description:
         type: youtube
-        id: "8WpNm5lQoyk"
+        video_id: "8WpNm5lQoyk"
       - title: "JavaScript Tutorial für Anfänger #3 - Variablen"
         description:
         type: youtube
-        id: "HuAFOK4vqZs"
+        video_id: "HuAFOK4vqZs"
       - title: "JavaScript Tutorial für Anfänger #4   Operatoren"
         description:
         type: youtube
-        id: "0uyMhfpVgXs"
+        video_id: "0uyMhfpVgXs"
       - title: "JavaScript Tutorial für Anfänger #5 - Strings"
         description:
         type: youtube
-        id: "UFQo9mIovpo"
+        video_id: "UFQo9mIovpo"
       - title: "JavaScript Tutorial für Anfänger #6 - Booleans"
         description:
         type: youtube
-        id: "ClF-2WZcE3w"
+        video_id: "ClF-2WZcE3w"
       - title: "JavaScript Tutorial für Anfänger #7 - if-Abfragen"
         description:
         type: youtube
-        id: "R7yRD_1qp_0"
+        video_id: "R7yRD_1qp_0"
       - title: "JavaScript Tutorial für Anfänger #8 - Switch Case Statements"
         description:
         type: youtube
-        id: "ZHgGIWru5Ec"
+        video_id: "ZHgGIWru5Ec"
       - title: "JavaScript Tutorial für Anfänger #9 - Arrays"
         description:
         type: youtube
-        id: "1iae6R8zAoI"
+        video_id: "1iae6R8zAoI"
       - title: "JavaScript Tutorial für Anfänger #10 - Arrays Part 2"
         description:
         type: youtube
-        id: "-VruqDKhryM"
+        video_id: "-VruqDKhryM"
       - title: "JavaScript Tutorial für Anfänger #11 - For Schleifen"
         description:
         type: youtube
-        id: "HixeTVkfyn4"
+        video_id: "HixeTVkfyn4"
       - title: "JavaScript Tutorial für Anfänger #12 - For In Schleifen"
         description:
         type: youtube
-        id: "rSMrSyW_baw"
+        video_id: "rSMrSyW_baw"
       - title: "JavaScript Tutorial für Anfänger #13 - While Schleifen"
         description:
         type: youtube
-        id: "MtdHUmt2w20"
+        video_id: "MtdHUmt2w20"
       - title: "JavaScript Tutorial für Anfänger #14 - Break und Continue"
         description:
         type: youtube
-        id: "M8VbJhWIGCI"
+        video_id: "M8VbJhWIGCI"
       - title: "JavaScript Tutorial für Anfänger #15 - Mathematische Funktionen"
         description:
         type: youtube
-        id: "WkWVjhURF9s"
+        video_id: "WkWVjhURF9s"
       - title: "JavaScript Tutorial für Anfänger #16 - Funktionen"
         description:
         type: youtube
-        id: "pt0YqMbZO8Q"
+        video_id: "pt0YqMbZO8Q"
       - title: "JavaScript Tutorial für Anfänger #17 - Parameter und Rückgabewerte"
         description:
         type: youtube
-        id: "KRIkAnbFq3A"
+        video_id: "KRIkAnbFq3A"
       - title: "JavaScript Tutorial für Anfänger #18 - Rekursive Funktionen"
         description:
         type: youtube
-        id: "qhi9f8E0Kps"
+        video_id: "qhi9f8E0Kps"
       - title: "JavaScript Tutorial für Anfänger #19 - Auslagern von Scripts"
         description:
         type: youtube
-        id: "Z5uhFcg4lRg"
+        video_id: "Z5uhFcg4lRg"
       - title: "JavaScript Tutorial für Anfänger #20 - Variablenscopes"
         description:
         type: youtube
-        id: "LGefU5nrQbg"
+        video_id: "LGefU5nrQbg"
       - title: "JavaScript Tutorial für Anfänger #21 - Events - Auf Klick Javascript ausführen"
         description:
         type: youtube
-        id: "K0PIQ7hispI"
+        video_id: "K0PIQ7hispI"
       - title: "JavaScript Tutorial für Anfänger #22 - Das Document Object Model DOM"
         description:
         type: youtube
-        id: "7jyy4OcX_FA"
+        video_id: "7jyy4OcX_FA"
       - title: "JavaScript Tutorial für Anfänger #23 - DOM #2 - Elemente"
         description:
         type: youtube
-        id: "Lkpfu_doJQc"
+        video_id: "Lkpfu_doJQc"
       - title: "JavaScript Tutorial für Anfänger #24 - DOM 3 - Elemente verändern"
         description:
         type: youtube
-        id: "BdukNYP5Aow"
+        video_id: "BdukNYP5Aow"
       - title: "JavaScript Tutorial für Anfänger #25 - DOM 4 - Animationen"
         description:
         type: youtube
-        id: "QIy874Wn1kM"
+        video_id: "QIy874Wn1kM"
       - title: "JavaScript Tutorial für Anfänger #26 - DOM 5 - this und Events"
         description:
         type: youtube
-        id: "1pUiyWP8jAU"
+        video_id: "1pUiyWP8jAU"
       - title: "JavaScript Tutorial für Anfänger #27 - DOM 6 - dynamisch neue Elemente erstellen - Nodes"
         description:
         type: youtube
-        id: "sZDjqTnfiGA"
+        video_id: "sZDjqTnfiGA"
       - title: "JavaScript Tutorial #28 - DOM 7 - dynamisch neue Elemente erstellen #2"
         description:
         type: youtube
-        id: "LkYmKRo7-Ak"
+        video_id: "LkYmKRo7-Ak"
       - title: "JavaScript Tutorial #29 - Das Browser Object Model BOM"
         description:
         type: youtube
-        id: "TkoBFAmVgbQ"
+        video_id: "TkoBFAmVgbQ"
       - title: "JavaScript Tutorial #30 - Das Browser Object Model BOM #2"
         description:
         type: youtube
-        id: "dtl9_Ob2Hx0"
+        video_id: "dtl9_Ob2Hx0"
       - title: "JavaScript Tutorial #31 - Cookies [German / Deutsch]"
         description:
         type: youtube
-        id: "-7fvXr97RDc"
+        video_id: "-7fvXr97RDc"
       - title: "JavaScript Tutorial #32 - Objektorientierung"
         description:
         type: youtube
-        id: "kmvpCw0Q0DY"
+        video_id: "kmvpCw0Q0DY"
       - title: "JavaScript Tutorial #33 - Konstruktoren"
         description:
         type: youtube
-        id: "-YOx-2BhNhs"
+        video_id: "-YOx-2BhNhs"
       - title: "JavaScript Tutorial #34 - Methoden"
         description:
         type: youtube
-        id: "XGI1e_dthlk"
+        video_id: "XGI1e_dthlk"
       - title: "JavaScript Tutorial #35 - Prototypes"
         description:
         type: youtube
-        id: "XTOKcXRionI"
+        video_id: "XTOKcXRionI"
       - title: "JavaScript Tutorial #36 - Errorhandling"
         description:
         type: youtube
-        id: "HgR6X6QigE0"
+        video_id: "HgR6X6QigE0"
       - title: "JavaScript Tutorial #37 - Datum und Uhrzeit"
         description:
         type: youtube
-        id: "NPPJWmEe0EY"
+        video_id: "NPPJWmEe0EY"
       - title: "JavaScript Tutorial - var, let und const"
         description:
         type: youtube
-        id: "OGe8OlfibQI"
+        video_id: "OGe8OlfibQI"
       - title: "JavaScript Tutorial - Generatoren und Yield"
         description:
         type: youtube
-        id: "k2dLCL-hudE"
+        video_id: "k2dLCL-hudE"
       - title: "JavaScript Tutorial - Mehr Informationen zu Generatoren"
         description:
         type: youtube
-        id: "vYoMEYTaBYE"
+        video_id: "vYoMEYTaBYE"
       - title: "JavaScript Tutorial - Arrow Functions"
         description:
         type: youtube
-        id: "mvS450Y2FH4"
+        video_id: "mvS450Y2FH4"
       - title: "TypeScript Tutorial Deutsch #1 - Die Rettung für JavaScript"
         description:
         type: youtube
-        id: "uo4PWU-R96k"
+        video_id: "uo4PWU-R96k"
       - title: "JavaScript - kann (a ==1 && a== 2 && a==3) jemals True werden?"
         description:
         type: youtube
-        id: "joVJKCGM2RE"
+        video_id: "joVJKCGM2RE"
       - title: "Sichere Passwörter in JavaScript mit @Unleashed Design"
         description:
         type: youtube
-        id: "OXW1lu-bLk8"
+        video_id: "OXW1lu-bLk8"
       - title: "Clean JavaScript Code"
         description:
         type: youtube
-        id: "LQrWkq6_hQQ"
+        video_id: "LQrWkq6_hQQ"
       - title: "NodeJS: JavaScript sinnvoll erweitern"
         description:
         type: youtube
-        id: "IyNpu4t30e8"
+        video_id: "IyNpu4t30e8"
       - title: "NPM - Paketmanager für Javascript"
         description:
         type: youtube
-        id: "f15kMS0z5iU"
+        video_id: "f15kMS0z5iU"
       - title: "JavaScript - NPM: Abhängigkeiten definieren und Projekte weitergeben mit der Package.json"
         description:
         type: youtube
-        id: "pRZ5qdJxxgE"
+        video_id: "pRZ5qdJxxgE"
       - title: "NPM - Automatisierte Builds und Browserify"
         description:
         type: youtube
-        id: "Ei7-YOR8oRU"
+        video_id: "Ei7-YOR8oRU"
       - title: "NodeJS Tutorial - Mit nodemon unkompliziert schnelleres serverseitiges Arbeiten ermöglichen"
         description:
         type: youtube
-        id: "9mTQPlhNvb8"
+        video_id: "9mTQPlhNvb8"

@@ -22,7 +22,7 @@ _lecture(){
       - title: $(_yml_escape "$2")
         description:
         type: youtube
-        id: $(_yml_escape "$1")
+        video_id: $(_yml_escape "$1")
 EOF
 }
 
