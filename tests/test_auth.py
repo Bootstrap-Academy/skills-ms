@@ -1,4 +1,4 @@
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import MagicMock
 
 import pytest
 from fastapi.security.base import SecurityBase
@@ -32,40 +32,6 @@ async def test__httpauth_call() -> None:
     http_auth = MagicMock()
     with pytest.raises(NotImplementedError):
         await auth.HTTPAuth.__call__(http_auth, request)
-
-
-# @pytest.mark.parametrize("token,ok", [("S3cr3t Token!", True), ("asdf1234", False)])
-# async def test__statictokenauth_check_token(token: str, ok: bool) -> None:
-#     http_auth = MagicMock()
-#     http_auth._token = "S3cr3t Token!"
-#     assert await auth.StaticTokenAuth._check_token(http_auth, token) == ok
-#
-#
-# async def test__statictokenauth_call__invalid_token(mocker: MockerFixture) -> None:
-#     get_token = mocker.patch("api.auth.get_token")
-#
-#     request = MagicMock()
-#     http_auth = MagicMock()
-#     http_auth._check_token = AsyncMock(return_value=False)
-#
-#     with pytest.raises(InvalidTokenError):
-#         await auth.StaticTokenAuth.__call__(http_auth, request)
-#
-#     get_token.assert_called_once_with(request)
-#     http_auth._check_token.assert_called_once_with(get_token())
-#
-#
-# async def test__statictokenauth_call__valid_token(mocker: MockerFixture) -> None:
-#     get_token = mocker.patch("api.auth.get_token")
-#
-#     request = MagicMock()
-#     http_auth = MagicMock()
-#     http_auth._check_token = AsyncMock(return_value=True)
-#
-#     assert await auth.StaticTokenAuth.__call__(http_auth, request) is True
-#
-#     get_token.assert_called_once_with(request)
-#     http_auth._check_token.assert_called_once_with(get_token())
 
 
 async def test__jwtauth_call__invalid_token(mocker: MockerFixture) -> None:
