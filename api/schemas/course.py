@@ -58,6 +58,16 @@ class Course(BaseCourse):
 
     Config = example(**get_example(BaseCourse), sections=[get_example(Section)])
 
+    @property
+    def summary(self) -> CourseSummary:
+        return CourseSummary(
+            id=self.id,
+            title=self.title,
+            description=self.description,
+            sections=len(self.sections),
+            lectures=sum(len(section.lectures) for section in self.sections),
+        )
+
 
 class CourseSummary(BaseCourse):
     sections: int = Field(description="Number of sections in the course")

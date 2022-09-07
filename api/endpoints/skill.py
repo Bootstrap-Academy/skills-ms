@@ -15,6 +15,13 @@ router = APIRouter(tags=["skill"])
 @router.get("/skills", responses=responses(list[Skill]))
 async def get_skills() -> Any:
     return [
-        {"id": k, "name": v.name, "courses": [], "instructors": [], "exam_dates": [], "dependencies": v.dependencies}
+        {
+            "id": k,
+            "name": v.name,
+            "courses": v.courses,
+            "instructors": [],
+            "exam_dates": [],
+            "dependencies": v.dependencies,
+        }
         for k, v in SKILLS.items()
     ]

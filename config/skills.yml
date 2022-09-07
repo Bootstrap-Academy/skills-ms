@@ -1,9 +1,11 @@
 grundlagen_der_programmierung_und_datenhaltung:
   name: Grundlagen der Programmierung und Datenhaltung
   dependencies: []
+  courses: [python]
 web_developer:
   name: Web Developer
   dependencies: [grundlagen_der_programmierung_und_datenhaltung]
+  courses: [javascript]
 mobile_app_developer:
   name: Mobile App Developer
   dependencies: [grundlagen_der_programmierung_und_datenhaltung]

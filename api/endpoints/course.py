@@ -15,16 +15,7 @@ router = APIRouter(tags=["course"])
 
 @router.get("/courses", responses=responses(list[CourseSummary]))
 async def list_courses() -> Any:
-    return [
-        {
-            "id": course.id,
-            "title": course.title,
-            "description": course.description,
-            "sections": len(course.sections),
-            "lectures": sum(len(section.lectures) for section in course.sections),
-        }
-        for course in COURSES.values()
-    ]
+    return [course.summary for course in COURSES.values()]
 
 
 @router.get("/courses/{course_id}", responses=responses(Course, CourseNotFoundException))
