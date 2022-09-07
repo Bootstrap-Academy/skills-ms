@@ -13,7 +13,9 @@ router = APIRouter(tags=["skill"])
 
 
 @router.get("/skills", responses=responses(list[Skill]))
-async def get_skills() -> Any:
+async def list_skills() -> Any:
+    """Return a list of all skills."""
+
     return [
         {
             "id": k,

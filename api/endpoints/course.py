@@ -15,11 +15,16 @@ router = APIRouter(tags=["course"])
 
 @router.get("/courses", responses=responses(list[CourseSummary]))
 async def list_courses() -> Any:
+    """Return a list of all available courses"""
+
     return [course.summary for course in COURSES.values()]
 
 
 @router.get("/courses/{course_id}", responses=responses(Course, CourseNotFoundException))
 async def get_course(course_id: str) -> Any:
+    """Return details about a specific course"""
+
     if course_id not in COURSES:
         raise CourseNotFoundException
+
     return COURSES[course_id]
