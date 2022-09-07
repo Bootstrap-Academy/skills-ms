@@ -34,6 +34,7 @@ SQL_SHOW_STATEMENTS: bool = get_bool("SQL_SHOW_STATEMENTS", False)
 # redis configuration
 REDIS_HOST = getenv("REDIS_HOST", "redis")
 REDIS_PORT = int(getenv("REDIS_PORT", "6379"))
-REDIS_DB = int(getenv("REDIS_DB", "0"))
+REDIS_DB = int(getenv("REDIS_DB", "1"))
+REDIS_AUTH_DB = int(getenv("REDIS_AUTH_DB", "0"))
 
 SENTRY_DSN: str | None = getenv("SENTRY_DSN")  # sentry data source name

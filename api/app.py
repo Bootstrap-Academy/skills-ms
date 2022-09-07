@@ -1,10 +1,6 @@
 """
-## Authentication
-- To authenticate requests, the `Authorization` header must contain a valid API token.
-
-## Requirements
-Some endpoints require one or more of the following conditions to be met:
-- **AUTH**: The request is authenticated using a valid API token.
+## Authentication, Special parameters, Requirements
+See [Auth Microservice](/auth/docs).
 """
 
 from typing import Any, Awaitable, Callable, TypeVar

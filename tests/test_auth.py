@@ -41,8 +41,7 @@ async def test__jwtauth_call__invalid_token(mocker: MockerFixture) -> None:
     request = MagicMock()
     http_auth = MagicMock()
 
-    with pytest.raises(InvalidTokenError):
-        await auth.JWTAuth.__call__(http_auth, request)
+    assert await auth.JWTAuth.__call__(http_auth, request) is None
 
     get_token.assert_called_once_with(request)
 
