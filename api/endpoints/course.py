@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from api import models
 from api.auth import require_verified_email, user_auth
 from api.database import db, filter_by
-from api.exceptions.auth import email_verified_responses, user_responses
+from api.exceptions.auth import verified_responses
 from api.exceptions.course import (
     AlreadyPurchasedCourseException,
     CourseIsFreeException,
@@ -50,7 +50,7 @@ async def list_courses() -> Any:
 @router.get(
     "/courses/{course_id}",
     dependencies=[require_verified_email, has_course_access],
-    responses=email_verified_responses(Course, NoCourseAccessException, CourseNotFoundException),
+    responses=verified_responses(Course, NoCourseAccessException, CourseNotFoundException),
 )
 async def get_course_details(course: Course = get_course) -> Any:
     """
@@ -64,7 +64,7 @@ async def get_course_details(course: Course = get_course) -> Any:
     return course
 
 
-@router.get("/course_access", dependencies=[require_verified_email], responses=user_responses(list[CourseSummary]))
+@router.get("/course_access", dependencies=[require_verified_email], responses=verified_responses(list[CourseSummary]))
 async def get_accessible_courses(user: User = user_auth) -> Any:
     """
     Return a list of all courses the user has access to.
@@ -82,7 +82,7 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
 @router.post(
     "/course_access/{course_id}",
     dependencies=[require_verified_email],
-    responses=responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException),
+    responses=verified_responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException),
 )
 async def buy_course(user: User = user_auth, course: Course = get_course) -> Any:
     """

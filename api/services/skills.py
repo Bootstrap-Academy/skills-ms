@@ -31,9 +31,10 @@ class RootSkillDescription(BaseModel):
 def _load_skills() -> dict[str, RootSkillDescription]:
     skills = {}
     for file in sorted(Path("config/skills").glob("*.yml")):
-        logger.debug(f"loading root skill {file.name}")
+        name = file.name.removesuffix(".yml")
+        logger.debug(f"loading root skill {name} from {file}")
         with file.open() as f:
-            skills[file.name.removesuffix(".yml")] = pydantic.parse_obj_as(RootSkillDescription, safe_load(f))
+            skills[name] = pydantic.parse_obj_as(RootSkillDescription, safe_load(f))
     return skills
 
 

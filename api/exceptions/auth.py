@@ -42,7 +42,7 @@ def admin_responses(default: type, *args: Type[APIException]) -> dict[int | str,
     return user_responses(default, *args, PermissionDeniedError)
 
 
-def email_verified_responses(default: type, *args: Type[APIException]) -> dict[int | str, dict[str, Any]]:
+def verified_responses(default: type, *args: Type[APIException]) -> dict[int | str, dict[str, Any]]:
     """api responses for email_verified dependency"""
 
     return user_responses(default, *args, EmailNotVerifiedError)
