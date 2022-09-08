@@ -40,3 +40,9 @@ def email_verified_responses(default: type, *args: Type[APIException]) -> dict[i
     """api responses for email_verified dependency"""
 
     return user_responses(default, *args, EmailNotVerifiedError)
+
+
+def internal_responses(default: type, *args: Type[APIException]) -> dict[int | str, dict[str, Any]]:
+    """api responses for admin_auth dependency"""
+
+    return responses(default, *args, InvalidTokenError)
