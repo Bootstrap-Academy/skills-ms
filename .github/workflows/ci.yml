@@ -161,6 +161,39 @@ jobs:
       - name: Check coverage
         run: poetry run coverage report
 
+  config:
+    name: Check config files
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: Set up Python ${{ env.PYTHON_VERSION }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Cache Virtual Environment
+        uses: actions/cache@v3
+        with:
+          path: |
+            .venv
+            ~/.cache/pip
+            ~/.cache/pypoetry
+          key: ${{ runner.os }}-venv-${{ hashFiles('poetry.lock') }}
+
+      - name: Setup poetry
+        run: |
+          pip install poetry poethepoet
+          poetry install -n --no-root
+
+      - name: Check config files
+        run: poe check
+
   docker_build:
     name: Docker Build
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository }}
