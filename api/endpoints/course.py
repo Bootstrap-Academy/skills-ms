@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from api import models
 from api.auth import require_verified_email, user_auth
 from api.database import db, filter_by
-from api.exceptions.auth import UserNotFoundError, email_verified_responses
+from api.exceptions.auth import email_verified_responses, user_responses
 from api.exceptions.course import (
     AlreadyPurchasedCourseException,
     CourseIsFreeException,
@@ -16,12 +16,11 @@ from api.exceptions.course import (
 )
 from api.schemas.course import Course, CourseSummary
 from api.schemas.user import User
-from api.services.auth import exists_user
 from api.services.courses import COURSES
 from api.utils.docs import responses
 
 
-router = APIRouter(tags=["course"])
+router = APIRouter()
 
 
 @Depends
@@ -65,12 +64,27 @@ async def get_course_details(course: Course = get_course) -> Any:
     return course
 
 
+@router.get("/course_access", dependencies=[require_verified_email], responses=user_responses(list[CourseSummary]))
+async def get_accessible_courses(user: User = user_auth) -> Any:
+    """
+    Return a list of all courses the user has access to.
+
+    *Requirements:* **VERIFIED**
+    """
+
+    course_ids = {k for k, v in COURSES.items() if v.free or user.admin}
+    async for course_access in await db.stream(filter_by(models.CourseAccess, user_id=user.id)):
+        if course_access.course_id in COURSES:
+            course_ids.add(course_access.course_id)
+    return [COURSES[course_id].summary for course_id in course_ids]
+
+
 @router.post(
-    "/courses/{course_id}/{user_id}/access",
+    "/course_access/{course_id}",
     dependencies=[require_verified_email],
-    responses=responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException, UserNotFoundError),
+    responses=responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException),
 )
-async def buy_course(user_id: str, course: Course = get_course) -> Any:
+async def buy_course(user: User = user_auth, course: Course = get_course) -> Any:
     """
     Buy access to a course for a user.
 
@@ -80,12 +94,9 @@ async def buy_course(user_id: str, course: Course = get_course) -> Any:
     if course.free:
         raise CourseIsFreeException
 
-    if await db.exists(filter_by(models.CourseAccess, user_id=user_id, course_id=course.id)):
+    if await db.exists(filter_by(models.CourseAccess, user_id=user.id, course_id=course.id)):
         raise AlreadyPurchasedCourseException
 
-    if not await exists_user(user_id):
-        raise UserNotFoundError
-
-    await models.CourseAccess.create(user_id, course.id)
+    await models.CourseAccess.create(user.id, course.id)
 
     return True

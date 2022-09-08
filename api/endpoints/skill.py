@@ -10,7 +10,7 @@ from api.services.skills import SKILLS
 from api.utils.docs import responses
 
 
-router = APIRouter(tags=["skill"])
+router = APIRouter()
 
 
 @router.get("/skilltree", responses=responses(list[RootSkill]))
