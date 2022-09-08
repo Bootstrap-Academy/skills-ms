@@ -49,8 +49,13 @@ class BaseCourse(BaseModel):
     id: str = Field(description="ID of the course")
     title: str = Field(description="Title of the course")
     description: str | None = Field(description="Description of the course")
+    price: int = Field(min=0, description="Price of the course in morphcoins")
 
     Config = example(id="python", title="Python", description="Course description")
+
+    @property
+    def free(self) -> bool:
+        return self.price == 0
 
 
 class Course(BaseCourse):
@@ -61,9 +66,7 @@ class Course(BaseCourse):
     @property
     def summary(self) -> CourseSummary:
         return CourseSummary(
-            id=self.id,
-            title=self.title,
-            description=self.description,
+            **{key: value for key, value in self.dict().items() if key in BaseCourse.__fields__},
             sections=len(self.sections),
             lectures=sum(len(section.lectures) for section in self.sections),
         )

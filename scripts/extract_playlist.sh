@@ -10,6 +10,7 @@ pl=$(youtube-dl -s "$1" 2> /dev/null | head -2 | tail -1 | cut -d' ' -f4-)
 cat << EOF
 title: $(_yml_escape "$pl")
 description:
+price:
 sections:
   - title: $(_yml_escape "$pl")
     description:

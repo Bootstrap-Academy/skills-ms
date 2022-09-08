@@ -17,13 +17,6 @@ async def list_skills() -> Any:
     """Return a list of all skills."""
 
     return [
-        {
-            "id": k,
-            "name": v.name,
-            "courses": v.courses,
-            "instructors": [],
-            "exam_dates": [],
-            "dependencies": v.dependencies,
-        }
+        Skill(id=k, name=v.name, courses=v.courses, instructors=[], exam_dates=[], dependencies=v.dependencies)
         for k, v in SKILLS.items()
     ]
