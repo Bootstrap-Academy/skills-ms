@@ -66,7 +66,7 @@ async def is_admin(user: User | None = public_auth) -> bool:
 
 
 async def _require_verified_email(user: User = user_auth) -> None:
-    if not user.email_verified:
+    if not user.email_verified and not user.admin:
         raise EmailNotVerifiedError
 
 
