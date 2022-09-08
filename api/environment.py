@@ -19,6 +19,9 @@ RELOAD: bool = get_bool("RELOAD", False)
 
 JWT_SECRET = getenv("JWT_SECRET", secrets.token_urlsafe(64))
 
+AUTH_URL = getenv("AUTH_URL", "http://localhost:8000/").rstrip("/")
+INTERNAL_JWT_TTL = int(getenv("INTERNAL_JWT_TTL", "10"))
+
 # database configuration
 DB_DRIVER: str = getenv("DB_DRIVER", "mysql+aiomysql")
 DB_HOST: str = getenv("DB_HOST", "localhost")

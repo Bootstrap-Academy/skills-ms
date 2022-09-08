@@ -24,6 +24,12 @@ class EmailNotVerifiedError(APIException):
     description = "The email has not been verified."
 
 
+class UserNotFoundError(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "User not found"
+    description = "This user does not exist."
+
+
 def user_responses(default: type, *args: Type[APIException]) -> dict[int | str, dict[str, Any]]:
     """api responses for user_auth dependency"""
 

@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends
 from api import models
 from api.auth import require_verified_email, user_auth
 from api.database import db, filter_by
-from api.exceptions.auth import email_verified_responses
+from api.exceptions.auth import UserNotFoundError, email_verified_responses
 from api.exceptions.course import (
     AlreadyPurchasedCourseException,
     CourseIsFreeException,
@@ -16,6 +16,7 @@ from api.exceptions.course import (
 )
 from api.schemas.course import Course, CourseSummary
 from api.schemas.user import User
+from api.services.auth import exists_user
 from api.services.courses import COURSES
 from api.utils.docs import responses
 
@@ -66,16 +67,24 @@ async def get_course_details(course: Course = get_course) -> Any:
 
 @router.post(
     "/courses/{course_id}/{user_id}/access",
-    responses=responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException),
+    dependencies=[require_verified_email],
+    responses=responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException, UserNotFoundError),
 )
 async def buy_course(user_id: str, course: Course = get_course) -> Any:
-    """Buy access to a course for a user."""
+    """
+    Buy access to a course for a user.
+
+    *Requirements:* **VERIFIED**
+    """
 
     if course.free:
         raise CourseIsFreeException
 
     if await db.exists(filter_by(models.CourseAccess, user_id=user_id, course_id=course.id)):
         raise AlreadyPurchasedCourseException
+
+    if not await exists_user(user_id):
+        raise UserNotFoundError
 
     await models.CourseAccess.create(user_id, course.id)
 
