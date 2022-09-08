@@ -1,0 +1,16 @@
+name: Machine Learning Expert
+dependencies:
+  - data_scientist
+skills:
+  pytorch:
+    name: Pytorch
+    dependencies: []
+    courses: []
+  tensorflow_mit_python:
+    name: Tensorflow mit Python
+    dependencies: []
+    courses: []
+  algorithmen_zum_machine_learning:
+    name: Algorithmen zum Machine Learning
+    dependencies: []
+    courses: []

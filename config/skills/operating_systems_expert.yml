@@ -1,0 +1,8 @@
+name: Operating Systems Expert
+dependencies:
+  - grundlagen_von_betriebssystemen
+skills:
+  betriebssystemtheorie:
+    name: Betriebssystemtheorie
+    dependencies: []
+    courses: []

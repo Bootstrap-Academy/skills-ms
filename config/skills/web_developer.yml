@@ -1,0 +1,64 @@
+name: Web Developer
+dependencies:
+  - grundlagen_der_programmierung_und_datenhaltung
+skills:
+  html_und_css:
+    name: HTML und CSS
+    dependencies: []
+    courses: []
+  scss_und_fortgeschrittenes_css:
+    name: SCSS und fortgeschrittenes CSS
+    dependencies:
+      - html_und_css
+    courses: []
+  php_grundlagen:
+    name: PHP Grundlagen
+    dependencies:
+      - html_und_css
+    courses: []
+  api_konzepte:
+    name: API Konzepte
+    dependencies:
+      - html_und_css
+    courses: []
+  python_flask:
+    name: Python Flask
+    dependencies:
+      - api_konzepte
+    courses: []
+  javascript_grundlagen:
+    name: Javascript Grundlagen
+    dependencies:
+      - html_und_css
+    courses: []
+  fortgeschrittenes_javascript:
+    name: Fortgeschrittenes Javascript
+    dependencies:
+      - javascript_grundlagen
+    courses: []
+  serverside_javascript_mit_node_und_express:
+    name: Serverside JavaScript mit Node und Express
+    dependencies:
+      - fortgeschrittenes_javascript
+      - api_konzepte
+    courses: []
+  javascript_testing:
+    name: Javascript Testing
+    dependencies:
+      - fortgeschrittenes_javascript
+    courses: []
+  typescript:
+    name: Typescript
+    dependencies:
+      - fortgeschrittenes_javascript
+    courses: []
+  react:
+    name: React
+    dependencies:
+      - typescript
+    courses: []
+  angular:
+    name: Angular
+    dependencies:
+      - typescript
+    courses: []

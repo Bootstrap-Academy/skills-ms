@@ -1,0 +1,21 @@
+name: Software Developer
+dependencies:
+  - web_developer
+  - mobile_app_developer
+  - anwendungs_developer
+  - game_developer
+skills:
+  uml:
+    name: UML
+    dependencies: []
+    courses: []
+  softwarearchitekturen_und_design_patterns:
+    name: Softwarearchitekturen und Design Patterns
+    dependencies:
+      - uml
+    courses: []
+  softwareplanung_und_management:
+    name: Softwareplanung und Management
+    dependencies:
+      - softwarearchitekturen_und_design_patterns
+    courses: []

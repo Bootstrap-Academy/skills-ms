@@ -1,0 +1,12 @@
+name: Blockchain Expert
+dependencies:
+  - grundlagen_der_it_sicherheit
+skills:
+  grundlagen_der_blockchain_technologie:
+    name: Grundlagen der Blockchain-Technologie
+    dependencies: []
+    courses: []
+  dapp_development:
+    name: dApp Development
+    dependencies: []
+    courses: []

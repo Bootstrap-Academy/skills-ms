@@ -1,0 +1,24 @@
+name: Anwendungs-Developer
+dependencies:
+  - grundlagen_der_programmierung_und_datenhaltung
+skills:
+  python_fuer_fortgeschrittene:
+    name: Python für Fortgeschrittene
+    dependencies: []
+    courses: []
+  java_fuer_fortgeschrittene:
+    name: Java für Fortgeschrittene
+    dependencies: []
+    courses: []
+  kotlin_fuer_fortgeschrittene:
+    name: Kotlin für Fortgeschrittene
+    dependencies: []
+    courses: []
+  c_plus_plus:
+    name: C++
+    dependencies: []
+    courses: []
+  c_sharp_fuer_fortgeschrittene:
+    name: C# für Fortgeschrittene
+    dependencies: []
+    courses: []

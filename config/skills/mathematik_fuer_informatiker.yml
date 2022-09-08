@@ -1,0 +1,22 @@
+name: Mathematik für Informatiker
+dependencies: []
+skills:
+  formale_logik_und_mengenlehre:
+    name: Formale Logik und Mengenlehre
+    dependencies: []
+    courses: []
+  analysis:
+    name: Analysis
+    dependencies:
+      - formale_logik_und_mengenlehre
+    courses: []
+  lineare_algebra:
+    name: Lineare Algebra
+    dependencies:
+      - formale_logik_und_mengenlehre
+    courses: []
+  statistik:
+    name: Statistik
+    dependencies:
+      - formale_logik_und_mengenlehre
+    courses: []

@@ -1,0 +1,8 @@
+name: Computer Grafiker
+dependencies:
+  - game_developer
+skills:
+  grundlagen_der_computergrafik:
+    name: Grundlagen der Computergrafik
+    dependencies: []
+    courses: []

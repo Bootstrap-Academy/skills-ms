@@ -1,0 +1,12 @@
+name: Game Developer
+dependencies:
+  - grundlagen_der_programmierung_und_datenhaltung
+skills:
+  unreal_engine_4:
+    name: Unreal Engine 4
+    dependencies: []
+    courses: []
+  unity_engine:
+    name: Unity Engine
+    dependencies: []
+    courses: []

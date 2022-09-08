@@ -1,0 +1,12 @@
+name: IT-Pädagoge und Dozent
+dependencies:
+  - soft_skills_fuer_informatiker
+skills:
+  coachings_in_der_it:
+    name: Coachings in der IT
+    dependencies: []
+    courses: []
+  paedagogik_fuer_informatiker:
+    name: Pädagogik für Informatiker
+    dependencies: []
+    courses: []

@@ -1,0 +1,41 @@
+name: Grundlagen der Programmierung und Datenhaltung
+dependencies: []
+skills:
+  python_grundlagen:
+    name: Python Grundlagen
+    dependencies: []
+    courses: []
+  java_grundlagen:
+    name: Java Grundlagen
+    dependencies: []
+    courses: []
+  kotlin_grundlagen:
+    name: Kotlin Grundlagen
+    dependencies: []
+    courses: []
+  c_grundlagen:
+    name: C Grundlagen
+    dependencies: []
+    courses: []
+  c_sharp_grundlagen:
+    name: C# Grundlagen
+    dependencies: []
+    courses: []
+  sql_grundlagen:
+    name: SQL Grundlagen
+    dependencies: []
+    courses: []
+  git_und_github:
+    name: Git und Github
+    dependencies: []
+    courses: []
+  algorithmen_und_datenstrukturen_grundlagen:
+    name: Algorithmen und Datenstrukturen Grundlagen
+    dependencies:
+      - python_grundlagen
+    courses: []
+  clean_code:
+    name: Clean Code
+    dependencies:
+      - algorithmen_und_datenstrukturen_grundlagen
+    courses: []

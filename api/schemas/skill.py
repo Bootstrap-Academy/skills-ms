@@ -1,20 +1,18 @@
 from pydantic import BaseModel, Field
 
-from api.utils.docs import example
 
-
-class Skill(BaseModel):
+class SubSkill(BaseModel):
     id: str = Field(description="ID of the skill")
     name: str = Field(description="Name of the skill")
+    dependencies: list[str] = Field(description="List of skill dependencies")
     courses: list[str] = Field(description="List of course ids")
-    instructors: list[None] = Field(description="List of instructors")
+    coaches: list[None] = Field(description="List of coaches")
     exam_dates: list[None] = Field(description="List of exam dates")
-    dependencies: list[str] = Field(description="List of course dependencies")
+    webinars: list[None] = Field(description="List of webinars")
 
-    Config = example(
-        id="software_developer",
-        name="Software Developer",
-        courses=["python"],
-        instructors=[],
-        dependencies=["web_developer"],
-    )
+
+class RootSkill(BaseModel):
+    id: str = Field(description="ID of the skill")
+    name: str = Field(description="Name of the skill")
+    dependencies: list[str] = Field(description="List of skill dependencies")
+    skills: list[str] = Field(description="List of sub skills")

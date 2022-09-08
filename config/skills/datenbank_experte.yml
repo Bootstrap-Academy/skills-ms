@@ -1,0 +1,22 @@
+name: Datenbank-Experte
+dependencies:
+  - grundlagen_der_programmierung_und_datenhaltung
+skills:
+  postgresql:
+    name: PostgreSQL
+    dependencies: []
+    courses: []
+  mongodb:
+    name: MongoDB
+    dependencies: []
+    courses: []
+  mysql:
+    name: MySQL
+    dependencies: []
+    courses: []
+  fortgeschrittene_datenbankmodelle:
+    name: Fortgeschrittene Datenbankmodelle
+    dependencies:
+      - postgresql
+      - mongodb
+    courses: []

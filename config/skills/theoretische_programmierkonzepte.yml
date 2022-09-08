@@ -1,0 +1,8 @@
+name: Theoretische Programmierkonzepte
+dependencies:
+  - grundlagen_der_programmierung_und_datenhaltung
+skills:
+  theoretische_konzepte_der_programmierung:
+    name: theoretische Konzepte der Programmierung
+    dependencies: []
+    courses: []

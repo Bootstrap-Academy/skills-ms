@@ -1,0 +1,8 @@
+name: Rechnernetze
+dependencies:
+  - grundlagen_der_netzwerktechnik
+skills:
+  vernetzte_systeme:
+    name: Vernetzte Systeme
+    dependencies: []
+    courses: []

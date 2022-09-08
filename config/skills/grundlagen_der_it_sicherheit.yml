@@ -1,0 +1,18 @@
+name: Grundlagen der IT-Sicherheit
+dependencies:
+  - grundlagen_der_netzwerktechnik
+  - grundlagen_von_betriebssystemen
+skills:
+  it_security_awareness:
+    name: IT Security Awareness
+    dependencies: []
+    courses: []
+  grundlagen_der_it_sicherheit:
+    name: Grundlagen der IT Sicherheit
+    dependencies: []
+    courses: []
+  osint:
+    name: OSINT
+    dependencies:
+      - grundlagen_der_it_sicherheit
+    courses: []

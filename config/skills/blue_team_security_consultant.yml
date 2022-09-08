@@ -1,0 +1,28 @@
+name: Blue Team Security Consultant
+dependencies:
+  - grundlagen_der_it_sicherheit
+skills:
+  netzsicherheit:
+    name: Netzsicherheit
+    dependencies: []
+    courses: []
+  it_sicherheitsberater:
+    name: IT Sicherheitsberater
+    dependencies:
+      - netzsicherheit
+    courses: []
+  incident_response:
+    name: Incident Response
+    dependencies:
+      - it_sicherheitsberater
+    courses: []
+  risiko_management:
+    name: Risiko Management
+    dependencies:
+      - it_sicherheitsberater
+    courses: []
+  datenschutz_und_privacy:
+    name: Datenschutz und Privacy
+    dependencies:
+      - it_sicherheitsberater
+    courses: []

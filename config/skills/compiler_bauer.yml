@@ -1,0 +1,8 @@
+name: Compiler-Bauer
+dependencies:
+  - theoretische_programmierkonzepte
+skills:
+  compilerbau:
+    name: Compilerbau
+    dependencies: []
+    courses: []

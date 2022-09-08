@@ -1,0 +1,12 @@
+name: Computer Scientist
+dependencies:
+  - algorithmiker
+skills:
+  theoretische_kryptographie:
+    name: Theoretische Kryptographie
+    dependencies: []
+    courses: []
+  berechenbarkeitstheorie:
+    name: Berechenbarkeitstheorie
+    dependencies: []
+    courses: []

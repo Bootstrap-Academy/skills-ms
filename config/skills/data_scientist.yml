@@ -1,0 +1,19 @@
+name: Data Scientist
+dependencies:
+  - algorithmiker
+  - datenbank_experte
+skills:
+  algorithmen_zur_datenanalyse:
+    name: Algorithmen zur Datenanalyse
+    dependencies: []
+    courses: []
+  datenanalyse_mit_python:
+    name: Datenanalyse mit Python
+    dependencies:
+      - algorithmen_zur_datenanalyse
+    courses: []
+  datenvisualisierung_mit_python:
+    name: Datenvisualisierung mit Python
+    dependencies:
+      - datenanalyse_mit_python
+    courses: []

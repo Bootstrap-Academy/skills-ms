@@ -1,0 +1,13 @@
+name: Algorithmiker
+dependencies:
+  - grundlagen_der_programmierung_und_datenhaltung
+  - mathematik_fuer_informatiker
+skills:
+  graphentheorie:
+    name: Graphentheorie
+    dependencies: []
+    courses: []
+  fortgeschrittene_algorithmen_und_datenstrukturen:
+    name: Fortgeschrittene Algorithmen und Datenstrukturen
+    dependencies: []
+    courses: []

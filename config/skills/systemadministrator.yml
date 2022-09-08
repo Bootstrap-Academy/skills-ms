@@ -1,0 +1,17 @@
+name: Systemadministrator
+dependencies:
+  - grundlagen_von_betriebssystemen
+  - grundlagen_der_it_sicherheit
+skills:
+  docker:
+    name: Docker
+    dependencies: []
+    courses: []
+  nginx:
+    name: Nginx
+    dependencies: []
+    courses: []
+  apache:
+    name: Apache
+    dependencies: []
+    courses: []

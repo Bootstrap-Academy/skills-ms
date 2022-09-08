@@ -1,0 +1,19 @@
+name: Grundlagen von Betriebssystemen
+dependencies: []
+skills:
+  windows_grundlagen:
+    name: Windows Grundlagen
+    dependencies: []
+    courses: []
+  powershell_und_fortgeschrittene_windows_administration:
+    name: Powershell und fortgeschrittene Windows-Administration
+    dependencies: []
+    courses: []
+  linux_grundlagen:
+    name: Linux Grundlagen
+    dependencies: []
+    courses: []
+  bash_und_fortgeschrittene_linux_administration:
+    name: Bash und fortgeschrittene Linux-Administration
+    dependencies: []
+    courses: []

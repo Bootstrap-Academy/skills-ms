@@ -1,0 +1,19 @@
+name: DevOps Engineer
+dependencies:
+  - cloud_architect
+  - software_developer
+skills:
+  devops_grundlagen:
+    name: DevOps Grundlagen
+    dependencies: []
+    courses: []
+  devsecops:
+    name: DevSecOps
+    dependencies:
+      - devops_grundlagen
+    courses: []
+  devmlops:
+    name: DevMLOps mit Python
+    dependencies:
+      - devops_grundlagen
+    courses: []

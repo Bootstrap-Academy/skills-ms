@@ -1,0 +1,7 @@
+name: Grundlagen der Netzwerktechnik
+dependencies: []
+skills:
+  netzwerktechnik:
+    name: Netzwerktechnik
+    dependencies: []
+    courses: []

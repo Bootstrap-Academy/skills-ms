@@ -1,0 +1,12 @@
+name: Mobile App Developer
+dependencies:
+  - grundlagen_der_programmierung_und_datenhaltung
+skills:
+  kotlin_native_app_developer:
+    name: Kotlin Native App Developer
+    dependencies: []
+    courses: []
+  dart_und_flutter_experte:
+    name: Dart und Flutter Experte
+    dependencies: []
+    courses: []
