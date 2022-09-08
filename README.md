@@ -83,4 +83,5 @@ poe pre-commit      # run pre-commit checks
   poe coverage      # run unit tests with coverage
 poe alembic         # use alembic to manage database migrations
 poe migrate         # run database migrations
+poe check           # check config files
 ```
