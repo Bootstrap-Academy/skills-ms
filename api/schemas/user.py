@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Extra
 
-from api.redis import redis_auth
+from api.redis import auth_redis
 
 
 class User(BaseModel):
@@ -29,4 +29,4 @@ class UserAccessToken(BaseModel):
         return User(id=self.uid, **self.data.dict())
 
     async def is_revoked(self) -> bool:
-        return bool(await redis_auth.exists(f"session_logout:{self.rt}"))
+        return bool(await auth_redis.exists(f"session_logout:{self.rt}"))

@@ -1,18 +1,37 @@
 from datetime import timedelta
+from enum import Enum
 
-from httpx import AsyncClient
+from httpx import AsyncClient, Response
 
-from api.environment import AUTH_URL, INTERNAL_JWT_TTL
+from api.logger import get_logger
+from api.settings import settings
 from api.utils.jwt import encode_jwt
 
 
-def _get_token() -> str:
-    return encode_jwt({}, timedelta(seconds=INTERNAL_JWT_TTL))
+logger = get_logger(__name__)
 
 
-def _get_client(base_url: str) -> AsyncClient:
-    return AsyncClient(base_url=base_url + "/_internal", headers={"Authorization": _get_token()})
+class InternalServiceError(Exception):
+    pass
 
 
-def auth_client() -> AsyncClient:
-    return _get_client(AUTH_URL)
+class InternalService(Enum):
+    AUTH = settings.auth_url
+
+    @classmethod
+    def _get_token(cls) -> str:
+        return encode_jwt({}, timedelta(seconds=settings.internal_jwt_ttl))
+
+    @classmethod
+    async def _handle_error(cls, response: Response) -> None:
+        if response.status_code in [401, 403] or response.status_code in range(500, 600):
+            await response.aread()
+            raise InternalServiceError(response, response.text)
+
+    @property
+    def client(self) -> AsyncClient:
+        return AsyncClient(
+            base_url=self.value + "/_internal",
+            headers={"Authorization": self._get_token()},
+            event_hooks={"response": [self._handle_error]},
+        )
