@@ -25,3 +25,9 @@ class AlreadyPurchasedCourseException(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = "Already purchased course"
     description = "You have already purchased this course."
+
+
+class NotEnoughCoinsError(APIException):
+    status_code = status.HTTP_403_FORBIDDEN
+    detail = "Not enough coins"
+    description = "The user does not have enough coins to perform this action."

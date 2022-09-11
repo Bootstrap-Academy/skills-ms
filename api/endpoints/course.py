@@ -13,10 +13,12 @@ from api.exceptions.course import (
     CourseIsFreeException,
     CourseNotFoundException,
     NoCourseAccessException,
+    NotEnoughCoinsError,
 )
 from api.schemas.course import Course, CourseSummary
 from api.schemas.user import User
 from api.services.courses import COURSES
+from api.services.shop import spend_coins
 from api.utils.docs import responses
 
 
@@ -82,7 +84,7 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
 @router.post(
     "/course_access/{course_id}",
     dependencies=[require_verified_email],
-    responses=verified_responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException),
+    responses=verified_responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException, NotEnoughCoinsError),
 )
 async def buy_course(user: User = user_auth, course: Course = get_course) -> Any:
     """
@@ -96,6 +98,9 @@ async def buy_course(user: User = user_auth, course: Course = get_course) -> Any
 
     if await db.exists(filter_by(models.CourseAccess, user_id=user.id, course_id=course.id)):
         raise AlreadyPurchasedCourseException
+
+    if not await spend_coins(user.id, course.price):
+        raise NotEnoughCoinsError
 
     await models.CourseAccess.create(user.id, course.id)
 
