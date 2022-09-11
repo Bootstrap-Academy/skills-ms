@@ -26,12 +26,24 @@ class HTTPAuth(SecurityBase):
 
 
 class JWTAuth(HTTPAuth):
+    def __init__(self, *, audience: list[str] | None = None, force_valid: bool = True):
+        super().__init__()
+        self.audience: list[str] | None = audience
+        self.force_valid: bool = force_valid
+
     async def __call__(self, request: Request) -> dict[Any, Any] | None:
-        return decode_jwt(get_token(request))
+        if (data := decode_jwt(get_token(request), audience=self.audience)) is None and self.force_valid:
+            raise InvalidTokenError
+        return data
 
 
-# static_token_auth = Depends(StaticTokenAuth("secret token"))
-jwt_auth = Depends(JWTAuth())
+class InternalAuth(JWTAuth):
+    def __init__(self, audience: list[str] | None = None):
+        super().__init__(audience=audience, force_valid=True)
+
+
+jwt_auth = Depends(JWTAuth(force_valid=False))
+internal_auth = Depends(InternalAuth(audience=["skills"]))
 
 
 @Depends
