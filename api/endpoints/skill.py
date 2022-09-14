@@ -8,8 +8,11 @@ from api import models
 from api.auth import admin_auth
 from api.database import db, filter_by, select
 from api.exceptions.auth import admin_responses
+from api.exceptions.course import CourseNotFoundException
 from api.exceptions.skill import CycleInSkillTreeException, SkillAlreadyExistsException, SkillNotFoundException
+from api.schemas.course import Course
 from api.schemas.skill import CreateRootSkill, CreateSubSkill, RootSkill, SubSkill, UpdateRootSkill, UpdateSubSkill
+from api.services.courses import COURSES
 from api.utils.docs import responses
 
 
@@ -126,7 +129,7 @@ async def list_sub_skills(*, root_skill: models.RootSkill = get_root_skill) -> A
 @router.post(
     "/skilltree/{root_skill_id}",
     dependencies=[admin_auth],
-    responses=admin_responses(SubSkill, SkillAlreadyExistsException, SkillNotFoundException),
+    responses=admin_responses(SubSkill, SkillAlreadyExistsException, SkillNotFoundException, CourseNotFoundException),
 )
 async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, data: CreateSubSkill) -> Any:
     """Create a new sub skill in a root skill."""
@@ -140,8 +143,19 @@ async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, dat
     if None in dependencies:
         raise SkillNotFoundException
 
+    courses = [*map(COURSES.get, data.courses)]
+    if None in courses:
+        raise CourseNotFoundException
+
     skill = models.SubSkill(
-        id=data.id, parent_id=root_skill.id, name=data.name, dependencies=cast(list[models.SubSkill], dependencies)
+        id=data.id,
+        parent_id=root_skill.id,
+        name=data.name,
+        dependencies=cast(list[models.SubSkill], dependencies),
+        courses=[
+            models.SkillCourse(root_skill_id=root_skill.id, sub_skill_id=data.id, course_id=course.id)
+            for course in cast(list[Course], courses)
+        ],
     )
     await db.add(skill)
     return skill.serialize
@@ -170,6 +184,16 @@ async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: Upda
             raise CycleInSkillTreeException
 
         skill.dependencies = cast(list[models.SubSkill], dependencies)
+
+    course_ids = {course.course_id for course in skill.courses}
+    if data.courses is not None and data.courses != course_ids:
+        if any(course not in COURSES for course in data.courses):
+            raise CourseNotFoundException
+
+        skill.courses = [
+            models.SkillCourse(root_skill_id=skill.parent_id, sub_skill_id=skill.id, course_id=course)
+            for course in data.courses
+        ]
 
     return skill.serialize
 

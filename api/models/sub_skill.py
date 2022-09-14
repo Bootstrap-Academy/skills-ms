@@ -1,12 +1,16 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import Column, ForeignKey, String
 from sqlalchemy.orm import Mapped, relationship
 
 from api.database import Base
 from api.models.root_skill import RootSkill
+
+
+if TYPE_CHECKING:
+    from .skill_course import SkillCourse
 
 
 class SubSkillDependency(Base):
@@ -41,6 +45,9 @@ class SubSkill(Base):
         lazy="selectin",
         join_depth=2,
     )
+    courses: list[SkillCourse] = relationship(
+        "SkillCourse", back_populates="sub_skill", lazy="selectin", cascade="all, delete-orphan"
+    )
 
     @property
     def serialize(self) -> dict[str, Any]:
@@ -50,5 +57,5 @@ class SubSkill(Base):
             "name": self.name,
             "dependencies": [dependency.id for dependency in self.dependencies],
             "dependents": [dependent.id for dependent in self.dependents],
-            "courses": [],
+            "courses": [course.course_id for course in self.courses],
         }
