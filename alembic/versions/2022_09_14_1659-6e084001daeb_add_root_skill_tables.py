@@ -37,10 +37,11 @@ def upgrade() -> None:
     op.create_table(
         "skills_sub_skill",
         sa.Column("id", sa.String(length=256), nullable=False),
-        sa.Column("parent_id", sa.String(length=256), nullable=False),
+        sa.Column("parent_id", sa.String(length=256), nullable=True),
         sa.Column("name", sa.String(length=256), nullable=True),
         sa.ForeignKeyConstraint(["parent_id"], ["skills_root_skill.id"]),
-        sa.PrimaryKeyConstraint("id", "parent_id"),
+        sa.PrimaryKeyConstraint("id"),
+        sa.UniqueConstraint("id"),
         mysql_collate="utf8mb4_bin",
     )
 

@@ -19,13 +19,10 @@ depends_on = None
 def upgrade() -> None:
     op.create_table(
         "skills_skill_course",
-        sa.Column("root_skill_id", sa.String(length=256), nullable=False),
-        sa.Column("sub_skill_id", sa.String(length=256), nullable=False),
+        sa.Column("skill_id", sa.String(length=256), nullable=False),
         sa.Column("course_id", sa.String(length=256), nullable=False),
-        sa.ForeignKeyConstraint(
-            ["root_skill_id", "sub_skill_id"], ["skills_sub_skill.parent_id", "skills_sub_skill.id"]
-        ),
-        sa.PrimaryKeyConstraint("root_skill_id", "sub_skill_id", "course_id"),
+        sa.ForeignKeyConstraint(["skill_id"], ["skills_sub_skill.id"]),
+        sa.PrimaryKeyConstraint("skill_id", "course_id"),
         mysql_collate="utf8mb4_bin",
     )
 

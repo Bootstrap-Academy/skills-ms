@@ -43,13 +43,13 @@ def _load_skills(path: Path) -> dict[str, RootSkillDescription]:
 
 def _check_skills_definitions(skills: dict[str, RootSkillDescription]) -> None:
     root_skills: set[str] = set()
+    sub_skills: set[str] = set()
 
     for root_id, root_skill in skills.items():
         if root_id in root_skills:
             raise ValueError(f"Root skill {root_id} is defined multiple times!")
         root_skills.add(root_id)
 
-        sub_skills: set[str] = set()
         for sub_id in root_skill.skills:
             if sub_id in sub_skills:
                 raise ValueError(f"Sub skill {sub_id} ({root_id}) is defined multiple times!")

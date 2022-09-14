@@ -134,7 +134,7 @@ async def list_sub_skills(*, root_skill: models.RootSkill = get_root_skill) -> A
 async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, data: CreateSubSkill) -> Any:
     """Create a new sub skill in a root skill."""
 
-    if await db.exists(filter_by(models.SubSkill, id=data.id, parent_id=root_skill.id)):
+    if await db.exists(filter_by(models.SubSkill, id=data.id)):
         raise SkillAlreadyExistsException
 
     dependencies = [
@@ -152,10 +152,7 @@ async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, dat
         parent_id=root_skill.id,
         name=data.name,
         dependencies=cast(list[models.SubSkill], dependencies),
-        courses=[
-            models.SkillCourse(root_skill_id=root_skill.id, sub_skill_id=data.id, course_id=course.id)
-            for course in cast(list[Course], courses)
-        ],
+        courses=[models.SkillCourse(skill_id=data.id, course_id=course.id) for course in cast(list[Course], courses)],
     )
     await db.add(skill)
     return skill.serialize
@@ -190,10 +187,7 @@ async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: Upda
         if any(course not in COURSES for course in data.courses):
             raise CourseNotFoundException
 
-        skill.courses = [
-            models.SkillCourse(root_skill_id=skill.parent_id, sub_skill_id=skill.id, course_id=course)
-            for course in data.courses
-        ]
+        skill.courses = [models.SkillCourse(skill_id=skill.id, course_id=course) for course in data.courses]
 
     return skill.serialize
 

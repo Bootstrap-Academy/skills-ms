@@ -23,8 +23,8 @@ class SubSkillDependency(Base):
 class SubSkill(Base):
     __tablename__ = "skills_sub_skill"
 
-    id: Mapped[str] = Column(String(256), primary_key=True)
-    parent_id: Mapped[str] = Column(String(256), ForeignKey("skills_root_skill.id"), primary_key=True)
+    id: Mapped[str] = Column(String(256), primary_key=True, unique=True)
+    parent_id: Mapped[str] = Column(String(256), ForeignKey("skills_root_skill.id"))
     parent: RootSkill = relationship("RootSkill", back_populates="sub_skills", lazy="selectin")
     name: Mapped[str] = Column(String(256))
     dependencies: list[SubSkill] = relationship(
@@ -46,7 +46,7 @@ class SubSkill(Base):
         join_depth=2,
     )
     courses: list[SkillCourse] = relationship(
-        "SkillCourse", back_populates="sub_skill", lazy="selectin", cascade="all, delete-orphan"
+        "SkillCourse", back_populates="skill", lazy="selectin", cascade="all, delete-orphan"
     )
 
     @property
