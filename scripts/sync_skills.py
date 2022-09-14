@@ -85,7 +85,7 @@ def _check_skill_courses(skills: dict[str, RootSkillDescription], courses: set[s
     logger.debug("skills courses are valid")
 
 
-def main(_list: bool, host: str, token: str, path: Path):
+def main(_list: bool, dry: bool, host: str, token: str, path: Path):
     skills = _load_skills(path)
     _check_skills_definitions(skills)
     _check_skill_dependencies(skills)
@@ -107,10 +107,12 @@ def main(_list: bool, host: str, token: str, path: Path):
         ts = TopologicalSorter({skill_id: {*skills[skill_id].dependencies} & add for skill_id in add})
         for skill in ts.static_order():
             logger.info(f"adding skill {skill}")
-            response = client.post(
-                "/skilltree", json={"id": skill, "name": skills[skill].name, "dependencies": skills[skill].dependencies}
-            )
-            response.raise_for_status()
+            if not dry:
+                response = client.post(
+                    "/skilltree",
+                    json={"id": skill, "name": skills[skill].name, "dependencies": skills[skill].dependencies},
+                )
+                response.raise_for_status()
 
         for skill in update:
             diff = {}
@@ -120,12 +122,17 @@ def main(_list: bool, host: str, token: str, path: Path):
                 diff["dependencies"] = skills[skill].dependencies
             if diff:
                 logger.info(f"updating skill {skill}")
-                response = client.patch(f"/skilltree/{skill}", json=diff)
-                response.raise_for_status()
+                if not dry:
+                    response = client.patch(f"/skilltree/{skill}", json=diff)
+                    response.raise_for_status()
 
-            resp = client.get(f"/skilltree/{skill}")
-            resp.raise_for_status()
-            remote_sub_skills = {sub_skill["id"]: sub_skill for sub_skill in resp.json()}
+        for skill in add | update:
+            if skill in add:
+                remote_sub_skills = {}
+            else:
+                resp = client.get(f"/skilltree/{skill}")
+                resp.raise_for_status()
+                remote_sub_skills = {sub_skill["id"]: sub_skill for sub_skill in resp.json()}
 
             sub_skills = skills[skill].skills
 
@@ -138,16 +145,17 @@ def main(_list: bool, host: str, token: str, path: Path):
             )
             for sub_skill in ts.static_order():
                 logger.info(f"adding sub skill {sub_skill} ({skill})")
-                response = client.post(
-                    f"/skilltree/{skill}",
-                    json={
-                        "id": sub_skill,
-                        "name": sub_skills[sub_skill].name,
-                        "dependencies": sub_skills[sub_skill].dependencies,
-                        "courses": sub_skills[sub_skill].courses,
-                    },
-                )
-                response.raise_for_status()
+                if not dry:
+                    response = client.post(
+                        f"/skilltree/{skill}",
+                        json={
+                            "id": sub_skill,
+                            "name": sub_skills[sub_skill].name,
+                            "dependencies": sub_skills[sub_skill].dependencies,
+                            "courses": sub_skills[sub_skill].courses,
+                        },
+                    )
+                    response.raise_for_status()
 
             for sub_skill in _update:
                 diff = {}
@@ -159,25 +167,29 @@ def main(_list: bool, host: str, token: str, path: Path):
                     diff["courses"] = sub_skills[sub_skill].courses
                 if diff:
                     logger.info(f"updating sub skill {sub_skill} ({skill})")
-                    response = client.patch(f"/skilltree/{skill}/{sub_skill}", json=diff)
-                    response.raise_for_status()
+                    if not dry:
+                        response = client.patch(f"/skilltree/{skill}/{sub_skill}", json=diff)
+                        response.raise_for_status()
 
             for sub_skill in _delete:
                 logger.info(f"deleting sub skill {sub_skill} ({skill})")
-                response = client.delete(f"/skilltree/{skill}/{sub_skill}")
-                response.raise_for_status()
+                if not dry:
+                    response = client.delete(f"/skilltree/{skill}/{sub_skill}")
+                    response.raise_for_status()
 
         for skill in delete:
             logger.info(f"deleting skill {skill}")
-            response = client.delete(f"/skilltree/{skill}")
-            response.raise_for_status()
+            if not dry:
+                response = client.delete(f"/skilltree/{skill}")
+                response.raise_for_status()
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sync skills from yaml files to the backend.")
     parser.add_argument("--list", action="store_true", help="list all skills without syncing")
+    parser.add_argument("--dry", action="store_true", help="dry run")
     parser.add_argument("--host", metavar="host", type=str, help="Host of the backend")
     parser.add_argument("--token", metavar="token", type=str, help="Token for the backend")
     parser.add_argument("path", metavar="path", type=Path, help="Path to the yaml files")
     args = parser.parse_args()
-    main(_list=args.list, host=args.host, token=args.token, path=args.path)
+    main(_list=args.list, dry=args.dry, host=args.host, token=args.token, path=args.path)

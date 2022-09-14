@@ -54,7 +54,7 @@ alembic = { cmd = "alembic", envfile = ".env" }
 migrate = { cmd = "alembic upgrade head", envfile = ".env" }
 env = { cmd = """python -c 'from api.settings import settings; from rich import print; print(settings)'""", envfile = ".env" }
 jwt = { cmd = """python -c 'from api.utils import jwt; import sys, json; print(jwt.encode_jwt(json.loads(sys.argv[1]), jwt.timedelta(seconds=int(sys.argv[2]))))'""", envfile = ".env" }
-check = { cmd = """python -c 'from api.services import courses; from scripts import sync_skills; from pathlib import Path; from rich import print; print(courses.COURSES); sync_skills.main(_list=True, host=None, token=None, path=Path("config/skills"))'""", env = {LOG_LEVEL="DEBUG"} }
+check = { cmd = """python -c 'from api.services import courses; from scripts import sync_skills; from pathlib import Path; from rich import print; print(courses.COURSES); sync_skills.main(_list=True, dry=False, host=None, token=None, path=Path("config/skills"))'""", env = {LOG_LEVEL="DEBUG"} }
 sync_skills = "python scripts/sync_skills.py"
 
 [tool.poe.tasks.coverage]
