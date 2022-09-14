@@ -11,7 +11,11 @@ class RootSkill(BaseModel):
     skills: list[str] = Field(description="List of sub skills")
 
     Config = example(
-        id="data_scientist", name="Data Scientist", dependencies=["algorithmiker", "datenbank_experte"], dependents=[]
+        id="datenbank_experte",
+        name="Datenbank-Experte",
+        dependencies=["grundlagen_der_programmierung_und_datenhaltung"],
+        dependents=["data_scientist"],
+        skills=["mongodb", "postgresql", "mysql", "fortgeschrittene_datenbankmodelle"],
     )
 
 
