@@ -85,22 +85,15 @@ def _check_skill_courses(skills: dict[str, RootSkillDescription], courses: set[s
     logger.debug("skills courses are valid")
 
 
-def main():
-    parser = argparse.ArgumentParser(description="Sync skills from yaml files to the backend.")
-    parser.add_argument("path", metavar="path", type=Path, help="Path to the yaml files")
-    parser.add_argument("host", metavar="host", type=str, help="Host of the backend")
-    parser.add_argument("token", metavar="token", type=str, help="Token for the backend")
-    args = parser.parse_args()
-
-    path: Path = args.path
-    host: str = args.host
-    token: str = args.token
-
+def main(_list: bool, host: str, token: str, path: Path):
     skills = _load_skills(path)
     _check_skills_definitions(skills)
     _check_skill_dependencies(skills)
     # _check_skill_courses(skills, courses)
     print(skills)
+
+    if _list or not host or not token:
+        return
 
     with Client(base_url=host, headers={"Authorization": token}) as client:
         response = client.get("/skilltree")
@@ -181,4 +174,10 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Sync skills from yaml files to the backend.")
+    parser.add_argument("--list", action="store_true", help="list all skills without syncing")
+    parser.add_argument("--host", metavar="host", type=str, help="Host of the backend")
+    parser.add_argument("--token", metavar="token", type=str, help="Token for the backend")
+    parser.add_argument("path", metavar="path", type=Path, help="Path to the yaml files")
+    args = parser.parse_args()
+    main(_list=args.list, host=args.host, token=args.token, path=args.path)
