@@ -55,6 +55,7 @@ migrate = { cmd = "alembic upgrade head", envfile = ".env" }
 env = { cmd = """python -c 'from api.settings import settings; from rich import print; print(settings)'""", envfile = ".env" }
 jwt = { cmd = """python -c 'from api.utils import jwt; import sys, json; print(jwt.encode_jwt(json.loads(sys.argv[1]), jwt.timedelta(seconds=int(sys.argv[2]))))'""", envfile = ".env" }
 check = { cmd = """python -c 'from api.services import courses, skills; from rich import print; print(skills.SKILLS); print(courses.COURSES)'""", env = {LOG_LEVEL="DEBUG"} }
+sync_skills = "python scripts/sync_skills.py"
 
 [tool.poe.tasks.coverage]
 shell = """
@@ -117,7 +118,7 @@ sections = ["FUTURE", "STDLIB", "FIRSTPARTY", "THIRDPARTY", "LOCALFOLDER"]
 strict = true
 ignore_missing_imports = true
 plugins = ["sqlalchemy.ext.mypy.plugin"]
-exclude = ['^alembic/env\.py$']
+exclude = ['^alembic/env\.py$', '^scripts/.+\.py$']
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
