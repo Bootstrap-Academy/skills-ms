@@ -77,7 +77,11 @@ async def list_root_skills() -> Any:
 
 @router.patch("/skilltree", dependencies=[admin_auth], responses=admin_responses(UpdateRootTree))
 async def update_root_tree_settings(data: UpdateRootTree) -> Any:
-    """Update the tree settings."""
+    """
+    Update the tree settings.
+
+    *Requirements:* **ADMIN**
+    """
 
     settings = await models.TreeSettings.get()
 
@@ -95,7 +99,11 @@ async def update_root_tree_settings(data: UpdateRootTree) -> Any:
     responses=admin_responses(RootSkill, SkillAlreadyExistsException, SkillNotFoundException),
 )
 async def create_root_skill(data: CreateRootSkill) -> Any:
-    """Create a new root skill."""
+    """
+    Create a new root skill.
+
+    *Requirements:* **ADMIN**
+    """
 
     if await db.exists(filter_by(models.RootSkill, id=data.id)):
         raise SkillAlreadyExistsException
@@ -122,7 +130,11 @@ async def create_root_skill(data: CreateRootSkill) -> Any:
     responses=admin_responses(RootSkill, SkillNotFoundException, CycleInSkillTreeException),
 )
 async def update_root_skill(*, skill: models.RootSkill = get_root_skill, data: UpdateRootSkill) -> Any:
-    """Update a root skill."""
+    """
+    Update a root skill.
+
+    *Requirements:* **ADMIN**
+    """
 
     if data.name is not None and data.name != skill.name:
         skill.name = data.name
@@ -153,7 +165,11 @@ async def update_root_skill(*, skill: models.RootSkill = get_root_skill, data: U
     "/skilltree/{root_skill_id}", dependencies=[admin_auth], responses=admin_responses(bool, SkillNotFoundException)
 )
 async def delete_root_skill(skill: models.RootSkill = get_root_skill) -> Any:
-    """Delete a root skill."""
+    """
+    Delete a root skill.
+
+    *Requirements:* **ADMIN**
+    """
 
     await db.delete(skill)
     return True
@@ -172,7 +188,11 @@ async def list_sub_skills(*, root_skill: models.RootSkill = get_root_skill) -> A
     responses=admin_responses(SubSkill, SkillAlreadyExistsException, SkillNotFoundException, CourseNotFoundException),
 )
 async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, data: CreateSubSkill) -> Any:
-    """Create a new sub skill in a root skill."""
+    """
+    Create a new sub skill in a root skill.
+
+    *Requirements:* **ADMIN**
+    """
 
     if await db.exists(filter_by(models.SubSkill, id=data.id)):
         raise SkillAlreadyExistsException
@@ -206,7 +226,11 @@ async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, dat
     responses=admin_responses(SubSkill, SkillNotFoundException, CycleInSkillTreeException),
 )
 async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: UpdateSubSkill) -> Any:
-    """Update a sub skill."""
+    """
+    Update a sub skill.
+
+    *Requirements:* **ADMIN**
+    """
 
     if data.name is not None and data.name != skill.name:
         skill.name = data.name
@@ -246,7 +270,11 @@ async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: Upda
     responses=admin_responses(bool, SkillNotFoundException),
 )
 async def delete_sub_skill(skill: models.SubSkill = get_sub_skill) -> Any:
-    """Delete a sub skill."""
+    """
+    Delete a sub skill.
+
+    *Requirements:* **ADMIN**
+    """
 
     await db.delete(skill)
     return True
