@@ -113,7 +113,7 @@ def main(
     with Client(base_url=host, headers={"Authorization": token}) as client:
         response = client.get("/skilltree")
         response.raise_for_status()
-        remote_skills = {skill["id"]: skill for skill in response.json()}
+        remote_skills = {skill["id"]: skill for skill in response.json()["skills"]}
 
         add = {*skills} - {*remote_skills}
         update = {*skills} & {*remote_skills}
@@ -130,6 +130,8 @@ def main(
                         "name": skills[skill].name,
                         "dependencies": skills[skill].dependencies,
                         **_get_position(skill),
+                        "sub_tree_rows": 20,
+                        "sub_tree_columns": 20,
                     },
                 )
                 response.raise_for_status()
