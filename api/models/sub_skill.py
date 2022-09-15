@@ -29,6 +29,7 @@ class SubSkill(Base):
     name: Mapped[str] = Column(String(256))
     row: Mapped[int] = Column(Integer)
     column: Mapped[int] = Column(Integer)
+    icon: Mapped[str | None] = Column(String(256), nullable=True)
     dependencies: list[SubSkill] = relationship(
         "SubSkill",
         secondary="skills_sub_skill_dependency",
@@ -62,4 +63,5 @@ class SubSkill(Base):
             "courses": [course.course_id for course in self.courses],
             "row": self.row,
             "column": self.column,
+            "icon": self.icon,
         }

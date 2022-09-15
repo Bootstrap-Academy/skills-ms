@@ -28,6 +28,7 @@ class RootSkill(Base):
     column: Mapped[int] = Column(Integer)
     sub_tree_rows: Mapped[int] = Column(Integer)
     sub_tree_columns: Mapped[int] = Column(Integer)
+    icon: Mapped[str | None] = Column(String(256), nullable=True)
     sub_skills: list[SubSkill] = relationship(
         "SubSkill", back_populates="parent", cascade="all, delete", lazy="selectin"
     )
@@ -62,4 +63,5 @@ class RootSkill(Base):
             "column": self.column,
             "sub_tree_rows": self.sub_tree_rows,
             "sub_tree_columns": self.sub_tree_columns,
+            "icon": self.icon,
         }

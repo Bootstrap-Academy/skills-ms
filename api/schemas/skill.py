@@ -13,6 +13,7 @@ class RootSkill(BaseModel):
     column: int = Field(description="Column of the skill in the skill tree")
     sub_tree_rows: int = Field(description="Number of rows in the sub skill tree")
     sub_tree_columns: int = Field(description="Number of columns in the sub skill tree")
+    icon: str | None = Field(description="Icon of the skill")
 
     Config = example(
         id="datenbank_experte",
@@ -24,6 +25,7 @@ class RootSkill(BaseModel):
         column=2,
         sub_tree_rows=20,
         sub_tree_columns=20,
+        icon="xyz",
     )
 
 
@@ -48,6 +50,7 @@ class CreateRootSkill(BaseModel):
     column: int = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
     sub_tree_rows: int = Field(ge=1, lt=1 << 31, description="Number of rows in the sub skill tree")
     sub_tree_columns: int = Field(ge=1, lt=1 << 31, description="Number of columns in the sub skill tree")
+    icon: str | None = Field(max_length=256, description="Icon of the skill")
 
 
 class UpdateRootSkill(BaseModel):
@@ -57,6 +60,7 @@ class UpdateRootSkill(BaseModel):
     column: int | None = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
     sub_tree_rows: int | None = Field(ge=1, lt=1 << 31, description="Number of rows in the sub skill tree")
     sub_tree_columns: int | None = Field(ge=1, lt=1 << 31, description="Number of columns in the sub skill tree")
+    icon: str | None = Field(max_length=256, description="Icon of the skill")
 
 
 class SubSkill(BaseModel):
@@ -68,6 +72,7 @@ class SubSkill(BaseModel):
     courses: list[str] = Field(description="List of course ids")
     row: int = Field(description="Row of the skill in the skill tree")
     column: int = Field(description="Column of the skill in the skill tree")
+    icon: str | None = Field(description="Icon of the skill")
 
     Config = example(
         id="datenanalyse_mit_python",
@@ -78,6 +83,7 @@ class SubSkill(BaseModel):
         courses=["datenanalyse_mit_python"],
         row=1,
         column=2,
+        icon="xyz",
     )
 
 
@@ -88,6 +94,7 @@ class CreateSubSkill(BaseModel):
     courses: set[str] = Field(description="List of course ids")
     row: int = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
     column: int = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
+    icon: str | None = Field(max_length=256, description="Icon of the skill")
 
 
 class UpdateSubSkill(BaseModel):
@@ -96,3 +103,4 @@ class UpdateSubSkill(BaseModel):
     courses: set[str] | None = Field(description="List of course ids")
     row: int | None = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
     column: int | None = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
+    icon: str | None = Field(max_length=256, description="Icon of the skill")

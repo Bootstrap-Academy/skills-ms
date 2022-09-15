@@ -121,6 +121,7 @@ async def create_root_skill(data: CreateRootSkill) -> Any:
         column=data.column,
         sub_tree_rows=data.sub_tree_rows,
         sub_tree_columns=data.sub_tree_columns,
+        icon=data.icon,
     )
     await db.add(skill)
     return skill.serialize
@@ -165,6 +166,9 @@ async def update_root_skill(*, skill: models.RootSkill = get_root_skill, data: U
 
     if data.sub_tree_columns is not None and data.sub_tree_columns != skill.sub_tree_columns:
         skill.sub_tree_columns = data.sub_tree_columns
+
+    if data.icon is not None and data.icon != skill.icon:
+        skill.icon = data.icon
 
     return skill.serialize
 
@@ -223,6 +227,7 @@ async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, dat
         courses=[models.SkillCourse(skill_id=data.id, course_id=course.id) for course in cast(list[Course], courses)],
         row=data.row,
         column=data.column,
+        icon=data.icon,
     )
     await db.add(skill)
     return skill.serialize
@@ -268,6 +273,9 @@ async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: Upda
 
     if data.column is not None and data.column != skill.column:
         skill.column = data.column
+
+    if data.icon is not None and data.icon != skill.icon:
+        skill.icon = data.icon
 
     return skill.serialize
 
