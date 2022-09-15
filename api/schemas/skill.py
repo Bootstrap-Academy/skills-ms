@@ -11,6 +11,8 @@ class RootSkill(BaseModel):
     skills: list[str] = Field(description="List of sub skills")
     row: int = Field(description="Row of the skill in the skill tree")
     column: int = Field(description="Column of the skill in the skill tree")
+    sub_tree_rows: int = Field(description="Number of rows in the sub skill tree")
+    sub_tree_columns: int = Field(description="Number of columns in the sub skill tree")
 
     Config = example(
         id="datenbank_experte",
@@ -20,6 +22,8 @@ class RootSkill(BaseModel):
         skills=["mongodb", "postgresql", "mysql", "fortgeschrittene_datenbankmodelle"],
         row=1,
         column=2,
+        sub_tree_rows=20,
+        sub_tree_columns=20,
     )
 
 
@@ -42,6 +46,8 @@ class CreateRootSkill(BaseModel):
     dependencies: set[str] = Field(description="List of skill dependencies")
     row: int = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
     column: int = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
+    sub_tree_rows: int = Field(ge=1, lt=1 << 31, description="Number of rows in the sub skill tree")
+    sub_tree_columns: int = Field(ge=1, lt=1 << 31, description="Number of columns in the sub skill tree")
 
 
 class UpdateRootSkill(BaseModel):
@@ -49,6 +55,8 @@ class UpdateRootSkill(BaseModel):
     dependencies: set[str] | None = Field(description="List of skill dependencies")
     row: int | None = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
     column: int | None = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
+    sub_tree_rows: int | None = Field(ge=1, lt=1 << 31, description="Number of rows in the sub skill tree")
+    sub_tree_columns: int | None = Field(ge=1, lt=1 << 31, description="Number of columns in the sub skill tree")
 
 
 class SubSkill(BaseModel):

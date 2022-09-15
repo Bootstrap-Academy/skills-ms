@@ -26,6 +26,8 @@ class RootSkill(Base):
     name: Mapped[str] = Column(String(256))
     row: Mapped[int] = Column(Integer)
     column: Mapped[int] = Column(Integer)
+    sub_tree_rows: Mapped[int] = Column(Integer)
+    sub_tree_columns: Mapped[int] = Column(Integer)
     sub_skills: list[SubSkill] = relationship(
         "SubSkill", back_populates="parent", cascade="all, delete", lazy="selectin"
     )
@@ -58,4 +60,6 @@ class RootSkill(Base):
             "skills": [sub_skill.id for sub_skill in self.sub_skills],
             "row": self.row,
             "column": self.column,
+            "sub_tree_rows": self.sub_tree_rows,
+            "sub_tree_columns": self.sub_tree_columns,
         }
