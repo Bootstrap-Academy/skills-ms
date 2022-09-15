@@ -8,6 +8,8 @@ from alembic import op
 
 import sqlalchemy as sa
 
+from api import models
+
 
 # revision identifiers, used by Alembic.
 revision = "4e5d21483ac8"
@@ -20,7 +22,7 @@ def upgrade() -> None:
     op.add_column("skills_root_skill", sa.Column("sub_tree_rows", sa.Integer(), nullable=True))
     op.add_column("skills_root_skill", sa.Column("sub_tree_columns", sa.Integer(), nullable=True))
 
-    op.execute("UPDATE skills_root_skill SET `sub_tree_rows` = 20, `sub_tree_columns` = 20")
+    op.execute(sa.update(models.RootSkill).values(sub_tree_rows=20, sub_tree_columns=20))
 
 
 def downgrade() -> None:
