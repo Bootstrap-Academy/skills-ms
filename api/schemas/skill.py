@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field
 
-from api.utils.docs import example
+from api.utils.docs import example, get_example
 
 
 class RootSkill(BaseModel):
@@ -21,6 +21,19 @@ class RootSkill(BaseModel):
         row=1,
         column=2,
     )
+
+
+class SkillTree(BaseModel):
+    skills: list[RootSkill] = Field(description="List of all skills")
+    rows: int = Field(description="Number of rows in the skill tree")
+    columns: int = Field(description="Number of columns in the skill tree")
+
+    Config = example(skills=get_example(RootSkill), rows=20, columns=20)
+
+
+class UpdateRootTree(BaseModel):
+    rows: int | None = Field(ge=1, lt=1 << 31, description="Number of rows in the skill tree")
+    columns: int | None = Field(ge=1, lt=1 << 31, description="Number of columns in the skill tree")
 
 
 class CreateRootSkill(BaseModel):

@@ -11,7 +11,16 @@ from api.exceptions.auth import admin_responses
 from api.exceptions.course import CourseNotFoundException
 from api.exceptions.skill import CycleInSkillTreeException, SkillAlreadyExistsException, SkillNotFoundException
 from api.schemas.course import Course
-from api.schemas.skill import CreateRootSkill, CreateSubSkill, RootSkill, SubSkill, UpdateRootSkill, UpdateSubSkill
+from api.schemas.skill import (
+    CreateRootSkill,
+    CreateSubSkill,
+    RootSkill,
+    SkillTree,
+    SubSkill,
+    UpdateRootSkill,
+    UpdateRootTree,
+    UpdateSubSkill,
+)
 from api.services.courses import COURSES
 from api.utils.docs import responses
 
@@ -53,11 +62,31 @@ def get_skill_dependents(skill_id: str, skills: dict[str, models.RootSkill] | di
     return dependents
 
 
-@router.get("/skilltree", responses=responses(list[RootSkill]))
+@router.get("/skilltree", responses=responses(SkillTree))
 async def list_root_skills() -> Any:
     """Return a list of all root skills."""
 
-    return [skill.serialize async for skill in await db.stream(select(models.RootSkill))]
+    settings = await models.TreeSettings.get()
+
+    return SkillTree(
+        skills=[skill.serialize async for skill in await db.stream(select(models.RootSkill))],
+        rows=settings.rows,
+        columns=settings.columns,
+    )
+
+
+@router.patch("/skilltree", dependencies=[admin_auth], responses=admin_responses(UpdateRootTree))
+async def update_root_tree_settings(data: UpdateRootTree) -> Any:
+    """Update the tree settings."""
+
+    settings = await models.TreeSettings.get()
+
+    if data.rows is not None and data.rows != settings.rows:
+        settings.rows = data.rows
+    if data.columns is not None and data.columns != settings.columns:
+        settings.columns = data.columns
+
+    return UpdateRootTree(rows=settings.rows, columns=settings.columns)
 
 
 @router.post(
