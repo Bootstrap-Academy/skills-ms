@@ -9,6 +9,8 @@ class RootSkill(BaseModel):
     dependencies: list[str] = Field(description="List of skill dependencies")
     dependents: list[str] = Field(description="List of skills that depend on this skill")
     skills: list[str] = Field(description="List of sub skills")
+    row: int = Field(description="Row of the skill in the skill tree")
+    column: int = Field(description="Column of the skill in the skill tree")
 
     Config = example(
         id="datenbank_experte",
@@ -16,6 +18,8 @@ class RootSkill(BaseModel):
         dependencies=["grundlagen_der_programmierung_und_datenhaltung"],
         dependents=["data_scientist"],
         skills=["mongodb", "postgresql", "mysql", "fortgeschrittene_datenbankmodelle"],
+        row=1,
+        column=2,
     )
 
 
@@ -23,11 +27,15 @@ class CreateRootSkill(BaseModel):
     id: str = Field(max_length=256, description="ID of the skill")
     name: str = Field(max_length=256, description="Name of the skill")
     dependencies: set[str] = Field(description="List of skill dependencies")
+    row: int = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
+    column: int = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
 
 
 class UpdateRootSkill(BaseModel):
     name: str | None = Field(max_length=256, description="Name of the skill")
     dependencies: set[str] | None = Field(description="List of skill dependencies")
+    row: int | None = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
+    column: int | None = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
 
 
 class SubSkill(BaseModel):
@@ -37,6 +45,8 @@ class SubSkill(BaseModel):
     dependencies: list[str] = Field(description="List of skill dependencies")
     dependents: list[str] = Field(description="List of skills that depend on this skill")
     courses: list[str] = Field(description="List of course ids")
+    row: int = Field(description="Row of the skill in the skill tree")
+    column: int = Field(description="Column of the skill in the skill tree")
 
     Config = example(
         id="datenanalyse_mit_python",
@@ -45,6 +55,8 @@ class SubSkill(BaseModel):
         dependencies=["algorithmen_zur_datenanalyse"],
         dependents=["datenvisualisierung_mit_python"],
         courses=["datenanalyse_mit_python"],
+        row=1,
+        column=2,
     )
 
 
@@ -53,9 +65,13 @@ class CreateSubSkill(BaseModel):
     name: str = Field(max_length=256, description="Name of the skill")
     dependencies: set[str] = Field(description="List of skill dependencies")
     courses: set[str] = Field(description="List of course ids")
+    row: int = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
+    column: int = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
 
 
 class UpdateSubSkill(BaseModel):
     name: str | None = Field(max_length=256, description="Name of the skill")
     dependencies: set[str] | None = Field(description="List of skill dependencies")
     courses: set[str] | None = Field(description="List of course ids")
+    row: int | None = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
+    column: int | None = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")

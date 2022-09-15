@@ -1,4 +1,5 @@
 import argparse
+import hashlib
 import re
 from graphlib import TopologicalSorter
 from pathlib import Path
@@ -85,7 +86,21 @@ def _check_skill_courses(skills: dict[str, RootSkillDescription], courses: set[s
     logger.debug("skills courses are valid")
 
 
-def main(_list: bool, dry: bool, host: str, token: str, path: Path):
+def _get_position(name: str) -> dict[str, int]:
+    row = int(hashlib.sha256(f"row:{name}".encode()).hexdigest(), 16) % 20
+    col = int(hashlib.sha256(f"col:{name}".encode()).hexdigest(), 16) % 20
+    return {"row": row, "column": col}
+
+
+def main(
+    path: Path,
+    *,
+    _list: bool = False,
+    dry: bool = False,
+    update_positions: bool = False,
+    host: str = "",
+    token: str = "",
+):
     skills = _load_skills(path)
     _check_skills_definitions(skills)
     _check_skill_dependencies(skills)
@@ -110,7 +125,12 @@ def main(_list: bool, dry: bool, host: str, token: str, path: Path):
             if not dry:
                 response = client.post(
                     "/skilltree",
-                    json={"id": skill, "name": skills[skill].name, "dependencies": skills[skill].dependencies},
+                    json={
+                        "id": skill,
+                        "name": skills[skill].name,
+                        "dependencies": skills[skill].dependencies,
+                        **_get_position(skill),
+                    },
                 )
                 response.raise_for_status()
 
@@ -120,6 +140,11 @@ def main(_list: bool, dry: bool, host: str, token: str, path: Path):
                 diff["name"] = skills[skill].name
             if set(skills[skill].dependencies) != set(remote_skills[skill]["dependencies"]):
                 diff["dependencies"] = skills[skill].dependencies
+            if update_positions and _get_position(skill) != {
+                "row": remote_skills[skill]["row"],
+                "column": remote_skills[skill]["column"],
+            }:
+                diff |= _get_position(skill)
             if diff:
                 logger.info(f"updating skill {skill}")
                 if not dry:
@@ -153,6 +178,7 @@ def main(_list: bool, dry: bool, host: str, token: str, path: Path):
                             "name": sub_skills[sub_skill].name,
                             "dependencies": sub_skills[sub_skill].dependencies,
                             "courses": sub_skills[sub_skill].courses,
+                            **_get_position(skill + "/" + sub_skill),
                         },
                     )
                     response.raise_for_status()
@@ -165,6 +191,11 @@ def main(_list: bool, dry: bool, host: str, token: str, path: Path):
                     diff["dependencies"] = sub_skills[sub_skill].dependencies
                 if set(sub_skills[sub_skill].courses) != set(remote_sub_skills[sub_skill]["courses"]):
                     diff["courses"] = sub_skills[sub_skill].courses
+                if update_positions and _get_position(skill + "/" + sub_skill) != {
+                    "row": remote_sub_skills[sub_skill]["row"],
+                    "column": remote_sub_skills[sub_skill]["column"],
+                }:
+                    diff |= _get_position(skill + "/" + sub_skill)
                 if diff:
                     logger.info(f"updating sub skill {sub_skill} ({skill})")
                     if not dry:
@@ -188,8 +219,16 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sync skills from yaml files to the backend.")
     parser.add_argument("--list", action="store_true", help="list all skills without syncing")
     parser.add_argument("--dry", action="store_true", help="dry run")
+    parser.add_argument("--update-positions", action="store_true", help="update positions")
     parser.add_argument("--host", metavar="host", type=str, help="Host of the backend")
     parser.add_argument("--token", metavar="token", type=str, help="Token for the backend")
     parser.add_argument("path", metavar="path", type=Path, help="Path to the yaml files")
     args = parser.parse_args()
-    main(_list=args.list, dry=args.dry, host=args.host, token=args.token, path=args.path)
+    main(
+        args.path,
+        _list=args.list,
+        dry=args.dry,
+        update_positions=args.update_positions,
+        host=args.host,
+        token=args.token,
+    )

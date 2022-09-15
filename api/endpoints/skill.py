@@ -76,7 +76,12 @@ async def create_root_skill(data: CreateRootSkill) -> Any:
         raise SkillNotFoundException
 
     skill = models.RootSkill(
-        id=data.id, name=data.name, sub_skills=[], dependencies=cast(list[models.RootSkill], dependencies)
+        id=data.id,
+        name=data.name,
+        sub_skills=[],
+        dependencies=cast(list[models.RootSkill], dependencies),
+        row=data.row,
+        column=data.column,
     )
     await db.add(skill)
     return skill.serialize
@@ -105,6 +110,12 @@ async def update_root_skill(*, skill: models.RootSkill = get_root_skill, data: U
             raise CycleInSkillTreeException
 
         skill.dependencies = cast(list[models.RootSkill], dependencies)
+
+    if data.row is not None and data.row != skill.row:
+        skill.row = data.row
+
+    if data.column is not None and data.column != skill.column:
+        skill.column = data.column
 
     return skill.serialize
 
@@ -153,6 +164,8 @@ async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, dat
         name=data.name,
         dependencies=cast(list[models.SubSkill], dependencies),
         courses=[models.SkillCourse(skill_id=data.id, course_id=course.id) for course in cast(list[Course], courses)],
+        row=data.row,
+        column=data.column,
     )
     await db.add(skill)
     return skill.serialize
@@ -188,6 +201,12 @@ async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: Upda
             raise CourseNotFoundException
 
         skill.courses = [models.SkillCourse(skill_id=skill.id, course_id=course) for course in data.courses]
+
+    if data.row is not None and data.row != skill.row:
+        skill.row = data.row
+
+    if data.column is not None and data.column != skill.column:
+        skill.column = data.column
 
     return skill.serialize
 
