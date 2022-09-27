@@ -17,6 +17,7 @@ from api.schemas.skill import (
     RootSkill,
     SkillTree,
     SubSkill,
+    SubSkillTree,
     UpdateRootSkill,
     UpdateRootTree,
     UpdateSubSkill,
@@ -187,11 +188,15 @@ async def delete_root_skill(skill: models.RootSkill = get_root_skill) -> Any:
     return True
 
 
-@router.get("/skilltree/{root_skill_id}", responses=responses(list[SubSkill], SkillNotFoundException))
+@router.get("/skilltree/{root_skill_id}", responses=responses(SubSkillTree, SkillNotFoundException))
 async def list_sub_skills(*, root_skill: models.RootSkill = get_root_skill) -> Any:
     """Return a list of all sub skills of a root skill."""
 
-    return [sub_skill.serialize for sub_skill in root_skill.sub_skills]
+    return SubSkillTree(
+        skills=[sub_skill.serialize for sub_skill in root_skill.sub_skills],
+        rows=root_skill.sub_tree_rows,
+        columns=root_skill.sub_tree_columns,
+    )
 
 
 @router.post(
