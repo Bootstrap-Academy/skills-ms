@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     auth_url: str = ""
     shop_url: str = ""
 
+    lecture_xp: int = 10
+
     internal_jwt_ttl: int = 10
 
     database_url: str = Field(

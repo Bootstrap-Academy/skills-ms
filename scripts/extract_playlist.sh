@@ -8,11 +8,13 @@ _yml_escape(){
 
 pl=$(youtube-dl -s "$1" 2> /dev/null | head -2 | tail -1 | cut -d' ' -f4-)
 cat << EOF
+# $1
 title: $(_yml_escape "$pl")
 description:
 price:
 sections:
-  - title: $(_yml_escape "$pl")
+  - id: section
+    title: $(_yml_escape "$pl")
     description:
     lectures:
 EOF
@@ -20,7 +22,8 @@ EOF
 _lecture(){
 #   echo "# $1 $2"
     cat << EOF
-      - title: $(_yml_escape "$2")
+      - id: $(_yml_escape "$1")
+        title: $(_yml_escape "$2")
         description:
         type: youtube
         video_id: $(_yml_escape "$1")
