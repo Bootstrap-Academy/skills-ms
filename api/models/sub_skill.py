@@ -11,6 +11,7 @@ from api.models.root_skill import RootSkill
 
 if TYPE_CHECKING:
     from .skill_course import SkillCourse
+    from .xp import XP
 
 
 class SubSkillDependency(Base):
@@ -51,6 +52,7 @@ class SubSkill(Base):
     courses: list[SkillCourse] = relationship(
         "SkillCourse", back_populates="skill", lazy="selectin", cascade="all, delete-orphan"
     )
+    xp: list[XP] = relationship("XP", back_populates="skill", cascade="all, delete-orphan")
 
     @property
     def serialize(self) -> dict[str, Any]:
