@@ -159,7 +159,7 @@ def main(
             else:
                 resp = client.get(f"/skilltree/{skill}")
                 resp.raise_for_status()
-                remote_sub_skills = {sub_skill["id"]: sub_skill for sub_skill in resp.json()}
+                remote_sub_skills = {sub_skill["id"]: sub_skill for sub_skill in resp.json()["skills"]}
 
             sub_skills = skills[skill].skills
 
