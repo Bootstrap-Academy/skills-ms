@@ -5,7 +5,6 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import FileResponse
-from starlette.datastructures import URLPath
 
 from api import models
 from api.auth import require_verified_email, user_auth
@@ -107,7 +106,7 @@ async def get_mp4_lecture_link(request: Request, course: Course = get_course, le
     name = f"{course.id}_{lecture.id}.mp4"
     await redis.setex(f"mp4_lecture:{token}:{name}", 60, str(path))
 
-    return URLPath(f"/lectures/{token}/{name}").make_absolute_url(request.base_url)
+    return f"{settings.public_base_url.rstrip('/')}/lectures/{token}/{name}"
 
 
 @router.get("/lectures/{token}/{file}", include_in_schema=False)

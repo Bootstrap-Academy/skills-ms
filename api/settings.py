@@ -22,6 +22,7 @@ class Settings(BaseSettings):
 
     lecture_xp: int = 10
 
+    public_base_url: str = "http://localhost:8000"
     mp4_lectures: Path = Path("lectures")
 
     internal_jwt_ttl: int = 10
