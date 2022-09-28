@@ -13,7 +13,11 @@ class YoutubeLecture(BaseModel):
     video_id: str = Field(description="Youtube Video ID of the lecture")
 
     Config = example(
-        title="Introduction", description="Introduction to the course", type="youtube", video_id="dQw4w9WgXcQ"
+        id="intro",
+        title="Introduction",
+        description="Introduction to the course",
+        type="youtube",
+        video_id="dQw4w9WgXcQ",
     )
 
     def to_user_lecture(self, completed: bool) -> UserLecture:
@@ -25,14 +29,8 @@ class Mp4Lecture(BaseModel):
     title: str = Field(description="Title of the lecture")
     description: str | None = Field(description="Description of the lecture")
     type = Field("mp4", const=True, description="Type of the lecture")
-    video_url: str = Field(description="URL of the MP4 file")
 
-    Config = example(
-        title="Introduction",
-        description="Introduction to the course",
-        type="mp4",
-        video_url="https://example.com/introduction.mp4",
-    )
+    Config = example(id="intro", title="Introduction", description="Introduction to the course", type="mp4")
 
     def to_user_lecture(self, completed: bool) -> UserLecture:
         return UserMp4Lecture(**self.dict(), completed=completed)

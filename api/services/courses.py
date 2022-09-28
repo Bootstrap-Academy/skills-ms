@@ -5,6 +5,7 @@ from yaml import safe_load
 
 from api.logger import get_logger
 from api.schemas.course import Course
+from api.settings import settings
 
 
 logger = get_logger(__name__)
@@ -32,6 +33,11 @@ def _check_course_definitions() -> None:
                 if lecture.id in lectures:
                     raise ValueError(f"Duplicate lecture id {lecture.id} in course {course.id}")
                 lectures.add(lecture.id)
+                if (
+                    lecture.type == "mp4"
+                    and not settings.mp4_lectures.joinpath(course.id, lecture.id + ".mp4").is_file()
+                ):
+                    logger.warning(f"Missing mp4 lecture {lecture.id} in course {course.id}")
     logger.debug("course definitions are valid")
 
 

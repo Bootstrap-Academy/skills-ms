@@ -1,0 +1,25 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7p9CgKtDep-tyA1dW18FNXr
+title: "Rust Programmieren Tutorials Deutsch für Anfänger"
+description:
+price: 20
+sections:
+  - id: section
+    title: "Rust Programmieren Tutorials Deutsch für Anfänger"
+    description:
+    lectures:
+      - id: "xJhuHXilkgo"
+        title: "Rust Programmieren Tutorial für Anfänger #1"
+        description:
+        type: mp4
+      - id: "HirFdbRFRgU"
+        title: "Rust Tutorial #2 - Konsolenausgaben"
+        description:
+        type: mp4
+      - id: "xioBbrGV9D8"
+        title: "Rust Tutorial #3 - Variablen"
+        description:
+        type: mp4
+      - id: "a2MQnow9cpI"
+        title: "Rust Tutorial #4 - Die if-Abfrage"
+        description:
+        type: mp4

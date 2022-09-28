@@ -1,4 +1,5 @@
 import secrets
+from pathlib import Path
 from typing import Literal
 
 from pydantic import BaseSettings, Field
@@ -20,6 +21,8 @@ class Settings(BaseSettings):
     shop_url: str = ""
 
     lecture_xp: int = 10
+
+    mp4_lectures: Path = Path("lectures")
 
     internal_jwt_ttl: int = 10
 

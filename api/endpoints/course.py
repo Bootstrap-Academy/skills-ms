@@ -1,8 +1,11 @@
 """Endpoints related to courses and lectures"""
 
+from secrets import token_urlsafe
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Request
+from fastapi.responses import FileResponse
+from starlette.datastructures import URLPath
 
 from api import models
 from api.auth import require_verified_email, user_auth
@@ -17,6 +20,7 @@ from api.exceptions.course import (
     NoCourseAccessException,
     NotEnoughCoinsError,
 )
+from api.redis import redis
 from api.schemas.course import Course, CourseSummary, Lecture, UserCourse
 from api.schemas.user import User
 from api.services.courses import COURSES
@@ -76,6 +80,43 @@ async def get_course_details(course: Course = get_course, user: User = user_auth
     """
 
     return course.to_user_course(await models.LectureProgress.get_completed(user.id, course.id))
+
+
+@router.get(
+    "/courses/{course_id}/lectures/{lecture_id}",
+    dependencies=[require_verified_email, has_course_access],
+    responses=verified_responses(str, NoCourseAccessException, CourseNotFoundException, LectureNotFoundException),
+)
+async def get_mp4_lecture_link(request: Request, course: Course = get_course, lecture: Lecture = get_lecture) -> Any:
+    """
+    Return the download link of an mp4 lecture.
+
+    *Requirements:* **VERIFIED**
+    """
+
+    print(lecture)
+
+    if lecture.type != "mp4":
+        raise LectureNotFoundException
+
+    path = settings.mp4_lectures.joinpath(course.id, lecture.id + ".mp4")
+    if not path.is_file():
+        raise LectureNotFoundException
+
+    token = token_urlsafe(64)
+    name = f"{course.id}_{lecture.id}.mp4"
+    await redis.setex(f"mp4_lecture:{token}:{name}", 60, str(path))
+
+    return URLPath(f"/lectures/{token}/{name}").make_absolute_url(request.base_url)
+
+
+@router.get("/lectures/{token}/{file}", include_in_schema=False)
+async def download_mp4_lecture(token: str, file: str) -> Any:
+    path = await redis.get(f"mp4_lecture:{token}:{file}")
+    if not path:
+        raise LectureNotFoundException
+
+    return FileResponse(path, media_type="video/mp4", filename=file)
 
 
 @router.put(
