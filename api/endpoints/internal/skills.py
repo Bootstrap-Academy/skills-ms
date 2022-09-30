@@ -1,9 +1,10 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
 
 from api import models
-from api.database import db, select
+from api.database import db, filter_by, select
+from api.exceptions.skill import SkillNotFoundException
 from api.utils.docs import responses
 
 
@@ -21,5 +22,15 @@ async def get_skills() -> Any:
 async def get_completed_skills(user_id: str) -> Any:
     """Return a list of all completed skills for a user."""
 
-    # todo
-    return [skill.id async for skill in await db.stream(select(models.SubSkill))]
+    return await models.XP.get_user_completed_skills(user_id)
+
+
+@router.post("/skills/{user_id}/{skill_id}", responses=responses(bool, SkillNotFoundException))
+async def add_skill_progress(user_id: str, skill_id: str, xp: int = Body(), complete: bool = Body()) -> Any:
+    """Add progress to a skill for a user."""
+
+    if not await db.exists(filter_by(models.SubSkill, id=skill_id)):
+        raise SkillNotFoundException
+
+    await models.XP.add_xp(user_id, skill_id, xp, complete)
+    return True
