@@ -5,7 +5,7 @@ from typing import Any, cast
 from fastapi import APIRouter, Depends
 
 from api import models
-from api.auth import admin_auth
+from api.auth import admin_auth, public_auth
 from api.database import db, filter_by, select
 from api.exceptions.auth import admin_responses
 from api.exceptions.course import CourseNotFoundException
@@ -22,6 +22,7 @@ from api.schemas.skill import (
     UpdateRootTree,
     UpdateSubSkill,
 )
+from api.schemas.user import User
 from api.services.courses import COURSES
 from api.utils.docs import responses
 
@@ -189,11 +190,22 @@ async def delete_root_skill(skill: models.RootSkill = get_root_skill) -> Any:
 
 
 @router.get("/skilltree/{root_skill_id}", responses=responses(SubSkillTree, SkillNotFoundException))
-async def list_sub_skills(*, root_skill: models.RootSkill = get_root_skill) -> Any:
-    """Return a list of all sub skills of a root skill."""
+async def list_sub_skills(*, root_skill: models.RootSkill = get_root_skill, user: User | None = public_auth) -> Any:
+    """
+    Return a list of all sub skills of a root skill.
+
+    `completed` is included iff the **VERIFIED** requirement is met.
+    """
+
+    completed: set[str] | None = (
+        await models.XP.get_user_completed_skills(user.id) if user and user.email_verified else None
+    )
 
     return SubSkillTree(
-        skills=[sub_skill.serialize for sub_skill in root_skill.sub_skills],
+        skills=[
+            {**sub_skill.serialize, "completed": (sub_skill.id in completed if completed is not None else None)}
+            for sub_skill in root_skill.sub_skills
+        ],
         rows=root_skill.sub_tree_rows,
         columns=root_skill.sub_tree_columns,
     )

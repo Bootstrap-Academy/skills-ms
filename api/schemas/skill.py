@@ -73,6 +73,7 @@ class SubSkill(BaseModel):
     row: int = Field(description="Row of the skill in the skill tree")
     column: int = Field(description="Column of the skill in the skill tree")
     icon: str | None = Field(description="Icon of the skill")
+    completed: bool | None = Field(description="Whether the user has completed the skill")
 
     Config = example(
         id="datenanalyse_mit_python",
@@ -84,6 +85,7 @@ class SubSkill(BaseModel):
         row=1,
         column=2,
         icon="xyz",
+        completed=True,
     )
 
 
