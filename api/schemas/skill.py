@@ -94,7 +94,7 @@ class SubSkillTree(BaseModel):
     rows: int = Field(description="Number of rows in the sub skill tree")
     columns: int = Field(description="Number of columns in the sub skill tree")
 
-    Config = example(skills=get_example(SubSkill), rows=20, columns=20)
+    Config = example(skills=[get_example(SubSkill)], rows=20, columns=20)
 
 
 class CreateSubSkill(BaseModel):
