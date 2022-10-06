@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Body
+from fastapi import APIRouter, Body, Query
 
 from api import models
 from api.database import db, filter_by, select
@@ -23,6 +23,19 @@ async def get_completed_skills(user_id: str) -> Any:
     """Return a list of all completed skills for a user."""
 
     return await models.XP.get_user_completed_skills(user_id)
+
+
+@router.get("/graduates", responses=responses(list[str]))
+async def get_graduates(skills: set[str] = Query()) -> Any:
+    """Return a list of all users who have completed a skill."""
+
+    out = set()
+    for i, skill in enumerate(skills):
+        if not i:
+            out = await models.XP.get_skill_graduates(skill)
+        else:
+            out &= await models.XP.get_skill_graduates(skill)
+    return out
 
 
 @router.post("/skills/{user_id}/{skill_id}", responses=responses(bool, SkillNotFoundException))

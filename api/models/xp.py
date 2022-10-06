@@ -37,3 +37,7 @@ class XP(Base):
     @classmethod
     async def get_user_completed_skills(cls, user_id: str) -> set[str]:
         return {record.skill_id async for record in await db.stream(filter_by(cls, user_id=user_id, completed=True))}
+
+    @classmethod
+    async def get_skill_graduates(cls, skill_id: str) -> set[str]:
+        return {record.user_id async for record in await db.stream(filter_by(cls, skill_id=skill_id, completed=True))}
