@@ -5,17 +5,18 @@ from fastapi import APIRouter, Body, Query
 from api import models
 from api.database import db, filter_by, select
 from api.exceptions.skill import SkillNotFoundException
+from api.schemas.skill import SubSkill
 from api.utils.docs import responses
 
 
 router = APIRouter()
 
 
-@router.get("/skills", responses=responses(list[str]))
+@router.get("/skills", responses=responses(list[SubSkill]))
 async def get_skills() -> Any:
     """Return a list of all skills."""
 
-    return [skill.id async for skill in await db.stream(select(models.SubSkill))]
+    return [skill.serialize async for skill in await db.stream(select(models.SubSkill))]
 
 
 @router.get("/skills/{user_id}", responses=responses(list[str]))
