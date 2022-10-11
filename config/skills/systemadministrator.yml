@@ -6,7 +6,8 @@ skills:
   docker:
     name: Docker
     dependencies: []
-    courses: []
+    courses:
+      - docker
   nginx:
     name: Nginx
     dependencies: []
@@ -18,4 +19,5 @@ skills:
   grundlagen_der_serveradministration:
     name: Grundlagen der Serveradministration
     dependencies: []
-    courses: []
+    courses:
+      - serveradministration

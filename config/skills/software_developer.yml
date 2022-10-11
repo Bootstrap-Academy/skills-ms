@@ -8,12 +8,14 @@ skills:
   uml:
     name: UML
     dependencies: []
-    courses: []
+    courses:
+      - uml
   softwarearchitekturen_und_design_patterns:
     name: Softwarearchitekturen und Design Patterns
     dependencies:
       - uml
-    courses: []
+    courses:
+      - softwareengineering
   softwareplanung_und_management:
     name: Softwareplanung und Management
     dependencies:

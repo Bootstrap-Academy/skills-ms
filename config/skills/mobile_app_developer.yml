@@ -9,4 +9,5 @@ skills:
   dart_und_flutter_experte:
     name: Dart und Flutter Experte
     dependencies: []
-    courses: []
+    courses:
+      - dart_flutter

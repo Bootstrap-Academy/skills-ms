@@ -6,7 +6,8 @@ skills:
   devops_grundlagen:
     name: DevOps Grundlagen
     dependencies: []
-    courses: []
+    courses:
+      - devops_grundlagen
   devsecops:
     name: DevSecOps
     dependencies:

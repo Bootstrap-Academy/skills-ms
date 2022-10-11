@@ -5,7 +5,9 @@ skills:
   netzsicherheit:
     name: Netzsicherheit
     dependencies: []
-    courses: []
+    courses:
+      - firewalls
+      - netzsicherheit
   it_sicherheitsberater:
     name: IT Sicherheitsberater
     dependencies:
@@ -25,4 +27,5 @@ skills:
     name: Datenschutz und Privacy
     dependencies:
       - it_sicherheitsberater
-    courses: []
+    courses:
+      - anonymitaet_im_internet

@@ -5,7 +5,8 @@ skills:
   grundlagen_der_blockchain_technologie:
     name: Grundlagen der Blockchain-Technologie
     dependencies: []
-    courses: []
+    courses:
+      - bitcoin_blockchain_kryptowaehrungen
   dapp_development:
     name: dApp Development
     dependencies: []

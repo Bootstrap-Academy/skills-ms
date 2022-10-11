@@ -6,13 +6,16 @@ skills:
   assembler:
     name: Assembler
     dependencies: []
-    courses: []
+    courses:
+      - assembler
   reverse_engineering:
     name: Reverse Engineering
     dependencies:
       - assembler
-    courses: []
+    courses:
+      - ghidra_reverse_engineering
   wireshark:
     name: Wireshark
     dependencies: []
-    courses: []
+    courses:
+      - wireshark

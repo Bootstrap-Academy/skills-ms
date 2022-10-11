@@ -4,7 +4,8 @@ skills:
   formale_logik_und_mengenlehre:
     name: Formale Logik und Mengenlehre
     dependencies: []
-    courses: []
+    courses:
+      - logik
   analysis:
     name: Analysis
     dependencies:

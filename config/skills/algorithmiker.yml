@@ -10,4 +10,5 @@ skills:
   fortgeschrittene_algorithmen_und_datenstrukturen:
     name: Fortgeschrittene Algorithmen und Datenstrukturen
     dependencies: []
-    courses: []
+    courses:
+      - binaere_mathematik

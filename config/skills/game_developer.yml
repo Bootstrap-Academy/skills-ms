@@ -5,7 +5,8 @@ skills:
   unreal_engine_4:
     name: Unreal Engine 4
     dependencies: []
-    courses: []
+    courses:
+      - unreal_engine
   unity_engine:
     name: Unity Engine
     dependencies: []

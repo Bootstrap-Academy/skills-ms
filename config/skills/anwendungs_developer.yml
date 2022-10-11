@@ -5,11 +5,19 @@ skills:
   python_fuer_fortgeschrittene:
     name: Python für Fortgeschrittene
     dependencies: []
-    courses: []
+    courses:
+      - python_lets_code
+      - python_pillow
+      - python_pyqt
+      - signalverarbeitung
   java_fuer_fortgeschrittene:
     name: Java für Fortgeschrittene
     dependencies: []
-    courses: []
+    courses:
+      - java_algorithmen
+      - java_fortgeschrittene_techniken
+      - java_ray_tracing
+      - java_swing
   kotlin_fuer_fortgeschrittene:
     name: Kotlin für Fortgeschrittene
     dependencies: []
@@ -17,7 +25,9 @@ skills:
   c_plus_plus:
     name: C++
     dependencies: []
-    courses: []
+    courses:
+      - c
+      - cpp
   c_sharp_fuer_fortgeschrittene:
     name: C# für Fortgeschrittene
     dependencies: []

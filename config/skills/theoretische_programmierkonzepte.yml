@@ -5,4 +5,8 @@ skills:
   theoretische_konzepte_der_programmierung:
     name: theoretische Konzepte der Programmierung
     dependencies: []
-    courses: []
+    courses:
+      - lambda_kalkuel
+      - programmieren_lernen
+      - prolog
+      - haskell

@@ -6,18 +6,22 @@ skills:
   algorithmen_zur_datenanalyse:
     name: Algorithmen zur Datenanalyse
     dependencies: []
-    courses: []
+    courses:
+      - data_mining
   datenanalyse_mit_python:
     name: Datenanalyse mit Python
     dependencies:
       - algorithmen_zur_datenanalyse
-    courses: []
+    courses:
+      - python_data_science
   datenvisualisierung_mit_python:
     name: Datenvisualisierung mit Python
     dependencies:
       - datenanalyse_mit_python
-    courses: []
+    courses:
+      - datenvisualisierung
   python_spark:
     name: Python Spark
     dependencies: []
-    courses: []
+    courses:
+      - spark_pyspark

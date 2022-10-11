@@ -4,15 +4,18 @@ skills:
   python_grundlagen:
     name: Python Grundlagen
     dependencies: []
-    courses: []
+    courses:
+      - python
   java_grundlagen:
     name: Java Grundlagen
     dependencies: []
-    courses: []
+    courses:
+      - java
   kotlin_grundlagen:
     name: Kotlin Grundlagen
     dependencies: []
-    courses: []
+    courses:
+      - kotlin
   c_grundlagen:
     name: C Grundlagen
     dependencies: []
@@ -24,18 +27,22 @@ skills:
   sql_grundlagen:
     name: SQL Grundlagen
     dependencies: []
-    courses: []
+    courses:
+      - sql_und_datenbanken
   git_und_github:
     name: Git und Github
     dependencies: []
-    courses: []
+    courses:
+      - git_und_github
   algorithmen_und_datenstrukturen_grundlagen:
     name: Algorithmen und Datenstrukturen Grundlagen
     dependencies:
       - python_grundlagen
-    courses: []
+    courses:
+      - algorithmen_und_datenstrukturen
   clean_code:
     name: Clean Code
     dependencies:
       - algorithmen_und_datenstrukturen_grundlagen
-    courses: []
+    courses:
+      - clean_code

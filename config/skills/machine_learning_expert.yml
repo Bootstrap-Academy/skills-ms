@@ -5,12 +5,15 @@ skills:
   pytorch:
     name: Pytorch
     dependencies: []
-    courses: []
+    courses:
+      - python_pytorch
   tensorflow_mit_python:
     name: Tensorflow mit Python
     dependencies: []
-    courses: []
+    courses:
+      - python_tensorflow
   algorithmen_zum_machine_learning:
     name: Algorithmen zum Machine Learning
     dependencies: []
-    courses: []
+    courses:
+      - machine_learning
