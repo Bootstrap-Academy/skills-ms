@@ -64,6 +64,13 @@ async def list_courses() -> Any:
     return [course.summary for course in COURSES.values()]
 
 
+@router.get("/courses/{course_id}/summary", responses=responses(CourseSummary))
+async def get_course_summary(course: Course = get_course) -> Any:
+    """Return a summary of the course."""
+
+    return course.summary
+
+
 @router.get(
     "/courses/{course_id}",
     dependencies=[require_verified_email, has_course_access],
