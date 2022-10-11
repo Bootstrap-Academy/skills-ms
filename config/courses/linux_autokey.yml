@@ -1,0 +1,58 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7qCtvw6fiki0ihkwv7tIWN_
+title: "Linux Desktop Automatisierung mit AutoKey"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665508161
+sections:
+  - id: section
+    title: "Linux Desktop Automatisierung mit AutoKey"
+    description:
+    lectures:
+      - id: "-aSol5omu0U"
+        title: "Linux Desktop Automatisierung mit AutoKey Tutorial #1 - Installation"
+        description:
+        type: youtube
+        video_id: "-aSol5omu0U"
+        duration: 618
+      - id: "7thmKIMmq8E"
+        title: "Linux Desktop Automatisierung mit AutoKey Tutorial #2 - Zwischenablage"
+        description:
+        type: youtube
+        video_id: "7thmKIMmq8E"
+        duration: 610
+      - id: "dpo-WwEQS1E"
+        title: "Linux Desktop Automatisierung mit AutoKey Tutorial #3 - Dialoge"
+        description:
+        type: youtube
+        video_id: "dpo-WwEQS1E"
+        duration: 1204
+      - id: "ZOvkTlZcRGA"
+        title: "Linux Desktop Automatisierung mit AutoKey Tutorial #4 - Maus"
+        description:
+        type: youtube
+        video_id: "ZOvkTlZcRGA"
+        duration: 452
+      - id: "o1zI5X_zxI8"
+        title: "Linux Desktop Automatisierung mit AutoKey Tutorial #5 - Tastatur"
+        description:
+        type: youtube
+        video_id: "o1zI5X_zxI8"
+        duration: 753
+      - id: "3fGSaBPNO1c"
+        title: "Linux Desktop Automatisierung mit AutoKey Tutorial #6 - Fenster"
+        description:
+        type: youtube
+        video_id: "3fGSaBPNO1c"
+        duration: 752
+      - id: "DSKDqv3U7Wc"
+        title: "Linux Desktop Automatisierung mit AutoKey Tutorial #7 - Globale Werte"
+        description:
+        type: youtube
+        video_id: "DSKDqv3U7Wc"
+        duration: 376

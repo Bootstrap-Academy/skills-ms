@@ -1,0 +1,100 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7r3cONM-b6UgiW7Bu3LgMd-
+title: "Hacken lernen für Anfänger deutsch/german"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665507885
+sections:
+  - id: section
+    title: "Hacken lernen für Anfänger deutsch/german"
+    description:
+    lectures:
+      - id: "GLmpLeghM2Y"
+        title: "Ethisches Hacken #1 - WLan hacken - WPA/WPA2 über Handshake - Bruteforce"
+        description:
+        type: youtube
+        video_id: "GLmpLeghM2Y"
+        duration: 1103
+      - id: "DltSGCQ4KWE"
+        title: "Ethisches Hacken #2 - WLan hacken - WPS mit Reaver"
+        description:
+        type: youtube
+        video_id: "DltSGCQ4KWE"
+        duration: 746
+      - id: "K0DkuJewt-s"
+        title: "Ethisches Hacken #3 - einen Evil Twin erstellen"
+        description:
+        type: youtube
+        video_id: "K0DkuJewt-s"
+        duration: 775
+      - id: "Xod64GBUnGs"
+        title: "Youtube Strikes: Ich lösche über 100 Videos!"
+        description:
+        type: youtube
+        video_id: "Xod64GBUnGs"
+        duration: 1454
+      - id: "CYZfaF4r0_o"
+        title: "Ethisches Hacken #6 - NMap"
+        description:
+        type: youtube
+        video_id: "CYZfaF4r0_o"
+        duration: 853
+      - id: "XcX3JY30tqU"
+        title: "Ethisches Hacken #11 - Steganographie - Verstecke Nachrichten/Dateien in Bildern"
+        description:
+        type: youtube
+        video_id: "XcX3JY30tqU"
+        duration: 432
+      - id: "lr9NnFqZlMo"
+        title: "Ethisches Hacken #12 - Dateien von Windows retten"
+        description:
+        type: youtube
+        video_id: "lr9NnFqZlMo"
+        duration: 303
+      - id: "PlDg6vNSYnk"
+        title: "Ethisches Hacken #17 - Shodan - Suchengine für Hacker"
+        description:
+        type: youtube
+        video_id: "PlDg6vNSYnk"
+        duration: 171
+      - id: "sxFOti8SLSs"
+        title: "Ethisches Hacken #21 - Steganographie - Verstecke Dateien wie Mr.Robot mit DeepSound"
+        description:
+        type: youtube
+        video_id: "sxFOti8SLSs"
+        duration: 385
+      - id: "M6ly1shUVQo"
+        title: "Ethisches Hacken #23 - Proxychains"
+        description:
+        type: youtube
+        video_id: "M6ly1shUVQo"
+        duration: 542
+      - id: "G9_owD5vBl4"
+        title: "Sondervideo: PHP feat. Hacking: Cross Site Scripting - Sicherheit von Forms"
+        description:
+        type: youtube
+        video_id: "G9_owD5vBl4"
+        duration: 560
+      - id: "R9W3TCGW2Fk"
+        title: "Sondervideo: PHP feat. Hacking: SQL Injections und Gegenmaßnahmen"
+        description:
+        type: youtube
+        video_id: "R9W3TCGW2Fk"
+        duration: 697
+      - id: "TV-uJHR5v-Q"
+        title: "Ethisches Hacken - Überprüfen, ob eine Email Adresse auf dem Server existiert"
+        description:
+        type: youtube
+        video_id: "TV-uJHR5v-Q"
+        duration: 324
+      - id: "EzKy7gDQh6A"
+        title: "Ethical Hacking - RustScan: Das schnellere nmap"
+        description:
+        type: youtube
+        video_id: "EzKy7gDQh6A"
+        duration: 393

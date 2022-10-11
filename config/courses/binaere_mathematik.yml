@@ -1,0 +1,58 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7rsjQsc8hFAdR4BlO_MQib1
+title: "Binäre Mathematik"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665506721
+sections:
+  - id: section
+    title: "Binäre Mathematik"
+    description:
+    lectures:
+      - id: "E_UPLOUDeIE"
+        title: "Rechnen mit Binärzahlen #1 - Binär in Dezimal umrechnen und umgekehrt - Theoretische Informatik"
+        description:
+        type: youtube
+        video_id: "E_UPLOUDeIE"
+        duration: 568
+      - id: "_lnX0kvaIjo"
+        title: "Rechnen mit Binärzahlen #2 - Binär addieren und subtrahieren - Theoretische Informatik"
+        description:
+        type: youtube
+        video_id: "_lnX0kvaIjo"
+        duration: 452
+      - id: "HMl9rzFF6nI"
+        title: "Rechnen mit Binärzahlen #3 - Binär multiplizieren - Theoretische Informatik"
+        description:
+        type: youtube
+        video_id: "HMl9rzFF6nI"
+        duration: 281
+      - id: "FrSw77DC7pI"
+        title: "Rechnen mit Binärzahlen #4 - Hornerschema - Theoretische Informatik"
+        description:
+        type: youtube
+        video_id: "FrSw77DC7pI"
+        duration: 809
+      - id: "-2yUppq5iJg"
+        title: "Rechnen mit Binärzahlen #5 -  Trick zum Zahlensysteme umwandeln - Theoretische Informatik"
+        description:
+        type: youtube
+        video_id: "-2yUppq5iJg"
+        duration: 446
+      - id: "u3G9uVy9Wz4"
+        title: "Rechnen mit Binärzahlen - Negative Zahlen - Theoretische Informatik"
+        description:
+        type: youtube
+        video_id: "u3G9uVy9Wz4"
+        duration: 563
+      - id: "-B9RtV0Ps8k"
+        title: "Rechnen mit Binärzahlen #6 - IEEE-754 - Floating Point - Theoretische Informatik"
+        description:
+        type: youtube
+        video_id: "-B9RtV0Ps8k"
+        duration: 723

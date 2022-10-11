@@ -1,0 +1,286 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7oaopPUB0SEmzZLf3aE5msy
+title: "Linux Tutorial"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665507322
+sections:
+  - id: section
+    title: "Linux Tutorial"
+    description:
+    lectures:
+      - id: "bjkyaeseb7g"
+        title: "Kali Linux Installation als virtuelle Maschine 2019 - die einfache Variante"
+        description:
+        type: youtube
+        video_id: "bjkyaeseb7g"
+        duration: 818
+      - id: "9lmGxgq7O1Q"
+        title: "Kali Linux in Virtualbox installieren 2020 - als virtuelle Maschine: die einfache Variante"
+        description:
+        type: youtube
+        video_id: "9lmGxgq7O1Q"
+        duration: 833
+      - id: "Jf7g0xh8HVU"
+        title: "Kali Linux Tutorial #0 - Installation mit Virtual Box"
+        description:
+        type: youtube
+        video_id: "Jf7g0xh8HVU"
+        duration: 902
+      - id: "Gg0suugWa4E"
+        title: "Linux Tutorial #0.1 - Linux auf USB installieren, VirtualBox von USB starten"
+        description:
+        type: youtube
+        video_id: "Gg0suugWa4E"
+        duration: 427
+      - id: "ycnC1j9usTM"
+        title: "[2021] KALI PERSISTENT auf USB installieren"
+        description:
+        type: youtube
+        video_id: "ycnC1j9usTM"
+        duration: 749
+      - id: "QMDS4qCZij0"
+        title: "Linux Tutorial #0.2 - Linux persistent auf USB installieren"
+        description:
+        type: youtube
+        video_id: "QMDS4qCZij0"
+        duration: 482
+      - id: "J0LjWe36fyU"
+        title: "Linux Tutorial #1 - Installieren von Linux"
+        description:
+        type: youtube
+        video_id: "J0LjWe36fyU"
+        duration: 722
+      - id: "aZJlQpiTVkw"
+        title: "Linux Tutorial #2 - Dateien und Grundbefehle"
+        description:
+        type: youtube
+        video_id: "aZJlQpiTVkw"
+        duration: 661
+      - id: "2RgpNc7AEQU"
+        title: "Linux Tutorial #3 - Rechte und Rechteverwaltung"
+        description:
+        type: youtube
+        video_id: "2RgpNc7AEQU"
+        duration: 393
+      - id: "EaUt-BC94dY"
+        title: "Linux Tutorial #4 - Verzeichnisse"
+        description:
+        type: youtube
+        video_id: "EaUt-BC94dY"
+        duration: 423
+      - id: "NkVqUj9GfUg"
+        title: "Linux Tutorial #5 - Prozessverwaltung"
+        description:
+        type: youtube
+        video_id: "NkVqUj9GfUg"
+        duration: 364
+      - id: "reHytpY3suc"
+        title: "Linux Tutorial #6 - Filtern"
+        description:
+        type: youtube
+        video_id: "reHytpY3suc"
+        duration: 580
+      - id: "mFOEdorIgQY"
+        title: "Linux Tutorial #7 - Pipes"
+        description:
+        type: youtube
+        video_id: "mFOEdorIgQY"
+        duration: 313
+      - id: "m5YvHeW3hGg"
+        title: "Linux Tutorial #8 - Installieren und Archive"
+        description:
+        type: youtube
+        video_id: "m5YvHeW3hGg"
+        duration: 502
+      - id: "MtpOZG_zlgk"
+        title: "Linux Tutorial #9 - Finden von Dateien"
+        description:
+        type: youtube
+        video_id: "MtpOZG_zlgk"
+        duration: 330
+      - id: "bIkXMVu2fvM"
+        title: "Linux Tutorial #10 - Links"
+        description:
+        type: youtube
+        video_id: "bIkXMVu2fvM"
+        duration: 390
+      - id: "EpbViz5QPjE"
+        title: "Linux Tutorial - Wetter anzeigen im Terminal mit einer Zeile"
+        description:
+        type: youtube
+        video_id: "EpbViz5QPjE"
+        duration: 58
+      - id: "-aQFREGMXnE"
+        title: "Linux Tutorial - Dem Terminal Charakter verpassen"
+        description:
+        type: youtube
+        video_id: "-aQFREGMXnE"
+        duration: 62
+      - id: "hSbtq_T_PqU"
+        title: "Linux Tutorial - Star Wars Episode 4 als ASCII Art"
+        description:
+        type: youtube
+        video_id: "hSbtq_T_PqU"
+        duration: 132
+      - id: "a3yclTCHB8U"
+        title: "Linux Tutorial - rlwrap"
+        description:
+        type: youtube
+        video_id: "a3yclTCHB8U"
+        duration: 107
+      - id: "3ImniGhMZHI"
+        title: "Linux Tutorial - Ein einzeiliger Speedtest im Terminal"
+        description:
+        type: youtube
+        video_id: "3ImniGhMZHI"
+        duration: 84
+      - id: "gYcoQaq-iRQ"
+        title: "Linux Tutorial - Videos konvertieren, schneiden und mehr mit ffmpeg"
+        description:
+        type: youtube
+        video_id: "gYcoQaq-iRQ"
+        duration: 691
+      - id: "lzalyyHuepQ"
+        title: "Linux Tutorial - Passwort mit Sternchen sichtbar machen"
+        description:
+        type: youtube
+        video_id: "lzalyyHuepQ"
+        duration: 82
+      - id: "HSdPqoFOlAI"
+        title: "Linux Tutorial - automatisches Herunterfahren"
+        description:
+        type: youtube
+        video_id: "HSdPqoFOlAI"
+        duration: 164
+      - id: "-5HF6eNOUnk"
+        title: "Linux Tutorial - Autostart"
+        description:
+        type: youtube
+        video_id: "-5HF6eNOUnk"
+        duration: 182
+      - id: "I2-9egjFYJw"
+        title: "Linux Tutorial - Grub Bootloader anpassen"
+        description:
+        type: youtube
+        video_id: "I2-9egjFYJw"
+        duration: 219
+      - id: "tL1PSKIjPcQ"
+        title: "Linux Tutorial - Ubuntu im Browser testen"
+        description:
+        type: youtube
+        video_id: "tL1PSKIjPcQ"
+        duration: 103
+      - id: "yyybv6H03YU"
+        title: "Linux Tutorial - PDF Dateien vereinigen"
+        description:
+        type: youtube
+        video_id: "yyybv6H03YU"
+        duration: 76
+      - id: "R6tpJojTedA"
+        title: "Linux Tutorial - Bild in Ascii Art konvertieren"
+        description:
+        type: youtube
+        video_id: "R6tpJojTedA"
+        duration: 107
+      - id: "S7SAsLh60dE"
+        title: "Bash Tutorial #1 - Scripten für das Linux-Terminal"
+        description:
+        type: youtube
+        video_id: "S7SAsLh60dE"
+        duration: 328
+      - id: "BiDXO0Cb2-k"
+        title: "Bash Tutorial #2 - Variablen"
+        description:
+        type: youtube
+        video_id: "BiDXO0Cb2-k"
+        duration: 438
+      - id: "3gyZvA3FxiE"
+        title: "Bash Tutorial #3 - if-Bedingungen"
+        description:
+        type: youtube
+        video_id: "3gyZvA3FxiE"
+        duration: 346
+      - id: "8PWnT7r-pIs"
+        title: "Bash Tutorial #4 - User Inputs"
+        description:
+        type: youtube
+        video_id: "8PWnT7r-pIs"
+        duration: 508
+      - id: "N7G-px1dBWs"
+        title: "Bash Tutorial #5 - Schleifen"
+        description:
+        type: youtube
+        video_id: "N7G-px1dBWs"
+        duration: 565
+      - id: "edzdqM2Wrug"
+        title: "Bash Tutorial #6 - Funktionen"
+        description:
+        type: youtube
+        video_id: "edzdqM2Wrug"
+        duration: 327
+      - id: "9RbU-h0NH0A"
+        title: "Git Tutorial #1 - Lokale Repositories"
+        description:
+        type: youtube
+        video_id: "9RbU-h0NH0A"
+        duration: 523
+      - id: "Oc3jnCqnLjo"
+        title: "Git Tutorial #2 - Remote Repositories mit Beispiel Github"
+        description:
+        type: youtube
+        video_id: "Oc3jnCqnLjo"
+        duration: 346
+      - id: "ZVoSBA03Tdc"
+        title: "Git Tutorial #3 - Branches, Merges etc"
+        description:
+        type: youtube
+        video_id: "ZVoSBA03Tdc"
+        duration: 607
+      - id: "YPQh1Z5zlqw"
+        title: "Linux Tutorial - PGP Verschlüsselung mit GnuPG #1 - Schlüssel generieren"
+        description:
+        type: youtube
+        video_id: "YPQh1Z5zlqw"
+        duration: 416
+      - id: "hVjcKBUAvxk"
+        title: "Linux Tutorial - PGP Verschlüsselung mit GnuPG #2 - Schlüssel austauschen"
+        description:
+        type: youtube
+        video_id: "hVjcKBUAvxk"
+        duration: 384
+      - id: "oitvqDTWQBs"
+        title: "Linux Tutorial - PGP Verschlüsselung mit GnuPG #3 - Verschlüsseln und Signieren"
+        description:
+        type: youtube
+        video_id: "oitvqDTWQBs"
+        duration: 673
+      - id: "84ItGdw3Kvk"
+        title: "Linux Tutorial - DNS Server ändern"
+        description:
+        type: youtube
+        video_id: "84ItGdw3Kvk"
+        duration: 254
+      - id: "vTZen7efha8"
+        title: "Linux Tutorial - top zur Überwachung der Auslastung"
+        description:
+        type: youtube
+        video_id: "vTZen7efha8"
+        duration: 594
+      - id: "Ur9bf-RMMLA"
+        title: "Linux Tutorial - Cpulimit"
+        description:
+        type: youtube
+        video_id: "Ur9bf-RMMLA"
+        duration: 181
+      - id: "xzU4I5UO1Qg"
+        title: "Der Shell-Vergleich: Bash vs ZSH | ZSH und Oh-My-ZSH installieren"
+        description:
+        type: youtube
+        video_id: "xzU4I5UO1Qg"
+        duration: 1451

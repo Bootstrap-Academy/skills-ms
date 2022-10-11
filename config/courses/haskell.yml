@@ -1,0 +1,76 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7pFIXDN1NLw6jMExuK-wN8I
+title: "Haskell Tutorials Deutsch"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665506672
+sections:
+  - id: section
+    title: "Haskell Tutorials Deutsch"
+    description:
+    lectures:
+      - id: "-KIXPpdnAZs"
+        title: "Haskell Tutorial 1 - Einleitung"
+        description:
+        type: youtube
+        video_id: "-KIXPpdnAZs"
+        duration: 827
+      - id: "Q5baqnT6jLw"
+        title: "Haskell Tutorial 2 - Rekursionen und Akkumulator"
+        description:
+        type: youtube
+        video_id: "Q5baqnT6jLw"
+        duration: 492
+      - id: "JxygG74puB0"
+        title: "Haskell Tutorial 3 - Listen und Pattern Matching"
+        description:
+        type: youtube
+        video_id: "JxygG74puB0"
+        duration: 805
+      - id: "3vVWHpMHVaY"
+        title: "Haskell Tutorial 4 - Mehr zu Listen"
+        description:
+        type: youtube
+        video_id: "3vVWHpMHVaY"
+        duration: 444
+      - id: "LUQhVtRucys"
+        title: "Haskell Tutorial 5 - Lambda-Funktionen und Map"
+        description:
+        type: youtube
+        video_id: "LUQhVtRucys"
+        duration: 620
+      - id: "-lYXNObDzdk"
+        title: "Haskell Tutorial 6 - Filter und Unterversorgen von Funktionen"
+        description:
+        type: youtube
+        video_id: "-lYXNObDzdk"
+        duration: 623
+      - id: "TL5DpNxiTnc"
+        title: "Haskell Tutorial 7 - Variablen dank Let und Where"
+        description:
+        type: youtube
+        video_id: "TL5DpNxiTnc"
+        duration: 378
+      - id: "rxA2DoQ6eso"
+        title: "Haskell Tutorial 8 - Listenkombinatoren"
+        description:
+        type: youtube
+        video_id: "rxA2DoQ6eso"
+        duration: 752
+      - id: "jt3Msx5wwLY"
+        title: "Haskell Tutorial 9 - Unendliche Listen und Lazy Evaluation"
+        description:
+        type: youtube
+        video_id: "jt3Msx5wwLY"
+        duration: 601
+      - id: "R3XEHaw4o44"
+        title: "Haskell Tutorial 10 - Datentypen"
+        description:
+        type: youtube
+        video_id: "R3XEHaw4o44"
+        duration: 702

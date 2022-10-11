@@ -1,0 +1,76 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7rbmmqb1Lt_RGU4DEhelTrR
+title: "Git und Github Tutorials Deutsch"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665507293
+sections:
+  - id: section
+    title: "Git und Github Tutorials Deutsch"
+    description:
+    lectures:
+      - id: "9RbU-h0NH0A"
+        title: "Git Tutorial #1 - Lokale Repositories"
+        description:
+        type: youtube
+        video_id: "9RbU-h0NH0A"
+        duration: 523
+      - id: "Oc3jnCqnLjo"
+        title: "Git Tutorial #2 - Remote Repositories mit Beispiel Github"
+        description:
+        type: youtube
+        video_id: "Oc3jnCqnLjo"
+        duration: 346
+      - id: "ZVoSBA03Tdc"
+        title: "Git Tutorial #3 - Branches, Merges etc"
+        description:
+        type: youtube
+        video_id: "ZVoSBA03Tdc"
+        duration: 607
+      - id: "mBfbktYFftQ"
+        title: "Github Tutorial - In eine Jetbrains IDE einbinden"
+        description:
+        type: youtube
+        video_id: "mBfbktYFftQ"
+        duration: 661
+      - id: "xi4q3dTVSgI"
+        title: "Github Tutorial - In der IDE mit Branches arbeiten"
+        description:
+        type: youtube
+        video_id: "xi4q3dTVSgI"
+        duration: 774
+      - id: "l8MZCnrSeQQ"
+        title: "Github Tutorial - Pull-Requests [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "l8MZCnrSeQQ"
+        duration: 616
+      - id: "jRX87fDJDaI"
+        title: "Github Tutorial - Ein paar Worte zu Lizenzen"
+        description:
+        type: youtube
+        video_id: "jRX87fDJDaI"
+        duration: 776
+      - id: "wSHNvdRjB9Q"
+        title: "Github Tutorial - Issues [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "wSHNvdRjB9Q"
+        duration: 408
+      - id: "YbuJv8XPVV8"
+        title: "Github Tutorial - Templates, Code of Conduct und Beschreibungen"
+        description:
+        type: youtube
+        video_id: "YbuJv8XPVV8"
+        duration: 531
+      - id: "CLz4sedgK-4"
+        title: "Github Tutorial - Github Dev: VS Code im Browser direkt nutzen"
+        description:
+        type: youtube
+        video_id: "CLz4sedgK-4"
+        duration: 260

@@ -1,0 +1,160 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7o4qcD8tepVY5k7YiHYfMu5
+title: "Java Tutorial - Algorithmen"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665506355
+sections:
+  - id: section
+    title: "Java Tutorial - Algorithmen"
+    description:
+    lectures:
+      - id: "1WGUjrGzZ2g"
+        title: "Java für Fortgeschrittene - Automaten"
+        description:
+        type: youtube
+        video_id: "1WGUjrGzZ2g"
+        duration: 996
+      - id: "MsFhP3sO8go"
+        title: "Java für Fortgeschrittene - Fifos und Stacks"
+        description:
+        type: youtube
+        video_id: "MsFhP3sO8go"
+        duration: 691
+      - id: "MuaikGaCHzQ"
+        title: "Let's Code - Webcrawler für Youtube - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "MuaikGaCHzQ"
+        duration: 1194
+      - id: "VcW-MlwJTR8"
+        title: "Java für Fortgeschrittene - Kodierung und Kompression"
+        description:
+        type: youtube
+        video_id: "VcW-MlwJTR8"
+        duration: 1561
+      - id: "TsjqDYjBl5w"
+        title: "Let's Code - K-Nearest-Neighbours aka kNN diesmal in HD - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "TsjqDYjBl5w"
+        duration: 1332
+      - id: "BOlpNPCE7Y4"
+        title: "Let's Code - Neuronale Netze - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "BOlpNPCE7Y4"
+        duration: 816
+      - id: "vzFcMR68DlA"
+        title: "Let's Code - Training eines Neurons aka Perzeptrons - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "vzFcMR68DlA"
+        duration: 716
+      - id: "KVVqdijV_7k"
+        title: "Let's Code - Sampling - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "KVVqdijV_7k"
+        duration: 742
+      - id: "A-ykNJ5Ysts"
+        title: "Let's Code - Quantisierung - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "A-ykNJ5Ysts"
+        duration: 1119
+      - id: "1ncy3GkY0ZI"
+        title: "Let's Code - Parzen-Windows - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "1ncy3GkY0ZI"
+        duration: 657
+      - id: "HHbEeDXcsgc"
+        title: "Let's Code - Markov Modell - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "HHbEeDXcsgc"
+        duration: 1159
+      - id: "gq9LqlaeZXs"
+        title: "Java für Fortgeschrittene - Bäume: Einleitung"
+        description:
+        type: youtube
+        video_id: "gq9LqlaeZXs"
+        duration: 595
+      - id: "-bdEjEs0d_k"
+        title: "Java für Fortgeschrittene - Mehr zu Bäumen"
+        description:
+        type: youtube
+        video_id: "-bdEjEs0d_k"
+        duration: 555
+      - id: "XOg1jmEIDw4"
+        title: "Java für Fortgeschrittene - balancierte Bäume"
+        description:
+        type: youtube
+        video_id: "XOg1jmEIDw4"
+        duration: 1417
+      - id: "ti26qtqpRdU"
+        title: "Java für Fortgeschrittene - Bubble Sort"
+        description:
+        type: youtube
+        video_id: "ti26qtqpRdU"
+        duration: 688
+      - id: "LcbIisbf5bM"
+        title: "Java für Fortgeschrittene - Insertion Sort"
+        description:
+        type: youtube
+        video_id: "LcbIisbf5bM"
+        duration: 462
+      - id: "2XcfA6WKLPw"
+        title: "Java für Fortgeschrittene - Merge Sort"
+        description:
+        type: youtube
+        video_id: "2XcfA6WKLPw"
+        duration: 594
+      - id: "VhwTKvuQ_Oc"
+        title: "Let's Code - Invertieren von Bildern - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "VhwTKvuQ_Oc"
+        duration: 781
+      - id: "RU0y57aK_ng"
+        title: "Let's Code - Bild in Graustufen konvertieren und Kontrast verbessern - Java für Fortgeschrittene"
+        description:
+        type: youtube
+        video_id: "RU0y57aK_ng"
+        duration: 714
+      - id: "ls3zZpfjn_M"
+        title: "Let's Code - Gaussian Blur in Java [Deutsch/German]"
+        description:
+        type: youtube
+        video_id: "ls3zZpfjn_M"
+        duration: 1801
+      - id: "QL1gNhcBhKk"
+        title: "Let's Code - Caesar Cipher aka Cäsar Verschlüsselung in Java"
+        description:
+        type: youtube
+        video_id: "QL1gNhcBhKk"
+        duration: 977
+      - id: "ave1We1FQoo"
+        title: "Java Tutorial - Das Damen-Problem"
+        description:
+        type: youtube
+        video_id: "ave1We1FQoo"
+        duration: 1270
+      - id: "tevFX3e0Tj8"
+        title: "Java feat Logik Tutorial - Sudokusolver mit Sat4J"
+        description:
+        type: youtube
+        video_id: "tevFX3e0Tj8"
+        duration: 2879
+      - id: "fu42rU7a-fE"
+        title: "Let's Code - Java Tutorial - Kantenerkennung"
+        description:
+        type: youtube
+        video_id: "fu42rU7a-fE"
+        duration: 974

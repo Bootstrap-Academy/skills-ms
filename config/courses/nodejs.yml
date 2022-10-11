@@ -1,0 +1,130 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7o-5JThNbEVW6CGAhWJwnkA
+title: "Node.js Tutorial - Serverseitiges JavaScript [SUPPORTER]"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665507460
+sections:
+  - id: section
+    title: "Node.js Tutorial - Serverseitiges JavaScript [SUPPORTER]"
+    description:
+    lectures:
+      - id: "IyNpu4t30e8"
+        title: "NodeJS: JavaScript sinnvoll erweitern"
+        description:
+        type: youtube
+        video_id: "IyNpu4t30e8"
+        duration: 431
+      - id: "f15kMS0z5iU"
+        title: "NPM - Paketmanager für Javascript"
+        description:
+        type: youtube
+        video_id: "f15kMS0z5iU"
+        duration: 411
+      - id: "pRZ5qdJxxgE"
+        title: "JavaScript - NPM: Abhängigkeiten definieren und Projekte weitergeben mit der Package.json"
+        description:
+        type: youtube
+        video_id: "pRZ5qdJxxgE"
+        duration: 355
+      - id: "Ei7-YOR8oRU"
+        title: "NPM - Automatisierte Builds und Browserify"
+        description:
+        type: youtube
+        video_id: "Ei7-YOR8oRU"
+        duration: 1002
+      - id: "9mTQPlhNvb8"
+        title: "NodeJS Tutorial - Mit nodemon unkompliziert schnelleres serverseitiges Arbeiten ermöglichen"
+        description:
+        type: youtube
+        video_id: "9mTQPlhNvb8"
+        duration: 257
+      - id: "NQEPx_m8T_c"
+        title: "Node Tutorial #01 - Ein Node Server mit JavaScript"
+        description:
+        type: youtube
+        video_id: "NQEPx_m8T_c"
+        duration: 514
+      - id: "3yamCfm0DSU"
+        title: "Node Tutorial #02 - Die Event Loop"
+        description:
+        type: youtube
+        video_id: "3yamCfm0DSU"
+        duration: 545
+      - id: "IWtwvRiVryA"
+        title: "Node Tutorial #03 - Das Request Object"
+        description:
+        type: youtube
+        video_id: "IWtwvRiVryA"
+        duration: 484
+      - id: "fSYdusZmdEw"
+        title: "Node Tutorial #04 - Das Response Object"
+        description:
+        type: youtube
+        video_id: "fSYdusZmdEw"
+        duration: 441
+      - id: "J1i19TAIffw"
+        title: "Node Tutorial #05 - POST Requests verarbeiten"
+        description:
+        type: youtube
+        video_id: "J1i19TAIffw"
+        duration: 1103
+      - id: "GGp7doY0OpQ"
+        title: "Node Tutorial #06 - Dateien schreiben"
+        description:
+        type: youtube
+        video_id: "GGp7doY0OpQ"
+        duration: 597
+      - id: "U_hIbwbiyw4"
+        title: "Node Tutorial #07 - Mit MySQL verbinden"
+        description:
+        type: youtube
+        video_id: "U_hIbwbiyw4"
+        duration: 696
+      - id: "w-_81TcrgyA"
+        title: "Node Tutorial #08 - Mit SQL arbeiten"
+        description:
+        type: youtube
+        video_id: "w-_81TcrgyA"
+        duration: 438
+      - id: "yGqllZCqDP8"
+        title: "Node Tutorial #09 - Einfache und effektive Datenbank Integration mit Sequelize"
+        description:
+        type: youtube
+        video_id: "yGqllZCqDP8"
+        duration: 524
+      - id: "UJIwEkAPIP4"
+        title: "Node Tutorial #10 - Das User Model und einfügen von neuen Usern"
+        description:
+        type: youtube
+        video_id: "UJIwEkAPIP4"
+        duration: 750
+      - id: "9b-pJKbBcxI"
+        title: "Node Tutorial #11 - Einträge mit Sequelize holen"
+        description:
+        type: youtube
+        video_id: "9b-pJKbBcxI"
+        duration: 708
+      - id: "mQfhgSMhK0k"
+        title: "Node Tutorial #12 - Operatoren in Sequelize"
+        description:
+        type: youtube
+        video_id: "mQfhgSMhK0k"
+        duration: 542
+      - id: "K4JKnVHcJOc"
+        title: "Node Tutorial #13 - Assoziationen"
+        description:
+        type: youtube
+        video_id: "K4JKnVHcJOc"
+        duration: 786
+      - id: "a4CHruqUzEo"
+        title: "Node Tutorial #14 - Assoziationen schreiben und holen"
+        description:
+        type: youtube
+        video_id: "a4CHruqUzEo"
+        duration: 574

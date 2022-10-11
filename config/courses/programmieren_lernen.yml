@@ -1,0 +1,232 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7onyAB57T0xqV2ZVSZOo79a
+title: "Programmieren Lernen - Lerne alle Sprachen in einer Serie"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665506634
+sections:
+  - id: section
+    title: "Programmieren Lernen - Lerne alle Sprachen in einer Serie"
+    description:
+    lectures:
+      - id: "nVMlDghNcHg"
+        title: "Programmieren Lernen - Lerne alle Sprachen in einer Serie #1 - Einleitung"
+        description:
+        type: youtube
+        video_id: "nVMlDghNcHg"
+        duration: 384
+      - id: "l7M7jG-d7c4"
+        title: "Programmieren Lernen #2 - Variablen und der Codefluss"
+        description:
+        type: youtube
+        video_id: "l7M7jG-d7c4"
+        duration: 602
+      - id: "-UA65GBxEtI"
+        title: "Programmieren Lernen #3 - Integer - Ganzzahlen"
+        description:
+        type: youtube
+        video_id: "-UA65GBxEtI"
+        duration: 669
+      - id: "j2YhHdfgmko"
+        title: "Programmieren Lernen #4 - Fließkommazahlen"
+        description:
+        type: youtube
+        video_id: "j2YhHdfgmko"
+        duration: 562
+      - id: "oNpV4luYx2I"
+        title: "Programmieren Lernen #5 - Buchstaben - Character"
+        description:
+        type: youtube
+        video_id: "oNpV4luYx2I"
+        duration: 274
+      - id: "Z3IRchso41A"
+        title: "Programmieren Lernen #6 - Kommentare"
+        description:
+        type: youtube
+        video_id: "Z3IRchso41A"
+        duration: 227
+      - id: "yiXbAG2vrlg"
+        title: "Programmieren Lernen #7 - Arrays"
+        description:
+        type: youtube
+        video_id: "yiXbAG2vrlg"
+        duration: 490
+      - id: "vtyBWsyRU-o"
+        title: "Programmieren Lernen #8 - Mehrdimensionale Arrays"
+        description:
+        type: youtube
+        video_id: "vtyBWsyRU-o"
+        duration: 528
+      - id: "EgleYPhgUU4"
+        title: "Programmieren Lernen #9 - Listen"
+        description:
+        type: youtube
+        video_id: "EgleYPhgUU4"
+        duration: 585
+      - id: "Am0YUgyOybM"
+        title: "Programmieren Lernen #10 - Strings"
+        description:
+        type: youtube
+        video_id: "Am0YUgyOybM"
+        duration: 568
+      - id: "GEjfGiVCvfs"
+        title: "Programmieren Lernen #11 - arithmetische Operatoren"
+        description:
+        type: youtube
+        video_id: "GEjfGiVCvfs"
+        duration: 647
+      - id: "8EdMk4VKXdA"
+        title: "Programmieren Lernen #12 - if - Verzweigungen"
+        description:
+        type: youtube
+        video_id: "8EdMk4VKXdA"
+        duration: 572
+      - id: "vGS1u9Ioy-g"
+        title: "Programmieren Lernen #13 - Booleans und Vergleichsoperatoren"
+        description:
+        type: youtube
+        video_id: "vGS1u9Ioy-g"
+        duration: 399
+      - id: "UehOgM4D914"
+        title: "Programmieren Lernen #14 - logische Operatoren"
+        description:
+        type: youtube
+        video_id: "UehOgM4D914"
+        duration: 540
+      - id: "K0kgwBMGSjg"
+        title: "Programmieren Lernen #15 - bitweise Operatoren"
+        description:
+        type: youtube
+        video_id: "K0kgwBMGSjg"
+        duration: 832
+      - id: "PKHf-KQLp2s"
+        title: "Programmieren Lernen #16 - while Schleifen"
+        description:
+        type: youtube
+        video_id: "PKHf-KQLp2s"
+        duration: 455
+      - id: "BFuzKat5gL0"
+        title: "Programmieren Lernen #17 - Die for-Schleife"
+        description:
+        type: youtube
+        video_id: "BFuzKat5gL0"
+        duration: 482
+      - id: "JqKw80YDuVI"
+        title: "Programmieren Lernen #18 - foreach Schleifen"
+        description:
+        type: youtube
+        video_id: "JqKw80YDuVI"
+        duration: 278
+      - id: "DSO4ITu9nYI"
+        title: "Programmieren Lernen #19 - break und continue"
+        description:
+        type: youtube
+        video_id: "DSO4ITu9nYI"
+        duration: 431
+      - id: "F1AGkBrQnXU"
+        title: "Programmieren Lernen #20 - Funktionen"
+        description:
+        type: youtube
+        video_id: "F1AGkBrQnXU"
+        duration: 501
+      - id: "KlSubMpETSg"
+        title: "Programmieren Lernen #21 - Rückgabewerte"
+        description:
+        type: youtube
+        video_id: "KlSubMpETSg"
+        duration: 562
+      - id: "M_s3j6oYMfc"
+        title: "Programmieren Lernen #22 - Parameter"
+        description:
+        type: youtube
+        video_id: "M_s3j6oYMfc"
+        duration: 425
+      - id: "4dut6s0E1vs"
+        title: "Programmieren Lernen #23 - Rekursion"
+        description:
+        type: youtube
+        video_id: "4dut6s0E1vs"
+        duration: 589
+      - id: "jL-2n9wkMfs"
+        title: "Programmieren Lernen #24 - Default Argumente"
+        description:
+        type: youtube
+        video_id: "jL-2n9wkMfs"
+        duration: 249
+      - id: "-_oHc7YtF54"
+        title: "Programmieren Lernen #25 - Call-by-Value vs Call-by-Reference"
+        description:
+        type: youtube
+        video_id: "-_oHc7YtF54"
+        duration: 703
+      - id: "XaFU2JHcWM4"
+        title: "Programmieren Lernen #26 - Lazy Evaluation"
+        description:
+        type: youtube
+        video_id: "XaFU2JHcWM4"
+        duration: 398
+      - id: "KcIlkkOcGwQ"
+        title: "Programmieren Lernen #27 - Funktionen sind auch nur Variablen - Function Pointer"
+        description:
+        type: youtube
+        video_id: "KcIlkkOcGwQ"
+        duration: 365
+      - id: "MZKVP6wNYuA"
+        title: "Programmieren Lernen #28 - Lambda Funktionen"
+        description:
+        type: youtube
+        video_id: "MZKVP6wNYuA"
+        duration: 292
+      - id: "jlvKo3eFKD4"
+        title: "Programmieren Lernen #29 - Inline Funktionen"
+        description:
+        type: youtube
+        video_id: "jlvKo3eFKD4"
+        duration: 799
+      - id: "dDKmkOjcaZE"
+        title: "Programmieren Lernen #30 - Code lesen - wie wird's gemacht"
+        description:
+        type: youtube
+        video_id: "dDKmkOjcaZE"
+        duration: 1078
+      - id: "MIKUT5mvtcE"
+        title: "Programmieren Lernen #31 - Klassen"
+        description:
+        type: youtube
+        video_id: "MIKUT5mvtcE"
+        duration: 610
+      - id: "2oIXNBn-1ik"
+        title: "Programmieren Lernen #32 - Methoden"
+        description:
+        type: youtube
+        video_id: "2oIXNBn-1ik"
+        duration: 411
+      - id: "sZoyPJK6cB0"
+        title: "Programmieren Lernen #33 - Konstruktoren"
+        description:
+        type: youtube
+        video_id: "sZoyPJK6cB0"
+        duration: 499
+      - id: "mmLpVW5uToI"
+        title: "Programmieren Lernen #34 - Zugriffsmodifikatoren"
+        description:
+        type: youtube
+        video_id: "mmLpVW5uToI"
+        duration: 605
+      - id: "aO4leORLrek"
+        title: "Programmieren Lernen #35 - Static - Klassenvariablen"
+        description:
+        type: youtube
+        video_id: "aO4leORLrek"
+        duration: 415
+      - id: "gt3FV9YhTts"
+        title: "Programmieren Lernen #36 - Vererbung"
+        description:
+        type: youtube
+        video_id: "gt3FV9YhTts"
+        duration: 494

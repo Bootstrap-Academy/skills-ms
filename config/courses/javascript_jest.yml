@@ -1,0 +1,58 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7qgQ2jnCFTo_knQTbpU5W4X
+title: "Jest - JavaScript Testing"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665508127
+sections:
+  - id: section
+    title: "Jest - JavaScript Testing"
+    description:
+    lectures:
+      - id: "Z_OOxP4g25U"
+        title: "Jest #1 - Der erste JavaScript Test"
+        description:
+        type: youtube
+        video_id: "Z_OOxP4g25U"
+        duration: 978
+      - id: "DhlAbTVVV8Y"
+        title: "Jest #2 - Test-Überdeckung Coverage berechnen und Grenzwerte festlegen"
+        description:
+        type: youtube
+        video_id: "DhlAbTVVV8Y"
+        duration: 616
+      - id: "9U4cKUThYIs"
+        title: "Jest #3 - Die Matcher vorgestellt"
+        description:
+        type: youtube
+        video_id: "9U4cKUThYIs"
+        duration: 964
+      - id: "ay9_AwpyoZg"
+        title: "Jest #4 - Asynchrone Funktionen testen"
+        description:
+        type: youtube
+        video_id: "ay9_AwpyoZg"
+        duration: 755
+      - id: "M_y0ENvKlPY"
+        title: "Jest #5 - Setup und Teardown"
+        description:
+        type: youtube
+        video_id: "M_y0ENvKlPY"
+        duration: 538
+      - id: "N90-ii0VSkk"
+        title: "Jest #6 - Mocking"
+        description:
+        type: youtube
+        video_id: "N90-ii0VSkk"
+        duration: 635
+      - id: "JhlLKlHXrWA"
+        title: "Jest #7 - Mocking von Modulen"
+        description:
+        type: youtube
+        video_id: "JhlLKlHXrWA"
+        duration: 524

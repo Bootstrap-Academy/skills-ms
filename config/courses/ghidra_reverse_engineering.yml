@@ -1,0 +1,106 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7oQc3MxjWB-rYHHo9vX905a
+title: "Reverse Engineering mit Ghidra Tutorial Deutsch"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665507867
+sections:
+  - id: section
+    title: "Reverse Engineering mit Ghidra Tutorial Deutsch"
+    description:
+    lectures:
+      - id: "gdpHhWiiayM"
+        title: "Reverse Engineering mit Ghidra Tutorial #1 - Ghidra vs. Ida Pro"
+        description:
+        type: youtube
+        video_id: "gdpHhWiiayM"
+        duration: 693
+      - id: "KwVAdKZieag"
+        title: "Reverse Engineering mit Ghidra Tutorial #2 - Eine einfache Aufgabe"
+        description:
+        type: youtube
+        video_id: "KwVAdKZieag"
+        duration: 892
+      - id: "rnR3T4CWu6s"
+        title: "Reverse Engineering mit Ghidra Tutorial #3 - Windows .exe-Dateien, Strings finden, Ordnung"
+        description:
+        type: youtube
+        video_id: "rnR3T4CWu6s"
+        duration: 532
+      - id: "I50Qp47G78g"
+        title: "Reverse Engineering mit Ghidra Tutorial #4 - Vorgehen bei Algorithmen"
+        description:
+        type: youtube
+        video_id: "I50Qp47G78g"
+        duration: 851
+      - id: "UW9RrMJaKN0"
+        title: "Reverse Engineering mit Ghidra Tutorial #5 - Klassen"
+        description:
+        type: youtube
+        video_id: "UW9RrMJaKN0"
+        duration: 702
+      - id: "-OwWG8B2prA"
+        title: "Wir reversen WannaCry #1 - Strings [Ghidra Tutorial #6]"
+        description:
+        type: youtube
+        video_id: "-OwWG8B2prA"
+        duration: 659
+      - id: "B0v3Nnmsjq4"
+        title: "Wir reversen WannaCry #2 - WinMain [Ghidra Tutorial #7]"
+        description:
+        type: youtube
+        video_id: "B0v3Nnmsjq4"
+        duration: 655
+      - id: "aHSVBnhU0Es"
+        title: "Wir reversen WannaCry #3 - die ersten Funktionen [Ghidra Tutorial #8]"
+        description:
+        type: youtube
+        video_id: "aHSVBnhU0Es"
+        duration: 794
+      - id: "kZYHkv5NCjI"
+        title: "Wir reversen WannaCry #4 - Ressourcen Extrahieren [Ghidra Tutorial #9]"
+        description:
+        type: youtube
+        video_id: "kZYHkv5NCjI"
+        duration: 806
+      - id: "Ti1PM7VpJo8"
+        title: "Wir reversen WannaCry #5 - Weiter im Code [Ghidra Tutorial #10]"
+        description:
+        type: youtube
+        video_id: "Ti1PM7VpJo8"
+        duration: 853
+      - id: "kJbz1lm-DIk"
+        title: "Wir reversen WannaCry #6 - NAME [Ghidra Tutorial #11]"
+        description:
+        type: youtube
+        video_id: "kJbz1lm-DIk"
+        duration: 693
+      - id: "XHeRQuTd1pM"
+        title: "Wir reversen WannaCry #7 - Krypto [Ghidra Tutorial #12]"
+        description:
+        type: youtube
+        video_id: "XHeRQuTd1pM"
+        duration: 961
+      - id: "j_0bNIZLl8w"
+        title: "Wir reversen WannaCry #8 - NAME [Ghidra Tutorial #13]"
+        description:
+        type: youtube
+        video_id: "j_0bNIZLl8w"
+        duration: 811
+      - id: "TMNjeGKunRY"
+        title: "Wir reversen WannaCry #9 [Ghidra Tutorial #14]"
+        description:
+        type: youtube
+        video_id: "TMNjeGKunRY"
+        duration: 728
+      - id: "tEelsPRPUU8"
+        title: "Wir reversen WannaCry #10 - die Kryptographie extrahieren [Ghidra Tutorial #15]"
+        description:
+        type: youtube
+        video_id: "tEelsPRPUU8"
+        duration: 995

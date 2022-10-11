@@ -1,0 +1,202 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7q4shI4L__SRpetWff9BjLZ
+title: "C Tutorials Deutsch"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665506415
+sections:
+  - id: section
+    title: "C Tutorials Deutsch"
+    description:
+    lectures:
+      - id: "x-2ZCkS3OHY"
+        title: "C Programmieren für Anfänger Tutorial #1 - Einleitung"
+        description:
+        type: youtube
+        video_id: "x-2ZCkS3OHY"
+        duration: 390
+      - id: "9bX5xEUqsqo"
+        title: "C Programmieren für Anfänger Tutorial #2 - Variablen"
+        description:
+        type: youtube
+        video_id: "9bX5xEUqsqo"
+        duration: 400
+      - id: "2tDkKZeAiPc"
+        title: "C Programmieren für Anfänger Tutorial #3 -  Datentypen"
+        description:
+        type: youtube
+        video_id: "2tDkKZeAiPc"
+        duration: 683
+      - id: "w8Q0SaKS3C0"
+        title: "C Programmieren für Anfänger Tutorial #4 - Konstanten"
+        description:
+        type: youtube
+        video_id: "w8Q0SaKS3C0"
+        duration: 273
+      - id: "wRBes5ORwRo"
+        title: "C Programmieren für Anfänger Tutorial #5 - if-Verzweigungen"
+        description:
+        type: youtube
+        video_id: "wRBes5ORwRo"
+        duration: 397
+      - id: "a0S_1Yl4k2s"
+        title: "C Programmieren für Anfänger Tutorial #6 - Operatoren"
+        description:
+        type: youtube
+        video_id: "a0S_1Yl4k2s"
+        duration: 438
+      - id: "pJ1g-mWXJoc"
+        title: "C Programmieren für Anfänger Tutorial #7  Logische Operatoren und mehr als eine if"
+        description:
+        type: youtube
+        video_id: "pJ1g-mWXJoc"
+        duration: 309
+      - id: "4yIVdaWHBYc"
+        title: "C Programmieren für Anfänger Tutorial #8 - Die Switch-Case-Verzweigung"
+        description:
+        type: youtube
+        video_id: "4yIVdaWHBYc"
+        duration: 420
+      - id: "_imEnxCFyiE"
+        title: "C Programmieren für Anfänger Tutorial #9 - While-Schleife"
+        description:
+        type: youtube
+        video_id: "_imEnxCFyiE"
+        duration: 468
+      - id: "qNRwmmQui6k"
+        title: "C Programmieren für Anfänger Tutorial #10 - Die For-Schleife"
+        description:
+        type: youtube
+        video_id: "qNRwmmQui6k"
+        duration: 191
+      - id: "9YizVz4ffgc"
+        title: "C Programmieren für Anfänger Tutorial #11 - Die Do-While Schleife"
+        description:
+        type: youtube
+        video_id: "9YizVz4ffgc"
+        duration: 145
+      - id: "6Uj_Ki9ZSqU"
+        title: "C Programmieren für Anfänger Tutorial #12 - Loop Control"
+        description:
+        type: youtube
+        video_id: "6Uj_Ki9ZSqU"
+        duration: 351
+      - id: "Q1Wf5cScgDM"
+        title: "C Programmieren für Anfänger Tutorial #13 - Funktionen"
+        description:
+        type: youtube
+        video_id: "Q1Wf5cScgDM"
+        duration: 376
+      - id: "yY3IB-vlpIw"
+        title: "C Programmieren für Anfänger Tutorial #14 - Rückgabewerte"
+        description:
+        type: youtube
+        video_id: "yY3IB-vlpIw"
+        duration: 530
+      - id: "UNGFcLwMG1E"
+        title: "C Programmieren für Anfänger Tutorial #15 - Parameter"
+        description:
+        type: youtube
+        video_id: "UNGFcLwMG1E"
+        duration: 435
+      - id: "eAl9ehuJpCo"
+        title: "C Programmieren für Anfänger Tutorial #16 - Gültigkeitsbereiche von Variablen"
+        description:
+        type: youtube
+        video_id: "eAl9ehuJpCo"
+        duration: 379
+      - id: "cH0pZYLEE5o"
+        title: "C Programmieren für Anfänger Tutorial #17 - Arrays"
+        description:
+        type: youtube
+        video_id: "cH0pZYLEE5o"
+        duration: 408
+      - id: "FBiwnHnZ8s8"
+        title: "C Programmieren für Anfänger Tutorial #18 - Arrays in Funktionen"
+        description:
+        type: youtube
+        video_id: "FBiwnHnZ8s8"
+        duration: 389
+      - id: "e2oUCDel0ZE"
+        title: "C Programmieren für Anfänger Tutorial #19 - Pointer"
+        description:
+        type: youtube
+        video_id: "e2oUCDel0ZE"
+        duration: 412
+      - id: "otsNa8gmHwQ"
+        title: "C Programmieren für Anfänger Tutorial #20 - Pointer auf Arrays"
+        description:
+        type: youtube
+        video_id: "otsNa8gmHwQ"
+        duration: 376
+      - id: "HJxSbFqqceo"
+        title: "C Programmieren für Anfänger Tutorial #21 - Strings als Arrays mit Pointern"
+        description:
+        type: youtube
+        video_id: "HJxSbFqqceo"
+        duration: 641
+      - id: "wlMgxCxFdxY"
+        title: "C Programmieren für Anfänger Tutorial #22   Mehrdimensionale Arrays"
+        description:
+        type: youtube
+        video_id: "wlMgxCxFdxY"
+        duration: 473
+      - id: "JlJwVBKT4TM"
+        title: "C Programmieren für Anfänger Tutorial #23 - Structures"
+        description:
+        type: youtube
+        video_id: "JlJwVBKT4TM"
+        duration: 425
+      - id: "38NPeapXYSY"
+        title: "C Programmieren für Anfänger Tutorial #24 - Pointer auf Structures"
+        description:
+        type: youtube
+        video_id: "38NPeapXYSY"
+        duration: 229
+      - id: "59MOqTyAiVc"
+        title: "C Programmieren für Anfänger Tutorial #25 - Unions"
+        description:
+        type: youtube
+        video_id: "59MOqTyAiVc"
+        duration: 334
+      - id: "-nFGkHRLl2c"
+        title: "C Programmieren für Anfänger Tutorial #26 - typedef"
+        description:
+        type: youtube
+        video_id: "-nFGkHRLl2c"
+        duration: 176
+      - id: "5wnoPArE4Ns"
+        title: "C Programmieren für Anfänger Tutorial #27 - Eingaben und Ausgaben"
+        description:
+        type: youtube
+        video_id: "5wnoPArE4Ns"
+        duration: 470
+      - id: "7D5nsUZiGEc"
+        title: "C Programmieren für Anfänger Tutorial #28 - Dateien lesen und schreiben"
+        description:
+        type: youtube
+        video_id: "7D5nsUZiGEc"
+        duration: 929
+      - id: "xKX854l3How"
+        title: "C Programmieren für Anfänger Tutorial #29 - Header Dateien"
+        description:
+        type: youtube
+        video_id: "xKX854l3How"
+        duration: 473
+      - id: "Dvs6s6_Gz6Y"
+        title: "C Programmieren für Anfänger Tutorial #30 - Funktionen mit variabler Anzahl an Parametern"
+        description:
+        type: youtube
+        video_id: "Dvs6s6_Gz6Y"
+        duration: 307
+      - id: "Pe0S0mUPGBc"
+        title: "C Programmieren für Anfänger Tutorial #31 - Speicherzuweisung"
+        description:
+        type: youtube
+        video_id: "Pe0S0mUPGBc"
+        duration: 495

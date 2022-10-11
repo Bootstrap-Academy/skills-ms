@@ -1,0 +1,142 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7qI9vtiiU5bJBfbxqBailVM
+title: "Java Tutorial Erste Schritte"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665508085
+sections:
+  - id: section
+    title: "Java Tutorial Erste Schritte"
+    description:
+    lectures:
+      - id: "U1KQrPl3FPg"
+        title: "Java installieren auf Windows 10"
+        description:
+        type: youtube
+        video_id: "U1KQrPl3FPg"
+        duration: 411
+      - id: "f9VGF0_Wkzw"
+        title: "Java für Anfänger 1 - Hello World [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "f9VGF0_Wkzw"
+        duration: 663
+      - id: "_ip_IbKd7Lc"
+        title: "Java für Anfänger 2 - Typen und Variablen [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "_ip_IbKd7Lc"
+        duration: 862
+      - id: "fUU2LufK66c"
+        title: "Java für Anfänger 3 - If-Anweisungen [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "fUU2LufK66c"
+        duration: 777
+      - id: "-QFRBm2BptI"
+        title: "Java für Anfänger 4 - Switch Case - DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "-QFRBm2BptI"
+        duration: 507
+      - id: "UnUuwQT2-Nk"
+        title: "Java für Anfänger 5 - While und Do-While [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "UnUuwQT2-Nk"
+        duration: 569
+      - id: "2x-PYhN9M3s"
+        title: "Java für Anfänger 6 - Arrays [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "2x-PYhN9M3s"
+        duration: 638
+      - id: "h28nX_JocKg"
+        title: "Java für Anfänger 7 - Methoden [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "h28nX_JocKg"
+        duration: 678
+      - id: "U4FUhOtnfSE"
+        title: "Java für Anfänger 8 - Überladen von Methoden [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "U4FUhOtnfSE"
+        duration: 308
+      - id: "0U3FfYbkMog"
+        title: "Java für Anfänger 9 - Klassen[DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "0U3FfYbkMog"
+        duration: 869
+      - id: "EEweBM7sIRk"
+        title: "Java für Anfänger 10 - Konstruktoren und mehr zu Klassen [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "EEweBM7sIRk"
+        duration: 591
+      - id: "-HUWV-tbNGw"
+        title: "Java für Anfänger 11 - Strings [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "-HUWV-tbNGw"
+        duration: 756
+      - id: "PR9ingLj2bE"
+        title: "Java für Anfänger 12 - Vererbung [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "PR9ingLj2bE"
+        duration: 649
+      - id: "xJVJrzm2piM"
+        title: "Java für Anfänger 13 - Interfaces [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "xJVJrzm2piM"
+        duration: 599
+      - id: "SSaGhjgVPjc"
+        title: "Java für Anfänger 14 - abstrakte Klassen und Klassenkonventionen [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "SSaGhjgVPjc"
+        duration: 695
+      - id: "xbPdJStJqFY"
+        title: "Java für Anfänger 15 - Modifikatoren [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "xbPdJStJqFY"
+        duration: 602
+      - id: "t9r2mh2hSAc"
+        title: "Java für Anfänger 16 - Rekursion und Overflow [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "t9r2mh2hSAc"
+        duration: 1299
+      - id: "Txw3hDq1nVs"
+        title: "Java für Anfänger 17 - Benutzereingaben [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "Txw3hDq1nVs"
+        duration: 710
+      - id: "rDn3AWPk_hw"
+        title: "Java für Anfänger 18 - Listen [DEUTSCH/GERMAN]"
+        description:
+        type: youtube
+        video_id: "rDn3AWPk_hw"
+        duration: 1564
+      - id: "trjFQXSHZ8s"
+        title: "Java Crash Kurs für Programmierer in ~30 Minuten"
+        description:
+        type: youtube
+        video_id: "trjFQXSHZ8s"
+        duration: 1893
+      - id: "s6i1Ou6R7vk"
+        title: "Lerne Java in einem Video - Das Java All in One Tutorial"
+        description:
+        type: youtube
+        video_id: "s6i1Ou6R7vk"
+        duration: 3633

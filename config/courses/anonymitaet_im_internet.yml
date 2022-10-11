@@ -1,0 +1,208 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7on8Ckrk2wo4ySeenf3rgf0
+title: "Anonymität im Internet"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665506827
+sections:
+  - id: section
+    title: "Anonymität im Internet"
+    description:
+    lectures:
+      - id: "6bpac1NcrZM"
+        title: "Guide zur Anonymität im Internet #1 - Der Inkognitomodus"
+        description:
+        type: youtube
+        video_id: "6bpac1NcrZM"
+        duration: 420
+      - id: "gGe-3-pw_nA"
+        title: "Guide zur Anonymität im Internet #2 - IP, Proxy, VPN und Tor"
+        description:
+        type: youtube
+        video_id: "gGe-3-pw_nA"
+        duration: 697
+      - id: "wdPVt6m8wuA"
+        title: "Guide zur Anonymität im Internet #3 - Browserfingerprint"
+        description:
+        type: youtube
+        video_id: "wdPVt6m8wuA"
+        duration: 889
+      - id: "dX-hUxsdCX0"
+        title: "Anonymität im Internet #4 - Verschlüsseln mit AES"
+        description:
+        type: youtube
+        video_id: "dX-hUxsdCX0"
+        duration: 449
+      - id: "yQJSQFxCHn0"
+        title: "Anonymität im Internet #5 - Verschlüsseln mit PGP"
+        description:
+        type: youtube
+        video_id: "yQJSQFxCHn0"
+        duration: 761
+      - id: "eyYQacf0gck"
+        title: "Anonymität im Internet #6 - Emails PGP-Verschlüsseln mit Enigmail"
+        description:
+        type: youtube
+        video_id: "eyYQacf0gck"
+        duration: 260
+      - id: "Jz9OTwqZssI"
+        title: "Anonymität im Internet #7 - Verschlüsseln mit Truecrypt"
+        description:
+        type: youtube
+        video_id: "Jz9OTwqZssI"
+        duration: 726
+      - id: "jzLDyxkDRNg"
+        title: "Anonym bleiben mit Whonix"
+        description:
+        type: youtube
+        video_id: "jzLDyxkDRNg"
+        duration: 1251
+      - id: "qXxucKl5zzs"
+        title: "Den richtigen VPN Anbieter wählen"
+        description:
+        type: youtube
+        video_id: "qXxucKl5zzs"
+        duration: 557
+      - id: "ol3zJAQD--8"
+        title: "Data Selfie - Welche Informationen hat Facebook"
+        description:
+        type: youtube
+        video_id: "ol3zJAQD--8"
+        duration: 134
+      - id: "lX7ZJghgGgg"
+        title: "Anonym im Netz Tutorial #6 - die Windows Datenschutzerklärung"
+        description:
+        type: youtube
+        video_id: "lX7ZJghgGgg"
+        duration: 551
+      - id: "W9enTdOhKYE"
+        title: "Anonym im Netz Tutorial #7 - Firefox Profilemaker, erweiterte Einstellungen in Firefox"
+        description:
+        type: youtube
+        video_id: "W9enTdOhKYE"
+        duration: 1525
+      - id: "ziGFK59haqY"
+        title: "Anonym im Netz Tutorial #8 - Angriff auf Proxies, Sender  und Empfängeranonymität"
+        description:
+        type: youtube
+        video_id: "ziGFK59haqY"
+        duration: 471
+      - id: "FYwbgTci3pI"
+        title: "Anonym im Netz - Die Google Datenschutzerklärung kurz durchleuchtet"
+        description:
+        type: youtube
+        video_id: "FYwbgTci3pI"
+        duration: 723
+      - id: "ecmMXWLudpI"
+        title: "Ich habe nichts zu verbergen: das digitale Missverständnis des 21. Jahrhunderts"
+        description:
+        type: youtube
+        video_id: "ecmMXWLudpI"
+        duration: 1327
+      - id: "1lSvb71Uwes"
+        title: "Anonym im Netz - Datenschutz bei Apple: so wird's gemacht"
+        description:
+        type: youtube
+        video_id: "1lSvb71Uwes"
+        duration: 1108
+      - id: "0qXO1CmIX-s"
+        title: "Facebook, Whatsapp und Instagram - Der Datenschutz im Halloween-Kostüm"
+        description:
+        type: youtube
+        video_id: "0qXO1CmIX-s"
+        duration: 1153
+      - id: "eyDaalvuOYE"
+        title: "Linux Tails - Maximale Anonymität - kurz vorgestellt und installiert"
+        description:
+        type: youtube
+        video_id: "eyDaalvuOYE"
+        duration: 1195
+      - id: "coJd7qo5_kg"
+        title: "Anonym im Netz Tutorial #9 - Mixes"
+        description:
+        type: youtube
+        video_id: "coJd7qo5_kg"
+        duration: 347
+      - id: "WHKsHmFUjks"
+        title: "Anonym im Netz Tutorial #10 - Onion Routing"
+        description:
+        type: youtube
+        video_id: "WHKsHmFUjks"
+        duration: 434
+      - id: "ijfvhdsfsmw"
+        title: "Anonym im Netz Tutorial #11 - Hidden Services"
+        description:
+        type: youtube
+        video_id: "ijfvhdsfsmw"
+        duration: 512
+      - id: "0O4yeQaABAw"
+        title: "Anonym im Netz Tutorial #12 - Bitmessage"
+        description:
+        type: youtube
+        video_id: "0O4yeQaABAw"
+        duration: 524
+      - id: "i2SP4eb7aHk"
+        title: "Anonym im Netz Tutorial #13 - Filesharing über TOR via Onionshare"
+        description:
+        type: youtube
+        video_id: "i2SP4eb7aHk"
+        duration: 393
+      - id: "ejy0APEsRuY"
+        title: "Windows SICHER, ANONYM und SCHNELLER machen"
+        description:
+        type: youtube
+        video_id: "ejy0APEsRuY"
+        duration: 3287
+      - id: "8H2Vxn6VXFY"
+        title: "Firefox: ANONYMER und SICHERER | Einstellungen und Addons"
+        description:
+        type: youtube
+        video_id: "8H2Vxn6VXFY"
+        duration: 3327
+      - id: "EUxsBVjyiTY"
+        title: "Veracrypt: verschlüsselte USB Sticks und Dateien erstellen mit Geheim-Fach"
+        description:
+        type: youtube
+        video_id: "EUxsBVjyiTY"
+        duration: 1686
+      - id: "-WymP8TwfcQ"
+        title: "GnuPG für Windows #1  - Installation und Schlüssel erstellen"
+        description:
+        type: youtube
+        video_id: "-WymP8TwfcQ"
+        duration: 620
+      - id: "y78MITuTqAs"
+        title: "GnuPG Windows #2 - Nachrichten, Dateien verschlüsseln, signieren und prüfen"
+        description:
+        type: youtube
+        video_id: "y78MITuTqAs"
+        duration: 815
+      - id: "qSz-y7wXF5s"
+        title: "In Outlook E-Mails verschlüsseln"
+        description:
+        type: youtube
+        video_id: "qSz-y7wXF5s"
+        duration: 259
+      - id: "53llt5oY5I0"
+        title: "Gmail und Sonstige Web Mail Anbieter verschlüsseln"
+        description:
+        type: youtube
+        video_id: "53llt5oY5I0"
+        duration: 490
+      - id: "mQFdUFDNaUs"
+        title: "GnuPG Verschlüsselung unter Android mit OpenKeyChain"
+        description:
+        type: youtube
+        video_id: "mQFdUFDNaUs"
+        duration: 675
+      - id: "IZzU89SzLWc"
+        title: "Chrome sicher machen"
+        description:
+        type: youtube
+        video_id: "IZzU89SzLWc"
+        duration: 2102

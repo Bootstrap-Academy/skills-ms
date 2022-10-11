@@ -1,0 +1,694 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7rjW6OL4aGL-L1SzBUijh8r
+title: "Netzwerktechnik"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665506949
+sections:
+  - id: section
+    title: "Netzwerktechnik"
+    description:
+    lectures:
+      - id: "QEsQkpG6I4w"
+        title: "Netzwerktechnik Tutorial #1 - Einleitung"
+        description:
+        type: youtube
+        video_id: "QEsQkpG6I4w"
+        duration: 224
+      - id: "n4FpSd-ApTY"
+        title: "Netzwerktechnik Tutorial #2 - Dienste"
+        description:
+        type: youtube
+        video_id: "n4FpSd-ApTY"
+        duration: 554
+      - id: "LiyA3mEedYM"
+        title: "Netzwerktechnik Tutorial #3 - Das ISO-OSI Referenzmodell"
+        description:
+        type: youtube
+        video_id: "LiyA3mEedYM"
+        duration: 684
+      - id: "VSOK-jK4Q6k"
+        title: "Netzwerktechnik Tutorial #4 - Simplex, Duplex und Halbduplex"
+        description:
+        type: youtube
+        video_id: "VSOK-jK4Q6k"
+        duration: 292
+      - id: "zNRkP2I7TMs"
+        title: "Netzwerktechnik Tutorial #5 - Signalklassen"
+        description:
+        type: youtube
+        video_id: "zNRkP2I7TMs"
+        duration: 411
+      - id: "xK6a0VKE3KA"
+        title: "Netzwerktechnik Tutorial #6 - Binäre Leitungscodes - Non Return to Zero"
+        description:
+        type: youtube
+        video_id: "xK6a0VKE3KA"
+        duration: 250
+      - id: "SWeUIgvja4A"
+        title: "Netzwerktechnik Tutorial #7 - Biphasen Leitungscodes - Non Return to Zero Inverted, Manchester Code"
+        description:
+        type: youtube
+        video_id: "SWeUIgvja4A"
+        duration: 506
+      - id: "4mt883GmToA"
+        title: "Netzwerktechnik Tutorial #8 - Ternäre Leitungscodes"
+        description:
+        type: youtube
+        video_id: "4mt883GmToA"
+        duration: 379
+      - id: "w20Ku3iy3b0"
+        title: "Netzwerktechnik Tutorial #9 - Blockcodes"
+        description:
+        type: youtube
+        video_id: "w20Ku3iy3b0"
+        duration: 367
+      - id: "BOSHIt_f2lM"
+        title: "Netzwerktechnik Tutorial #10 - Störungen und Repeater"
+        description:
+        type: youtube
+        video_id: "BOSHIt_f2lM"
+        duration: 431
+      - id: "SWVjv0RjAEA"
+        title: "Netzwerktechnik Tutorial #11 - Mehrfachnutzung und Multiplexen"
+        description:
+        type: youtube
+        video_id: "SWVjv0RjAEA"
+        duration: 319
+      - id: "0UnYQ-VHavM"
+        title: "Netzwerktechnik Tutorial #12 - Netztopologien"
+        description:
+        type: youtube
+        video_id: "0UnYQ-VHavM"
+        duration: 450
+      - id: "Up5-3kOkeTY"
+        title: "Netzwerktechnik Tutorial #13 - Paketverluste und Quittungen"
+        description:
+        type: youtube
+        video_id: "Up5-3kOkeTY"
+        duration: 614
+      - id: "rUsjT_5wLnQ"
+        title: "Netzwerktechnik Tutorial #14 - ARQ - Automatic Repeat Request"
+        description:
+        type: youtube
+        video_id: "rUsjT_5wLnQ"
+        duration: 748
+      - id: "j975yg5SAyo"
+        title: "Netzwerktechnik Tutorial #15 - CRC zyklische Redundanzprüfung"
+        description:
+        type: youtube
+        video_id: "j975yg5SAyo"
+        duration: 448
+      - id: "TCXp91RdTH8"
+        title: "Netzwerktechnik Tutorial #16 - Flusskontrolle"
+        description:
+        type: youtube
+        video_id: "TCXp91RdTH8"
+        duration: 391
+      - id: "3GLRDOD4GBo"
+        title: "Netzwerktechnik Tutorial #17 - Handshakes"
+        description:
+        type: youtube
+        video_id: "3GLRDOD4GBo"
+        duration: 362
+      - id: "JxSeX9QbwNc"
+        title: "Netzwerktechnik Tutorial #18 - HDLC"
+        description:
+        type: youtube
+        video_id: "JxSeX9QbwNc"
+        duration: 754
+      - id: "2YzAIvEEUI8"
+        title: "Netzwerktechnik Tutorial #19 - Aloha"
+        description:
+        type: youtube
+        video_id: "2YzAIvEEUI8"
+        duration: 688
+      - id: "VuuW8n1TVCk"
+        title: "Netzwerktechnik Tutorial #20 - Carrier Sense Multiple Access - CSMA"
+        description:
+        type: youtube
+        video_id: "VuuW8n1TVCk"
+        duration: 684
+      - id: "LnIw2Rr2oiA"
+        title: "Netzwerktechnik Tutorial #21 - CSMA-CD vs- CSMA-CA"
+        description:
+        type: youtube
+        video_id: "LnIw2Rr2oiA"
+        duration: 334
+      - id: "haKY_Q1gMG0"
+        title: "Netzwerktechnik Tutorial #22 - Ethernet"
+        description:
+        type: youtube
+        video_id: "haKY_Q1gMG0"
+        duration: 940
+      - id: "J670n74SpG4"
+        title: "Netzwerktechnik Tutorial #23 - Kollisionsdomänen"
+        description:
+        type: youtube
+        video_id: "J670n74SpG4"
+        duration: 494
+      - id: "2-G8ZhcB_yQ"
+        title: "Netzwerktechnik Tutorial #24 - Token Ring"
+        description:
+        type: youtube
+        video_id: "2-G8ZhcB_yQ"
+        duration: 295
+      - id: "9ndcP8qoUAc"
+        title: "Netzwerktechnik Tutorial #25 - Brücken und Switches"
+        description:
+        type: youtube
+        video_id: "9ndcP8qoUAc"
+        duration: 668
+      - id: "i8FZbRislpo"
+        title: "Netzwerktechnik Tutorial #26 - Das Bridge Protocol"
+        description:
+        type: youtube
+        video_id: "i8FZbRislpo"
+        duration: 804
+      - id: "fvX_k7rV6-Y"
+        title: "Netzwerktechnik Tutorial #27 - Fast Ethernet, Gigabit Ethernet und 10 Gigabit Ethernet"
+        description:
+        type: youtube
+        video_id: "fvX_k7rV6-Y"
+        duration: 394
+      - id: "gAS1PxqRKf8"
+        title: "Netzwerktechnik Tutorial #28 - Routing Grundlagen"
+        description:
+        type: youtube
+        video_id: "gAS1PxqRKf8"
+        duration: 456
+      - id: "4NjTX88u-fw"
+        title: "Netzwerktechnik Tutorial #29 - In Line Speed"
+        description:
+        type: youtube
+        video_id: "4NjTX88u-fw"
+        duration: 226
+      - id: "kkvB3OE4sIw"
+        title: "Netzwerktechnik Tutorial #30 - IP Forwarding Tabelle"
+        description:
+        type: youtube
+        video_id: "kkvB3OE4sIw"
+        duration: 619
+      - id: "R1hAZU8R-dU"
+        title: "Netzwerktechnik Tutorial #31 - Binäre Tries und Patricia Tries"
+        description:
+        type: youtube
+        video_id: "R1hAZU8R-dU"
+        duration: 608
+      - id: "79gHEOsFJOo"
+        title: "Netzwerktechnik Tutorial #32 - Content Adressable Memory"
+        description:
+        type: youtube
+        video_id: "79gHEOsFJOo"
+        duration: 464
+      - id: "eDtmcV4oK54"
+        title: "Netzwerktechnik Tutorial #33 - IP Datenpakete"
+        description:
+        type: youtube
+        video_id: "eDtmcV4oK54"
+        duration: 1136
+      - id: "2E6WXnXlQBk"
+        title: "Netzwerktechnik Tutorial #34 - Routing Algorithmen"
+        description:
+        type: youtube
+        video_id: "2E6WXnXlQBk"
+        duration: 557
+      - id: "Rt04_sYCELU"
+        title: "Netzwerktechnik Tutorial #35 - Distanz Vektor Algorithmen"
+        description:
+        type: youtube
+        video_id: "Rt04_sYCELU"
+        duration: 453
+      - id: "2SdvR9KdC30"
+        title: "Netzwerktechnik Tutorial #36 - Distanz Vektor Algorithmen #2"
+        description:
+        type: youtube
+        video_id: "2SdvR9KdC30"
+        duration: 456
+      - id: "qyGqQWM2YTk"
+        title: "Netzwerktechnik Tutorial #37 - Link State Algorithmen"
+        description:
+        type: youtube
+        video_id: "qyGqQWM2YTk"
+        duration: 588
+      - id: "ipDhLgJxwXA"
+        title: "Netzwerktechnik Tutorial #38 - Das Address Resolution Protocol ARP"
+        description:
+        type: youtube
+        video_id: "ipDhLgJxwXA"
+        duration: 471
+      - id: "PU6xFCkj0Yg"
+        title: "Netzwerktechnik Tutorial #39 - Internet Control Message Protocol ICMP"
+        description:
+        type: youtube
+        video_id: "PU6xFCkj0Yg"
+        duration: 271
+      - id: "E-dAE5sARWQ"
+        title: "Netzwerktechnik Tutorial #40 - Autonome Systeme aka Netz aus Netzen"
+        description:
+        type: youtube
+        video_id: "E-dAE5sARWQ"
+        duration: 754
+      - id: "uWadG3fWxBQ"
+        title: "Netzwerktechnik Tutorial #41 - Content Delivery Provider und Networks"
+        description:
+        type: youtube
+        video_id: "uWadG3fWxBQ"
+        duration: 350
+      - id: "bKca4gfgA_I"
+        title: "Netzwerktechnik Tutorial #42 - Internet Exchange Points IXP"
+        description:
+        type: youtube
+        video_id: "bKca4gfgA_I"
+        duration: 316
+      - id: "LUmajjJEq24"
+        title: "Netzwerktechnik Tutorial #43 - Das Border Gateway Protocol BGP"
+        description:
+        type: youtube
+        video_id: "LUmajjJEq24"
+        duration: 1068
+      - id: "lQ2eIHwnHhE"
+        title: "Netzwerktechnik Tutorial #44 - Adressknappheit und NATs"
+        description:
+        type: youtube
+        video_id: "lQ2eIHwnHhE"
+        duration: 730
+      - id: "nB3rA_H4I4s"
+        title: "Netzwerktechnik Tutorial #45 - IPv6"
+        description:
+        type: youtube
+        video_id: "nB3rA_H4I4s"
+        duration: 631
+      - id: "bmvISgR-C_4"
+        title: "Netzwerktechnik Tutorial #46 - Die Transportschicht"
+        description:
+        type: youtube
+        video_id: "bmvISgR-C_4"
+        duration: 465
+      - id: "7FWb0cHeikc"
+        title: "Netzwerktechnik Tutorial #47 - User Datagram Protocol UDP"
+        description:
+        type: youtube
+        video_id: "7FWb0cHeikc"
+        duration: 301
+      - id: "SUD2cUnNQMw"
+        title: "Netzwerktechnik Tutorial #48 - Transmission Control Protocol TCP"
+        description:
+        type: youtube
+        video_id: "SUD2cUnNQMw"
+        duration: 591
+      - id: "vnoZsk50w5E"
+        title: "Netzwerktechnik Tutorial #49 - TCP #2"
+        description:
+        type: youtube
+        video_id: "vnoZsk50w5E"
+        duration: 494
+      - id: "VgwYpsvzZlQ"
+        title: "Netzwerktechnik Tutorial #50 - Flusskontrolle"
+        description:
+        type: youtube
+        video_id: "VgwYpsvzZlQ"
+        duration: 365
+      - id: "uDYIxXqk5Ok"
+        title: "Netzwerktechnik Tutorial #51 - SYN Flooding Angriffe und SYN Cookies"
+        description:
+        type: youtube
+        video_id: "uDYIxXqk5Ok"
+        duration: 522
+      - id: "5jT-q71xNKw"
+        title: "Netzwerktechnik Tutorial #52 - TCP Option Window Scaling"
+        description:
+        type: youtube
+        video_id: "5jT-q71xNKw"
+        duration: 260
+      - id: "u2xJtSsSvYY"
+        title: "Netzwerktechnik Tutorial #53 - Staukontrolle"
+        description:
+        type: youtube
+        video_id: "u2xJtSsSvYY"
+        duration: 374
+      - id: "9_LEr3SSJtc"
+        title: "Netzwerktechnik Tutorial #54 - Random Early Detection RED"
+        description:
+        type: youtube
+        video_id: "9_LEr3SSJtc"
+        duration: 540
+      - id: "IJulDEZHJW0"
+        title: "Netzwerktechnik Tutorial #55 - Slow Start"
+        description:
+        type: youtube
+        video_id: "IJulDEZHJW0"
+        duration: 508
+      - id: "gATuauC2lJA"
+        title: "Netzwerktechnik Tutorial #56 - Der Retransmission Timer"
+        description:
+        type: youtube
+        video_id: "gATuauC2lJA"
+        duration: 588
+      - id: "yAnEWhMACxc"
+        title: "Netzwerktechnik Tutorial #57 - weitere TCP Features"
+        description:
+        type: youtube
+        video_id: "yAnEWhMACxc"
+        duration: 498
+      - id: "Xs70Fdz3jy8"
+        title: "Netzwerktechnik Tutorial #58 - Congestion Avoidance"
+        description:
+        type: youtube
+        video_id: "Xs70Fdz3jy8"
+        duration: 257
+      - id: "-U0LkNcZVNQ"
+        title: "Netzwerktechnik Tutorial #59 - TCP Tahoe"
+        description:
+        type: youtube
+        video_id: "-U0LkNcZVNQ"
+        duration: 436
+      - id: "G7-yFCs3RI4"
+        title: "Netzwerktechnik Tutorial #60 - TCP Reno"
+        description:
+        type: youtube
+        video_id: "G7-yFCs3RI4"
+        duration: 539
+      - id: "eSunM5kNcT8"
+        title: "Netzwerktechnik Tutorial #61 - TCP Fairness"
+        description:
+        type: youtube
+        video_id: "eSunM5kNcT8"
+        duration: 496
+      - id: "lgTqC9ubkw4"
+        title: "Netzwerktechnik Tutorial #62 - Einige Formeln zur Leistung von TCP"
+        description:
+        type: youtube
+        video_id: "lgTqC9ubkw4"
+        duration: 744
+      - id: "w_5B382keNw"
+        title: "Netzwerktechnik Tutorial #63 - Linux - Cubic TCP"
+        description:
+        type: youtube
+        video_id: "w_5B382keNw"
+        duration: 517
+      - id: "CcjCUGeCO00"
+        title: "Netzwerktechnik Tutorial #64 - Windows - Compound TCP"
+        description:
+        type: youtube
+        video_id: "CcjCUGeCO00"
+        duration: 710
+      - id: "UVdDfyuzpz8"
+        title: "Netzsicherheit Tutorial #1 - Einleitung"
+        description:
+        type: youtube
+        video_id: "UVdDfyuzpz8"
+        duration: 1629
+      - id: "6X8FSF1XXpc"
+        title: "Netzsicherheit Tutorial #2 - Extended Validation Zertifikate und andere Zertifikate"
+        description:
+        type: youtube
+        video_id: "6X8FSF1XXpc"
+        duration: 407
+      - id: "jaRJq9XYhVc"
+        title: "Netzsicherheit Tutorial #3 - OCSP - Status von Zertifikaten prüfen"
+        description:
+        type: youtube
+        video_id: "jaRJq9XYhVc"
+        duration: 472
+      - id: "h31hMJ6ztVM"
+        title: "Netzsicherheit Tutorial #4 - Password Authentication Protocol PAP"
+        description:
+        type: youtube
+        video_id: "h31hMJ6ztVM"
+        duration: 413
+      - id: "u355Z0YyN84"
+        title: "Netzsicherheit Tutorial #5 - CHAP"
+        description:
+        type: youtube
+        video_id: "u355Z0YyN84"
+        duration: 320
+      - id: "iQyXs3EX2PM"
+        title: "Netzsicherheit Tutorial #6 - S-Key"
+        description:
+        type: youtube
+        video_id: "iQyXs3EX2PM"
+        duration: 432
+      - id: "OkcvnG6Qjok"
+        title: "Netzsicherheit Tutorial #7 - EAP"
+        description:
+        type: youtube
+        video_id: "OkcvnG6Qjok"
+        duration: 462
+      - id: "AO29zGa_JHc"
+        title: "Netzsicherheit Tutorial #8 - Authentifikation bei mehreren Ressourcen"
+        description:
+        type: youtube
+        video_id: "AO29zGa_JHc"
+        duration: 319
+      - id: "ooe1G24vzYI"
+        title: "Netzsicherheit Tutorial #9 - Kerberos Einführung"
+        description:
+        type: youtube
+        video_id: "ooe1G24vzYI"
+        duration: 442
+      - id: "tSLvaWczpNM"
+        title: "Netzsicherheit Tutorial #10 - Das Ticket Granting Ticket"
+        description:
+        type: youtube
+        video_id: "tSLvaWczpNM"
+        duration: 719
+      - id: "ftS7jyK-Sqc"
+        title: "Netzsicherheit Tutorial #11 - Ressourcenzugriff"
+        description:
+        type: youtube
+        video_id: "ftS7jyK-Sqc"
+        duration: 593
+      - id: "ewcKF5RJ7TM"
+        title: "Netzsicherheit Tutorial #12 - Mehrstufige Netze"
+        description:
+        type: youtube
+        video_id: "ewcKF5RJ7TM"
+        duration: 491
+      - id: "5wjEJurs_Mo"
+        title: "Netzsicherheit Tutorial #13 - Angriffe auf IP"
+        description:
+        type: youtube
+        video_id: "5wjEJurs_Mo"
+        duration: 299
+      - id: "Oy8lWxjAqZU"
+        title: "Netzsicherheit Tutorial #14 - Übersicht zu IPSec"
+        description:
+        type: youtube
+        video_id: "Oy8lWxjAqZU"
+        duration: 451
+      - id: "CJGfic-O4K0"
+        title: "Netzsicherheit Tutorial #15 - Die Datenbanken von IPSec"
+        description:
+        type: youtube
+        video_id: "CJGfic-O4K0"
+        duration: 449
+      - id: "uVWVT4c3kuE"
+        title: "Netzsicherheit Tutorial #16 - Tunnelmodus und Transportmodus"
+        description:
+        type: youtube
+        video_id: "uVWVT4c3kuE"
+        duration: 505
+      - id: "yymR6zqtdT8"
+        title: "Netzsicherheit Tutorial #17 - AH - Authentication Header"
+        description:
+        type: youtube
+        video_id: "yymR6zqtdT8"
+        duration: 517
+      - id: "L9UtqLy42XI"
+        title: "Netzsicherheit Tutorial #18 - ESP - Encapsulation Security Payload"
+        description:
+        type: youtube
+        video_id: "L9UtqLy42XI"
+        duration: 463
+      - id: "eSoIL71Ri0M"
+        title: "Netzsicherheit Tutorial #19 - Der Internet Key Exchange - IKE"
+        description:
+        type: youtube
+        video_id: "eSoIL71Ri0M"
+        duration: 631
+      - id: "sye1azuEZXw"
+        title: "Netzsicherheit Tutorial #20 - TLS Einleitung"
+        description:
+        type: youtube
+        video_id: "sye1azuEZXw"
+        duration: 570
+      - id: "vuMJAgx87TM"
+        title: "Netzsicherheit Tutorial #21 - Angriffe auf TLS"
+        description:
+        type: youtube
+        video_id: "vuMJAgx87TM"
+        duration: 533
+      - id: "Y_SR0qIZR8w"
+        title: "Netzsicherheit Tutorial #22 - Das Record Protocol"
+        description:
+        type: youtube
+        video_id: "Y_SR0qIZR8w"
+        duration: 362
+      - id: "BmyAIFPcWyc"
+        title: "Netzsicherheit Tutorial #23 - Schlüsselgenerierung bei TLS"
+        description:
+        type: youtube
+        video_id: "BmyAIFPcWyc"
+        duration: 221
+      - id: "Vqh19T66rhM"
+        title: "Netzsicherheit Tutorial #24 - Netzzugang"
+        description:
+        type: youtube
+        video_id: "Vqh19T66rhM"
+        duration: 285
+      - id: "C6m8wCNJrfA"
+        title: "Netzsicherheit Tutorial #25 - Netzzugang über LAN"
+        description:
+        type: youtube
+        video_id: "C6m8wCNJrfA"
+        duration: 287
+      - id: "L1-CqVfkFFg"
+        title: "Netzsicherheit Tutorial #26 - Netzzugang bei VPNs"
+        description:
+        type: youtube
+        video_id: "L1-CqVfkFFg"
+        duration: 402
+      - id: "U82i104RAHc"
+        title: "Netzsicherheit Tutorial #27 - Netzzugang bei VPNs #2 - OpenVPN"
+        description:
+        type: youtube
+        video_id: "U82i104RAHc"
+        duration: 279
+      - id: "Dyhq9SPSN-Y"
+        title: "Netzsicherheit Tutorial #28 - WEP"
+        description:
+        type: youtube
+        video_id: "Dyhq9SPSN-Y"
+        duration: 459
+      - id: "CflJNJCt6Bs"
+        title: "Netzsicherheit Tutorial #29 - WPA2"
+        description:
+        type: youtube
+        video_id: "CflJNJCt6Bs"
+        duration: 548
+      - id: "eOv5H-yD2go"
+        title: "Netzwerktechnik Application Layer #1 - HTTP - Hyper Text Transfer Protocol"
+        description:
+        type: youtube
+        video_id: "eOv5H-yD2go"
+        duration: 630
+      - id: "HA3WAWV1AWg"
+        title: "Netzwerktechnik Application Layer #2 - HTTP Anfragen in der Praxis"
+        description:
+        type: youtube
+        video_id: "HA3WAWV1AWg"
+        duration: 379
+      - id: "daE9hBS6VtA"
+        title: "Netzwerktechnik Application Layer #3 - HTTP  Statuscodes"
+        description:
+        type: youtube
+        video_id: "daE9hBS6VtA"
+        duration: 315
+      - id: "LH3I3oXvWrU"
+        title: "Netzwerktechnik Application Layer #4 - SSH - Secure Shell"
+        description:
+        type: youtube
+        video_id: "LH3I3oXvWrU"
+        duration: 359
+      - id: "ITXcKBXkRFs"
+        title: "Netzwerktechnik Application Layer #5 - SSH Verschlüsselung"
+        description:
+        type: youtube
+        video_id: "ITXcKBXkRFs"
+        duration: 431
+      - id: "_8CfylnwXmA"
+        title: "Netzwerktechnik Application Layer #6 - SSH - Connection Protocol"
+        description:
+        type: youtube
+        video_id: "_8CfylnwXmA"
+        duration: 422
+      - id: "m8-rfv5oceE"
+        title: "Netzwerktechnik Application Layer #7 - FTP - File Transfer Protocol"
+        description:
+        type: youtube
+        video_id: "m8-rfv5oceE"
+        duration: 346
+      - id: "PfpvpCm4C90"
+        title: "Netzwerktechnik Application Layer #8 - SMTP - Simple Mail Transfer Protocol"
+        description:
+        type: youtube
+        video_id: "PfpvpCm4C90"
+        duration: 535
+      - id: "CPWZ-U9j3HQ"
+        title: "Netzwerktechnik Application Layer #9 - POP - Post Office Protocol"
+        description:
+        type: youtube
+        video_id: "CPWZ-U9j3HQ"
+        duration: 260
+      - id: "Y3gtTX4hvMc"
+        title: "Netzwerktechnik Application Layer #10 - Bittorrent"
+        description:
+        type: youtube
+        video_id: "Y3gtTX4hvMc"
+        duration: 482
+      - id: "Tc6V4lem9FY"
+        title: "Wireshark Tutorial #1 - Einleitung und Installation"
+        description:
+        type: youtube
+        video_id: "Tc6V4lem9FY"
+        duration: 574
+      - id: "tMP6IH4MAk8"
+        title: "Wireshark Tutorial #2 - Aufzeichnen"
+        description:
+        type: youtube
+        video_id: "tMP6IH4MAk8"
+        duration: 632
+      - id: "rhokQ-6UC2Q"
+        title: "Wireshark Tutorial #3 - Mehr zum Paket"
+        description:
+        type: youtube
+        video_id: "rhokQ-6UC2Q"
+        duration: 625
+      - id: "2L7WP0Bb5pA"
+        title: "Wireshark Tutorial #4 - Datenpakete"
+        description:
+        type: youtube
+        video_id: "2L7WP0Bb5pA"
+        duration: 717
+      - id: "rEWSZ8V4H3c"
+        title: "Wireshark Tutorial #5 - Speichern und Laden"
+        description:
+        type: youtube
+        video_id: "rEWSZ8V4H3c"
+        duration: 191
+      - id: "pJekOEB3HLs"
+        title: "Wireshark Tutorial #6 - Filter"
+        description:
+        type: youtube
+        video_id: "pJekOEB3HLs"
+        duration: 653
+      - id: "5GbvTT69v0U"
+        title: "Wireshark Tutorial #7 - Verbindungen einfärben"
+        description:
+        type: youtube
+        video_id: "5GbvTT69v0U"
+        duration: 231
+      - id: "rXb5AFSQpSE"
+        title: "Wireshark Tutorial #8 - Statistiken und Graphs"
+        description:
+        type: youtube
+        video_id: "rXb5AFSQpSE"
+        duration: 477
+      - id: "Hs58b7OHgto"
+        title: "Wireshark Challenge aus dem Vorstellungsgespräch - Telnet"
+        description:
+        type: youtube
+        video_id: "Hs58b7OHgto"
+        duration: 499
+      - id: "6BmqSrBteY0"
+        title: "Die Top 6 Netzwerk-Protokolle für Internet of Things"
+        description:
+        type: youtube
+        video_id: "6BmqSrBteY0"
+        duration: 960

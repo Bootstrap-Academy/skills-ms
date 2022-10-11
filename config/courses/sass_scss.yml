@@ -1,0 +1,178 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7oopYYGy5hX-Y6b07_3DPp5
+title: "SASS und SCSS - CSS auf Steroiden Tutorial Deutsch"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665508245
+sections:
+  - id: section
+    title: "SASS und SCSS - CSS auf Steroiden Tutorial Deutsch"
+    description:
+    lectures:
+      - id: "Vyp3Nh0QvSk"
+        title: "CSS auf Steroiden: SCSS und SASS Tutorial #1 - Einleitung"
+        description:
+        type: youtube
+        video_id: "Vyp3Nh0QvSk"
+        duration: 406
+      - id: "9ZD6NmO2PTk"
+        title: "SCSS und SASS Tutorial #2 - Installation unter MacOS, Linux und Windows"
+        description:
+        type: youtube
+        video_id: "9ZD6NmO2PTk"
+        duration: 524
+      - id: "wpjisrRQGoc"
+        title: "SCSS und SASS Tutorial #3 - Die Entwicklungsumgebung"
+        description:
+        type: youtube
+        video_id: "wpjisrRQGoc"
+        duration: 553
+      - id: "dmQ9ft1R4oQ"
+        title: "SCSS und SASS Tutorial #4 - Variablen"
+        description:
+        type: youtube
+        video_id: "dmQ9ft1R4oQ"
+        duration: 403
+      - id: "5FZo3ieRhno"
+        title: "SCSS und SASS Tutorial #5 - Nesting"
+        description:
+        type: youtube
+        video_id: "5FZo3ieRhno"
+        duration: 488
+      - id: "JfS6GoPcpsI"
+        title: "SCSS und SASS Tutorial #6 - Partials und Imports"
+        description:
+        type: youtube
+        video_id: "JfS6GoPcpsI"
+        duration: 653
+      - id: "Dsqea2p7qmQ"
+        title: "SCSS und SASS Tutorial #7 - Mixins"
+        description:
+        type: youtube
+        video_id: "Dsqea2p7qmQ"
+        duration: 278
+      - id: "2nCPYNVf3fE"
+        title: "SCSS und SASS Tutorial #8 - Mixins mit Parametern"
+        description:
+        type: youtube
+        video_id: "2nCPYNVf3fE"
+        duration: 529
+      - id: "Aicbc6d3xgw"
+        title: "SCSS und SASS Tutorial #9 - Datentypen"
+        description:
+        type: youtube
+        video_id: "Aicbc6d3xgw"
+        duration: 431
+      - id: "ezOR6yEwubA"
+        title: "SCSS und SASS Tutorial #10 - Mathematische Operationen in Style Sheets"
+        description:
+        type: youtube
+        video_id: "ezOR6yEwubA"
+        duration: 569
+      - id: "Ya7J_4au13I"
+        title: "SCSS und SASS Tutorial #11 - Interpolation mit #{}"
+        description:
+        type: youtube
+        video_id: "Ya7J_4au13I"
+        duration: 547
+      - id: "acOPoGADus0"
+        title: "SCSS und SASS Tutorial #12 - !default"
+        description:
+        type: youtube
+        video_id: "acOPoGADus0"
+        duration: 172
+      - id: "BJBkWvDxYjo"
+        title: "SCSS und SASS Tutorial #13 - @media"
+        description:
+        type: youtube
+        video_id: "BJBkWvDxYjo"
+        duration: 374
+      - id: "BbAZQpGTgp0"
+        title: "SCSS und SASS Tutorial #14 - if-Anweisungen"
+        description:
+        type: youtube
+        video_id: "BbAZQpGTgp0"
+        duration: 514
+      - id: "7VG8RAkZGIs"
+        title: "SCSS und SASS Tutorial #15 - for-Schleifen"
+        description:
+        type: youtube
+        video_id: "7VG8RAkZGIs"
+        duration: 302
+      - id: "9TaxiKMGRKU"
+        title: "SCSS und SASS Tutorial #16 - each-Schleifen"
+        description:
+        type: youtube
+        video_id: "9TaxiKMGRKU"
+        duration: 451
+      - id: "sXDGzsNXO3c"
+        title: "SCSS und SASS Tutorial #17 - Extends"
+        description:
+        type: youtube
+        video_id: "sXDGzsNXO3c"
+        duration: 343
+      - id: "Fr_4YFkOI_E"
+        title: "SCSS und SASS Tutorial #18 - Debug Nachrichten"
+        description:
+        type: youtube
+        video_id: "Fr_4YFkOI_E"
+        duration: 289
+      - id: "5781OsElTo0"
+        title: "SCSS und SASS Tutorial #19 - & - der hier Marker"
+        description:
+        type: youtube
+        video_id: "5781OsElTo0"
+        duration: 176
+      - id: "1gPU2Gcn5J0"
+        title: "SCSS und SASS Tutorial #20 - Leichte Farbfunktionen"
+        description:
+        type: youtube
+        video_id: "1gPU2Gcn5J0"
+        duration: 619
+      - id: "TvW6sqtOI1k"
+        title: "SCSS und SASS Tutorial #21 - Hersteller Präfixe Mixin"
+        description:
+        type: youtube
+        video_id: "TvW6sqtOI1k"
+        duration: 312
+      - id: "FSufbI1YV2Y"
+        title: "SCSS und SASS Tutorial #22 - Stanzeffekt Mixin"
+        description:
+        type: youtube
+        video_id: "FSufbI1YV2Y"
+        duration: 245
+      - id: "me3QJZELp3k"
+        title: "SCSS und SASS Tutorial #23 - Responsive Breakpoints"
+        description:
+        type: youtube
+        video_id: "me3QJZELp3k"
+        duration: 294
+      - id: "qv1lVbEeRZ0"
+        title: "SCSS und SASS Tutorial #24 - Ein-  und Ausblenden"
+        description:
+        type: youtube
+        video_id: "qv1lVbEeRZ0"
+        duration: 455
+      - id: "PHXXEIQz5F0"
+        title: "SCSS und SASS Tutorial #25 - Mit Listen arbeiten"
+        description:
+        type: youtube
+        video_id: "PHXXEIQz5F0"
+        duration: 585
+      - id: "ybVFCBUVtwM"
+        title: "SCSS und SASS Tutorial #26 - Mit Maps arbeiten"
+        description:
+        type: youtube
+        video_id: "ybVFCBUVtwM"
+        duration: 515
+      - id: "8RE7YEFJlfY"
+        title: "SCSS und SASS Tutorial #27 - nützliche SASS Funktionen"
+        description:
+        type: youtube
+        video_id: "8RE7YEFJlfY"
+        duration: 834

@@ -1,0 +1,88 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7pSbRnMtEG5XEdYVwJE5se9
+title: "DevOps Grundlagen"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665506858
+sections:
+  - id: section
+    title: "DevOps Grundlagen"
+    description:
+    lectures:
+      - id: "YtQdxrbfYVE"
+        title: "DevOps Tutorial #1 - Was ist DevOps"
+        description:
+        type: youtube
+        video_id: "YtQdxrbfYVE"
+        duration: 459
+      - id: "npDTCy90BZI"
+        title: "DevOps Guide #2 - Das CAMS Modell"
+        description:
+        type: youtube
+        video_id: "npDTCy90BZI"
+        duration: 1036
+      - id: "xY7qYF7Rql8"
+        title: "DevOps Guide #3 - The three ways [Deutsch]"
+        description:
+        type: youtube
+        video_id: "xY7qYF7Rql8"
+        duration: 501
+      - id: "YMJ_sdeDbFE"
+        title: "DevOps Guide #4 - CI/CD - Continuous Integration und Continuous Delivery"
+        description:
+        type: youtube
+        video_id: "YMJ_sdeDbFE"
+        duration: 492
+      - id: "Q73xlpx5fH4"
+        title: "DevOps Guide #5 - Testen"
+        description:
+        type: youtube
+        video_id: "Q73xlpx5fH4"
+        duration: 784
+      - id: "CVlW_xJRJyQ"
+        title: "DevOps Guide #6 - Canary Deployment"
+        description:
+        type: youtube
+        video_id: "CVlW_xJRJyQ"
+        duration: 226
+      - id: "5_KihxuO9sE"
+        title: "DevOps Guide #7 - Blue Green Deployment"
+        description:
+        type: youtube
+        video_id: "5_KihxuO9sE"
+        duration: 243
+      - id: "kMNxhTSeUZk"
+        title: "DevOps Guide #8 - Immutable Deployment"
+        description:
+        type: youtube
+        video_id: "kMNxhTSeUZk"
+        duration: 167
+      - id: "xsZKoOtt-0c"
+        title: "DevOps Guide #9 - Monitoring"
+        description:
+        type: youtube
+        video_id: "xsZKoOtt-0c"
+        duration: 349
+      - id: "7604cNfJfiU"
+        title: "DevOps Guide #10 - Das Post Mortem Gespräch - ein Beispiel für DevOps"
+        description:
+        type: youtube
+        video_id: "7604cNfJfiU"
+        duration: 304
+      - id: "RwtqQWF-tYc"
+        title: "Pair Programming - Varianten, Dos und Don'ts"
+        description:
+        type: youtube
+        video_id: "RwtqQWF-tYc"
+        duration: 1109
+      - id: "4u4x4Zg5Zpg"
+        title: "Aufgaben besser verwalten: Top KANBAN-Boards im Vergleich"
+        description:
+        type: youtube
+        video_id: "4u4x4Zg5Zpg"
+        duration: 2068

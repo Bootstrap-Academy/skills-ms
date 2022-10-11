@@ -1,0 +1,82 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7oIlWv3K9xACZi3fHfYLKtj
+title: "Wireshark Tutorial Deutsch"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665507854
+sections:
+  - id: section
+    title: "Wireshark Tutorial Deutsch"
+    description:
+    lectures:
+      - id: "Tc6V4lem9FY"
+        title: "Wireshark Tutorial #1 - Einleitung und Installation"
+        description:
+        type: youtube
+        video_id: "Tc6V4lem9FY"
+        duration: 574
+      - id: "tMP6IH4MAk8"
+        title: "Wireshark Tutorial #2 - Aufzeichnen"
+        description:
+        type: youtube
+        video_id: "tMP6IH4MAk8"
+        duration: 632
+      - id: "rhokQ-6UC2Q"
+        title: "Wireshark Tutorial #3 - Mehr zum Paket"
+        description:
+        type: youtube
+        video_id: "rhokQ-6UC2Q"
+        duration: 625
+      - id: "2L7WP0Bb5pA"
+        title: "Wireshark Tutorial #4 - Datenpakete"
+        description:
+        type: youtube
+        video_id: "2L7WP0Bb5pA"
+        duration: 717
+      - id: "rEWSZ8V4H3c"
+        title: "Wireshark Tutorial #5 - Speichern und Laden"
+        description:
+        type: youtube
+        video_id: "rEWSZ8V4H3c"
+        duration: 191
+      - id: "pJekOEB3HLs"
+        title: "Wireshark Tutorial #6 - Filter"
+        description:
+        type: youtube
+        video_id: "pJekOEB3HLs"
+        duration: 653
+      - id: "5GbvTT69v0U"
+        title: "Wireshark Tutorial #7 - Verbindungen einfärben"
+        description:
+        type: youtube
+        video_id: "5GbvTT69v0U"
+        duration: 231
+      - id: "rXb5AFSQpSE"
+        title: "Wireshark Tutorial #8 - Statistiken und Graphs"
+        description:
+        type: youtube
+        video_id: "rXb5AFSQpSE"
+        duration: 477
+      - id: "Hs58b7OHgto"
+        title: "Wireshark Challenge aus dem Vorstellungsgespräch - Telnet"
+        description:
+        type: youtube
+        video_id: "Hs58b7OHgto"
+        duration: 499
+      - id: "r9rd7U5I4Q4"
+        title: "Wireshark-Ersatz? Das eine Feature des MS Network Monitors"
+        description:
+        type: youtube
+        video_id: "r9rd7U5I4Q4"
+        duration: 337
+      - id: "Mr80hEkYYqY"
+        title: "Remote Wireshark: SSHDump und Verbindungen auf dem Server beobachten"
+        description:
+        type: youtube
+        video_id: "Mr80hEkYYqY"
+        duration: 339

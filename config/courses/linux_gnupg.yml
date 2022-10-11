@@ -1,0 +1,34 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7pUKpzMbzggvudByxULkut-
+title: "GnuPG unter Linux Tutorial Deutsch"
+description:
+category:
+language: de
+image:
+author: null
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665508174
+sections:
+  - id: section
+    title: "GnuPG unter Linux Tutorial Deutsch"
+    description:
+    lectures:
+      - id: "YPQh1Z5zlqw"
+        title: "Linux Tutorial - PGP Verschlüsselung mit GnuPG #1 - Schlüssel generieren"
+        description:
+        type: youtube
+        video_id: "YPQh1Z5zlqw"
+        duration: 416
+      - id: "hVjcKBUAvxk"
+        title: "Linux Tutorial - PGP Verschlüsselung mit GnuPG #2 - Schlüssel austauschen"
+        description:
+        type: youtube
+        video_id: "hVjcKBUAvxk"
+        duration: 384
+      - id: "oitvqDTWQBs"
+        title: "Linux Tutorial - PGP Verschlüsselung mit GnuPG #3 - Verschlüsseln und Signieren"
+        description:
+        type: youtube
+        video_id: "oitvqDTWQBs"
+        duration: 673
