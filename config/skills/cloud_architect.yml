@@ -1,4 +1,8 @@
 name: Cloud Architect
 dependencies:
   - systemadministrator
-skills: {}
+skills:
+  grundlagen_der_cloud_administration:
+    name: Grundlagen der Cloud-Administration
+    dependencies: []
+    courses: []

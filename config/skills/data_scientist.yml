@@ -17,3 +17,7 @@ skills:
     dependencies:
       - datenanalyse_mit_python
     courses: []
+  python_spark:
+    name: Python Spark
+    dependencies: []
+    courses: []

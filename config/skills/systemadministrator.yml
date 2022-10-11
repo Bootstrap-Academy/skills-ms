@@ -15,3 +15,7 @@ skills:
     name: Apache
     dependencies: []
     courses: []
+  grundlagen_der_serveradministration:
+    name: Grundlagen der Serveradministration
+    dependencies: []
+    courses: []
