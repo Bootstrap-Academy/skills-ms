@@ -11,6 +11,7 @@ class YoutubeLecture(BaseModel):
     description: str | None = Field(description="Description of the lecture")
     type = Field("youtube", const=True, description="Type of the lecture")
     video_id: str = Field(description="Youtube Video ID of the lecture")
+    duration: int = Field(description="Duration of the lecture in seconds")
 
     Config = example(
         id="intro",
@@ -18,6 +19,7 @@ class YoutubeLecture(BaseModel):
         description="Introduction to the course",
         type="youtube",
         video_id="dQw4w9WgXcQ",
+        duration=100,
     )
 
     def to_user_lecture(self, completed: bool) -> UserLecture:
@@ -29,8 +31,11 @@ class Mp4Lecture(BaseModel):
     title: str = Field(description="Title of the lecture")
     description: str | None = Field(description="Description of the lecture")
     type = Field("mp4", const=True, description="Type of the lecture")
+    duration: int = Field(description="Duration of the lecture in seconds")
 
-    Config = example(id="intro", title="Introduction", description="Introduction to the course", type="mp4")
+    Config = example(
+        id="intro", title="Introduction", description="Introduction to the course", type="mp4", duration=100
+    )
 
     def to_user_lecture(self, completed: bool) -> UserLecture:
         return UserMp4Lecture(**self.dict(), completed=completed)
@@ -56,9 +61,28 @@ class BaseCourse(BaseModel):
     id: str = Field(description="ID of the course")
     title: str = Field(description="Title of the course")
     description: str | None = Field(description="Description of the course")
+    category: str | None = Field(description="Category of the course")
+    language: str | None = Field(description="Language of the course")
+    image: str | None = Field(description="Image URL of the course")
+    author: str | None = Field(description="Author of the course")
     price: int = Field(min=0, description="Price of the course in morphcoins")
+    learning_goals: list[str] = Field(description="Learning goals of the course")
+    requirements: list[str] = Field(description="Requirements of the course")
+    last_update: int = Field(description="Timestamp of last update of the course")
 
-    Config = example(id="python", title="Python", description="Course description")
+    Config = example(
+        id="python",
+        title="Python",
+        description="Course description",
+        category="Programming",
+        language="en",
+        image="https://example.com/image.png",
+        author="John Doe",
+        price=100,
+        learning_goals=["Learn Python"],
+        requirements=["Basic knowledge of programming"],
+        last_update=1620000000,
+    )
 
     @property
     def free(self) -> bool:

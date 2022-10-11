@@ -2,39 +2,37 @@
 
 set -e
 
-_yml_escape(){
-    printf "%s" "$1" | base64 -w0 | yq '@base64d'
-}
-
-pl=$(youtube-dl -s "$1" 2> /dev/null | head -2 | tail -1 | cut -d' ' -f4-)
+pl=$(youtube-dl -j --playlist-end 1 "$1" | jq -c '[.playlist_title,.playlist_uploader]')
 cat << EOF
 # $1
-title: $(_yml_escape "$pl")
+title: $(jq .[0] <<< "$pl")
 description:
+category:
+language:
+image:
+author: $(jq .[1] <<< "$pl")
 price:
+learning_goals: []
+requirements: []
+last_update: $(date +%s)
 sections:
   - id: section
-    title: $(_yml_escape "$pl")
+    title: $(jq .[0] <<< "$pl")
     description:
     lectures:
 EOF
 
-_lecture(){
-#   echo "# $1 $2"
-    cat << EOF
-      - id: $(_yml_escape "$1")
-        title: $(_yml_escape "$2")
+while read line; do
+  data=$(jq -Rc '@base64d|fromjson|[.id,.title,.duration]' <<< "$line")
+  id=$(jq .[0] <<< "$data")
+  title=$(jq .[1] <<< "$data")
+  duration=$(jq .[2] <<< "$data")
+  cat << EOF
+      - id: $id
+        title: $title
         description:
         type: youtube
-        video_id: $(_yml_escape "$1")
+        video_id: $id
+        duration: $duration
 EOF
-}
-
-while read line; do
-    if [[ -z "$t" ]]; then
-        t="$line"
-    else
-        _lecture "$line" "$t"
-        unset t
-    fi
-done < <(youtube-dl --get-id --get-title "$1")
+done < <(youtube-dl -j "$1" | jq -r 'tojson|@base64')
