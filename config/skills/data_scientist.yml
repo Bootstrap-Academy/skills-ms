@@ -22,6 +22,7 @@ skills:
       - datenvisualisierung
   python_spark:
     name: Python Spark
-    dependencies: []
+    dependencies:
+      - datenanalyse_mit_python
     courses:
       - spark_pyspark

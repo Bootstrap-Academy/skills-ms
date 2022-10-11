@@ -76,6 +76,7 @@ skills:
     courses: []
   three_js:
     name: 3D Animationen mit ThreeJS
-    dependencies: []
+    dependencies:
+      - typescript
     courses:
       - threejs
