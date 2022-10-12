@@ -11,6 +11,7 @@ from pydantic import BaseModel, ConstrainedStr
 from rich import print
 
 from api.logger import get_logger
+from api.services.courses import COURSES
 
 
 logger = get_logger(__name__)
@@ -104,7 +105,7 @@ def main(
     skills = _load_skills(path)
     _check_skills_definitions(skills)
     _check_skill_dependencies(skills)
-    # _check_skill_courses(skills, courses)
+    _check_skill_courses(skills, set(COURSES))
     print(skills)
 
     if _list or not host or not token:

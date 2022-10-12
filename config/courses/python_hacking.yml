@@ -1,0 +1,101 @@
+# https://www.dropbox.com/t/2QXeTTH1ZwdkNU07
+title: "Python Hacking"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1665584088
+sections:
+  - id: section
+    title: "Hacking"
+    description:
+    lectures:
+      - id: "hacking_mit_python_bildmetadaten_auslesen_mit_python"
+        title: "Hacking mit Python - Bildmetadaten auslesen mit Python"
+        description:
+        type: mp4
+        duration: 267
+      - id: "hacking_mit_python_ddos"
+        title: "Hacking mit Python - DDoS"
+        description:
+        type: mp4
+        duration: 637
+      - id: "hacking_mit_python_den_antivirenschutz_austricksen"
+        title: "Hacking mit Python - Den Antivirenschutz austricksen"
+        description:
+        type: mp4
+        duration: 1778
+      - id: "hacking_mit_python_ein_dictionary_passwort_cracker_für_zip_archive"
+        title: "Hacking mit Python - Ein Dictionary Passwort Cracker für Zip-Archive"
+        description:
+        type: mp4
+        duration: 514
+      - id: "hacking_mit_python_eine_backdoor_mit_python"
+        title: "Hacking mit Python - Eine Backdoor mit Python"
+        description:
+        type: mp4
+        duration: 966
+      - id: "hacking_mit_python_ein_keylogger_mit_pygame"
+        title: "Hacking mit Python - Ein Keylogger mit PyGame"
+        description:
+        type: mp4
+        duration: 446
+      - id: "hacking_mit_python_ein_passwort_cracker_für_zip_archive"
+        title: "Hacking mit Python - Ein Passwort Cracker für Zip-Archive"
+        description:
+        type: mp4
+        duration: 994
+      - id: "hacking_mit_python_ein_portscanner"
+        title: "Hacking mit Python - Ein Portscanner"
+        description:
+        type: mp4
+        duration: 558
+      - id: "hacking_mit_python_hashes_cracken_mit_rainbowtables"
+        title: "Hacking mit Python - Hashes cracken mit Rainbowtables"
+        description:
+        type: mp4
+        duration: 431
+      - id: "hacking_mit_python_rainbowtables_generieren"
+        title: "Hacking mit Python - Rainbowtables generieren"
+        description:
+        type: mp4
+        duration: 693
+      - id: "hacking_mit_python_steganographie_text_in_bildern_verstecken_funktioniert_auch_mit_mp3s"
+        title: "Hacking mit Python - Steganographie - Text in Bildern verstecken FUNKTIONIERT AUCH MIT MP3S"
+        description:
+        type: mp4
+        duration: 391
+      - id: "hacking_mit_python_was_tun_ransomwares_aka_kryptographie_in_python"
+        title: "Hacking mit Python - Was tun Ransomwares aka Kryptographie in Python"
+        description:
+        type: mp4
+        duration: 829
+      - id: "python_hacking_ft._wireshark_pyshark_ein_interface_für_tshark"
+        title: "Python Hacking ft. Wireshark - PyShark ein Interface für TShark"
+        description:
+        type: mp4
+        duration: 798
+      - id: "python_hacking_html_formulare_bruteforcen_mit_disclaimer"
+        title: "Python Hacking - HTML-Formulare bruteforcen mit Disclaimer"
+        description:
+        type: mp4
+        duration: 1562
+      - id: "python_hacking_html_formulare_bruteforcen"
+        title: "Python Hacking - HTML-Formulare bruteforcen"
+        description:
+        type: mp4
+        duration: 1557
+      - id: "python_hacking_nmap_mit_python"
+        title: "Python Hacking - Nmap mit Python"
+        description:
+        type: mp4
+        duration: 584
+      - id: "python_krypto_one_time_pad"
+        title: "Python Krypto - One Time Pad"
+        description:
+        type: mp4
+        duration: 992
