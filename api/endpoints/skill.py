@@ -253,7 +253,7 @@ async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, dat
 @router.patch(
     "/skilltree/{root_skill_id}/{sub_skill_id}",
     dependencies=[admin_auth],
-    responses=admin_responses(SubSkill, SkillNotFoundException, CycleInSkillTreeException),
+    responses=admin_responses(SubSkill, SkillNotFoundException, CycleInSkillTreeException, CourseNotFoundException),
 )
 async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: UpdateSubSkill) -> Any:
     """

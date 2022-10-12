@@ -64,7 +64,7 @@ async def list_courses() -> Any:
     return [course.summary for course in COURSES.values()]
 
 
-@router.get("/courses/{course_id}/summary", responses=responses(CourseSummary))
+@router.get("/courses/{course_id}/summary", responses=responses(CourseSummary, CourseNotFoundException))
 async def get_course_summary(course: Course = get_course) -> Any:
     """Return a summary of the course."""
 
