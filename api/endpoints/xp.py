@@ -1,12 +1,14 @@
 from typing import Any
+from uuid import uuid4
 
 from fastapi import APIRouter
 
 from api import models
-from api.auth import get_user, require_verified_email
+from api.auth import admin_auth, get_user, require_verified_email
 from api.database import db, filter_by, select
-from api.exceptions.auth import PermissionDeniedError, verified_responses
-from api.schemas.xp import RootSkillXP, SubSkillXP, XPResponse
+from api.endpoints.skill import get_sub_skill
+from api.exceptions.auth import PermissionDeniedError, admin_responses, verified_responses
+from api.schemas.xp import RootSkillXP, SubSkillXP, UpdateXP, XPResponse
 from api.services.xp import (
     calc_global_xp_needed,
     calc_progress,
@@ -33,17 +35,23 @@ async def get_xp(user_id: str = get_user(require_self_or_admin=True)) -> Any:
     *Requirements:* **VERIFIED** and (**SELF** or **ADMIN**)
     """
 
-    xp_records = {row.skill_id: row.xp async for row in await db.stream(filter_by(models.XP, user_id=user_id))}
+    xp_records: dict[str, tuple[int, bool]] = {
+        row.skill_id: (row.xp, row.completed) async for row in await db.stream(filter_by(models.XP, user_id=user_id))
+    }
 
     response = XPResponse(total_xp=0, total_level=0, skills=[], progress=0)
     root_skill: models.RootSkill
     async for root_skill in await db.stream(select(models.RootSkill)):
         root_skill_xp = RootSkillXP(skill=root_skill.id, xp=0, level=0, skills=[], progress=0)
         for sub_skill in root_skill.sub_skills:
-            xp = xp_records.get(sub_skill.id, 0)
+            xp, completed = xp_records.get(sub_skill.id, (0, False))
             level = calc_sub_skill_level(xp)
             sub_skill_xp = SubSkillXP(
-                skill=sub_skill.id, xp=xp, level=level, progress=calc_progress(xp, level, calc_sub_skill_xp_needed)
+                skill=sub_skill.id,
+                xp=xp,
+                level=level,
+                progress=calc_progress(xp, level, calc_sub_skill_xp_needed),
+                completed=completed,
             )
             root_skill_xp.skills.append(sub_skill_xp)
             root_skill_xp.xp += xp
@@ -57,3 +65,34 @@ async def get_xp(user_id: str = get_user(require_self_or_admin=True)) -> Any:
     response.progress = calc_progress(response.total_xp, response.total_level, calc_global_xp_needed)
 
     return response
+
+
+@router.patch(
+    "/xp/{user_id}/{root_skill_id}/{sub_skill_id}", dependencies=[admin_auth], responses=admin_responses(SubSkillXP)
+)
+async def update_xp(data: UpdateXP, skill: models.SubSkill = get_sub_skill, user_id: str = get_user()) -> Any:
+    """
+    Update a user's xp for a sub skill.
+
+    *Requirements:* **ADMIN**
+    """
+
+    if xp := await db.get(models.XP, user_id=user_id, skill_id=skill.id):
+        if data.xp is not None:
+            xp.xp = data.xp
+        if data.completed is not None:
+            xp.completed = data.completed
+    else:
+        xp = models.XP(
+            id=str(uuid4()), user_id=user_id, skill_id=skill.id, xp=data.xp or 0, completed=data.completed or False
+        )
+        await db.add(xp)
+
+    level = calc_sub_skill_level(xp.xp)
+    return SubSkillXP(
+        skill=skill.id,
+        xp=xp.xp,
+        level=level,
+        progress=calc_progress(xp.xp, level, calc_sub_skill_xp_needed),
+        completed=xp.completed,
+    )

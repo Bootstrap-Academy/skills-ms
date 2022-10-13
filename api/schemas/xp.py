@@ -6,6 +6,7 @@ class SubSkillXP(BaseModel):
     xp: int = Field(description="Amount of XP the user has in this skill")
     level: int = Field(description="Level of the user in this skill")
     progress: float = Field(ge=0, le=1, description="Progress towards the next level")
+    completed: bool = Field(description="Whether the user has completed the skill")
 
 
 class RootSkillXP(BaseModel):
@@ -21,3 +22,8 @@ class XPResponse(BaseModel):
     total_level: int = Field(description="Total level of the user")
     progress: float = Field(ge=0, le=1, description="Progress towards the next level")
     skills: list[RootSkillXP] = Field(description="List of root skills")
+
+
+class UpdateXP(BaseModel):
+    xp: int | None = Field(ge=0, description="Amount of XP the user has in this skill")
+    completed: bool | None = Field(description="Whether the user has completed the skill")

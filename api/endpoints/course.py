@@ -100,8 +100,6 @@ async def get_mp4_lecture_link(request: Request, course: Course = get_course, le
     *Requirements:* **VERIFIED**
     """
 
-    print(lecture)
-
     if lecture.type != "mp4":
         raise LectureNotFoundException
 
