@@ -3,11 +3,11 @@
 from secrets import token_urlsafe
 from typing import Any
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 from fastapi.responses import FileResponse
 
 from api import models
-from api.auth import require_verified_email, user_auth
+from api.auth import public_auth, require_verified_email, user_auth
 from api.database import db, filter_by
 from api.exceptions.auth import verified_responses
 from api.exceptions.course import (
@@ -58,10 +58,42 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
 
 
 @router.get("/courses", responses=responses(list[CourseSummary]))
-async def list_courses() -> Any:
+async def list_courses(
+    search_term: str | None = Query(None, max_length=256, description="A search term to filter courses by"),
+    language: str | None = Query(None, max_length=256, description="The language to search for"),
+    author: str | None = Query(None, max_length=256, description="The author to search for"),
+    free: bool | None = Query(None, description="Whether to search for free courses"),
+    owned: bool | None = Query(None, description="Whether to search for courses the user owns"),
+    user: User | None = public_auth,
+) -> Any:
     """Return a list of all available courses."""
 
-    return [course.summary for course in COURSES.values()]
+    out = iter(COURSES.values())
+
+    if search_term:
+        out = (
+            course
+            for course in out
+            if search_term.lower() in course.title.lower()
+            or (course.description is not None and search_term.lower() in course.description)
+        )
+    if language:
+        out = (course for course in out if course.language is not None and language.lower() in course.language.lower())
+    if author:
+        out = (course for course in out if course.author is not None and author.lower() in course.author.lower())
+    if free is not None:
+        out = (course for course in out if course.free == free)
+    if owned is not None:
+        courses = {course.id for course in COURSES.values() if course.free}
+        if user and user.admin:
+            courses = set(COURSES)
+        elif user:
+            courses |= {ca.course_id async for ca in await db.stream(filter_by(models.CourseAccess, user_id=user.id))}
+
+        relevant = courses if owned else set(COURSES) - courses
+        out = (course for course in out if course.id in relevant)
+
+    return [course.summary for course in out]
 
 
 @router.get("/courses/{course_id}/summary", responses=responses(CourseSummary, CourseNotFoundException))
