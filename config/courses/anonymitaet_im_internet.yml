@@ -80,6 +80,7 @@ sections:
         type: youtube
         video_id: "ol3zJAQD--8"
         duration: 134
+      - id: "W9enTdOhKYE"
         title: "Firefox Profilemaker, erweiterte Einstellungen in Firefox"
         description:
         type: youtube
@@ -91,7 +92,6 @@ sections:
         type: youtube
         video_id: "lX7ZJghgGgg"
         duration: 551
-      - id: "W9enTdOhKYE"
       - id: "FYwbgTci3pI"
         title: "Die Google Datenschutzerklärung kurz durchleuchtet"
         description:
