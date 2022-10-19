@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pb4apqIMKvCz37t_dLznMm
-title: "Datenvisualisierung / Data Visualization"
+title: "Datenvisualisierung"
 description:
 category:
 language: de
@@ -11,89 +11,89 @@ requirements: []
 last_update: 1665507531
 sections:
   - id: section
-    title: "Datenvisualisierung / Data Visualization"
+    title: "Datenvisualisierung"
     description:
     lectures:
       - id: "Eo8b3Y2ibvY"
-        title: "Plotly #1 - hübsche Grafiken mit Python erstellen: Daten visualisieren"
+        title: "hübsche Grafiken mit Python erstellen: Daten visualisieren"
         description:
         type: youtube
         video_id: "Eo8b3Y2ibvY"
         duration: 514
       - id: "tMW5yWpo7H0"
-        title: "Plotly #2 - Graph Objects vs Dictionaries"
+        title: "Graph Objects vs Dictionaries"
         description:
         type: youtube
         video_id: "tMW5yWpo7H0"
         duration: 587
       - id: "JnOM7s1BSN8"
-        title: "Plotly #3 - Scatter Plots mit Express"
+        title: "Scatter Plots mit Express"
         description:
         type: youtube
         video_id: "JnOM7s1BSN8"
         duration: 615
       - id: "H0VPGq0RcZU"
-        title: "Plotly #4 - Scatter Plots mit Fehlern"
+        title: "Scatter Plots mit Fehlern"
         description:
         type: youtube
         video_id: "H0VPGq0RcZU"
         duration: 197
       - id: "6sVXa1gfIbA"
-        title: "Plotly #5 - Bar Diagramme mit Express"
+        title: "Bar Diagramme mit Express"
         description:
         type: youtube
         video_id: "6sVXa1gfIbA"
         duration: 718
       - id: "a982sb3bDD0"
-        title: "Plotly #6 - Scatter Matrix - perfekt zum Überblick verschaffen"
+        title: "Scatter Matrix - perfekt zum Überblick verschaffen"
         description:
         type: youtube
         video_id: "a982sb3bDD0"
         duration: 632
       - id: "r4GdOcQLbeY"
-        title: "Plotly #7 - Parallel Graphen"
+        title: "Parallel-Graphen"
         description:
         type: youtube
         video_id: "r4GdOcQLbeY"
         duration: 719
       - id: "EMMLaY2GSX0"
-        title: "Plotly #8 - Animationen in Scatter Plots und mehr fortgeschrittene Themen"
+        title: "Animationen in Scatter Plots und mehr fortgeschrittene Themen"
         description:
         type: youtube
         video_id: "EMMLaY2GSX0"
         duration: 727
       - id: "lej3-XxmAr4"
-        title: "Plotly #9 - Linien und Flächen Plots"
+        title: "Linien und Flächen Plots"
         description:
         type: youtube
         video_id: "lej3-XxmAr4"
         duration: 731
       - id: "h2YYjgG_LtI"
-        title: "Plotly #10 - Kuchen und Sunburst Diagramme"
+        title: "Kuchen und Sunburst Diagramme"
         description:
         type: youtube
         video_id: "h2YYjgG_LtI"
         duration: 868
       - id: "knBjYw7e6z4"
-        title: "Plotly #11 - Histogramme erstellen"
+        title: "Histogramme erstellen"
         description:
         type: youtube
         video_id: "knBjYw7e6z4"
         duration: 647
       - id: "IXOE-IPFuFc"
-        title: "Plotly #12 - Histogramme mit weiterverwendbaren Counts"
+        title: "Histogramme mit weiterverwendbaren Counts"
         description:
         type: youtube
         video_id: "IXOE-IPFuFc"
         duration: 339
       - id: "XkE6YRR6voU"
-        title: "Plotly #13 - fortgeschrittene Histogramme"
+        title: "fortgeschrittene Histogramme"
         description:
         type: youtube
         video_id: "XkE6YRR6voU"
         duration: 598
       - id: "dXPIayOZBQA"
-        title: "Plotly #14 - Templates"
+        title: "Templates"
         description:
         type: youtube
         video_id: "dXPIayOZBQA"
