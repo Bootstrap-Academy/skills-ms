@@ -21,7 +21,7 @@ sections:
         video_id: "wI9yE7ZIbMg"
         duration: 1015
       - id: "vXrBTD8adW0"
-        title: "Eine Website für Stable Diffusion [Dall E Ersatz]"
+        title: "Eine Web UI für Stable Diffusion [Dall E Ersatz]"
         description:
         type: youtube
         video_id: "vXrBTD8adW0"

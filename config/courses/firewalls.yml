@@ -92,3 +92,15 @@ sections:
         type: youtube
         video_id: "F9uMNMl-GAw"
         duration: 813
+      - id: "pLynrwMoorY"
+        title: "OpnSense: Wireguard VPN [Hetzner Server]"
+        description:
+        type: youtube
+        video_id: "pLynrwMoorY"
+        duration: 1459
+      - id: "jGGrOQT6kqs"
+        title: "OpnSense: Internes Netzwerk, private Webservices via VPN [Hetzner Server]"
+        description:
+        type: youtube
+        video_id: "jGGrOQT6kqs"
+        duration: 950
