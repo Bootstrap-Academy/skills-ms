@@ -238,3 +238,465 @@ sections:
         type: youtube
         video_id: "gt3FV9YhTts"
         duration: 494
+      - id: "2TA-Gcs5XFs"
+        title: "Programmieren Lernen #37 - TypeCasts"
+        description:
+        type: youtube
+        video_id: "2TA-Gcs5XFs"
+        duration: 543
+      - id: "3k3Pq3pJlHo"
+        title: "Programmieren Lernen #38 - instanceof und typeof"
+        description:
+        type: youtube
+        video_id: "3k3Pq3pJlHo"
+        duration: 268
+      - id: "gDXHBqRJ3lM"
+        title: "Programmieren Lernen #39 - Überschreiben von Methoden"
+        description:
+        type: youtube
+        video_id: "gDXHBqRJ3lM"
+        duration: 329
+      - id: "Rcnai3U0RcE"
+        title: "Programmieren Lernen #40 - Enums"
+        description:
+        type: youtube
+        video_id: "Rcnai3U0RcE"
+        duration: 227
+      - id: "pqwBUimLMYY"
+        title: "Programmieren Lernen #41 - Operatoren überschreiben"
+        description:
+        type: youtube
+        video_id: "pqwBUimLMYY"
+        duration: 376
+      - id: "Ktfjm9caHxc"
+        title: "Programmieren Lernen #42 - Super"
+        description:
+        type: youtube
+        video_id: "Ktfjm9caHxc"
+        duration: 351
+      - id: "nj7YcDQvTHU"
+        title: "Programmieren Lernen #43 - Interfaces"
+        description:
+        type: youtube
+        video_id: "nj7YcDQvTHU"
+        duration: 447
+      - id: "pnyTVFITVoY"
+        title: "Programmieren Lernen #44 - Mehrfachvererbung und das Diamantenproblem"
+        description:
+        type: youtube
+        video_id: "pnyTVFITVoY"
+        duration: 424
+      - id: "ofkuSg6dUf4"
+        title: "Programmieren Lernen #45 - Abstrakte Klassen"
+        description:
+        type: youtube
+        video_id: "ofkuSg6dUf4"
+        duration: 298
+      - id: "8UKrmsB4DiY"
+        title: "Programmieren Lernen #46 - Der Zugriffsmodifikator protected"
+        description:
+        type: youtube
+        video_id: "8UKrmsB4DiY"
+        duration: 195
+      - id: "Pmz_M92miP8"
+        title: "Programmieren Lernen #47 - statische innere Klassen"
+        description:
+        type: youtube
+        video_id: "Pmz_M92miP8"
+        duration: 478
+      - id: "b3V73ya2FS0"
+        title: "Programmieren Lernen #48 - innere Klassen"
+        description:
+        type: youtube
+        video_id: "b3V73ya2FS0"
+        duration: 359
+      - id: "VET4R9hd5ks"
+        title: "Programmieren Lernen #49 - anonyme innere Klassen"
+        description:
+        type: youtube
+        video_id: "VET4R9hd5ks"
+        duration: 257
+      - id: "Da2J0exYRN0"
+        title: "Programmieren Lernen #50 - Module"
+        description:
+        type: youtube
+        video_id: "Da2J0exYRN0"
+        duration: 417
+      - id: "zDxv2kI575Q"
+        title: "Programmieren Lernen #51 - Dynamic vs Static Scoping"
+        description:
+        type: youtube
+        video_id: "zDxv2kI575Q"
+        duration: 460
+      - id: "TWcosPyPfrY"
+        title: "Programmieren Lernen #52 - Mixins"
+        description:
+        type: youtube
+        video_id: "TWcosPyPfrY"
+        duration: 301
+      - id: "Bfr0-t7lXVs"
+        title: "Programmieren Lernen #53 - Generics"
+        description:
+        type: youtube
+        video_id: "Bfr0-t7lXVs"
+        duration: 516
+      - id: "w43Mhmr1_ec"
+        title: "Programmieren Lernen #54 - generische Funktionen"
+        description:
+        type: youtube
+        video_id: "w43Mhmr1_ec"
+        duration: 575
+      - id: "tcj7g_Q9Wnc"
+        title: "Programmieren Lernen #55 - Typschranken"
+        description:
+        type: youtube
+        video_id: "tcj7g_Q9Wnc"
+        duration: 304
+      - id: "d50Nir52aS8"
+        title: "Programmieren Lernen #56 - Prozesse vs Threads"
+        description:
+        type: youtube
+        video_id: "d50Nir52aS8"
+        duration: 702
+      - id: "OzyV_tTlcZg"
+        title: "Programmieren Lernen #57 - Threads erstellen"
+        description:
+        type: youtube
+        video_id: "OzyV_tTlcZg"
+        duration: 461
+      - id: "5AYVw_YokEI"
+        title: "Programmieren Lernen #58 - Nebenläufigkeit von Threads"
+        description:
+        type: youtube
+        video_id: "5AYVw_YokEI"
+        duration: 328
+      - id: "8aNB2O9BtRU"
+        title: "Programmieren Lernen #59 - Atomare Operationen"
+        description:
+        type: youtube
+        video_id: "8aNB2O9BtRU"
+        duration: 334
+      - id: "AdzCb97qqRY"
+        title: "Programmieren Lernen #60 - synchronized und locks"
+        description:
+        type: youtube
+        video_id: "AdzCb97qqRY"
+        duration: 451
+      - id: "p2OEUX8tzLE"
+        title: "Programmieren Lernen #61 - Semaphoren"
+        description:
+        type: youtube
+        video_id: "p2OEUX8tzLE"
+        duration: 154
+      - id: "uy5X4iXFLD0"
+        title: "Programmieren Lernen #62 - Deadlocks"
+        description:
+        type: youtube
+        video_id: "uy5X4iXFLD0"
+        duration: 414
+      - id: "l-OOim0p3bE"
+        title: "Programmieren Lernen #63 - Concurrent Programming Languages"
+        description:
+        type: youtube
+        video_id: "l-OOim0p3bE"
+        duration: 374
+      - id: "ThAU874F3cs"
+        title: "Programmieren Lernen #64 - Actors und Message Passing"
+        description:
+        type: youtube
+        video_id: "ThAU874F3cs"
+        duration: 349
+      - id: "fjlotlmfH7U"
+        title: "Programmieren Lernen #65 - Events"
+        description:
+        type: youtube
+        video_id: "fjlotlmfH7U"
+        duration: 322
+      - id: "z6DQQhlQrI0"
+        title: "Programmieren Lernen #66 - Event Driven Development"
+        description:
+        type: youtube
+        video_id: "z6DQQhlQrI0"
+        duration: 401
+      - id: "t65-68pBfRA"
+        title: "Programmieren Lernen #67 - Debugging und Breakpoints"
+        description:
+        type: youtube
+        video_id: "t65-68pBfRA"
+        duration: 594
+      - id: "RhNBE6o7tJU"
+        title: "Programmieren Lernen #68 - Testen"
+        description:
+        type: youtube
+        video_id: "RhNBE6o7tJU"
+        duration: 867
+      - id: "f231K1LjKMU"
+        title: "Programmieren Lernen #69 - Exceptions"
+        description:
+        type: youtube
+        video_id: "f231K1LjKMU"
+        duration: 599
+      - id: "cL8xtQ1_6HU"
+        title: "Programmieren Lernen #70 - eigene Exceptions"
+        description:
+        type: youtube
+        video_id: "cL8xtQ1_6HU"
+        duration: 484
+      - id: "EZ1atCGFhjw"
+        title: "Programmieren Lernen #71 - RegEx - Reguläre Ausdrücke"
+        description:
+        type: youtube
+        video_id: "EZ1atCGFhjw"
+        duration: 761
+      - id: "kubXOU01Ws8"
+        title: "Programmieren Lernen #72 - Vektoren"
+        description:
+        type: youtube
+        video_id: "kubXOU01Ws8"
+        duration: 482
+      - id: "_LF3yUium9o"
+        title: "Programmieren Lernen #73 - Zufall"
+        description:
+        type: youtube
+        video_id: "_LF3yUium9o"
+        duration: 524
+      - id: "TrOk3FNv-8c"
+        title: "Programmieren Lernen #74 - Dateien"
+        description:
+        type: youtube
+        video_id: "TrOk3FNv-8c"
+        duration: 716
+      - id: "RMS9WGEpBzI"
+        title: "Programmieren Lernen #75 - Dateien - Modi"
+        description:
+        type: youtube
+        video_id: "RMS9WGEpBzI"
+        duration: 498
+      - id: "pjGctthnDXI"
+        title: "Programmieren Lernen #76 - Ascii und Unicode"
+        description:
+        type: youtube
+        video_id: "pjGctthnDXI"
+        duration: 487
+      - id: "-_OEWwkJNqQ"
+        title: "Programmieren Lernen #77 - Binäre Dateien"
+        description:
+        type: youtube
+        video_id: "-_OEWwkJNqQ"
+        duration: 299
+      - id: "RM4oMOuzkEA"
+        title: "Programmieren Lernen #78 - Objekt Serialisierung"
+        description:
+        type: youtube
+        video_id: "RM4oMOuzkEA"
+        duration: 337
+      - id: "GRKkyF6Bkok"
+        title: "Programmieren Lernen #79 - XML und JSON"
+        description:
+        type: youtube
+        video_id: "GRKkyF6Bkok"
+        duration: 627
+      - id: "ED4nCctxfDo"
+        title: "Programmieren Lernen #80 - Flushing"
+        description:
+        type: youtube
+        video_id: "ED4nCctxfDo"
+        duration: 287
+      - id: "9H5INP4TNj8"
+        title: "Programmieren Lernen #81 - Absolute und Relative Pfade"
+        description:
+        type: youtube
+        video_id: "9H5INP4TNj8"
+        duration: 578
+      - id: "pHMHbI4cI6o"
+        title: "Programmieren Lernen #82 - Logging"
+        description:
+        type: youtube
+        video_id: "pHMHbI4cI6o"
+        duration: 448
+      - id: "e73Bxm4HsAs"
+        title: "Programmieren Lernen #83 - Datum und Uhrzeit"
+        description:
+        type: youtube
+        video_id: "e73Bxm4HsAs"
+        duration: 857
+      - id: "RFT1ioXYm-U"
+        title: "Programmieren Lernen #84 - Networking"
+        description:
+        type: youtube
+        video_id: "RFT1ioXYm-U"
+        duration: 734
+      - id: "Dcf0Ag49c38"
+        title: "Programmieren Lernen #85 - Datenbanken"
+        description:
+        type: youtube
+        video_id: "Dcf0Ag49c38"
+        duration: 892
+      - id: "39GU7sZZrZA"
+        title: "Programmieren Lernen #86 - Fortgeschrittene Funktionale Programmierung:Inferierte Typen"
+        description:
+        type: youtube
+        video_id: "39GU7sZZrZA"
+        duration: 226
+      - id: "4NCeP9yclZM"
+        title: "Programmieren Lernen #87 - Typinferenz von Funktionen"
+        description:
+        type: youtube
+        video_id: "4NCeP9yclZM"
+        duration: 461
+      - id: "dUKIbPcXuyU"
+        title: "Programmieren Lernen #88 - Funktionen höherer Ordnung und Currying"
+        description:
+        type: youtube
+        video_id: "dUKIbPcXuyU"
+        duration: 564
+      - id: "eDOF0B6H2G4"
+        title: "Programmieren Lernen #89 - Pattern Matching mit Listen"
+        description:
+        type: youtube
+        video_id: "eDOF0B6H2G4"
+        duration: 323
+      - id: "1VIM4rml9BA"
+        title: "Programmieren Lernen #90 - Wildcards im Pattern Matching"
+        description:
+        type: youtube
+        video_id: "1VIM4rml9BA"
+        duration: 167
+      - id: "HoSWY0uK7to"
+        title: "Programmieren Lernen #91 - Pattern Guards"
+        description:
+        type: youtube
+        video_id: "HoSWY0uK7to"
+        duration: 148
+      - id: "bxsCzFHZrow"
+        title: "Programmieren Lernen #92 - Case Classes"
+        description:
+        type: youtube
+        video_id: "bxsCzFHZrow"
+        duration: 277
+      - id: "u5YWnmcTsn0"
+        title: "Programmieren Lernen #93 - Map"
+        description:
+        type: youtube
+        video_id: "u5YWnmcTsn0"
+        duration: 332
+      - id: "nVE68kbRypA"
+        title: "Programmieren Lernen #94 - Zip"
+        description:
+        type: youtube
+        video_id: "nVE68kbRypA"
+        duration: 321
+      - id: "M9-Scj76TTw"
+        title: "Programmieren Lernen #95 - Unzip"
+        description:
+        type: youtube
+        video_id: "M9-Scj76TTw"
+        duration: 127
+      - id: "eGhe755ryK8"
+        title: "Programmieren Lernen #96 - Filter"
+        description:
+        type: youtube
+        video_id: "eGhe755ryK8"
+        duration: 246
+      - id: "r6rRP5q1fTU"
+        title: "Programmieren Lernen #97 - Reduce"
+        description:
+        type: youtube
+        video_id: "r6rRP5q1fTU"
+        duration: 520
+      - id: "sdlQOyvKde8"
+        title: "Programmieren Lernen #98 - Generatoren"
+        description:
+        type: youtube
+        video_id: "sdlQOyvKde8"
+        duration: 342
+      - id: "ZRJ5BaSBQ8Q"
+        title: "Programmieren Lernen #99 - Dekoratoren"
+        description:
+        type: youtube
+        video_id: "ZRJ5BaSBQ8Q"
+        duration: 363
+      - id: "VobBC97dXcI"
+        title: "Programmieren Lernen #100 - List Comprehensions"
+        description:
+        type: youtube
+        video_id: "VobBC97dXcI"
+        duration: 418
+      - id: "vOBiHk6MwX0"
+        title: "Clean Code Tutorial #1 - Einführung und Struktur einer Klasse"
+        description:
+        type: youtube
+        video_id: "vOBiHk6MwX0"
+        duration: 410
+      - id: "Sa1slZ18nLo"
+        title: "Clean Code Tutorial #2 - Law of Demeter [German/Deutsch]"
+        description:
+        type: youtube
+        video_id: "Sa1slZ18nLo"
+        duration: 284
+      - id: "QKtGq66dN6U"
+        title: "Clean Code Tutorial #3 - Prinzip der kleinsten Überraschung"
+        description:
+        type: youtube
+        video_id: "QKtGq66dN6U"
+        duration: 274
+      - id: "OKHkGNue7fI"
+        title: "Clean Code Tutorial #4 - Kommentare"
+        description:
+        type: youtube
+        video_id: "OKHkGNue7fI"
+        duration: 339
+      - id: "HVSTWJwWC_w"
+        title: "Clean Code Tutorial #5 - DRY: dont repeat yourself"
+        description:
+        type: youtube
+        video_id: "HVSTWJwWC_w"
+        duration: 230
+      - id: "oKdy-hwdpw8"
+        title: "Clean Code Tutorial #6 - YAGNI"
+        description:
+        type: youtube
+        video_id: "oKdy-hwdpw8"
+        duration: 285
+      - id: "ju3NeXFCsaE"
+        title: "Clean Code Tutorial #7 - Single Responsibility"
+        description:
+        type: youtube
+        video_id: "ju3NeXFCsaE"
+        duration: 286
+      - id: "rLPNqlbUyIM"
+        title: "Clean Code Tutorial #8 - Open Closed"
+        description:
+        type: youtube
+        video_id: "rLPNqlbUyIM"
+        duration: 288
+      - id: "VQinjwq03rY"
+        title: "Clean Code Tutorial #9 - Liskovsches Substitutionsprinzip"
+        description:
+        type: youtube
+        video_id: "VQinjwq03rY"
+        duration: 429
+      - id: "adXGiewEY1c"
+        title: "Clean Code Tutorial #10 - Interface Segregation [Deutsch/German]"
+        description:
+        type: youtube
+        video_id: "adXGiewEY1c"
+        duration: 347
+      - id: "oC-y2TS0qbE"
+        title: "Clean Code Tutorial #11 - Dependency Inversion [Deutsch/German]"
+        description:
+        type: youtube
+        video_id: "oC-y2TS0qbE"
+        duration: 273
+      - id: "o5zdblAfZ6U"
+        title: "Clean Code Tutorial #12 - Single Level of Abstraction [Deutsch/German]"
+        description:
+        type: youtube
+        video_id: "o5zdblAfZ6U"
+        duration: 278
+      - id: "F8tAUuHJ43U"
+        title: "Clean Code Tutorial #13 - Refactoring und Pfadfinderregel"
+        description:
+        type: youtube
+        video_id: "F8tAUuHJ43U"
+        duration: 572
