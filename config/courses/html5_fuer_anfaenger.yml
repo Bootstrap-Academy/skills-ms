@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qIbKPeroqn3-BkUTWzYBT4
-title: "HTML 5 Tutorials für Anfänger"
+title: "HTML 5"
 description:
 category:
 language: de
@@ -11,95 +11,95 @@ requirements: []
 last_update: 1665506509
 sections:
   - id: section
-    title: "HTML 5 Tutorials für Anfänger"
+    title: "HTML 5"
     description:
     lectures:
       - id: "pM-G2sIFPkA"
-        title: "Webseite erstellen mit HTML 5 Tutorial #1 - Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "pM-G2sIFPkA"
         duration: 446
       - id: "9LmJjujyccw"
-        title: "HTML 5 Tutorial #2 - einfache Tags"
+        title: "einfache Tags"
         description:
         type: youtube
         video_id: "9LmJjujyccw"
         duration: 570
       - id: "5ZiAHCPy1jc"
-        title: "HTML 5 Tutorial #3 - Tags mit Attributen"
+        title: "Tags mit Attributen"
         description:
         type: youtube
         video_id: "5ZiAHCPy1jc"
         duration: 638
       - id: "cV5q-AbyeAo"
-        title: "HTML 5 Tutorial #4 - häufig verwendete Tags"
+        title: "häufig verwendete Tags"
         description:
         type: youtube
         video_id: "cV5q-AbyeAo"
         duration: 644
       - id: "s9iZxZUot3A"
-        title: "HTML 5 Tutorial #5 - Tabellen"
+        title: "Tabellen"
         description:
         type: youtube
         video_id: "s9iZxZUot3A"
         duration: 518
       - id: "HRJI36zZ29g"
-        title: "HTML 5 Tutorial #6 - Listen"
+        title: "Listen"
         description:
         type: youtube
         video_id: "HRJI36zZ29g"
         duration: 443
       - id: "Vj3DOvPwO0Q"
-        title: "HTML 5 Tutorial #7 - Struktur und CSS-Zugriffsmöglichkeiten"
+        title: "Struktur und CSS-Zugriffsmöglichkeiten"
         description:
         type: youtube
         video_id: "Vj3DOvPwO0Q"
         duration: 545
       - id: "B84vj38QULY"
-        title: "HTML 5 Tutorial #8 - IFrames"
+        title: "IFrames"
         description:
         type: youtube
         video_id: "B84vj38QULY"
         duration: 380
       - id: "-4BE31wiJAw"
-        title: "HTML 5 Tutorial #9 - Forms #1"
+        title: "Forms #1"
         description:
         type: youtube
         video_id: "-4BE31wiJAw"
         duration: 989
       - id: "ynSOu2rqj7g"
-        title: "HTML 5 Tutorial #10 - Forms #2"
+        title: "Forms #2"
         description:
         type: youtube
         video_id: "ynSOu2rqj7g"
         duration: 804
       - id: "5tKNGQ5iG4Q"
-        title: "HTML 5 Tutorial #11 - Forms #3"
+        title: "Forms #3"
         description:
         type: youtube
         video_id: "5tKNGQ5iG4Q"
         duration: 462
       - id: "t1UwtbrHDsA"
-        title: "HTML 5 Tutorial #12 - Meta-Tags"
+        title: "Meta-Tags"
         description:
         type: youtube
         video_id: "t1UwtbrHDsA"
         duration: 544
       - id: "ZoFUebsyMr8"
-        title: "HTML 5 Tutorial #13 - Videos und Untertitel"
+        title: "Videos und Untertitel"
         description:
         type: youtube
         video_id: "ZoFUebsyMr8"
         duration: 411
       - id: "i01EUb0VuPk"
-        title: "HTML 5 Tutorial #14 - Audio und YouTube einbetten"
+        title: "Audio und YouTube einbetten"
         description:
         type: youtube
         video_id: "i01EUb0VuPk"
         duration: 426
       - id: "CR4ZDwlIBtw"
-        title: "HTML 5 Tutorial #15 - SVG-Grafiken"
+        title: "SVG-Grafiken"
         description:
         type: youtube
         video_id: "CR4ZDwlIBtw"
