@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7r7ztDWJ66pMNRYaa_TUjKP
-title: "Logik Tutorial"
+title: "Formale Logik"
 description:
 category:
 language: de
@@ -11,215 +11,231 @@ requirements: []
 last_update: 1665506249
 sections:
   - id: section
-    title: "Logik Tutorial"
+    title: "Aussagenlogik"
     description:
     lectures:
       - id: "ABuhSltG8yY"
-        title: "Aussagenlogik #1 - Und, Oder, Nicht"
+        title: "Und, Oder, Nicht"
         description:
         type: youtube
         video_id: "ABuhSltG8yY"
         duration: 591
       - id: "4FvPKAlknfQ"
-        title: "Aussagenlogik #2 - Implikation und Äquivalenz"
+        title: "Implikation und Äquivalenz"
         description:
         type: youtube
         video_id: "4FvPKAlknfQ"
         duration: 514
       - id: "36KmhqViegI"
-        title: "Aussagenlogik #3 - XOR, NOR, NAND"
+        title: "XOR, NOR, NAND"
         description:
         type: youtube
         video_id: "36KmhqViegI"
         duration: 455
       - id: "365sKG0BKSE"
-        title: "Aussagenlogik #4 - Die De Morgan'schen Gesetze"
+        title: "Die De Morgan'schen Gesetze"
         description:
         type: youtube
         video_id: "365sKG0BKSE"
         duration: 370
       - id: "MhS_NHY-aRI"
-        title: "Aussagenlogik #5 - boolsche Funktionen"
+        title: "boolsche Funktionen"
         description:
         type: youtube
         video_id: "MhS_NHY-aRI"
         duration: 558
       - id: "vsCfuQZ4Tj4"
-        title: "Aussagenlogik #6 - Logische Grundgesetze"
+        title: "Logische Grundgesetze"
         description:
         type: youtube
         video_id: "vsCfuQZ4Tj4"
         duration: 806
       - id: "y7oPW-b-2DM"
-        title: "Aussagenlogik #7 - Normalformen"
+        title: "Normalformen"
         description:
         type: youtube
         video_id: "y7oPW-b-2DM"
         duration: 619
       - id: "N9VISlcJhQE"
-        title: "Aussagenlogik #8 - Vollständige Normalformen aus Wahrheitstabelle"
+        title: "Vollständige Normalformen aus Wahrheitstabelle"
         description:
         type: youtube
         video_id: "N9VISlcJhQE"
         duration: 704
       - id: "5anTmbtGSjk"
-        title: "Aussagenlogik #9 - Normalformen umwandeln"
+        title: "Normalformen umwandeln"
         description:
         type: youtube
         video_id: "5anTmbtGSjk"
         duration: 833
       - id: "1J1wtrEVUtw"
-        title: "Aussagenlogik #10 - Shannon Formeln, Bäume und deren Reduktion"
+        title: "Shannon Formeln, Bäume und deren Reduktion"
         description:
         type: youtube
         video_id: "1J1wtrEVUtw"
         duration: 777
       - id: "N8sK28aWYyQ"
-        title: "Aussagenlogik #11 - Basen"
+        title: "Basen"
         description:
         type: youtube
         video_id: "N8sK28aWYyQ"
         duration: 222
       - id: "gNGaJzUS0KY"
-        title: "Aussagenlogik #12 - Metasprache und das Craigsche Interpolationslemma"
+        title: "Metasprache und das Craigsche Interpolationslemma"
         description:
         type: youtube
         video_id: "gNGaJzUS0KY"
         duration: 759
       - id: "keILzTb0Soo"
-        title: "Aussagenlogik #13 - SatSolving und der DPLL Algorithmus"
+        title: "SatSolving und der DPLL Algorithmus"
         description:
         type: youtube
         video_id: "keILzTb0Soo"
         duration: 1762
       - id: "tevFX3e0Tj8"
-        title: "Java feat Logik Tutorial - Sudokusolver mit Sat4J"
+        title: "Ein Sudokusolver in Java mit Sat4J"
         description:
         type: youtube
         video_id: "tevFX3e0Tj8"
         duration: 2879
       - id: "rcAZ8oIvcUY"
-        title: "Aussagenlogik #15 - Modelle, Interpretationen, Folgerungen und Äquivalenz"
+        title: "Modelle, Interpretationen, Folgerungen und Äquivalenz"
         description:
         type: youtube
         video_id: "rcAZ8oIvcUY"
         duration: 894
       - id: "OG8haxPgIgc"
-        title: "Aussagenlogik Bonus - Horn Formeln und der Markierungsalgorithmus"
+        title: "Horn Formeln und der Markierungsalgorithmus"
         description:
         type: youtube
         video_id: "OG8haxPgIgc"
         duration: 585
+  - id: section2
+    title: "Prädikatenlogik"
+    description:
+    lectures:
       - id: "Y4tfUA62mKk"
-        title: "Prädikatenlogik erster Stufe #1 - Quantoren"
+        title: "Quantoren"
         description:
         type: youtube
         video_id: "Y4tfUA62mKk"
         duration: 756
       - id: "oTBKRKC2dDE"
-        title: "Prädikatenlogik #2 - Funktions- und Prädikatensymbole"
+        title: "Funktions- und Prädikatensymbole"
         description:
         type: youtube
         video_id: "oTBKRKC2dDE"
         duration: 1044
       - id: "--tfLmTGS4U"
-        title: "Prädikatenlogik #3 - Ein Beispielrätsel"
+        title: "Ein Beispielrätsel"
         description:
         type: youtube
         video_id: "--tfLmTGS4U"
         duration: 770
       - id: "LhjaxFBZYog"
-        title: "Prädikatenlogik #4 - Freie und gebundene Variablen"
+        title: "Freie und gebundene Variablen"
         description:
         type: youtube
         video_id: "LhjaxFBZYog"
         duration: 618
       - id: "2ITUIJhiRMQ"
-        title: "Prädikatenlogik #5 - Substitutionen"
+        title: "Substitutionen"
         description:
         type: youtube
         video_id: "2ITUIJhiRMQ"
         duration: 550
       - id: "A2ch63AYO5Y"
-        title: "Prädikatenlogik #6 - Unifikation"
+        title: "Unifikation"
         description:
         type: youtube
         video_id: "A2ch63AYO5Y"
         duration: 649
       - id: "6obfErOT0WU"
-        title: "Prädikatenlogik #7 - Normalformen"
+        title: "Normalformen"
         description:
         type: youtube
         video_id: "6obfErOT0WU"
         duration: 290
       - id: "GpZ9SbRTEZA"
-        title: "Prädikatenlogik #8 - Die pränexe Normalform"
+        title: "Die pränexe Normalform"
         description:
         type: youtube
         video_id: "GpZ9SbRTEZA"
         duration: 364
       - id: "SGrIrYkNSaU"
-        title: "Prädikatenlogik #9 - Skolemnormalform"
+        title: "Skolemnormalform"
         description:
         type: youtube
         video_id: "SGrIrYkNSaU"
         duration: 519
+  - id: section3
+    title: "Kalküle"
+    description:
+    lectures:
       - id: "Y0_51xizzCo"
-        title: "Logik Tutorial #25 - Der Hilbertkalkül #1"
+        title: "Der Hilbertkalkül #1"
         description:
         type: youtube
         video_id: "Y0_51xizzCo"
         duration: 1076
       - id: "LvSEglTwlUs"
-        title: "Logik Tutorial #26 - Der Hilbertkalkül #2"
+        title: "Der Hilbertkalkül #2"
         description:
         type: youtube
         video_id: "LvSEglTwlUs"
         duration: 682
       - id: "fVNoVGACo2o"
-        title: "Logik Tutorial #27 - Der Hilbertkalkül #3"
+        title: "Der Hilbertkalkül #3"
         description:
         type: youtube
         video_id: "fVNoVGACo2o"
         duration: 1202
       - id: "bUwRfrfrsgc"
-        title: "Logik Tutorial #28 - Resolutionskalkül #1"
+        title: "Resolutionskalkül #1"
         description:
         type: youtube
         video_id: "bUwRfrfrsgc"
         duration: 332
       - id: "RbQhqSNPmqw"
-        title: "Logik Tutorial #32 - Reduktionssysteme"
+        title: "Reduktionssysteme"
         description:
         type: youtube
         video_id: "RbQhqSNPmqw"
         duration: 896
+  - id: section4
+    title: "Weitere Logiken"
+    description:
+    lectures:
       - id: "4tbuQrrvUvg"
-        title: "Logik Tutorial #33 - Modallogik"
+        title: "Modallogik"
         description:
         type: youtube
         video_id: "4tbuQrrvUvg"
         duration: 508
       - id: "U-nBLdYg0iA"
-        title: "Logik Tutorial #34 - Lineare Temporal-Logik (LTL)"
+        title: "Lineare Temporal-Logik (LTL)"
         description:
         type: youtube
         video_id: "U-nBLdYg0iA"
         duration: 523
       - id: "TwdeZDvArGg"
-        title: "Logik Tutorial #35 - Fuzzy Logic"
+        title: "Fuzzy Logic"
         description:
         type: youtube
         video_id: "TwdeZDvArGg"
         duration: 384
+  - id: section5
+    title: "Extras"
+    description:
+    lectures:
       - id: "hOoa0KiyspQ"
-        title: "Logik Bonus - Der Sequenzenkalkül der Aussagenlogik"
+        title: "Der Sequenzenkalkül der Aussagenlogik"
         description:
         type: youtube
         video_id: "hOoa0KiyspQ"
         duration: 1086
       - id: "amdZMtiFNU8"
-        title: "Logik Bonus - Der Sequenzenkalkül der Prädikatenlogik"
+        title: "Der Sequenzenkalkül der Prädikatenlogik"
         description:
         type: youtube
         video_id: "amdZMtiFNU8"
