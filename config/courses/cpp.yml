@@ -298,7 +298,7 @@ sections:
         type: youtube
         video_id: "NCa-QKf5MZ8"
         duration: 301
-  - id: section
+  - id: section7
     title: "Parallelismus und Concurrency"
     description:
     lectures:
