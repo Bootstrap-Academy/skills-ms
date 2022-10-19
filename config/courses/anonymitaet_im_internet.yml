@@ -14,44 +14,50 @@ sections:
     title: "Anonymität im Internet"
     description:
     lectures:
+      - id: "ecmMXWLudpI"
+        title: "Ich habe nichts zu verbergen: das digitale Missverständnis des 21. Jahrhunderts"
+        description:
+        type: youtube
+        video_id: "ecmMXWLudpI"
+        duration: 1327
       - id: "6bpac1NcrZM"
-        title: "Guide zur Anonymität im Internet #1 - Der Inkognitomodus"
+        title: "Der Inkognitomodus"
         description:
         type: youtube
         video_id: "6bpac1NcrZM"
         duration: 420
       - id: "gGe-3-pw_nA"
-        title: "Guide zur Anonymität im Internet #2 - IP, Proxy, VPN und Tor"
+        title: "IP, Proxy, VPN und Tor"
         description:
         type: youtube
         video_id: "gGe-3-pw_nA"
         duration: 697
       - id: "wdPVt6m8wuA"
-        title: "Guide zur Anonymität im Internet #3 - Browserfingerprint"
+        title: "Browserfingerprint"
         description:
         type: youtube
         video_id: "wdPVt6m8wuA"
         duration: 889
       - id: "dX-hUxsdCX0"
-        title: "Anonymität im Internet #4 - Verschlüsseln mit AES"
+        title: "Verschlüsseln mit AES"
         description:
         type: youtube
         video_id: "dX-hUxsdCX0"
         duration: 449
       - id: "yQJSQFxCHn0"
-        title: "Anonymität im Internet #5 - Verschlüsseln mit PGP"
+        title: "Verschlüsseln mit PGP"
         description:
         type: youtube
         video_id: "yQJSQFxCHn0"
         duration: 761
       - id: "eyYQacf0gck"
-        title: "Anonymität im Internet #6 - Emails PGP-Verschlüsseln mit Enigmail"
+        title: "Emails PGP-Verschlüsseln mit Enigmail"
         description:
         type: youtube
         video_id: "eyYQacf0gck"
         duration: 260
       - id: "Jz9OTwqZssI"
-        title: "Anonymität im Internet #7 - Verschlüsseln mit Truecrypt"
+        title: "Verschlüsseln mit Truecrypt"
         description:
         type: youtube
         video_id: "Jz9OTwqZssI"
@@ -74,38 +80,26 @@ sections:
         type: youtube
         video_id: "ol3zJAQD--8"
         duration: 134
-      - id: "lX7ZJghgGgg"
-        title: "Anonym im Netz Tutorial #6 - die Windows Datenschutzerklärung"
-        description:
-        type: youtube
-        video_id: "lX7ZJghgGgg"
-        duration: 551
       - id: "W9enTdOhKYE"
-        title: "Anonym im Netz Tutorial #7 - Firefox Profilemaker, erweiterte Einstellungen in Firefox"
+        title: "Firefox Profilemaker, erweiterte Einstellungen in Firefox"
         description:
         type: youtube
         video_id: "W9enTdOhKYE"
         duration: 1525
-      - id: "ziGFK59haqY"
-        title: "Anonym im Netz Tutorial #8 - Angriff auf Proxies, Sender  und Empfängeranonymität"
+      - id: "lX7ZJghgGgg"
+        title: "die Windows Datenschutzerklärung"
         description:
         type: youtube
-        video_id: "ziGFK59haqY"
-        duration: 471
+        video_id: "lX7ZJghgGgg"
+        duration: 551
       - id: "FYwbgTci3pI"
-        title: "Anonym im Netz - Die Google Datenschutzerklärung kurz durchleuchtet"
+        title: "Die Google Datenschutzerklärung kurz durchleuchtet"
         description:
         type: youtube
         video_id: "FYwbgTci3pI"
         duration: 723
-      - id: "ecmMXWLudpI"
-        title: "Ich habe nichts zu verbergen: das digitale Missverständnis des 21. Jahrhunderts"
-        description:
-        type: youtube
-        video_id: "ecmMXWLudpI"
-        duration: 1327
       - id: "1lSvb71Uwes"
-        title: "Anonym im Netz - Datenschutz bei Apple: so wird's gemacht"
+        title: "Datenschutz bei Apple: so wird's gemacht"
         description:
         type: youtube
         video_id: "1lSvb71Uwes"
@@ -122,32 +116,38 @@ sections:
         type: youtube
         video_id: "eyDaalvuOYE"
         duration: 1195
+      - id: "ziGFK59haqY"
+        title: "Angriff auf Proxies, Sender  und Empfängeranonymität"
+        description:
+        type: youtube
+        video_id: "ziGFK59haqY"
+        duration: 471
       - id: "coJd7qo5_kg"
-        title: "Anonym im Netz Tutorial #9 - Mixes"
+        title: "Mixes"
         description:
         type: youtube
         video_id: "coJd7qo5_kg"
         duration: 347
       - id: "WHKsHmFUjks"
-        title: "Anonym im Netz Tutorial #10 - Onion Routing"
+        title: "Onion Routing"
         description:
         type: youtube
         video_id: "WHKsHmFUjks"
         duration: 434
       - id: "ijfvhdsfsmw"
-        title: "Anonym im Netz Tutorial #11 - Hidden Services"
+        title: "Hidden Services"
         description:
         type: youtube
         video_id: "ijfvhdsfsmw"
         duration: 512
       - id: "0O4yeQaABAw"
-        title: "Anonym im Netz Tutorial #12 - Bitmessage"
+        title: "Bitmessage"
         description:
         type: youtube
         video_id: "0O4yeQaABAw"
         duration: 524
       - id: "i2SP4eb7aHk"
-        title: "Anonym im Netz Tutorial #13 - Filesharing über TOR via Onionshare"
+        title: "Filesharing über TOR via Onionshare"
         description:
         type: youtube
         video_id: "i2SP4eb7aHk"
