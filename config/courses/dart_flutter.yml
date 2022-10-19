@@ -15,181 +15,181 @@ sections:
     description:
     lectures:
       - id: "S0SPcUrZaZQ"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #1 - Installation"
+        title: "Installation"
         description:
         type: youtube
         video_id: "S0SPcUrZaZQ"
         duration: 1586
       - id: "RtBQ_6OFTqQ"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #2 - Erklärung der Demo App"
+        title: "Erklärung der Demo App"
         description:
         type: youtube
         video_id: "RtBQ_6OFTqQ"
         duration: 957
       - id: "hwYjscZArtc"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #3 - Externe Pakete für eine erste eigene App"
+        title: "Externe Pakete für eine erste eigene App"
         description:
         type: youtube
         video_id: "hwYjscZArtc"
         duration: 662
       - id: "Eow-ISyijHY"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #4 - Klassenstruktur"
+        title: "Klassenstruktur"
         description:
         type: youtube
         video_id: "Eow-ISyijHY"
         duration: 483
       - id: "CQkd2L8LHLs"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #5 - Eine ListView hinzufügen"
+        title: "Eine ListView hinzufügen"
         description:
         type: youtube
         video_id: "CQkd2L8LHLs"
         duration: 1016
       - id: "DWlOik7zhiI"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #6 - Anklickbare Icons hinzufügen"
+        title: "Anklickbare Icons hinzufügen"
         description:
         type: youtube
         video_id: "DWlOik7zhiI"
         duration: 491
       - id: "S6HdPBstNOo"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #7 - Bilder und neue Widgets"
+        title: "Bilder und neue Widgets"
         description:
         type: youtube
         video_id: "S6HdPBstNOo"
         duration: 606
       - id: "Yfv1FLIzWWk"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #8 - Layouts: Rows und Columns"
+        title: "Layouts: Rows und Columns"
         description:
         type: youtube
         video_id: "Yfv1FLIzWWk"
         duration: 708
       - id: "WTiW7qt2CCk"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #9 - Achsen und Layouts"
+        title: "Achsen und Layouts"
         description:
         type: youtube
         video_id: "WTiW7qt2CCk"
         duration: 484
       - id: "o5PBbPicsBQ"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #10 - Quellcode ordentlich halten"
+        title: "Quellcode ordentlich halten"
         description:
         type: youtube
         video_id: "o5PBbPicsBQ"
         duration: 555
       - id: "sU13IpjzV3I"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #11 - Der Container"
+        title: "Der Container"
         description:
         type: youtube
         video_id: "sU13IpjzV3I"
         duration: 532
       - id: "umiNz0Kc3O4"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #12 - Die Gridview"
+        title: "Die Gridview"
         description:
         type: youtube
         video_id: "umiNz0Kc3O4"
         duration: 572
       - id: "Xz-VC1MlGr0"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #13 - Der Stack"
+        title: "Der Stack"
         description:
         type: youtube
         video_id: "Xz-VC1MlGr0"
         duration: 640
       - id: "JwIvUA6ihbc"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #14 - Material Cards"
+        title: "Material Cards"
         description:
         type: youtube
         video_id: "JwIvUA6ihbc"
         duration: 495
       - id: "hxE3ZvmPn9E"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #15 - HTTP Anfragen, Kommunikation mit dem Backend"
+        title: "HTTP Anfragen, Kommunikation mit dem Backend"
         description:
         type: youtube
         video_id: "hxE3ZvmPn9E"
         duration: 1201
       - id: "RMNZ123y6Zk"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #16 - JSON Objekte verarbeiten"
+        title: "JSON Objekte verarbeiten"
         description:
         type: youtube
         video_id: "RMNZ123y6Zk"
         duration: 721
       - id: "HkZ79bVAqp8"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #17 - Debug Tools"
+        title: "Debug Tools"
         description:
         type: youtube
         video_id: "HkZ79bVAqp8"
         duration: 703
       - id: "-RtixfTWR30"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #18 - Klickbare Buttons"
+        title: "Klickbare Buttons"
         description:
         type: youtube
         video_id: "-RtixfTWR30"
         duration: 540
       - id: "Zp8J9B_h6Uk"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #19 - Dismissable Items"
+        title: "Dismissable Items"
         description:
         type: youtube
         video_id: "Zp8J9B_h6Uk"
         duration: 853
       - id: "C5aZT9uvVwg"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #20 - Navigationsleiste"
+        title: "Navigationsleiste"
         description:
         type: youtube
         video_id: "C5aZT9uvVwg"
         duration: 776
       - id: "jmgr44o5wiY"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #21 - Bottom Nav Leiste"
+        title: "Bottom Nav Leiste"
         description:
         type: youtube
         video_id: "jmgr44o5wiY"
         duration: 907
       - id: "qemv5YGIjik"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #22 - Inhalte ändern über Navigationsleiste"
+        title: "Inhalte ändern über Navigationsleiste"
         description:
         type: youtube
         video_id: "qemv5YGIjik"
         duration: 472
       - id: "zaDZvM5KdXc"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #23 - Optionen Menü"
+        title: "Optionen Menü"
         description:
         type: youtube
         video_id: "zaDZvM5KdXc"
         duration: 729
       - id: "zOOlWg_ijKI"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #24 - TabBar"
+        title: "TabBar"
         description:
         type: youtube
         video_id: "zOOlWg_ijKI"
         duration: 724
       - id: "Keu9s4652Hc"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #25 - Bottom App Bar"
+        title: "Bottom App Bar"
         description:
         type: youtube
         video_id: "Keu9s4652Hc"
         duration: 909
       - id: "wxV8mfXQYCU"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #26 - Input Felder"
+        title: "Input Felder"
         description:
         type: youtube
         video_id: "wxV8mfXQYCU"
         duration: 945
       - id: "QsOXxSSm2bA"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #27 - Input Felder validation und submit"
+        title: "Input Felder validation und submit"
         description:
         type: youtube
         video_id: "QsOXxSSm2bA"
         duration: 1027
       - id: "xbA5e2uZClY"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #28 - Banner"
+        title: "Banner"
         description:
         type: youtube
         video_id: "xbA5e2uZClY"
         duration: 175
       - id: "l1kbFB1UL6M"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #29 - Animation zwischen Widgets"
+        title: "Animation zwischen Widgets"
         description:
         type: youtube
         video_id: "l1kbFB1UL6M"
         duration: 973
       - id: "TorSNwZRRuY"
-        title: "App Entwicklung mit Dart und Flutter Tutorial #30 - Animation"
+        title: "Animation"
         description:
         type: youtube
         video_id: "TorSNwZRRuY"
