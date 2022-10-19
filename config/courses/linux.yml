@@ -50,7 +50,7 @@ sections:
         type: youtube
         video_id: "J0LjWe36fyU"
         duration: 722
-  - id: section
+  - id: section2
     title: "Grundlagen im Linux Terminal"
     description:
     lectures:
@@ -108,7 +108,7 @@ sections:
         type: youtube
         video_id: "bIkXMVu2fvM"
         duration: 390
-  - id: section
+  - id: section3
     title: "Nützliches und Spaßiges"
     description:
     lectures:
@@ -190,7 +190,7 @@ sections:
         type: youtube
         video_id: "R6tpJojTedA"
         duration: 107
-  - id: section
+  - id: section4
     title: "PGP Verschlüsselung mit GnuPG"
     description:
     lectures:
@@ -212,7 +212,7 @@ sections:
         type: youtube
         video_id: "oitvqDTWQBs"
         duration: 673
-  - id: section
+  - id: section5
     title: "Mehr nützliche Features und Tools"
     description:
     lectures:
