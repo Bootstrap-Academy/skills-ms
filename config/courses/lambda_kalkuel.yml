@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oBz3PP5sGIkLnmBbw10UUP
-title: "Lambda Kalkül"
+title: "Der Lambda Kalkül"
 description:
 category:
 language: de
@@ -11,107 +11,107 @@ requirements: []
 last_update: 1665506696
 sections:
   - id: section
-    title: "Lambda Kalkül"
+    title: "Der Lambda Kalkül"
     description:
     lectures:
       - id: "KJmaND1V4r4"
-        title: "Lambda Kalkül #1 - Einführung - Theoretische Informatik"
+        title: "Einführung"
         description:
         type: youtube
         video_id: "KJmaND1V4r4"
         duration: 751
       - id: "CeU5CrvsPuw"
-        title: "Lambda Kalkül #2 - Alpha-Äquivalenz - Theoretische Informatik"
+        title: "Alpha-Äquivalenz"
         description:
         type: youtube
         video_id: "CeU5CrvsPuw"
         duration: 346
       - id: "9sFgP105EJg"
-        title: "Lambda Kalkül #3 - Beta Reduktion - Theoretische Informatik"
+        title: "Beta Reduktion"
         description:
         type: youtube
         video_id: "9sFgP105EJg"
         duration: 452
       - id: "rNmPopvqAzc"
-        title: "Lambda Kalkül #4 - Normalreihenfolge und Normalform - Theoretische Informatik"
+        title: "Normalreihenfolge und Normalform"
         description:
         type: youtube
         video_id: "rNmPopvqAzc"
         duration: 282
       - id: "LBLCiM34S6Q"
-        title: "Lambda Kalkül #5 - Call-by-Name und Call-by-Value - Theoretische Informatik"
+        title: "Call-by-Name und Call-by-Value"
         description:
         type: youtube
         video_id: "LBLCiM34S6Q"
         duration: 335
       - id: "qx5h6-uLork"
-        title: "Lambda Kalkül #6 - natürliche Zahlen - Church Zahlen - Theoretische Informatik"
+        title: "natürliche Zahlen - Church Zahlen"
         description:
         type: youtube
         video_id: "qx5h6-uLork"
         duration: 572
       - id: "L1YbhqcBXDw"
-        title: "Lambda Kalkül #7 - Addition von Church-Zahlen - Theoretische Informatik"
+        title: "Addition von Church-Zahlen"
         description:
         type: youtube
         video_id: "L1YbhqcBXDw"
         duration: 477
       - id: "dubTJQ-iGLk"
-        title: "Lambda Kalkül #8 - Multiplikation von Church Zahlen - Theoretische Informatik"
+        title: "Multiplikation von Church Zahlen"
         description:
         type: youtube
         video_id: "dubTJQ-iGLk"
         duration: 357
       - id: "r4V2fQv8y9g"
-        title: "Lambda Kalkül #9 - True, False, If und AND - Theoretische Informatik"
+        title: "True, False, If und AND"
         description:
         type: youtube
         video_id: "r4V2fQv8y9g"
         duration: 499
       - id: "xgQRhVQY3mM"
-        title: "Lambda Kalkül #10 - Typsysteme - Theoretische Informatik"
+        title: "Typsysteme"
         description:
         type: youtube
         video_id: "xgQRhVQY3mM"
         duration: 418
       - id: "dQnoxO4SQUI"
-        title: "Lambda Kalkül #11 - Typsysteme: Abstraktionsregel - Theoretische Informatik"
+        title: "Typsysteme: Abstraktionsregel"
         description:
         type: youtube
         video_id: "dQnoxO4SQUI"
         duration: 382
       - id: "raTfwW-A-PY"
-        title: "Lambda Kalkül #12 - Typsysteme: Applikationsregel - Theoretische Informatik"
+        title: "Typsysteme: Applikationsregel"
         description:
         type: youtube
         video_id: "raTfwW-A-PY"
         duration: 462
       - id: "mLt7PIypMvk"
-        title: "Lambda Kalkül #13 - Typsysteme: Konstanten- und Variablenregel - Theoretische Informatik"
+        title: "Typsysteme: Konstanten- und Variablenregel"
         description:
         type: youtube
         video_id: "mLt7PIypMvk"
         duration: 281
       - id: "F0x6_11fHqM"
-        title: "Lambda Kalkül #14 - Typsysteme: variable Typen - Theoretische Informatik"
+        title: "Typsysteme: variable Typen"
         description:
         type: youtube
         video_id: "F0x6_11fHqM"
         duration: 369
       - id: "ZL3kqMmMyZg"
-        title: "Lambda Kalkül #15 - Typsysteme: Let Regel - Theoretische Informatik"
+        title: "Typsysteme: Let Regel"
         description:
         type: youtube
         video_id: "ZL3kqMmMyZg"
         duration: 874
       - id: "FF-bmQBUzlM"
-        title: "Lambda Kalkül #16 - Typsysteme: Ein Beispielbaum - Theoretische Informatik"
+        title: "Typsysteme: Ein Beispielbaum"
         description:
         type: youtube
         video_id: "FF-bmQBUzlM"
         duration: 726
       - id: "Bx6-OoYk6H0"
-        title: "Lambda Kalkül #17 - Typsysteme: Unifikation - Theoretische Informatik"
+        title: "Typsysteme: Unifikation"
         description:
         type: youtube
         video_id: "Bx6-OoYk6H0"
