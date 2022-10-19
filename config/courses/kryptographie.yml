@@ -86,7 +86,7 @@ sections:
         type: youtube
         video_id: "ISBf3hNe3ME"
         duration: 414
-  - id: section
+  - id: section2
     title: "Symmetrische Kryptographie"
     description:
     lectures:
@@ -126,7 +126,7 @@ sections:
         type: youtube
         video_id: "Uf9QjoS-wOY"
         duration: 514
-  - id: section
+  - id: section3
     title: "Authentifizierung bei symmetrischer Verschlüsselung"
     description:
     lectures:
@@ -160,7 +160,7 @@ sections:
         type: youtube
         video_id: "4RtqOgyapg4"
         duration: 537
-  - id: section
+  - id: section4
     title: "Praktisch relevante symmetrische Verschlüsselungsverfahren"
     description:
     lectures:
@@ -194,7 +194,7 @@ sections:
         type: youtube
         video_id: "23H_kaE8DMk"
         duration: 616
-  - id: section
+  - id: section5
     title: "Asymmetrische Kryptographie"
     description:
     lectures:
@@ -342,7 +342,7 @@ sections:
         type: youtube
         video_id: "ToyLBOT_BaU"
         duration: 478
-  - id: section
+  - id: section6
     title: "Kurze Einführung zu Hashfunktionen"
     description:
     lectures:
@@ -376,7 +376,7 @@ sections:
         type: youtube
         video_id: "a72_qvh6tVE"
         duration: 546
-  - id: section
+  - id: section7
     title: "Digitale Signaturen"
     description:
     lectures:
@@ -596,7 +596,7 @@ sections:
         type: youtube
         video_id: "xd5fzxbvuok"
         duration: 1462
-  - id: section
+  - id: section8
     title: "Zero Knowledge und Commitments"
     description:
     lectures:
@@ -630,7 +630,7 @@ sections:
         type: youtube
         video_id: "P4bapsK7_iw"
         duration: 542
-  - id: section
+  - id: section9
     title: "Kryptoanalyse"
     description:
     lectures:
@@ -664,7 +664,7 @@ sections:
         type: youtube
         video_id: "yUZzJx-f19Y"
         duration: 412
-  - id: section
+  - id: section10
     title: "Bonus"
     description:
     lectures:
