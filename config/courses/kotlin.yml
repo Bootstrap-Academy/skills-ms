@@ -122,7 +122,7 @@ sections:
         type: youtube
         video_id: "tQFGCBEMJfw"
         duration: 480
-  - id: section
+  - id: section2
     title: "Besondere Features von Kotlin"
     description:
     lectures:
@@ -210,7 +210,7 @@ sections:
         type: youtube
         video_id: "ltHYzdNxR7c"
         duration: 330
-  - id: section
+  - id: section3
     title: "Grundlagen von funktionalem Kotlin"
     description:
     lectures:
@@ -244,7 +244,7 @@ sections:
         type: youtube
         video_id: "sKCbFVeJSLk"
         duration: 526
-  - id: section
+  - id: section4
     title: "Funktionale Programmierung: Besonders in Kotlin"
     description:
     lectures:
@@ -260,7 +260,7 @@ sections:
         type: youtube
         video_id: "CxYZMYniWT4"
         duration: 218
-  - id: section
+  - id: section5
     title: "Übungsblock zu Funktionen"
     description:
     lectures:
@@ -288,7 +288,7 @@ sections:
         type: youtube
         video_id: "yoE9Yw4Vma8"
         duration: 503
-  - id: section
+  - id: section6
     title: "Klassen und Objekte"
     description:
     lectures:
@@ -322,7 +322,7 @@ sections:
         type: youtube
         video_id: "XAVhjK6_7Q4"
         duration: 660
-  - id: section
+  - id: section7
     title: "Kotlin bei OOP"
     description:
     lectures:
@@ -410,7 +410,7 @@ sections:
         type: youtube
         video_id: "aulgd6WEdBM"
         duration: 305
-  - id: section
+  - id: section8
     title: "Collections"
     description:
     lectures:
@@ -570,7 +570,7 @@ sections:
         type: youtube
         video_id: "YUk4qnf5XHw"
         duration: 136
-  - id: section
+  - id: section9
     title: "Die Standard Library und Best Practice"
     description:
     lectures:
@@ -640,7 +640,7 @@ sections:
         type: youtube
         video_id: "pugNaQXeLX0"
         duration: 151
-  - id: section
+  - id: section10
     title: "Übungsprojekt"
     description:
     lectures:
@@ -680,7 +680,7 @@ sections:
         type: youtube
         video_id: "Oe8jV_yASiE"
         duration: 999
-  - id: section
+  - id: section11
     title: "Testing"
     description:
     lectures:
@@ -702,7 +702,7 @@ sections:
         type: youtube
         video_id: "lggXrf73W1w"
         duration: 606
-  - id: section
+  - id: section12
     title: "Fortgeschrittene Funktionale Programmierung"
     description:
     lectures:
@@ -730,7 +730,7 @@ sections:
         type: youtube
         video_id: "N6PHgmzeYhk"
         duration: 412
-  - id: section
+  - id: section13
     title: "Generics und fortgeschrittene OOP"
     description:
     lectures:
@@ -812,7 +812,7 @@ sections:
         type: youtube
         video_id: "5YdAvw_foAo"
         duration: 393
-  - id: section
+  - id: section14
     title: "Java Interoperabilität"
     description:
     lectures:
@@ -828,7 +828,7 @@ sections:
         type: youtube
         video_id: "JRQMfT7E1vg"
         duration: 221
-  - id: section
+  - id: section15
     title: "Bonus"
     description:
     lectures:
