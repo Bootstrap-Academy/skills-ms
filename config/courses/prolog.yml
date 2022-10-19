@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7q7ODiEAnq2EnsP-8LMGtfw
-title: "Prolog Tutorial Deutsch"
+title: "Prolog: Logische Programmierung"
 description:
 category:
 language: de
@@ -11,47 +11,47 @@ requirements: []
 last_update: 1665506685
 sections:
   - id: section
-    title: "Prolog Tutorial Deutsch"
+    title: "Prolog Programmierung"
     description:
     lectures:
       - id: "8iUYNp5Z45o"
-        title: "Prolog #1 - Einführung"
+        title: "Einführung"
         description:
         type: youtube
         video_id: "8iUYNp5Z45o"
         duration: 485
       - id: "9bCzsE-LamI"
-        title: "Prolog #2 - Regeln"
+        title: "Regeln"
         description:
         type: youtube
         video_id: "9bCzsE-LamI"
         duration: 569
       - id: "hpQYxISZC74"
-        title: "Prolog #3 - Die Großeltern von Robb Stark"
+        title: "Die Großeltern von Robb Stark"
         description:
         type: youtube
         video_id: "hpQYxISZC74"
         duration: 723
       - id: "DZeeXgOEjzs"
-        title: "Prolog #4 - Listen"
+        title: "Listen"
         description:
         type: youtube
         video_id: "DZeeXgOEjzs"
         duration: 772
       - id: "gyPChcbuok8"
-        title: "Prolog #5 - Zuweisungen"
+        title: "Zuweisungen"
         description:
         type: youtube
         video_id: "gyPChcbuok8"
         duration: 426
       - id: "tRYRwmkH9bA"
-        title: "Prolog #6 - Cuts"
+        title: "Cuts"
         description:
         type: youtube
         video_id: "tRYRwmkH9bA"
         duration: 516
       - id: "-TxFZmCq_no"
-        title: "Prolog #7 - Send + More = Money"
+        title: "Send + More = Money"
         description:
         type: youtube
         video_id: "-TxFZmCq_no"
