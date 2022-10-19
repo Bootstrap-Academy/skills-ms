@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pSbRnMtEG5XEdYVwJE5se9
-title: "DevOps Grundlagen"
+title: "DevOps"
 description:
 category:
 language: de
@@ -15,61 +15,61 @@ sections:
     description:
     lectures:
       - id: "YtQdxrbfYVE"
-        title: "DevOps Tutorial #1 - Was ist DevOps"
+        title: "Was ist DevOps"
         description:
         type: youtube
         video_id: "YtQdxrbfYVE"
         duration: 459
       - id: "npDTCy90BZI"
-        title: "DevOps Guide #2 - Das CAMS Modell"
+        title: "Das CAMS Modell"
         description:
         type: youtube
         video_id: "npDTCy90BZI"
         duration: 1036
       - id: "xY7qYF7Rql8"
-        title: "DevOps Guide #3 - The three ways [Deutsch]"
+        title: "The three ways"
         description:
         type: youtube
         video_id: "xY7qYF7Rql8"
         duration: 501
       - id: "YMJ_sdeDbFE"
-        title: "DevOps Guide #4 - CI/CD - Continuous Integration und Continuous Delivery"
+        title: "CI/CD - Continuous Integration und Continuous Delivery"
         description:
         type: youtube
         video_id: "YMJ_sdeDbFE"
         duration: 492
       - id: "Q73xlpx5fH4"
-        title: "DevOps Guide #5 - Testen"
+        title: "Testen"
         description:
         type: youtube
         video_id: "Q73xlpx5fH4"
         duration: 784
       - id: "CVlW_xJRJyQ"
-        title: "DevOps Guide #6 - Canary Deployment"
+        title: "Canary Deployment"
         description:
         type: youtube
         video_id: "CVlW_xJRJyQ"
         duration: 226
       - id: "5_KihxuO9sE"
-        title: "DevOps Guide #7 - Blue Green Deployment"
+        title: "Blue Green Deployment"
         description:
         type: youtube
         video_id: "5_KihxuO9sE"
         duration: 243
       - id: "kMNxhTSeUZk"
-        title: "DevOps Guide #8 - Immutable Deployment"
+        title: "Immutable Deployment"
         description:
         type: youtube
         video_id: "kMNxhTSeUZk"
         duration: 167
       - id: "xsZKoOtt-0c"
-        title: "DevOps Guide #9 - Monitoring"
+        title: "Monitoring"
         description:
         type: youtube
         video_id: "xsZKoOtt-0c"
         duration: 349
       - id: "7604cNfJfiU"
-        title: "DevOps Guide #10 - Das Post Mortem Gespräch - ein Beispiel für DevOps"
+        title: "Das Post Mortem Gespräch - ein Beispiel für DevOps"
         description:
         type: youtube
         video_id: "7604cNfJfiU"
