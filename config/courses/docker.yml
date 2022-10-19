@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oea6IDCLzpKe5XfLmWCwgr
-title: "Docker Tutorial"
+title: "Docker"
 description:
 category:
 language: de
@@ -11,11 +11,11 @@ requirements: []
 last_update: 1665507061
 sections:
   - id: section
-    title: "Docker Tutorial"
+    title: "Docker"
     description:
     lectures:
       - id: "avdVAfL8GPI"
-        title: "Docker Tutorial #1 - Warum ihr Docker braucht!"
+        title: "Warum ihr Docker braucht!"
         description:
         type: youtube
         video_id: "avdVAfL8GPI"
@@ -27,19 +27,19 @@ sections:
         video_id: "_KnVD65mEJE"
         duration: 996
       - id: "DisDkSqDCNc"
-        title: "Docker Tutorial #2 - Wie Docker arbeitet"
+        title: "Wie Docker arbeitet"
         description:
         type: youtube
         video_id: "DisDkSqDCNc"
         duration: 225
       - id: "prqcw-ijWHU"
-        title: "Docker Tutorial #3 - Docker unter Linux installieren"
+        title: "Docker unter Linux installieren"
         description:
         type: youtube
         video_id: "prqcw-ijWHU"
         duration: 759
       - id: "VV6EKMUg9Hk"
-        title: "Docker Tutorial #4 - Docker unter Windows installieren"
+        title: "Docker unter Windows installieren"
         description:
         type: youtube
         video_id: "VV6EKMUg9Hk"
@@ -51,229 +51,229 @@ sections:
         video_id: "bKyEecIGwJ0"
         duration: 652
       - id: "O-WZnE5Pu4A"
-        title: "Docker Tutorial #5 - Docker unter Mac installieren"
+        title: "Docker unter Mac installieren"
         description:
         type: youtube
         video_id: "O-WZnE5Pu4A"
         duration: 158
       - id: "ooj0bFwkV7Y"
-        title: "Docker Tutorial #6 - Docker Compose unter Linux installieren"
+        title: "Docker Compose unter Linux installieren"
         description:
         type: youtube
         video_id: "ooj0bFwkV7Y"
         duration: 187
       - id: "Sc6IL5oYu50"
-        title: "Docker Tutorial #7 - Die Installation überprüfen"
+        title: "Die Installation überprüfen"
         description:
         type: youtube
         video_id: "Sc6IL5oYu50"
         duration: 244
       - id: "oikJmNT1T0E"
-        title: "Docker Tutorial #8 - Eine Busybox starten"
+        title: "Eine Busybox starten"
         description:
         type: youtube
         video_id: "oikJmNT1T0E"
         duration: 685
       - id: "DdOV-3f2hT8"
-        title: "Docker Tutorial #9 - Befehle im inneren des Containers ausführen"
+        title: "Befehle im inneren des Containers ausführen"
         description:
         type: youtube
         video_id: "DdOV-3f2hT8"
         duration: 182
       - id: "e-smL7N3ALk"
-        title: "Docker Tutorial #10 - WebApps und Port Mapping"
+        title: "WebApps und Port Mapping"
         description:
         type: youtube
         video_id: "e-smL7N3ALk"
         duration: 327
       - id: "yfaspTvApNU"
-        title: "Docker Tutorial #11 - Der Detached Modus"
+        title: "Der Detached Modus"
         description:
         type: youtube
         video_id: "yfaspTvApNU"
         duration: 111
       - id: "KvRuH6KheNg"
-        title: "Docker Tutorial #12 - Eine Shell im Detached Mode erlangen"
+        title: "Eine Shell im Detached Mode erlangen"
         description:
         type: youtube
         video_id: "KvRuH6KheNg"
         duration: 356
       - id: "Dv--5NSZ91A"
-        title: "Docker Tutorial #13 - Dateien an Container übergeben"
+        title: "Dateien an Container übergeben"
         description:
         type: youtube
         video_id: "Dv--5NSZ91A"
         duration: 213
       - id: "ojREzIPCHbg"
-        title: "Docker Tutorial #14 - Container stoppen, Löschen von Images und Containern"
+        title: "Container stoppen, Löschen von Images und Containern"
         description:
         type: youtube
         video_id: "ojREzIPCHbg"
         duration: 280
       - id: "KXyD4K8ct1o"
-        title: "Docker Tutorial #15 - Container automatisch starten lassen"
+        title: "Container automatisch starten lassen"
         description:
         type: youtube
         video_id: "KXyD4K8ct1o"
         duration: 408
       - id: "5HQw92WNY20"
-        title: "Docker Tutorial #16 - Statistiken der laufenden Container"
+        title: "Statistiken der laufenden Container"
         description:
         type: youtube
         video_id: "5HQw92WNY20"
         duration: 172
       - id: "9k12DF-zuO4"
-        title: "Docker Tutorial #17 - Die Ressourcen eines Containers limitieren"
+        title: "Die Ressourcen eines Containers limitieren"
         description:
         type: youtube
         video_id: "9k12DF-zuO4"
         duration: 318
       - id: "1w1VFVyCGQ8"
-        title: "Docker Tutorial #18 - Logs ansehen"
+        title: "Logs ansehen"
         description:
         type: youtube
         video_id: "1w1VFVyCGQ8"
         duration: 112
       - id: "JwKPbh-6K_Q"
-        title: "Docker Tutorial #19 - In eine Datei loggen"
+        title: "In eine Datei loggen"
         description:
         type: youtube
         video_id: "JwKPbh-6K_Q"
         duration: 468
       - id: "eIHHFOE2D4A"
-        title: "Docker Tutorial #20 - Dockerfiles"
+        title: "Dockerfiles"
         description:
         type: youtube
         video_id: "eIHHFOE2D4A"
         duration: 498
       - id: "IlQVORxAs70"
-        title: "Docker Tutorial #21 - Dockerfiles builden und starten"
+        title: "Dockerfiles builden und starten"
         description:
         type: youtube
         video_id: "IlQVORxAs70"
         duration: 370
       - id: "3Fz4VvHgKmI"
-        title: "Docker Tutorial #22 - Images auf Docker Hub teilen"
+        title: "Images auf Docker Hub teilen"
         description:
         type: youtube
         video_id: "3Fz4VvHgKmI"
         duration: 281
       - id: "Lod-Hs7rGeE"
-        title: "Docker Tutorial #23 - Environment Variablen"
+        title: "Environment Variablen"
         description:
         type: youtube
         video_id: "Lod-Hs7rGeE"
         duration: 357
       - id: "HbQOF8CSp3o"
-        title: "Docker Tutorial #24 - Python Deployment mit Docker"
+        title: "Python Deployment mit Docker"
         description:
         type: youtube
         video_id: "HbQOF8CSp3o"
         duration: 336
       - id: "QXxVJHSpIZ4"
-        title: "Docker Tutorial #24 - Nodejs Deployment mit Docker"
+        title: "Nodejs Deployment mit Docker"
         description:
         type: youtube
         video_id: "QXxVJHSpIZ4"
         duration: 232
       - id: "Jn59zf63Ong"
-        title: "Docker Tutorial #25 - Ein Email Server mit MailCow"
+        title: "Ein Email Server mit MailCow"
         description:
         type: youtube
         video_id: "Jn59zf63Ong"
         duration: 600
       - id: "c_OEr4c8kmc"
-        title: "Docker Tutorial #26 - Wordpress mit Docker installieren"
+        title: "Wordpress mit Docker installieren"
         description:
         type: youtube
         video_id: "c_OEr4c8kmc"
         duration: 365
       - id: "iiGVw6Mw2_k"
-        title: "Docker Tutorial #27 - Eine eigene Cloud mit Nextcloud"
+        title: "Eine eigene Cloud mit Nextcloud"
         description:
         type: youtube
         video_id: "iiGVw6Mw2_k"
         duration: 237
       - id: "lEpxGWMkOk0"
-        title: "Docker Tutorial #28 - Mehr Optionen in Docker Compose Files"
+        title: "Mehr Optionen in Docker Compose Files"
         description:
         type: youtube
         video_id: "lEpxGWMkOk0"
         duration: 390
       - id: "vH7o3eAFLJ8"
-        title: "Docker Tutorial #29 - Swarms"
+        title: "Swarms"
         description:
         type: youtube
         video_id: "vH7o3eAFLJ8"
         duration: 166
       - id: "LXT8k1fro0Q"
-        title: "Docker Tutorial #30 - Docker Machine auf Linux installieren"
+        title: "Docker Machine auf Linux installieren"
         description:
         type: youtube
         video_id: "LXT8k1fro0Q"
         duration: 298
       - id: "bhzxOBFKERQ"
-        title: "Docker Tutorial #31 - Lokale virtuelle Maschinen erstellen"
+        title: "Lokale virtuelle Maschinen erstellen"
         description:
         type: youtube
         video_id: "bhzxOBFKERQ"
         duration: 366
       - id: "n2f2kWIGbkY"
-        title: "Docker Tutorial #32 - Zusätzliche Informationen über die VMs"
+        title: "Zusätzliche Informationen über die VMs"
         description:
         type: youtube
         video_id: "n2f2kWIGbkY"
         duration: 192
       - id: "QJCQLb3xhAI"
-        title: "Docker Tutorial #33 - Einen Swarm erstellen"
+        title: "Einen Swarm erstellen"
         description:
         type: youtube
         video_id: "QJCQLb3xhAI"
         duration: 335
       - id: "18u66b5dKb0"
-        title: "Docker Tutorial #34 - Eine App im Swarm hosten"
+        title: "Eine App im Swarm hosten"
         description:
         type: youtube
         video_id: "18u66b5dKb0"
         duration: 333
       - id: "tcuHLhwgKoU"
-        title: "Docker Tutorial #35 - Den Stack beenden, den Swarm verlassen"
+        title: "Den Stack beenden, den Swarm verlassen"
         description:
         type: youtube
         video_id: "tcuHLhwgKoU"
         duration: 246
       - id: "-LxLq2ZW00E"
-        title: "Docker Tutorial #36 - Ein Image nur auf dem Manager starten"
+        title: "Ein Image nur auf dem Manager starten"
         description:
         type: youtube
         video_id: "-LxLq2ZW00E"
         duration: 224
       - id: "UtjLSCQ5JXk"
-        title: "Docker Tutorial #37 - Einen einzelnen Service im Cluster veröffentlichen"
+        title: "Einen einzelnen Service im Cluster veröffentlichen"
         description:
         type: youtube
         video_id: "UtjLSCQ5JXk"
         duration: 213
       - id: "ac--_k2gLqk"
-        title: "Docker Tutorial #38 - Services update"
+        title: "Services update"
         description:
         type: youtube
         video_id: "ac--_k2gLqk"
         duration: 168
       - id: "VjgcxQlzpkI"
-        title: "Docker Tutorial #39 - Letzte Worte"
+        title: "Letzte Worte"
         description:
         type: youtube
         video_id: "VjgcxQlzpkI"
         duration: 152
       - id: "YYYT91RfkkU"
-        title: "Docker Tutorial Bonus - Joomla mit Docker aufsetzen"
+        title: "Joomla mit Docker aufsetzen"
         description:
         type: youtube
         video_id: "YYYT91RfkkU"
         duration: 402
       - id: "FgESFWtxFB0"
-        title: "Docker Tutorial Bonus - Docker Compose Dateiformat Version"
+        title: "Docker Compose Dateiformat Version"
         description:
         type: youtube
         video_id: "FgESFWtxFB0"
