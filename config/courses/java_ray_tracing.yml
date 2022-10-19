@@ -15,97 +15,97 @@ sections:
     description:
     lectures:
       - id: "qpb19vrBpJ4"
-        title: "Grafik in Java - Raytracing #1 - Setup und Einleitung"
+        title: "Setup und Einleitung"
         description:
         type: youtube
         video_id: "qpb19vrBpJ4"
         duration: 878
       - id: "6C9qtjliz3M"
-        title: "Grafik in Java - Raytracing #2 - Der erste Teil der Kamera"
+        title: "Der erste Teil der Kamera"
         description:
         type: youtube
         video_id: "6C9qtjliz3M"
         duration: 605
       - id: "qLHPcTYYr4A"
-        title: "Grafik in Java - Raytracing #3 - Die Vector-Klasse"
+        title: "Die Vector-Klasse"
         description:
         type: youtube
         video_id: "qLHPcTYYr4A"
         duration: 1016
       - id: "nfTFDLTzS2Y"
-        title: "Grafik in Java - Raytracing #4 - Der 2. Teil der Kamera"
+        title: "Der 2. Teil der Kamera"
         description:
         type: youtube
         video_id: "nfTFDLTzS2Y"
         duration: 700
       - id: "ZcIn6e_UdVs"
-        title: "Grafik in Java - Raytracing #5 - Teil 1 des Tracers"
+        title: "Teil 1 des Tracers"
         description:
         type: youtube
         video_id: "ZcIn6e_UdVs"
         duration: 649
       - id: "m_IeoWvSbQI"
-        title: "Grafik in Java - Raytracing #6 - Teil 2 des Tracers"
+        title: "Teil 2 des Tracers"
         description:
         type: youtube
         video_id: "m_IeoWvSbQI"
         duration: 527
       - id: "vjeU6aOntmY"
-        title: "Grafik in Java - Raytracing #7 - Schnitt mit einer Kugel"
+        title: "Schnitt mit einer Kugel"
         description:
         type: youtube
         video_id: "vjeU6aOntmY"
         duration: 986
       - id: "lVa2jdiqXqI"
-        title: "Grafik in Java - RayTracing #8 - Der erste Output"
+        title: "Der erste Output"
         description:
         type: youtube
         video_id: "lVa2jdiqXqI"
         duration: 1057
       - id: "BqmNviqfTCo"
-        title: "Grafik in Java - Raytracing #9 - Vorbereitungen für die Schattenberechnung"
+        title: "Vorbereitungen für die Schattenberechnung"
         description:
         type: youtube
         video_id: "BqmNviqfTCo"
         duration: 677
       - id: "R-_J-sFfUCc"
-        title: "Grafik in Java - Raytracing #10 - Schnittpunktposition und Normale einer Kugel"
+        title: "Schnittpunktposition und Normale einer Kugel"
         description:
         type: youtube
         video_id: "R-_J-sFfUCc"
         duration: 597
       - id: "ON8ZCpa4KWc"
-        title: "Grafik in Java - Raytracing #11 - Die Materialklasse"
+        title: "Die Materialklasse"
         description:
         type: youtube
         video_id: "ON8ZCpa4KWc"
         duration: 511
       - id: "352eWQJstzQ"
-        title: "Grafik in Java - Raytracing #12 - Licht ins Dunkle"
+        title: "Licht ins Dunkle"
         description:
         type: youtube
         video_id: "352eWQJstzQ"
         duration: 399
       - id: "FzeWe9BYrRI"
-        title: "Grafik in Java - Raytracing #13 - Schattenberechnung Teil 1"
+        title: "Schattenberechnung Teil 1"
         description:
         type: youtube
         video_id: "FzeWe9BYrRI"
         duration: 878
       - id: "UzHHkCrFxNY"
-        title: "Grafik in Java - Raytracing #14 - Phong Shading"
+        title: "Phong Shading"
         description:
         type: youtube
         video_id: "UzHHkCrFxNY"
         duration: 976
       - id: "_G_eZ9BljC0"
-        title: "Grafik in Java - Raytracing #15 - Shading Output"
+        title: "Shading Output"
         description:
         type: youtube
         video_id: "_G_eZ9BljC0"
         duration: 607
       - id: "0bAkPWPnz-U"
-        title: "Grafik in Java - Raytracing #16 - Spiegelungen"
+        title: "Spiegelungen"
         description:
         type: youtube
         video_id: "0bAkPWPnz-U"
