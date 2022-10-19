@@ -134,7 +134,7 @@ sections:
         type: youtube
         video_id: "LGefU5nrQbg"
         duration: 287
-  - id: section
+  - id: section2
     title: "JavaScript im DOM und BOM"
     description:
     lectures:
@@ -204,7 +204,7 @@ sections:
         type: youtube
         video_id: "-7fvXr97RDc"
         duration: 584
-  - id: section
+  - id: section3
     title: "JavaScript OOP"
     description:
     lectures:
@@ -232,7 +232,7 @@ sections:
         type: youtube
         video_id: "XTOKcXRionI"
         duration: 208
-  - id: section
+  - id: section4
     title: "JavaScript Nützliches"
     description:
     lectures:
@@ -272,7 +272,7 @@ sections:
         type: youtube
         video_id: "mvS450Y2FH4"
         duration: 949
-  - id: section
+  - id: section5
     title: "Wie geht es weiter?"
     description:
     lectures:
