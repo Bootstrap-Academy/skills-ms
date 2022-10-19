@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rx55Mai21reZtd_8m-qe27
-title: "PyTorch Tutorial - Neuronale Netze in Python Deutsch/German"
+title: "PyTorch Tutorial - Neuronale Netze in Python"
 description:
 category:
 language: de
@@ -11,227 +11,247 @@ requirements: []
 last_update: 1665508278
 sections:
   - id: section
-    title: "PyTorch Tutorial - Neuronale Netze in Python Deutsch/German"
+    title: "Das erste neuronale Netz"
     description:
     lectures:
       - id: "pylvlMuRKY0"
-        title: "Neuronale Netze in Python: PyTorch Tutorial #0 - Tensorflow und Keras vs PyTorch"
+        title: "Tensorflow und Keras vs PyTorch"
         description:
         type: youtube
         video_id: "pylvlMuRKY0"
         duration: 691
       - id: "h6KaLGUv9Uw"
-        title: "Neuronale Netze in Python: PyTorch Tutorial #1 - Installation von PyTorch"
+        title: "Installation von PyTorch"
         description:
         type: youtube
         video_id: "h6KaLGUv9Uw"
         duration: 660
       - id: "U4aM8oTEVAc"
-        title: "Pytorch Tutorial #2 - Tensoren"
+        title: "Tensoren"
         description:
         type: youtube
         video_id: "U4aM8oTEVAc"
         duration: 637
       - id: "bqVYRzwvCkU"
-        title: "Pytorch Tutorial #3 - Die Grafikkarte nutzen"
+        title: "Die Grafikkarte nutzen"
         description:
         type: youtube
         video_id: "bqVYRzwvCkU"
         duration: 169
       - id: "GBzojftwfGQ"
-        title: "Pytorch Tutorial #4 - Das erste eigene Neuronale Netz"
+        title: "Das erste eigene Neuronale Netz"
         description:
         type: youtube
         video_id: "GBzojftwfGQ"
         duration: 775
       - id: "u6V69py5Aps"
-        title: "Pytorch Tutorial #5 - Das Netz füttern"
+        title: "Das Netz füttern"
         description:
         type: youtube
         video_id: "u6V69py5Aps"
         duration: 440
       - id: "F4V2617urQs"
-        title: "Pytorch Tutorial #6 - Das Netz lernen lassen"
+        title: "Das Netz lernen lassen"
         description:
         type: youtube
         video_id: "F4V2617urQs"
         duration: 797
       - id: "nU5Ww2-Zntk"
-        title: "Pytorch Tutorial #7 - Die Grafikkarte nutzen fürs ganze Netz"
+        title: "Die Grafikkarte nutzen fürs ganze Netz"
         description:
         type: youtube
         video_id: "nU5Ww2-Zntk"
         duration: 208
       - id: "I4v2sES3AK0"
-        title: "Pytorch Tutorial #8 - Speichern und Laden des Netzes"
+        title: "Speichern und Laden des Netzes"
         description:
         type: youtube
         video_id: "I4v2sES3AK0"
         duration: 408
+  - id: section2
+    title: "Handschrifterkennung mit MNIST"
+    description:
+    lectures:
       - id: "8gZR4Q3262k"
-        title: "Pytorch Tutorial #9 - Handschrifterkennung mit dem MNIST Datensatz"
+        title: "Handschrifterkennung mit dem MNIST Datensatz"
         description:
         type: youtube
         video_id: "8gZR4Q3262k"
         duration: 893
       - id: "u0hC8gmpUDw"
-        title: "Pytorch Tutorial #10 - Handschrifterkennung mit dem MNIST Datensatz - Training"
+        title: "Training"
         description:
         type: youtube
         video_id: "u0hC8gmpUDw"
         duration: 601
       - id: "wVcuMADUmdY"
-        title: "Pytorch Tutorial #11 - Handschrifterkennung mit dem MNIST Datensatz - Das Netz"
+        title: "Das Netz"
         description:
         type: youtube
         video_id: "wVcuMADUmdY"
         duration: 1071
       - id: "pS6Qe-A1MWg"
-        title: "Pytorch Tutorial #12 - Handschrifterkennung mit dem MNIST Datensatz - Evaluieren"
+        title: "Evaluieren"
         description:
         type: youtube
         video_id: "pS6Qe-A1MWg"
         duration: 799
+  - id: section3
+    title: "Katze oder Hund?"
+    description:
+    lectures:
       - id: "32lHVbT09h8"
-        title: "Pytorch Tutorial #13 - Katze oder Hund? Bilderkennung"
+        title: "Bilderkennung"
         description:
         type: youtube
         video_id: "32lHVbT09h8"
         duration: 819
       - id: "cNwMpWt6IHk"
-        title: "Pytorch Tutorial #14 - Katze oder Hund? - Daten einlesen"
+        title: "Daten einlesen"
         description:
         type: youtube
         video_id: "cNwMpWt6IHk"
         duration: 640
       - id: "Zj5QkjmYmBI"
-        title: "Pytorch Tutorial #15 - Katze oder Hund? - Randomisierung"
+        title: "Randomisierung"
         description:
         type: youtube
         video_id: "Zj5QkjmYmBI"
         duration: 345
       - id: "dDO7ihzkoC4"
-        title: "Pytorch Tutorial #16 - Katze oder Hund? - Das Training"
+        title: "Das Training"
         description:
         type: youtube
         video_id: "dDO7ihzkoC4"
         duration: 554
       - id: "RkcRqphggLY"
-        title: "Pytorch Tutorial #17 - Katze oder Hund? - Das Netz"
+        title: "Das Netz"
         description:
         type: youtube
         video_id: "RkcRqphggLY"
         duration: 829
       - id: "ulCylfDJRKo"
-        title: "Pytorch Tutorial #18 - Katze oder Hund? - Evaluation"
+        title: "Evaluation"
         description:
         type: youtube
         video_id: "ulCylfDJRKo"
         duration: 613
+  - id: section4
+    title: "Namensherkunft"
+    description:
+    lectures:
       - id: "kabjuJWLvus"
-        title: "Pytorch Tutorial #19 - Namensherkunft - Character-RNNs"
+        title: "Character-RNNs"
         description:
         type: youtube
         video_id: "kabjuJWLvus"
         duration: 899
       - id: "26esNjWkEHA"
-        title: "Pytorch Tutorial #20 - Namensherkunft - One-Hot-Encoding"
+        title: "One-Hot-Encoding"
         description:
         type: youtube
         video_id: "26esNjWkEHA"
         duration: 586
       - id: "PjlFR-PdwXk"
-        title: "Pytorch Tutorial #21 - Namensherkunft - Das RNN-Netz"
+        title: "Das RNN-Netz"
         description:
         type: youtube
         video_id: "PjlFR-PdwXk"
         duration: 668
       - id: "P08d-1RnczM"
-        title: "Pytorch Tutorial #22 - Namensherkunft - Training"
+        title: "Training"
         description:
         type: youtube
         video_id: "P08d-1RnczM"
         duration: 791
       - id: "rJUZfEJZas8"
-        title: "Pytorch Tutorial #23 - Namensherkunft - Training und Plotting"
+        title: "Training und Plotting"
         description:
         type: youtube
         video_id: "rJUZfEJZas8"
         duration: 669
+  - id: section5
+    title: "Menschliche Passwörter generieren"
+    description:
+    lectures:
       - id: "5O5X5-rNqrA"
-        title: "PyTorch Tutorial #24 - Wordlists / menschliche Passwörter generieren"
+        title: "Wordlists"
         description:
         type: youtube
         video_id: "5O5X5-rNqrA"
         duration: 378
       - id: "cF9fVxHGL54"
-        title: "Pytorch Tutorial #25 - menschliche Passwörter - Das Netz"
+        title: "Das Netz"
         description:
         type: youtube
         video_id: "cF9fVxHGL54"
         duration: 662
       - id: "5qqsfvGqdgU"
-        title: "Pytorch Tutorial #26 - menschliche Passwörter - Training"
+        title: "Training"
         description:
         type: youtube
         video_id: "5qqsfvGqdgU"
         duration: 455
       - id: "-BS63kJIvsY"
-        title: "Pytorch Tutorial #27 - menschliche Passwörter - Training #2"
+        title: "Training #2"
         description:
         type: youtube
         video_id: "-BS63kJIvsY"
         duration: 804
       - id: "Xe6dMzEyc9A"
-        title: "Pytorch Tutorial #28 - menschliche Passwörter - Passwörter generieren / Sampling"
+        title: "Passwörter generieren / Sampling"
         description:
         type: youtube
         video_id: "Xe6dMzEyc9A"
         duration: 482
+  - id: section6
+    title: "Balance halten mit Cartpole"
+    description:
+    lectures:
       - id: "YfSPmFrs9Vg"
-        title: "Pytorch Tutorial #29 - Balance halten mit Cartpole - Reinforcement Learning"
+        title: "Reinforcement Learning"
         description:
         type: youtube
         video_id: "YfSPmFrs9Vg"
         duration: 514
       - id: "CB2WRO_G6OI"
-        title: "Pytorch Tutorial #30 - Balance halten - Memory"
+        title: "Memory"
         description:
         type: youtube
         video_id: "CB2WRO_G6OI"
         duration: 526
       - id: "R9Iy_ViGfCs"
-        title: "Pytorch Tutorial #31 - Balance halten - Das Netz"
+        title: "Das Netz"
         description:
         type: youtube
         video_id: "R9Iy_ViGfCs"
         duration: 468
       - id: "loTwHTGTBu4"
-        title: "Pytorch Tutorial #32 - Balance halten - Datenverarbeitung"
+        title: "Datenverarbeitung"
         description:
         type: youtube
         video_id: "loTwHTGTBu4"
         duration: 930
       - id: "bDNWSe-DMXI"
-        title: "Pytorch Tutorial #33 - Balance halten - Training Vorbereitung"
+        title: "Training Vorbereitung"
         description:
         type: youtube
         video_id: "bDNWSe-DMXI"
         duration: 880
       - id: "JLCGBEEf2BM"
-        title: "Pytorch Tutorial #34 - Balance halten - Training #2"
+        title: "Training #2"
         description:
         type: youtube
         video_id: "JLCGBEEf2BM"
         duration: 1130
       - id: "Jc6jevYQqQQ"
-        title: "Pytorch Tutorial #35 - Balance halten - Spielen und Training initialisieren"
+        title: "Spielen und Training initialisieren"
         description:
         type: youtube
         video_id: "Jc6jevYQqQQ"
         duration: 624
       - id: "Nk0X4TYd1oU"
-        title: "Pytorch Tutorial #36 - Balance halten - Anzeigen"
+        title: "Anzeigen"
         description:
         type: youtube
         video_id: "Nk0X4TYd1oU"
