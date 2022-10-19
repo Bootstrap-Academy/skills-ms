@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7ogA_q-mOoYH3dDQIh8B3Oe
-title: "Mit Express einfach einen JavaScript Server erstellen"
+title: "ExpressJS: JavaScript Server in einfach"
 description:
 category:
 language: de
@@ -15,115 +15,115 @@ sections:
     description:
     lectures:
       - id: "vTeblk3C7tc"
-        title: "Express JavaScript Tutorial #01 - Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "vTeblk3C7tc"
         duration: 286
       - id: "oQn6CWihv-A"
-        title: "Express JavaScript Tutorial #02 - Ein einfacher Express Server"
+        title: "Ein einfacher Express Server"
         description:
         type: youtube
         video_id: "oQn6CWihv-A"
         duration: 830
       - id: "cJYnVOJpCJA"
-        title: "Express JavaScript Tutorial #03 - HTTP Methoden und Postman"
+        title: "HTTP Methoden und Postman"
         description:
         type: youtube
         video_id: "cJYnVOJpCJA"
         duration: 642
       - id: "1MQT_LAFSVo"
-        title: "Express JavaScript Tutorial #04 - Grundlegendes Routing"
+        title: "Grundlegendes Routing"
         description:
         type: youtube
         video_id: "1MQT_LAFSVo"
         duration: 381
       - id: "ym79gBNCRpA"
-        title: "Express JavaScript Tutorial #05 - Statische Ordner"
+        title: "Statische Ordner"
         description:
         type: youtube
         video_id: "ym79gBNCRpA"
         duration: 429
       - id: "xxx3H555t64"
-        title: "Express JavaScript Tutorial #06 - Dateien als Antwort"
+        title: "Dateien als Antwort"
         description:
         type: youtube
         video_id: "xxx3H555t64"
         duration: 438
       - id: "HLbtNPcGVNo"
-        title: "Express JavaScript Tutorial #07 - Middleware und use vs all"
+        title: "Middleware und use vs all"
         description:
         type: youtube
         video_id: "HLbtNPcGVNo"
         duration: 930
       - id: "bIRLtRJjlHA"
-        title: "Express JavaScript Tutorial #08 - Daten empfangen via Json und URLEncoded"
+        title: "Daten empfangen via Json und URLEncoded"
         description:
         type: youtube
         video_id: "bIRLtRJjlHA"
         duration: 696
       - id: "D_6YZGTG_Pg"
-        title: "Express JavaScript Tutorial #09 - Helmet für mehr Sicherheit"
+        title: "Helmet für mehr Sicherheit"
         description:
         type: youtube
         video_id: "D_6YZGTG_Pg"
         duration: 408
       - id: "PhMQh8iVprw"
-        title: "Express JavaScript Tutorial #10 - In Json antworten: eine echte API"
+        title: "In Json antworten: eine echte API"
         description:
         type: youtube
         video_id: "PhMQh8iVprw"
         duration: 352
       - id: "jAqsi8Ot2W8"
-        title: "Express JavaScript Tutorial #11 - Serverside Rendering: Einführung"
+        title: "Serverside Rendering: Einführung"
         description:
         type: youtube
         video_id: "jAqsi8Ot2W8"
         duration: 625
       - id: "DhWS50ZJY7M"
-        title: "Express JavaScript Tutorial #12 - EJS: Embedded JavaScript"
+        title: "EJS: Embedded JavaScript"
         description:
         type: youtube
         video_id: "DhWS50ZJY7M"
         duration: 603
       - id: "tI_D_H0g9y8"
-        title: "Express JavaScript Tutorial #13 - EJS mit Express verbinden"
+        title: "EJS mit Express verbinden"
         description:
         type: youtube
         video_id: "tI_D_H0g9y8"
         duration: 362
       - id: "kFoeoxmvi48"
-        title: "Express JavaScript Tutorial #14 - EJS und Escapes: ein kleiner Ausflug in die Security"
+        title: "EJS und Escapes: ein kleiner Ausflug in die Security"
         description:
         type: youtube
         video_id: "kFoeoxmvi48"
         duration: 851
       - id: "8FWuPtOgs10"
-        title: "Express JavaScript Tutorial #16 - Fortgeschrittenes Routing"
+        title: "Fortgeschrittenes Routing"
         description:
         type: youtube
         video_id: "8FWuPtOgs10"
         duration: 643
       - id: "kEiVL-RdQsI"
-        title: "Express JavaScript Tutorial #17 - Der Express Router"
+        title: "Der Express Router"
         description:
         type: youtube
         video_id: "kEiVL-RdQsI"
         duration: 567
       - id: "uaithhg0eIg"
-        title: "Express JavaScript Tutorial #18 - Get-Parameter"
+        title: "Get-Parameter"
         description:
         type: youtube
         video_id: "uaithhg0eIg"
         duration: 666
       - id: "CUDsF03tcvo"
-        title: "Express JavaScript Tutorial #19 - Cookies"
+        title: "Cookies"
         description:
         type: youtube
         video_id: "CUDsF03tcvo"
         duration: 831
       - id: "C2o-9t50Wmc"
-        title: "Express JavaScript Tutorial #20 - Express Generator"
+        title: "Express Generator"
         description:
         type: youtube
         video_id: "C2o-9t50Wmc"
