@@ -15,23 +15,23 @@ sections:
     description:
     lectures:
       - id: "wI9yE7ZIbMg"
-        title: "Python Let's Code: Wasserzeichen und Komprimieren von Bildern"
+        title: "Wasserzeichen und Komprimieren von Bildern"
         description:
         type: youtube
         video_id: "wI9yE7ZIbMg"
         duration: 1015
-      - id: "vXrBTD8adW0"
-        title: "Eine Website für Stable Diffusion [Dall E Ersatz]"
-        description:
-        type: youtube
-        video_id: "vXrBTD8adW0"
-        duration: 928
       - id: "J5CEZ1lZo_o"
         title: "Stable Diffusion: Besser als Dall E 2 in Python [Tutorial]"
         description:
         type: youtube
         video_id: "J5CEZ1lZo_o"
         duration: 1083
+      - id: "vXrBTD8adW0"
+        title: "Eine Website für Stable Diffusion"
+        description:
+        type: youtube
+        video_id: "vXrBTD8adW0"
+        duration: 928
       - id: "NvH6StJ918s"
         title: "Mit Python Personen auf Bildern identifizieren"
         description:
@@ -39,7 +39,7 @@ sections:
         video_id: "NvH6StJ918s"
         duration: 1408
       - id: "aFYxOS96q2A"
-        title: "KI bestraft mich für Fehler in Beat Saber 😬 | BEAT THE TRÖTE"
+        title: "BEAT THE TRÖTE"
         description:
         type: youtube
         video_id: "aFYxOS96q2A"
@@ -62,74 +62,74 @@ sections:
         type: youtube
         video_id: "ZOWLCEJzQPQ"
         duration: 1470
-      - id: "soVqW_yoKIU"
-        title: "Graphen zeichnen | Python"
-        description:
-        type: youtube
-        video_id: "soVqW_yoKIU"
-        duration: 618
       - id: "RRuU0W6_kso"
-        title: "Python Lets Code - Graphen"
+        title: "Graphen"
         description:
         type: youtube
         video_id: "RRuU0W6_kso"
         duration: 954
+      - id: "soVqW_yoKIU"
+        title: "Graphen zeichnen"
+        description:
+        type: youtube
+        video_id: "soVqW_yoKIU"
+        duration: 618
       - id: "Gc92z58-Qm4"
-        title: "Snake in Python - in unter 150 Zeilen Code [PyGame]"
+        title: "Snake in Python in unter 150 Zeilen Code [PyGame]"
         description:
         type: youtube
         video_id: "Gc92z58-Qm4"
         duration: 3709
-      - id: "XkvcUlvGqvs"
-        title: "SECURE FTP - SFTP mit pysftp | Python"
-        description:
-        type: youtube
-        video_id: "XkvcUlvGqvs"
-        duration: 1148
       - id: "1HxjDXykSmc"
-        title: "FTP steuern und verwalten mit FTPlib | Python"
+        title: "FTP steuern und verwalten mit FTPlib"
         description:
         type: youtube
         video_id: "1HxjDXykSmc"
         duration: 1324
+      - id: "XkvcUlvGqvs"
+        title: "SECURE FTP - SFTP mit pysftp"
+        description:
+        type: youtube
+        video_id: "XkvcUlvGqvs"
+        duration: 1148
       - id: "sj03Q-JYZqA"
-        title: "2FA One Time Passwords mit PyOTP | Python"
+        title: "2FA One Time Passwords mit PyOTP"
         description:
         type: youtube
         video_id: "sj03Q-JYZqA"
         duration: 853
       - id: "VVKFuZf9jNw"
-        title: "Passwörter sicher speichern | Python"
+        title: "Passwörter sicher speichern"
         description:
         type: youtube
         video_id: "VVKFuZf9jNw"
         duration: 1140
       - id: "dipFOn4kZHY"
-        title: "Text \"Clean\" machen | Python"
+        title: "Text \"Clean\" machen"
         description:
         type: youtube
         video_id: "dipFOn4kZHY"
         duration: 1531
       - id: "cnrhMjroWrI"
-        title: "Größe eines Verzeichnisses berechnen | Python"
+        title: "Größe eines Verzeichnisses berechnen"
         description:
         type: youtube
         video_id: "cnrhMjroWrI"
         duration: 717
       - id: "0q9CLHGV1Fo"
-        title: "Schrift in Bildern erkennen und in Text umwandeln | PyTesseract, Python"
+        title: "Schrift in Bildern erkennen und in Text umwandeln mit PyTesseract"
         description:
         type: youtube
         video_id: "0q9CLHGV1Fo"
         duration: 737
       - id: "-XXj-uLdGmQ"
-        title: "Webcam nutzen und Kanten erkennen | Python"
+        title: "Webcam nutzen und Kanten erkennen"
         description:
         type: youtube
         video_id: "-XXj-uLdGmQ"
         duration: 682
       - id: "lWDWJaV_rZ4"
-        title: "Subdomains einer Website enumerieren mit Python"
+        title: "Subdomains einer Website enumerieren"
         description:
         type: youtube
         video_id: "lWDWJaV_rZ4"
@@ -153,7 +153,7 @@ sections:
         video_id: "iLg9KSFxzi8"
         duration: 1198
       - id: "bFlyT4cDXew"
-        title: "Alle Bilder einer Website runterladen [PYTHON]"
+        title: "Alle Bilder einer Website runterladen"
         description:
         type: youtube
         video_id: "bFlyT4cDXew"
@@ -177,7 +177,7 @@ sections:
         video_id: "6Sf_qHehLgU"
         duration: 766
       - id: "TZJQoi1h2FI"
-        title: "Text-To-Speech in Python in 4 Zeilen (eigentlich)"
+        title: "Text-To-Speech in Python in 4 Zeilen"
         description:
         type: youtube
         video_id: "TZJQoi1h2FI"
@@ -219,7 +219,7 @@ sections:
         video_id: "QBmhMpNAG0I"
         duration: 1295
       - id: "SfPWCKTHzE4"
-        title: "Tetris in Python - in unter 250 Zeilen Code [PyGame]"
+        title: "Tetris in Python in unter 250 Zeilen Code [PyGame]"
         description:
         type: youtube
         video_id: "SfPWCKTHzE4"
@@ -231,7 +231,7 @@ sections:
         video_id: "Lb3fGHLLhL8"
         duration: 13972
       - id: "MP8lMbgv1Ls"
-        title: "Let's Code - DNS Performancetest in Python + News - Cloudflare eröffnet DNS Server"
+        title: "DNS Performancetest in Python"
         description:
         type: youtube
         video_id: "MP8lMbgv1Ls"
