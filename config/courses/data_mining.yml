@@ -5,77 +5,77 @@ category:
 language: de
 image:
 author: "The Morpheus Tutorials"
-price: 3000
+price: 1000
 learning_goals: []
 requirements: []
 last_update: 1665508109
 sections:
   - id: section
-    title: "Eine kurze Einführung ins Data Mining für die Supporter"
+    title: "Eine kurze Einführung ins Data Mining"
     description:
     lectures:
       - id: "Y7fEREo2gfQ"
-        title: "Eine kurze Einführung ins Data Mining #1 - Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "Y7fEREo2gfQ"
         duration: 114
       - id: "g_Kvy2uL_nA"
-        title: "Data Mining #2 - Daten"
+        title: "Daten"
         description:
         type: youtube
         video_id: "g_Kvy2uL_nA"
         duration: 625
       - id: "oteQDfTKi3o"
-        title: "Data Mining #3   Features"
+        title: "Features"
         description:
         type: youtube
         video_id: "oteQDfTKi3o"
         duration: 453
       - id: "j-CYgOs2Wjg"
-        title: "Data Mining #4   Wie kommt man an Daten"
+        title: "Wie kommt man an Daten"
         description:
         type: youtube
         video_id: "j-CYgOs2Wjg"
         duration: 453
       - id: "Z8Vs8gpNgjY"
-        title: "Data Mining #5   Plots"
+        title: "Plots"
         description:
         type: youtube
         video_id: "Z8Vs8gpNgjY"
         duration: 315
       - id: "VkQxtrj426Y"
-        title: "Data Mining #6   Rückschlüsse"
+        title: "Rückschlüsse"
         description:
         type: youtube
         video_id: "VkQxtrj426Y"
         duration: 94
       - id: "LRpsfdXgdbk"
-        title: "Data Mining #7   Geheimtipp Warnsysteme"
+        title: "Geheimtipp: Warnsysteme"
         description:
         type: youtube
         video_id: "LRpsfdXgdbk"
         duration: 231
       - id: "jFRZQNCeYiw"
-        title: "Data Mining #8   Beispiel WhatsApp Metadaten"
+        title: "Beispiel: WhatsApp Metadaten"
         description:
         type: youtube
         video_id: "jFRZQNCeYiw"
         duration: 289
       - id: "Vc5GokYTkWI"
-        title: "Data Mining #9   Neuronale Netze"
+        title: "Neuronale Netze"
         description:
         type: youtube
         video_id: "Vc5GokYTkWI"
         duration: 351
       - id: "ymN3lePsT74"
-        title: "Data Mining #10   Die große Gefahr von Data Science"
+        title: "Die große Gefahr von Data Science"
         description:
         type: youtube
         video_id: "ymN3lePsT74"
         duration: 417
       - id: "9K0tGphkxpY"
-        title: "Data Mining #11   Ausblick   was soll ich lernen"
+        title: "Ausblick: was soll ich lernen"
         description:
         type: youtube
         video_id: "9K0tGphkxpY"
