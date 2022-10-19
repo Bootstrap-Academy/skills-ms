@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qQz698kYRkkBXJDeXJY_I7
-title: "CSS 3 Tutorials für Anfänger"
+title: "CSS 3"
 description:
 category:
 language: de
@@ -11,143 +11,143 @@ requirements: []
 last_update: 1665506525
 sections:
   - id: section
-    title: "CSS 3 Tutorials für Anfänger"
+    title: "CSS 3"
     description:
     lectures:
       - id: "49ya2iMC40Q"
-        title: "CSS 3 Tutorial #1 - Einleitung und Einbindung in HTML"
+        title: "Einleitung und Einbindung in HTML"
         description:
         type: youtube
         video_id: "49ya2iMC40Q"
         duration: 414
       - id: "GiLNSfOmtZQ"
-        title: "CSS 3 Tutorial #2 - grundlegender Aufbau und Selektoren"
+        title: "grundlegender Aufbau und Selektoren"
         description:
         type: youtube
         video_id: "GiLNSfOmtZQ"
         duration: 550
       - id: "5I7UlR2QK-U"
-        title: "CSS 3 Tutorial #3 - mehr zu Selektoren"
+        title: "mehr zu Selektoren"
         description:
         type: youtube
         video_id: "5I7UlR2QK-U"
         duration: 650
       - id: "8GephXAvg9o"
-        title: "CSS 3 Tutorial #4 - Farben"
+        title: "Farben"
         description:
         type: youtube
         video_id: "8GephXAvg9o"
         duration: 381
       - id: "CxQCoA0YN9g"
-        title: "CSS 3 Tutorial #5 - Hintergründe"
+        title: "Hintergründe"
         description:
         type: youtube
         video_id: "CxQCoA0YN9g"
         duration: 526
       - id: "s0WSM0ck4TA"
-        title: "CSS 3 Tutorial #6 - Das Box-Modell"
+        title: "Das Box-Modell"
         description:
         type: youtube
         video_id: "s0WSM0ck4TA"
         duration: 600
       - id: "2C-VziV2McI"
-        title: "CSS 3 Tutorial #7 - Schriftvarianz"
+        title: "Schriftvarianz"
         description:
         type: youtube
         video_id: "2C-VziV2McI"
         duration: 740
       - id: "cjr7nQRwwms"
-        title: "CSS 3 Tutorial #8 - Links und das Hovern von Objekten"
+        title: "Links und das Hovern von Objekten"
         description:
         type: youtube
         video_id: "cjr7nQRwwms"
         duration: 537
       - id: "wmpoN0OmNZo"
-        title: "CSS 3 Tutorial #9 - Position"
+        title: "Position"
         description:
         type: youtube
         video_id: "wmpoN0OmNZo"
         duration: 790
       - id: "4ZSK5drtj1I"
-        title: "CSS 3 Tutorial #10 - Float"
+        title: "Float"
         description:
         type: youtube
         video_id: "4ZSK5drtj1I"
         duration: 403
       - id: "hyW3xtH5Y4s"
-        title: "CSS 3 Tutorial #11 - Navigationsleiste zum Mitprogrammieren"
+        title: "Navigationsleiste zum Mitprogrammieren"
         description:
         type: youtube
         video_id: "hyW3xtH5Y4s"
         duration: 902
       - id: "S3tM87aokfQ"
-        title: "CSS 3 Tutorial #12 - Schatten und runde Ecken"
+        title: "Schatten und runde Ecken"
         description:
         type: youtube
         video_id: "S3tM87aokfQ"
         duration: 560
       - id: "kWLlgNQf8fg"
-        title: "CSS 3 Tutorial #13 - Transparenz"
+        title: "Transparenz"
         description:
         type: youtube
         video_id: "kWLlgNQf8fg"
         duration: 457
       - id: "VUQISeNOt2U"
-        title: "CSS 3 Tutorial #14 - Farbverläufe"
+        title: "Farbverläufe"
         description:
         type: youtube
         video_id: "VUQISeNOt2U"
         duration: 548
       - id: "dxJf6uF5Yd4"
-        title: "CSS 3 Tutorial #15 - eigene Schriftarten verwenden"
+        title: "eigene Schriftarten verwenden"
         description:
         type: youtube
         video_id: "dxJf6uF5Yd4"
         duration: 333
       - id: "koSJKFfCvYU"
-        title: "CSS 3 Tutorial #16 - Bilder filtern"
+        title: "Bilder filtern"
         description:
         type: youtube
         video_id: "koSJKFfCvYU"
         duration: 506
       - id: "z5JdAwtsbZM"
-        title: "CSS 3 Tutorial #17 - 2D Transformationen"
+        title: "2D Transformationen"
         description:
         type: youtube
         video_id: "z5JdAwtsbZM"
         duration: 388
       - id: "JyIvnPSv8CM"
-        title: "CSS 3 Tutorial #18 - Responsive Media Design"
+        title: "Responsive Media Design"
         description:
         type: youtube
         video_id: "JyIvnPSv8CM"
         duration: 572
       - id: "R6CerSgbC_w"
-        title: "CSS 3 Tutorial #19 - Flex Layouts"
+        title: "Flex Layouts"
         description:
         type: youtube
         video_id: "R6CerSgbC_w"
         duration: 1063
       - id: "dMuJa_jjyAI"
-        title: "CSS 3 Tutorial #20 - Grid Layouts"
+        title: "Grid Layouts"
         description:
         type: youtube
         video_id: "dMuJa_jjyAI"
         duration: 602
       - id: "oKk2jjqMypU"
-        title: "CSS 3 Tutorial #21 - Variablen"
+        title: "Variablen"
         description:
         type: youtube
         video_id: "oKk2jjqMypU"
         duration: 722
       - id: "VaRILz4GC1U"
-        title: "CSS 3 Tutorial #22 - Before und After"
+        title: "Before und After"
         description:
         type: youtube
         video_id: "VaRILz4GC1U"
         duration: 343
       - id: "_fqHym2MYxc"
-        title: "CSS 3 Tutorial #23 - Calc"
+        title: "Calc"
         description:
         type: youtube
         video_id: "_fqHym2MYxc"
@@ -159,19 +159,19 @@ sections:
         video_id: "PPHofk9ei6E"
         duration: 1720
       - id: "YWJ2yQTt8tw"
-        title: "CSS 3 Tutorial #24 - Animationen Grundlagen"
+        title: "Animationen Grundlagen"
         description:
         type: youtube
         video_id: "YWJ2yQTt8tw"
         duration: 402
       - id: "gHXRU5a2dlw"
-        title: "CSS 3 Tutorial #25 - Animationen für Fortgeschrittene"
+        title: "Animationen für Fortgeschrittene"
         description:
         type: youtube
         video_id: "gHXRU5a2dlw"
         duration: 920
       - id: "v013BPfB_ks"
-        title: "CSS 3 Tutorial #26 - WHERE vs  IS"
+        title: "WHERE vs  IS"
         description:
         type: youtube
         video_id: "v013BPfB_ks"
