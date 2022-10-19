@@ -15,79 +15,79 @@ sections:
     description:
     lectures:
       - id: "vOBiHk6MwX0"
-        title: "Clean Code Tutorial #1 - Einführung und Struktur einer Klasse"
+        title: "Einführung und Struktur einer Klasse"
         description:
         type: youtube
         video_id: "vOBiHk6MwX0"
         duration: 410
       - id: "Sa1slZ18nLo"
-        title: "Clean Code Tutorial #2 - Law of Demeter [German/Deutsch]"
+        title: "Law of Demeter"
         description:
         type: youtube
         video_id: "Sa1slZ18nLo"
         duration: 284
       - id: "QKtGq66dN6U"
-        title: "Clean Code Tutorial #3 - Prinzip der kleinsten Überraschung"
+        title: "Prinzip der kleinsten Überraschung"
         description:
         type: youtube
         video_id: "QKtGq66dN6U"
         duration: 274
       - id: "OKHkGNue7fI"
-        title: "Clean Code Tutorial #4 - Kommentare"
+        title: "Kommentare"
         description:
         type: youtube
         video_id: "OKHkGNue7fI"
         duration: 339
       - id: "HVSTWJwWC_w"
-        title: "Clean Code Tutorial #5 - DRY: dont repeat yourself"
+        title: "DRY: dont repeat yourself"
         description:
         type: youtube
         video_id: "HVSTWJwWC_w"
         duration: 230
       - id: "oKdy-hwdpw8"
-        title: "Clean Code Tutorial #6 - YAGNI"
+        title: "YAGNI"
         description:
         type: youtube
         video_id: "oKdy-hwdpw8"
         duration: 285
       - id: "ju3NeXFCsaE"
-        title: "Clean Code Tutorial #7 - Single Responsibility"
+        title: "Single Responsibility"
         description:
         type: youtube
         video_id: "ju3NeXFCsaE"
         duration: 286
       - id: "rLPNqlbUyIM"
-        title: "Clean Code Tutorial #8 - Open Closed"
+        title: "Open Closed"
         description:
         type: youtube
         video_id: "rLPNqlbUyIM"
         duration: 288
       - id: "VQinjwq03rY"
-        title: "Clean Code Tutorial #9 - Liskovsches Substitutionsprinzip"
+        title: "Liskovsches Substitutionsprinzip"
         description:
         type: youtube
         video_id: "VQinjwq03rY"
         duration: 429
       - id: "adXGiewEY1c"
-        title: "Clean Code Tutorial #10 - Interface Segregation [Deutsch/German]"
+        title: "Interface Segregation"
         description:
         type: youtube
         video_id: "adXGiewEY1c"
         duration: 347
       - id: "oC-y2TS0qbE"
-        title: "Clean Code Tutorial #11 - Dependency Inversion [Deutsch/German]"
+        title: "Dependency Inversion"
         description:
         type: youtube
         video_id: "oC-y2TS0qbE"
         duration: 273
       - id: "o5zdblAfZ6U"
-        title: "Clean Code Tutorial #12 - Single Level of Abstraction [Deutsch/German]"
+        title: "Single Level of Abstraction"
         description:
         type: youtube
         video_id: "o5zdblAfZ6U"
         duration: 278
       - id: "F8tAUuHJ43U"
-        title: "Clean Code Tutorial #13 - Refactoring und Pfadfinderregel"
+        title: "Refactoring und Pfadfinderregel"
         description:
         type: youtube
         video_id: "F8tAUuHJ43U"
