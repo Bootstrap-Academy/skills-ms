@@ -24,6 +24,7 @@ from api.schemas.skill import (
 )
 from api.schemas.user import User
 from api.services.courses import COURSES
+from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
 
 
@@ -65,6 +66,7 @@ def get_skill_dependents(skill_id: str, skills: dict[str, models.RootSkill] | di
 
 
 @router.get("/skilltree", responses=responses(SkillTree))
+@redis_cached("skills")
 async def list_root_skills() -> Any:
     """Return a list of all root skills."""
 
@@ -91,6 +93,8 @@ async def update_root_tree_settings(data: UpdateRootTree) -> Any:
         settings.rows = data.rows
     if data.columns is not None and data.columns != settings.columns:
         settings.columns = data.columns
+
+    await clear_cache("skills")
 
     return UpdateRootTree(rows=settings.rows, columns=settings.columns)
 
@@ -126,6 +130,9 @@ async def create_root_skill(data: CreateRootSkill) -> Any:
         icon=data.icon,
     )
     await db.add(skill)
+
+    await clear_cache("skills")
+
     return skill.serialize
 
 
@@ -172,6 +179,8 @@ async def update_root_skill(*, skill: models.RootSkill = get_root_skill, data: U
     if data.icon is not None and data.icon != skill.icon:
         skill.icon = data.icon
 
+    await clear_cache("skills")
+
     return skill.serialize
 
 
@@ -186,16 +195,22 @@ async def delete_root_skill(skill: models.RootSkill = get_root_skill) -> Any:
     """
 
     await db.delete(skill)
+
+    await clear_cache("skills")
+
     return True
 
 
 @router.get("/skilltree/{root_skill_id}", responses=responses(SubSkillTree, SkillNotFoundException))
-async def list_sub_skills(*, root_skill: models.RootSkill = get_root_skill, user: User | None = public_auth) -> Any:
+@redis_cached("skills", "root_skill_id", "user")
+async def list_sub_skills(*, root_skill_id: str, user: User | None = public_auth) -> Any:
     """
     Return a list of all sub skills of a root skill.
 
     `completed` is included iff the **VERIFIED** requirement is met.
     """
+
+    root_skill: models.RootSkill = await get_root_skill.dependency(root_skill_id)
 
     completed: set[str] | None = (
         await models.XP.get_user_completed_skills(user.id) if user and user.email_verified else None
@@ -247,6 +262,9 @@ async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, dat
         icon=data.icon,
     )
     await db.add(skill)
+
+    await clear_cache("skills")
+
     return skill.serialize
 
 
@@ -294,6 +312,8 @@ async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: Upda
     if data.icon is not None and data.icon != skill.icon:
         skill.icon = data.icon
 
+    await clear_cache("skills")
+
     return skill.serialize
 
 
@@ -310,4 +330,7 @@ async def delete_sub_skill(skill: models.SubSkill = get_sub_skill) -> Any:
     """
 
     await db.delete(skill)
+
+    await clear_cache("skills")
+
     return True

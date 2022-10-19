@@ -7,7 +7,7 @@ from api import models
 from api.auth import admin_auth, get_user, require_verified_email
 from api.database import db, filter_by, select
 from api.endpoints.skill import get_sub_skill
-from api.exceptions.auth import PermissionDeniedError, admin_responses, verified_responses
+from api.exceptions.auth import PermissionDeniedError, UserNotFoundError, admin_responses, verified_responses
 from api.exceptions.xp import CertificateNotFoundError, SkillNotCompletedError
 from api.schemas.xp import Certificate, RootSkillXP, SubSkillXP, UpdateXP, XPResponse
 from api.services.auth import get_user_for_certificate
@@ -19,6 +19,7 @@ from api.services.xp import (
     calc_sub_skill_level,
     calc_sub_skill_xp_needed,
 )
+from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
 
 
@@ -30,6 +31,7 @@ router = APIRouter()
     dependencies=[require_verified_email],
     responses=verified_responses(XPResponse, PermissionDeniedError),
 )
+@redis_cached("xp", "user_id")
 async def get_xp(user_id: str = get_user(require_self_or_admin=True)) -> Any:
     """
     Get a user's xp.
@@ -73,16 +75,19 @@ async def get_xp(user_id: str = get_user(require_self_or_admin=True)) -> Any:
 @router.get(
     "/xp/{user_id}/{root_skill_id}/{sub_skill_id}",
     dependencies=[require_verified_email],
-    responses=verified_responses(str, SkillNotCompletedError),
+    responses=verified_responses(str, SkillNotCompletedError, UserNotFoundError),
 )
+@redis_cached("xp", "root_skill_id", "sub_skill_id", "user_id")
 async def get_certificate_code(
-    skill: models.SubSkill = get_sub_skill, user_id: str = get_user(require_self_or_admin=True)
+    root_skill_id: str, sub_skill_id: str, user_id: str = get_user(check_existence=True, require_self_or_admin=True)
 ) -> Any:
     """
     Get a user's certificate code for a sub skill.
 
     *Requirements:* **VERIFIED** and (**SELF** or **ADMIN**)
     """
+
+    skill: models.SubSkill = await get_sub_skill.dependency(root_skill_id, sub_skill_id)
 
     xp_record = await db.get(models.XP, user_id=user_id, skill_id=skill.id)
     if not xp_record or not xp_record.completed:
@@ -92,6 +97,7 @@ async def get_certificate_code(
 
 
 @router.get("/certificates/{code}", responses=responses(Certificate, CertificateNotFoundError))
+@redis_cached("xp", "code")
 async def get_certificate(code: str) -> Any:
     """
     Get a certificate by code.
@@ -133,6 +139,8 @@ async def update_xp(data: UpdateXP, skill: models.SubSkill = get_sub_skill, user
             id=str(uuid4()), user_id=user_id, skill_id=skill.id, xp=data.xp or 0, completed=data.completed or False
         )
         await db.add(xp)
+
+    await clear_cache("xp")
 
     level = calc_sub_skill_level(xp.xp)
     return SubSkillXP(

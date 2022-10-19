@@ -15,6 +15,7 @@ from .database import db, db_context
 from .endpoints import ROUTER, TAGS
 from .logger import get_logger, setup_sentry
 from .settings import settings
+from .utils.cache import clear_cache
 from .utils.debug import check_responses
 from .utils.docs import add_endpoint_links_to_openapi_docs
 from .version import get_version
@@ -69,6 +70,8 @@ async def rollback_on_exception(request: Request, exc: HTTPException) -> Respons
 @app.on_event("startup")
 async def on_startup() -> None:
     setup_app()
+
+    await clear_cache("courses")
 
 
 @app.on_event("shutdown")

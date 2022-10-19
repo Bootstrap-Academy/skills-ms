@@ -6,6 +6,7 @@ from api import models
 from api.database import db, filter_by, select
 from api.exceptions.skill import SkillNotFoundException
 from api.schemas.skill import SubSkill
+from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
 
 
@@ -13,6 +14,7 @@ router = APIRouter()
 
 
 @router.get("/skills", responses=responses(list[SubSkill]))
+@redis_cached("skills")
 async def get_skills() -> Any:
     """Return a list of all skills."""
 
@@ -20,6 +22,7 @@ async def get_skills() -> Any:
 
 
 @router.get("/skills/{user_id}", responses=responses(list[str]))
+@redis_cached("xp", "user_id")
 async def get_completed_skills(user_id: str) -> Any:
     """Return a list of all completed skills for a user."""
 
@@ -27,6 +30,7 @@ async def get_completed_skills(user_id: str) -> Any:
 
 
 @router.get("/graduates", responses=responses(list[str]))
+@redis_cached("xp", "skills")
 async def get_graduates(skills: set[str] = Query()) -> Any:
     """Return a list of all users who have completed a skill."""
 
@@ -47,4 +51,7 @@ async def add_skill_progress(user_id: str, skill_id: str, xp: int = Body(), comp
         raise SkillNotFoundException
 
     await models.XP.add_xp(user_id, skill_id, xp, complete)
+
+    await clear_cache("xp")
+
     return True

@@ -91,6 +91,7 @@ async def test__rollback_on_exception(mocker: MockerFixture) -> None:
 async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> None:
     fastapi_patch = mocker.patch("fastapi.FastAPI")
     db_patch = mocker.patch("api.database.db")
+    clear_cache_patch = mocker.patch("api.utils.cache.clear_cache")
 
     module, on_startup = get_decorated_function(fastapi_patch, "on_event", "startup")
     db_patch.create_tables = AsyncMock()
@@ -100,6 +101,7 @@ async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> N
 
     module.setup_app.assert_called_once_with()
     db_patch.create_tables.assert_not_called()  # use alembic migrations instead
+    clear_cache_patch.assert_called_once_with("courses")
 
 
 async def test__on_shutdown(mocker: MockerFixture) -> None:

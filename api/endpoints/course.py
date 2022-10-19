@@ -3,7 +3,7 @@
 from secrets import token_urlsafe
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query, Request
+from fastapi import APIRouter, Depends, Query
 from fastapi.responses import FileResponse
 
 from api import models
@@ -25,6 +25,7 @@ from api.schemas.user import User
 from api.services.courses import COURSES
 from api.services.shop import spend_coins
 from api.settings import settings
+from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
 
 
@@ -53,8 +54,14 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
 
     if course.free or user.admin:
         return
-    if not await db.exists(filter_by(models.CourseAccess, user_id=user.id, course_id=course.id)):
+
+    if course.id not in await get_owned_courses(user.id):
         raise NoCourseAccessException
+
+
+@redis_cached("course_access", "user_id")
+async def get_owned_courses(user_id: str) -> set[str]:
+    return {ca.course_id async for ca in await db.stream(filter_by(models.CourseAccess, user_id=user_id))}
 
 
 @router.get("/courses", responses=responses(list[CourseSummary]))
@@ -88,7 +95,7 @@ async def list_courses(
         if user and user.admin:
             courses = set(COURSES)
         elif user:
-            courses |= {ca.course_id async for ca in await db.stream(filter_by(models.CourseAccess, user_id=user.id))}
+            courses |= await get_owned_courses(user.id)
 
         relevant = courses if owned else set(COURSES) - courses
         out = (course for course in out if course.id in relevant)
@@ -108,6 +115,7 @@ async def get_course_summary(course: Course = get_course) -> Any:
     dependencies=[require_verified_email, has_course_access],
     responses=verified_responses(UserCourse, NoCourseAccessException, CourseNotFoundException),
 )
+@redis_cached("lecture_progress", "course", "user")
 async def get_course_details(course: Course = get_course, user: User = user_auth) -> Any:
     """
     Return details about a specific course.
@@ -125,7 +133,7 @@ async def get_course_details(course: Course = get_course, user: User = user_auth
     dependencies=[require_verified_email, has_course_access],
     responses=verified_responses(str, NoCourseAccessException, CourseNotFoundException, LectureNotFoundException),
 )
-async def get_mp4_lecture_link(request: Request, course: Course = get_course, lecture: Lecture = get_lecture) -> Any:
+async def get_mp4_lecture_link(course: Course = get_course, lecture: Lecture = get_lecture) -> Any:
     """
     Return the download link of an mp4 lecture.
 
@@ -182,6 +190,9 @@ async def complecte_lecture(
     async for skill_course in await db.stream(filter_by(models.SkillCourse, course_id=course.id)):
         await models.XP.add_xp(user.id, skill_course.skill_id, settings.lecture_xp)
 
+    await clear_cache("xp")
+    await clear_cache("lecture_progress")
+
     return True
 
 
@@ -194,9 +205,7 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
     """
 
     course_ids = {k for k, v in COURSES.items() if v.free or user.admin}
-    async for course_access in await db.stream(filter_by(models.CourseAccess, user_id=user.id)):
-        if course_access.course_id in COURSES:
-            course_ids.add(course_access.course_id)
+    course_ids |= (await get_owned_courses(user.id)) & set(COURSES)
     return [COURSES[course_id].summary for course_id in course_ids]
 
 
@@ -222,5 +231,7 @@ async def buy_course(user: User = user_auth, course: Course = get_course) -> Any
         raise NotEnoughCoinsError
 
     await models.CourseAccess.create(user.id, course.id)
+
+    await clear_cache("course_access")
 
     return True
