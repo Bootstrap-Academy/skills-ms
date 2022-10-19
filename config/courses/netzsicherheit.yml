@@ -11,183 +11,198 @@ requirements: []
 last_update: 1665506743
 sections:
   - id: section
-    title: "Netzsicherheit - IT Security in Netzwerken"
+    title: "Grundlagen"
     description:
     lectures:
       - id: "UVdDfyuzpz8"
-        title: "Netzsicherheit Tutorial #1 - Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "UVdDfyuzpz8"
         duration: 1629
       - id: "6X8FSF1XXpc"
-        title: "Netzsicherheit Tutorial #2 - Extended Validation Zertifikate und andere Zertifikate"
+        title: "Extended Validation Zertifikate und andere Zertifikate"
         description:
         type: youtube
         video_id: "6X8FSF1XXpc"
         duration: 407
       - id: "jaRJq9XYhVc"
-        title: "Netzsicherheit Tutorial #3 - OCSP - Status von Zertifikaten prüfen"
+        title: "OCSP - Status von Zertifikaten prüfen"
         description:
         type: youtube
         video_id: "jaRJq9XYhVc"
         duration: 472
       - id: "h31hMJ6ztVM"
-        title: "Netzsicherheit Tutorial #4 - Password Authentication Protocol PAP"
+        title: "Password Authentication Protocol PAP"
         description:
         type: youtube
         video_id: "h31hMJ6ztVM"
         duration: 413
       - id: "u355Z0YyN84"
-        title: "Netzsicherheit Tutorial #5 - CHAP"
+        title: "CHAP"
         description:
         type: youtube
         video_id: "u355Z0YyN84"
         duration: 320
       - id: "iQyXs3EX2PM"
-        title: "Netzsicherheit Tutorial #6 - S-Key"
+        title: "S-Key"
         description:
         type: youtube
         video_id: "iQyXs3EX2PM"
         duration: 432
       - id: "OkcvnG6Qjok"
-        title: "Netzsicherheit Tutorial #7 - EAP"
+        title: "EAP"
         description:
         type: youtube
         video_id: "OkcvnG6Qjok"
         duration: 462
       - id: "AO29zGa_JHc"
-        title: "Netzsicherheit Tutorial #8 - Authentifikation bei mehreren Ressourcen"
+        title: "Authentifikation bei mehreren Ressourcen"
         description:
         type: youtube
         video_id: "AO29zGa_JHc"
         duration: 319
+  - id: section2
+    title: "Kerberos"
+    description:
       - id: "ooe1G24vzYI"
-        title: "Netzsicherheit Tutorial #9 - Kerberos Einführung"
+        title: "Kerberos Einführung"
         description:
         type: youtube
         video_id: "ooe1G24vzYI"
         duration: 442
       - id: "tSLvaWczpNM"
-        title: "Netzsicherheit Tutorial #10 - Das Ticket Granting Ticket"
+        title: "Das Ticket Granting Ticket"
         description:
         type: youtube
         video_id: "tSLvaWczpNM"
         duration: 719
       - id: "ftS7jyK-Sqc"
-        title: "Netzsicherheit Tutorial #11 - Ressourcenzugriff"
+        title: "Ressourcenzugriff"
         description:
         type: youtube
         video_id: "ftS7jyK-Sqc"
         duration: 593
       - id: "ewcKF5RJ7TM"
-        title: "Netzsicherheit Tutorial #12 - Mehrstufige Netze"
+        title: "Mehrstufige Netze"
         description:
         type: youtube
         video_id: "ewcKF5RJ7TM"
         duration: 491
+  - id: section3
+    title: "IPSec"
+    description:
       - id: "5wjEJurs_Mo"
-        title: "Netzsicherheit Tutorial #13 - Angriffe auf IP"
+        title: "Angriffe auf IP"
         description:
         type: youtube
         video_id: "5wjEJurs_Mo"
         duration: 299
       - id: "Oy8lWxjAqZU"
-        title: "Netzsicherheit Tutorial #14 - Übersicht zu IPSec"
+        title: "Übersicht zu IPSec"
         description:
         type: youtube
         video_id: "Oy8lWxjAqZU"
         duration: 451
       - id: "CJGfic-O4K0"
-        title: "Netzsicherheit Tutorial #15 - Die Datenbanken von IPSec"
+        title: "Die Datenbanken von IPSec"
         description:
         type: youtube
         video_id: "CJGfic-O4K0"
         duration: 449
       - id: "uVWVT4c3kuE"
-        title: "Netzsicherheit Tutorial #16 - Tunnelmodus und Transportmodus"
+        title: "Tunnelmodus und Transportmodus"
         description:
         type: youtube
         video_id: "uVWVT4c3kuE"
         duration: 505
       - id: "yymR6zqtdT8"
-        title: "Netzsicherheit Tutorial #17 - AH - Authentication Header"
+        title: "AH - Authentication Header"
         description:
         type: youtube
         video_id: "yymR6zqtdT8"
         duration: 517
       - id: "L9UtqLy42XI"
-        title: "Netzsicherheit Tutorial #18 - ESP - Encapsulation Security Payload"
+        title: "ESP - Encapsulation Security Payload"
         description:
         type: youtube
         video_id: "L9UtqLy42XI"
         duration: 463
       - id: "eSoIL71Ri0M"
-        title: "Netzsicherheit Tutorial #19 - Der Internet Key Exchange - IKE"
+        title: "Der Internet Key Exchange - IKE"
         description:
         type: youtube
         video_id: "eSoIL71Ri0M"
         duration: 631
+  - id: section4
+    title: "TLS"
+    description:
       - id: "sye1azuEZXw"
-        title: "Netzsicherheit Tutorial #20 - TLS Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "sye1azuEZXw"
         duration: 570
       - id: "vuMJAgx87TM"
-        title: "Netzsicherheit Tutorial #21 - Angriffe auf TLS"
+        title: "Angriffe auf TLS"
         description:
         type: youtube
         video_id: "vuMJAgx87TM"
         duration: 533
       - id: "Y_SR0qIZR8w"
-        title: "Netzsicherheit Tutorial #22 - Das Record Protocol"
+        title: "Das Record Protocol"
         description:
         type: youtube
         video_id: "Y_SR0qIZR8w"
         duration: 362
       - id: "BmyAIFPcWyc"
-        title: "Netzsicherheit Tutorial #23 - Schlüsselgenerierung bei TLS"
+        title: "Schlüsselgenerierung bei TLS"
         description:
         type: youtube
         video_id: "BmyAIFPcWyc"
         duration: 221
+  - id: section5
+    title: "Netzzugang"
+    description:
       - id: "Vqh19T66rhM"
-        title: "Netzsicherheit Tutorial #24 - Netzzugang"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "Vqh19T66rhM"
         duration: 285
       - id: "C6m8wCNJrfA"
-        title: "Netzsicherheit Tutorial #25 - Netzzugang über LAN"
+        title: "Netzzugang über LAN"
         description:
         type: youtube
         video_id: "C6m8wCNJrfA"
         duration: 287
       - id: "L1-CqVfkFFg"
-        title: "Netzsicherheit Tutorial #26 - Netzzugang bei VPNs"
+        title: "Netzzugang bei VPNs"
         description:
         type: youtube
         video_id: "L1-CqVfkFFg"
         duration: 402
       - id: "U82i104RAHc"
-        title: "Netzsicherheit Tutorial #27 - Netzzugang bei VPNs #2 - OpenVPN"
+        title: "Netzzugang bei VPNs #2 - OpenVPN"
         description:
         type: youtube
         video_id: "U82i104RAHc"
         duration: 279
       - id: "Dyhq9SPSN-Y"
-        title: "Netzsicherheit Tutorial #28 - WEP"
+        title: "WEP"
         description:
         type: youtube
         video_id: "Dyhq9SPSN-Y"
         duration: 459
       - id: "CflJNJCt6Bs"
-        title: "Netzsicherheit Tutorial #29 - WPA2"
+        title: "WPA2"
         description:
         type: youtube
         video_id: "CflJNJCt6Bs"
         duration: 548
+  - id: section6
+    title: "Bonus"
+    description:
       - id: "a5-83uboWzs"
         title: "JSON Web Tokens"
         description:
