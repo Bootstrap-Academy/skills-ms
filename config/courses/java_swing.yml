@@ -68,7 +68,7 @@ sections:
         type: youtube
         video_id: "N5Bgbhn4hJs"
         duration: 761
-  - id: section
+  - id: section2
     title: "Snake in Swing"
     description:
     lectures:
