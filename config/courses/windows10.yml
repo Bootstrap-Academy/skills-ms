@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rRSgXNzZMV3XlrfklBugNW
-title: "Windows 10 Tutorial - Kommandozeile und mehr"
+title: "Windows 10 - Kommandozeile und mehr"
 description:
 category:
 language: de
@@ -11,59 +11,59 @@ requirements: []
 last_update: 1665507370
 sections:
   - id: section
-    title: "Windows 10 Tutorial - Kommandozeile und mehr"
+    title: "Grundlagen"
     description:
     lectures:
       - id: "xnF2ZnYPIOc"
-        title: "Windows Command Line Tutorial #1 - Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "xnF2ZnYPIOc"
         duration: 317
       - id: "vWlwHLgdNBU"
-        title: "Windows Command Line Tutorial #2 - ipconfig"
+        title: "ipconfig"
         description:
         type: youtube
         video_id: "vWlwHLgdNBU"
         duration: 208
       - id: "s6HmUeYefuE"
-        title: "Windows Command Line Tutorial #3 - Erstellen und Löschen von Verzeichnissen"
+        title: "Erstellen und Löschen von Verzeichnissen"
         description:
         type: youtube
         video_id: "s6HmUeYefuE"
         duration: 232
       - id: "wtvCi6ytnxs"
-        title: "Windows Command Line Tutorial #4 - Dateien löschen, erstellen, anhängen und Pipes"
+        title: "Dateien löschen, erstellen, anhängen und Pipes"
         description:
         type: youtube
         video_id: "wtvCi6ytnxs"
         duration: 519
       - id: "3NEpD_mYcvM"
-        title: "Windows Command Line Tutorial #5 - Dateien verschieben, kopieren, Datenträger und Farbe"
+        title: "Dateien verschieben, kopieren, Datenträger und Farbe"
         description:
         type: youtube
         video_id: "3NEpD_mYcvM"
         duration: 288
       - id: "01pu4Euw9Ng"
-        title: "Windows Command Line Tutorial #6 - Speichern von Outputs"
+        title: "Speichern von Outputs"
         description:
         type: youtube
         video_id: "01pu4Euw9Ng"
         duration: 245
       - id: "6app-3MmjVI"
-        title: "Windows Command Line Tutorial #7 - cls und mehrere Commands auf einmal ausführen"
+        title: "cls und mehrere Commands auf einmal ausführen"
         description:
         type: youtube
         video_id: "6app-3MmjVI"
         duration: 160
       - id: "Jd_5Zr6qoO8"
-        title: "Windows Tutorial - Der Registrierungseditor und Autostart unter Windows"
+        title: "Der Registrierungseditor und Autostart unter Windows"
         description:
         type: youtube
         video_id: "Jd_5Zr6qoO8"
         duration: 506
       - id: "vf62tjS6v9E"
-        title: "Windows Tutorial - Registrierungseditor per Kommandozeile"
+        title: "Registrierungseditor per Kommandozeile"
         description:
         type: youtube
         video_id: "vf62tjS6v9E"
