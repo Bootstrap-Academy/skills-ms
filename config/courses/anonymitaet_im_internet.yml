@@ -206,3 +206,21 @@ sections:
         type: youtube
         video_id: "IZzU89SzLWc"
         duration: 2102
+      - id: "XcX3JY30tqU"
+        title: "Steganographie - Verstecke Nachrichten/Dateien in Bildern"
+        description:
+        type: youtube
+        video_id: "XcX3JY30tqU"
+        duration: 432
+      - id: "sxFOti8SLSs"
+        title: "Steganographie - Verstecke Dateien wie Mr.Robot mit DeepSound"
+        description:
+        type: youtube
+        video_id: "sxFOti8SLSs"
+        duration: 385
+      - id: "M6ly1shUVQo"
+        title: "Proxychains"
+        description:
+        type: youtube
+        video_id: "M6ly1shUVQo"
+        duration: 542
