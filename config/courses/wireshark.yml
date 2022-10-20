@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oIlWv3K9xACZi3fHfYLKtj
-title: "Wireshark Tutorial Deutsch"
+title: "Wireshark: Netzwerkanalyse"
 description:
 category:
 language: de
@@ -11,59 +11,59 @@ requirements: []
 last_update: 1665507854
 sections:
   - id: section
-    title: "Wireshark Tutorial Deutsch"
+    title: "Wireshark"
     description:
     lectures:
       - id: "Tc6V4lem9FY"
-        title: "Wireshark Tutorial #1 - Einleitung und Installation"
+        title: "Einleitung und Installation"
         description:
         type: youtube
         video_id: "Tc6V4lem9FY"
         duration: 574
       - id: "tMP6IH4MAk8"
-        title: "Wireshark Tutorial #2 - Aufzeichnen"
+        title: "Aufzeichnen"
         description:
         type: youtube
         video_id: "tMP6IH4MAk8"
         duration: 632
       - id: "rhokQ-6UC2Q"
-        title: "Wireshark Tutorial #3 - Mehr zum Paket"
+        title: "Mehr zum Paket"
         description:
         type: youtube
         video_id: "rhokQ-6UC2Q"
         duration: 625
       - id: "2L7WP0Bb5pA"
-        title: "Wireshark Tutorial #4 - Datenpakete"
+        title: "Datenpakete"
         description:
         type: youtube
         video_id: "2L7WP0Bb5pA"
         duration: 717
       - id: "rEWSZ8V4H3c"
-        title: "Wireshark Tutorial #5 - Speichern und Laden"
+        title: "Speichern und Laden"
         description:
         type: youtube
         video_id: "rEWSZ8V4H3c"
         duration: 191
       - id: "pJekOEB3HLs"
-        title: "Wireshark Tutorial #6 - Filter"
+        title: "Filter"
         description:
         type: youtube
         video_id: "pJekOEB3HLs"
         duration: 653
       - id: "5GbvTT69v0U"
-        title: "Wireshark Tutorial #7 - Verbindungen einfärben"
+        title: "Verbindungen einfärben"
         description:
         type: youtube
         video_id: "5GbvTT69v0U"
         duration: 231
       - id: "rXb5AFSQpSE"
-        title: "Wireshark Tutorial #8 - Statistiken und Graphs"
+        title: "Statistiken und Graphs"
         description:
         type: youtube
         video_id: "rXb5AFSQpSE"
         duration: 477
       - id: "Hs58b7OHgto"
-        title: "Wireshark Challenge aus dem Vorstellungsgespräch - Telnet"
+        title: "Challenge aus dem Vorstellungsgespräch - Telnet"
         description:
         type: youtube
         video_id: "Hs58b7OHgto"
