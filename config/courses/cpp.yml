@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oG-kkn36ZnDpRq6iahUXZS
 title: "C++ Programmierung"
-description:
+description: "C++ ist die Weiterentwicklung von C - Objektorientierung, Vererbung, dynamische Bindung. Hier kam der ganze Spaß dazu. C++ ist mittlerweile eine moderne Sprache, die weit verbreitet ist und speziell dort zum Einsatz kommt, wo Leistung essentiell ist: Spiele, Server und Co."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/cpp.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
