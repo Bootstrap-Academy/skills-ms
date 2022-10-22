@@ -15,7 +15,7 @@ sections:
     description:
     lectures:
       - id: "wI9yE7ZIbMg"
-        title: "Python Let's Code: Wasserzeichen und Komprimieren von Bildern"
+        title: "Wasserzeichen und Komprimieren von Bildern"
         description:
         type: youtube
         video_id: "wI9yE7ZIbMg"
@@ -27,7 +27,7 @@ sections:
         video_id: "vXrBTD8adW0"
         duration: 928
       - id: "J5CEZ1lZo_o"
-        title: "Stable Diffusion: Besser als Dall E 2 in Python [Tutorial]"
+        title: "Stable Diffusion: Besser als Dall E 2 in Python"
         description:
         type: youtube
         video_id: "J5CEZ1lZo_o"
@@ -39,7 +39,7 @@ sections:
         video_id: "NvH6StJ918s"
         duration: 1408
       - id: "aFYxOS96q2A"
-        title: "KI bestraft mich für Fehler in Beat Saber 😬 | BEAT THE TRÖTE"
+        title: "BEAT THE TRÖTE"
         description:
         type: youtube
         video_id: "aFYxOS96q2A"
@@ -81,55 +81,55 @@ sections:
         video_id: "Gc92z58-Qm4"
         duration: 3709
       - id: "XkvcUlvGqvs"
-        title: "SECURE FTP - SFTP mit pysftp | Python"
+        title: "SECURE FTP - SFTP mit pysftp"
         description:
         type: youtube
         video_id: "XkvcUlvGqvs"
         duration: 1148
       - id: "1HxjDXykSmc"
-        title: "FTP steuern und verwalten mit FTPlib | Python"
+        title: "FTP steuern und verwalten mit FTPlib"
         description:
         type: youtube
         video_id: "1HxjDXykSmc"
         duration: 1324
       - id: "sj03Q-JYZqA"
-        title: "2FA One Time Passwords mit PyOTP | Python"
+        title: "2FA One Time Passwords mit PyOTP"
         description:
         type: youtube
         video_id: "sj03Q-JYZqA"
         duration: 853
       - id: "VVKFuZf9jNw"
-        title: "Passwörter sicher speichern | Python"
+        title: "Passwörter sicher speichern"
         description:
         type: youtube
         video_id: "VVKFuZf9jNw"
         duration: 1140
       - id: "dipFOn4kZHY"
-        title: "Text \"Clean\" machen | Python"
+        title: "Text \"Clean\" machen"
         description:
         type: youtube
         video_id: "dipFOn4kZHY"
         duration: 1531
       - id: "cnrhMjroWrI"
-        title: "Größe eines Verzeichnisses berechnen | Python"
+        title: "Größe eines Verzeichnisses berechnen"
         description:
         type: youtube
         video_id: "cnrhMjroWrI"
         duration: 717
       - id: "0q9CLHGV1Fo"
-        title: "Schrift in Bildern erkennen und in Text umwandeln | PyTesseract, Python"
+        title: "Schrift in Bildern erkennen und in Text umwandeln mit PyTesseract"
         description:
         type: youtube
         video_id: "0q9CLHGV1Fo"
         duration: 737
       - id: "-XXj-uLdGmQ"
-        title: "Webcam nutzen und Kanten erkennen | Python"
+        title: "Webcam nutzen und Kanten erkennen"
         description:
         type: youtube
         video_id: "-XXj-uLdGmQ"
         duration: 682
       - id: "lWDWJaV_rZ4"
-        title: "Subdomains einer Website enumerieren mit Python"
+        title: "Subdomains einer Website enumerieren"
         description:
         type: youtube
         video_id: "lWDWJaV_rZ4"
@@ -153,13 +153,13 @@ sections:
         video_id: "iLg9KSFxzi8"
         duration: 1198
       - id: "bFlyT4cDXew"
-        title: "Alle Bilder einer Website runterladen [PYTHON]"
+        title: "Alle Bilder einer Website runterladen"
         description:
         type: youtube
         video_id: "bFlyT4cDXew"
         duration: 628
       - id: "9YBaUXzvBOo"
-        title: "Mit Python QR Codes erstellen und einlesen"
+        title: "QR Codes erstellen und einlesen"
         description:
         type: youtube
         video_id: "9YBaUXzvBOo"
@@ -171,67 +171,61 @@ sections:
         video_id: "JG1CC89mF00"
         duration: 1157
       - id: "6Sf_qHehLgU"
-        title: "Ein einfacher Screenrecorder in Python mit opencv und pyautogui"
+        title: "Ein einfacher Screenrecorder mit opencv und pyautogui"
         description:
         type: youtube
         video_id: "6Sf_qHehLgU"
         duration: 766
       - id: "TZJQoi1h2FI"
-        title: "Text-To-Speech in Python in 4 Zeilen (eigentlich)"
+        title: "Text-To-Speech in Python in 4 Zeilen"
         description:
         type: youtube
         video_id: "TZJQoi1h2FI"
         duration: 230
       - id: "OZo2HxoIOtw"
-        title: "PDF Dateien zusammenfügen, trennen und Text auslesen mit Python"
+        title: "PDF Dateien zusammenfügen, trennen und Text auslesen"
         description:
         type: youtube
         video_id: "OZo2HxoIOtw"
         duration: 1028
       - id: "uZ9WWzkH17I"
-        title: "Mit RSA Text verschlüsseln in Python [PyCryptodome]"
+        title: "Mit RSA Text verschlüsseln [PyCryptodome]"
         description:
         type: youtube
         video_id: "uZ9WWzkH17I"
         duration: 1308
       - id: "P4F2Zt25j2I"
-        title: "Dateien verschlüsseln mit Python [PyCryptodome]"
+        title: "Dateien verschlüsseln [PyCryptodome]"
         description:
         type: youtube
         video_id: "P4F2Zt25j2I"
         duration: 1816
       - id: "QthP_kxOy9Y"
-        title: "Dateien über das Netzwerk verschicken mit Python [Sockets]"
+        title: "Dateien über das Netzwerk verschicken mit Sockets"
         description:
         type: youtube
         video_id: "QthP_kxOy9Y"
         duration: 1164
       - id: "csPfQnCc9P0"
-        title: "Sichere Passwörter erstellen mit Python"
+        title: "Sichere Passwörter erstellen"
         description:
         type: youtube
         video_id: "csPfQnCc9P0"
         duration: 583
       - id: "QBmhMpNAG0I"
-        title: "Mein neues System - Systeminfo auslesen mit Python"
+        title: "Mein neues System - Systeminfo auslesen"
         description:
         type: youtube
         video_id: "QBmhMpNAG0I"
         duration: 1295
       - id: "SfPWCKTHzE4"
-        title: "Tetris in Python - in unter 250 Zeilen Code [PyGame]"
+        title: "Tetris in Python in unter 250 Zeilen Code [PyGame]"
         description:
         type: youtube
         video_id: "SfPWCKTHzE4"
         duration: 5625
-      - id: "Lb3fGHLLhL8"
-        title: "Live Coding einer Blockchain in Python [Level: 7/10] zum Jubiläum des Community Projekts"
-        description:
-        type: youtube
-        video_id: "Lb3fGHLLhL8"
-        duration: 13972
       - id: "MP8lMbgv1Ls"
-        title: "Let's Code - DNS Performancetest in Python + News - Cloudflare eröffnet DNS Server"
+        title: "DNS Performancetest"
         description:
         type: youtube
         video_id: "MP8lMbgv1Ls"
