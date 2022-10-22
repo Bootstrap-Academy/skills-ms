@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qgQ2jnCFTo_knQTbpU5W4X
 title: "Jest - JavaScript Testing"
-description:
+description: "Ich weiß, ich weiß, testen ist so ein Ding, das will man nicht unbedingt als Entwickler tun. Aber wer tut's dann? Wer findet die Bugs, wer sagt, was genau schief geht. Am Ende ist man meist deutlich schneller, Tests zu schreiben, als die Bugs vom Kunden finden zu lassen. Und Jest ist DIE Bibliothek für JS Tests."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/javascript.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
