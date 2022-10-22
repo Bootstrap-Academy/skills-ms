@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qNMn6zimfu4JPUklG-4Uu4
 title: "Softwareengineering - Grundlagen"
-description:
+description: "Softwareentwickeln ist - so leid es mir tut, das sagen zu müssen - etwas völlig anderes als Programmieren. Es geht darum, den Code aus zig Modulen und zig Klassen in ein großes und ganzes zu gießen - und sich überhaupt mal darum Gedanken zu machen, was man eigentlich braucht. Software ist mittlerweile so hochkomplex, da muss das definitiv sein!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/softwareengineering.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
