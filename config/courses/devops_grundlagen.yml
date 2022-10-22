@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pSbRnMtEG5XEdYVwJE5se9
 title: "DevOps"
-description:
+description: "Die Softwareentwicklung hat sich stark weiter entwickelt. Klassische Entwicklung, agile Development, DevOps. Es wurde irgendwie immer weniger technisch und mittlerweile ist man echt darauf fixiert, dass man menschlich und kommunikativ gut ist. Was das heißt, erfahrt ihr hier."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/devops.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
