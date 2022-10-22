@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rRSgXNzZMV3XlrfklBugNW
-title: "Windows 10 - Kommandozeile und mehr"
-description:
+title: "Windows lernen - Kommandozeile und mehr"
+description: "Wir alle nutzen Windows irgendwann in unserem Leben. Und vermutlich sollten wir es dann schon zu nutzen lernen!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/windows.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
