@@ -110,7 +110,7 @@ sections:
         type: youtube
         video_id: "MoIRG27jD54"
         duration: 336
-  - id: section
+  - id: section2
     title: "Audio Verarbeitung in Python"
     description:
     lectures:
