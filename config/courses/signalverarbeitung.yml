@@ -1,10 +1,10 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qvLZlbEiRwHoP0mbmAHNId
 title: "Signalverarbeitung mit Python"
-description:
+description: "Mit Python Biosignale auslesen - Stimme, Bilder aber auch EEG Werte? Ja aber natürlich geht das. Habt ihr was anderes erwartet?"
 category:
 language: de
-image:
-author: null
+image: https://static.bootstrap.academy/thumbnails/signalverarbeitung.jpg
+author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
 requirements: []
