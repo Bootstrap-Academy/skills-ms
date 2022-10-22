@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pWwFv5APk240hrehtCJae-
-title: "Kryptographie"
-description:
+title: "Theoretische Kryptographie"
+description: "Kryptographie ist überall - ihr öffnet eine App? Ihr seid auf einer Website? Wäre ja ziemlich übel, wenn jeder eure Zahlungsdaten mitlesen kann. Ihr schreibt mit Freunden auf Signal? Wäre doof, wenn da jeder mitlesen kann. Zum Glück haben wir Kyptographie. Doch mathematisch ist sie noch spannender als ihr euch das vorstellen könnt!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/krypto.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
