@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qCtvw6fiki0ihkwv7tIWN_
 title: "Linux Desktop Automatisierung mit AutoKey"
-description:
+description: "Ihr wollt Dinge automatisieren, Makros schreiben, schneller unterwegs sein. Ihr leidet an demselben Problem, das ich auch kenne.. und ich hab hier die Lösung für euch. AutoKey."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/linux.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
