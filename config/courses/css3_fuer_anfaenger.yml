@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qQz698kYRkkBXJDeXJY_I7
 title: "CSS 3"
-description:
+description: "Mit CSS definiert man, wie eine Website aussehen soll - nicht den Inhalt oder das Verhalten. Doch ist das Design bei Web nicht gerade einer der wichtigsten Punkte? Schatten, Ecken aber auch Design für mobile Geräte und Effekte sind heute nicht mehr wegzudenken. Hier erfahrt ihr, wie man diese einsetzt."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/CSS.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
