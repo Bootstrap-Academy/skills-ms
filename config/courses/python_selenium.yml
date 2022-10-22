@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7ruEf-FwVD3Z5owHgdXNKlb
-title: "Python Selenium Tutorial - Den Browser automatisch bedienen"
+title: "Python Selenium - Den Browser automatisch bedienen"
 description:
 category:
 language: de
@@ -11,77 +11,77 @@ requirements: []
 last_update: 1665508136
 sections:
   - id: section
-    title: "Python Selenium Tutorial - Den Browser automatisch bedienen"
+    title: "Den Browser automatisch bedienen"
     description:
     lectures:
       - id: "u1T2v2Ucuuc"
-        title: "Python Selenium Tutorial #1 - Den Browser automatisch bedienen lassen"
+        title: "Den Browser automatisch bedienen lassen"
         description:
         type: youtube
         video_id: "u1T2v2Ucuuc"
         duration: 499
       - id: "X_oTF5aSGcA"
-        title: "Python Selenium Tutorial #2 - Automatisch Googlen"
+        title: "Automatisch Googlen"
         description:
         type: youtube
         video_id: "X_oTF5aSGcA"
         duration: 547
       - id: "bfk6mmYkOWI"
-        title: "Python Selenium Tutorial #3 - Unittests mit Selenium"
+        title: "Unittests mit Selenium"
         description:
         type: youtube
         video_id: "bfk6mmYkOWI"
         duration: 633
       - id: "Ak4-l5XkQ3k"
-        title: "Python Selenium Tutorial #4 - Elemente finden #1"
+        title: "Elemente finden #1"
         description:
         type: youtube
         video_id: "Ak4-l5XkQ3k"
         duration: 814
       - id: "2iX3fQiqUdA"
-        title: "Python Selenium Tutorial #5 - Keys"
+        title: "Keys"
         description:
         type: youtube
         video_id: "2iX3fQiqUdA"
         duration: 218
       - id: "wJsUvQAjUFs"
-        title: "Python Selenium Tutorial #6 - Die History"
+        title: "Die History"
         description:
         type: youtube
         video_id: "wJsUvQAjUFs"
         duration: 131
       - id: "nK6CMrNTWqY"
-        title: "Python Selenium Tutorial #7 - Cookies"
+        title: "Cookies"
         description:
         type: youtube
         video_id: "nK6CMrNTWqY"
         duration: 400
       - id: "ScByEODsLiw"
-        title: "Python Selenium Tutorial #8 - Ein Mini XPath Tutorial"
+        title: "Ein Mini XPath Tutorial"
         description:
         type: youtube
         video_id: "ScByEODsLiw"
         duration: 709
       - id: "A1XWkGMeso4"
-        title: "Python Selenium Tutorial #9 - Performance Tests und Explizites warten"
+        title: "Performance Tests und Explizites warten"
         description:
         type: youtube
         video_id: "A1XWkGMeso4"
         duration: 459
       - id: "kPBbIo2iKic"
-        title: "Python Selenium Tutorial #10 - Implizites warten und eigene Wartebedingungen"
+        title: "Implizites warten und eigene Wartebedingungen"
         description:
         type: youtube
         video_id: "kPBbIo2iKic"
         duration: 475
       - id: "BsWrl_AT_jQ"
-        title: "Python Selenium Tutorial #11 - ActionChains"
+        title: "ActionChains"
         description:
         type: youtube
         video_id: "BsWrl_AT_jQ"
         duration: 530
       - id: "0hz8u3iCxQk"
-        title: "Python Selenium Tutorial #12 - ChromeOptions"
+        title: "ChromeOptions"
         description:
         type: youtube
         video_id: "0hz8u3iCxQk"
