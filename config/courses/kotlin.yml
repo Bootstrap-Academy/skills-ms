@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rylgyThgUldHG8KE6Nbc1O
 title: "Kotlin Programmierung"
-description:
+description: "Kotlin ist zwar nicht mehr so unbekannt, wie das vor kurzem noch war. Kotlin ist mittlerweile die Standardsprache für native Android-Apps. Es ist die Sprache, die ihr in jedes Java-Projekt stecken könnt - egal wie alt und dadurch einen modernen Ansatz nutzen könnt, der in Java noch nicht angekommen ist."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/kotlin.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
