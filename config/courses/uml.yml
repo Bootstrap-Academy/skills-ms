@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oC7U6tm0BOnGg1R9ont0Vo
 title: "UML - Unified Modeling Language"
-description:
+description: "Ihr versucht gerade eure Software zu definieren und malt einfach drauf los? Ja.. schwierig. Denn für sowas gibt's Standards, damit jeder auch dasselbe versteht wie ihr. Und das ist UML."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/uml.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
