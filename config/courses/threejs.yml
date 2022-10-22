@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rrmmZEVGA4GfLLNLlGipWo
 title: "Three.js - 3D Animationen im Browser"
-description:
+description: "Wunderschöne 3D Animationen im Browser, vielleicht sogar 3D Spiele? Das geht! Eine Möglichkeit ist ThreeJS."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/threejs.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
