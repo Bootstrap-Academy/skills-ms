@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oBz3PP5sGIkLnmBbw10UUP
 title: "Der Lambda Kalkül"
-description:
+description: "Äh, wut? Der Lambda Kalkül ist wohl der theoretischste Ansatz zu Programmierung, den ihr je gesehen habt. Er versucht Funktionen und Co zu formalisieren und macht das.. mit ein paar extra Windungen im Gehirn. Nehmt euch nen Tee und gleich noch einen Kaffee dazu und gönnt euch."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/lambda.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
