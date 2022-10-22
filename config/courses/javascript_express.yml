@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7ogA_q-mOoYH3dDQIh8B3Oe
-title: "ExpressJS: JavaScript Server in einfach"
-description:
+title: "ExpressJS: JavaScript Server und APIs in einfach"
+description: "Ihr wollt eine API mit JavaScript erstellen? Klar, ihr könnt auch alles von Hand machen.. oder ihr nutzt Express und seid in 20 Minuten durch."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/javascript.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
