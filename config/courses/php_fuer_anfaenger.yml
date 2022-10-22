@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rZMP1lj32Qyp4bkarvzCGm
-title: "PHP Tutorial Deutsch für Anfänger"
+title: "PHP Programmierung"
 description:
 category:
 language: de
@@ -11,269 +11,285 @@ requirements: []
 last_update: 1665507563
 sections:
   - id: section
-    title: "PHP Tutorial Deutsch für Anfänger"
+    title: "Grundlagen von PHP"
     description:
     lectures:
       - id: "SW1fgMxj9a4"
-        title: "PHP 7 Tutorial #1 - Installation"
+        title: "Installation"
         description:
         type: youtube
         video_id: "SW1fgMxj9a4"
         duration: 811
       - id: "uXNZTw2X2Uo"
-        title: "PHP 7 Tutorial #2 - Variablen"
+        title: "Variablen"
         description:
         type: youtube
         video_id: "uXNZTw2X2Uo"
         duration: 548
       - id: "BBH36wuYWNE"
-        title: "PHP 7 Tutorial #3 - Datentypen"
+        title: "Datentypen"
         description:
         type: youtube
         video_id: "BBH36wuYWNE"
         duration: 212
       - id: "Wi6hzkPsHhE"
-        title: "PHP 7 Tutorial #4 - Arithmetische Operatoren"
+        title: "Arithmetische Operatoren"
         description:
         type: youtube
         video_id: "Wi6hzkPsHhE"
         duration: 300
       - id: "I8gclpRQUhA"
-        title: "PHP 7 Tutorial #5 - Logische Operatoren"
+        title: "Logische Operatoren"
         description:
         type: youtube
         video_id: "I8gclpRQUhA"
         duration: 276
       - id: "KpBOBtcj-p8"
-        title: "PHP 7 Tutorial #6 - if-Bedingungen"
+        title: "if-Bedingungen"
         description:
         type: youtube
         video_id: "KpBOBtcj-p8"
         duration: 519
       - id: "qM7fybZ10Cc"
-        title: "PHP 7 Tutorial #7 - Das switch-case-Statement"
+        title: "Das switch-case-Statement"
         description:
         type: youtube
         video_id: "qM7fybZ10Cc"
         duration: 418
       - id: "YGkSgFD_a8I"
-        title: "PHP 7 Tutorial #8 - while-Schleifen"
+        title: "while-Schleifen"
         description:
         type: youtube
         video_id: "YGkSgFD_a8I"
         duration: 347
       - id: "pZJBZsfhe4Y"
-        title: "PHP 7 Tutorial #9 - Die Do-While-Schleife"
+        title: "Die Do-While-Schleife"
         description:
         type: youtube
         video_id: "pZJBZsfhe4Y"
         duration: 209
       - id: "fJRKomvlRq8"
-        title: "PHP 7 Tutorial #10 - Arrays"
+        title: "Arrays"
         description:
         type: youtube
         video_id: "fJRKomvlRq8"
         duration: 519
       - id: "cPEtayniHIs"
-        title: "PHP 7 Tutorial #11 - Die Foreach-Schleife"
+        title: "Die Foreach-Schleife"
         description:
         type: youtube
         video_id: "cPEtayniHIs"
         duration: 174
       - id: "6y6g5SEh1g0"
-        title: "PHP 7 Tutorial #12 - Assoziative Arrays"
+        title: "Assoziative Arrays"
         description:
         type: youtube
         video_id: "6y6g5SEh1g0"
         duration: 282
       - id: "XYoGuWCytN4"
-        title: "PHP 7 Tutorial #13 - Strings"
+        title: "Strings"
         description:
         type: youtube
         video_id: "XYoGuWCytN4"
         duration: 542
       - id: "yEOY85tjRLY"
-        title: "PHP 7 Tutorial #14 - Arrays Sortieren"
+        title: "Arrays Sortieren"
         description:
         type: youtube
         video_id: "yEOY85tjRLY"
         duration: 324
       - id: "HnKxQJjPp68"
-        title: "PHP 7 Tutorial #15 - Loopcontrol mit Break und Continue"
+        title: "Loopcontrol mit Break und Continue"
         description:
         type: youtube
         video_id: "HnKxQJjPp68"
         duration: 267
       - id: "X4WRSRjerds"
-        title: "PHP 7 Tutorial #16 - Kommentare, ===, die und exit"
+        title: "Kommentare, ===, die und exit"
         description:
         type: youtube
         video_id: "X4WRSRjerds"
         duration: 327
       - id: "m5xzlquvf0g"
-        title: "PHP 7 Tutorial #17 - Funktionen"
+        title: "Funktionen"
         description:
         type: youtube
         video_id: "m5xzlquvf0g"
         duration: 422
       - id: "7QsOU0Gvb3U"
-        title: "PHP 7 Tutorial #18 - Funktionen mit Parametern"
+        title: "Funktionen mit Parametern"
         description:
         type: youtube
         video_id: "7QsOU0Gvb3U"
         duration: 369
       - id: "Ebj2luXPPqw"
-        title: "PHP 7 Tutorial #19 - Funktionen mit Defaultparametern und Rückgabewerten"
+        title: "Funktionen mit Defaultparametern und Rückgabewerten"
         description:
         type: youtube
         video_id: "Ebj2luXPPqw"
         duration: 445
       - id: "F19VwkwPW3A"
-        title: "PHP 7 Tutorial #20 - Rekursive Funktionen"
+        title: "Rekursive Funktionen"
         description:
         type: youtube
         video_id: "F19VwkwPW3A"
         duration: 649
+  - id: section2
+    title: "Web-spezifische Themen"
+    description:
+    lectures:
       - id: "_ui0nclZK24"
-        title: "PHP 7 Tutorial #21 - Forms auswerten"
+        title: "Forms auswerten"
         description:
         type: youtube
         video_id: "_ui0nclZK24"
         duration: 641
       - id: "CaQVfH7ei30"
-        title: "PHP 7 Tutorial #22 - Form und $_SERVER"
+        title: "Form und $_SERVER"
         description:
         type: youtube
         video_id: "CaQVfH7ei30"
         duration: 437
       - id: "G9_owD5vBl4"
-        title: "Sondervideo: PHP feat. Hacking: Cross Site Scripting - Sicherheit von Forms"
+        title: "Cross Site Scripting - Sicherheit von Forms"
         description:
         type: youtube
         video_id: "G9_owD5vBl4"
         duration: 560
       - id: "Rt8mCnIHdbM"
-        title: "PHP 7 Tutorial #23 - Validierung von Forms"
+        title: "Validierung von Forms"
         description:
         type: youtube
         video_id: "Rt8mCnIHdbM"
         duration: 402
+  - id: section3
+    title: "Datenbanken"
+    description:
+    lectures:
       - id: "pdd1fnTcuzU"
-        title: "PHP 7 Tutorial #24 - Eine MySQL Datenbank über phpmyadmin"
+        title: "Eine MySQL Datenbank über phpmyadmin"
         description:
         type: youtube
         video_id: "pdd1fnTcuzU"
         duration: 634
       - id: "QBFlR-46aC0"
-        title: "PHP 7 Tutorial #25 - auf die MySQL Datenbank verbinden"
+        title: "auf die MySQL Datenbank verbinden"
         description:
         type: youtube
         video_id: "QBFlR-46aC0"
         duration: 440
       - id: "mklFZGBPUzI"
-        title: "PHP 7 Tutorial #26 - SQL Statements in PHP"
+        title: "SQL Statements in PHP"
         description:
         type: youtube
         video_id: "mklFZGBPUzI"
         duration: 727
       - id: "R9W3TCGW2Fk"
-        title: "Sondervideo: PHP feat. Hacking: SQL Injections und Gegenmaßnahmen"
+        title: "SQL Injections und Gegenmaßnahmen"
         description:
         type: youtube
         video_id: "R9W3TCGW2Fk"
         duration: 697
+  - id: section4
+    title: "Tipps und Tricks"
+    description:
+    lectures:
       - id: "Hz9AlK8Rt-M"
-        title: "PHP 7 Tutorial #27 - Datum und Uhrzeit"
+        title: "Datum und Uhrzeit"
         description:
         type: youtube
         video_id: "Hz9AlK8Rt-M"
         duration: 449
       - id: "bR2Z3vEXT8c"
-        title: "PHP 7 Tutorial #28 - Include und Require"
+        title: "Include und Require"
         description:
         type: youtube
         video_id: "bR2Z3vEXT8c"
         duration: 305
       - id: "Ov_rBQ0qMWo"
-        title: "PHP 7 Tutorial #29 - File Uploads - Dateien auf den Server hochladen"
+        title: "File Uploads - Dateien auf den Server hochladen"
         description:
         type: youtube
         video_id: "Ov_rBQ0qMWo"
         duration: 820
       - id: "clE-f1NRNWU"
-        title: "PHP 7 Tutorial #30 - Den File Upload überprüfen"
+        title: "Den File Upload überprüfen"
         description:
         type: youtube
         video_id: "clE-f1NRNWU"
         duration: 734
       - id: "Rz1muj_ACYQ"
-        title: "PHP 7 Tutorial #31 - Dateien lesen und schreiben"
+        title: "Dateien lesen und schreiben"
         description:
         type: youtube
         video_id: "Rz1muj_ACYQ"
         duration: 645
       - id: "MeeoG5W8lNE"
-        title: "PHP 7 Tutorial #32 - Cookies"
+        title: "Cookies"
         description:
         type: youtube
         video_id: "MeeoG5W8lNE"
         duration: 632
       - id: "-qRblIR14k0"
-        title: "PHP 7 Tutorial #33 - Sessions"
+        title: "Sessions"
         description:
         type: youtube
         video_id: "-qRblIR14k0"
         duration: 316
       - id: "1_24npIWaJ8"
-        title: "PHP 7 Tutorial #34 - sicheres Speichern von Passwörtern"
+        title: "sicheres Speichern von Passwörtern"
         description:
         type: youtube
         video_id: "1_24npIWaJ8"
         duration: 308
       - id: "jWn6rR4y5uQ"
-        title: "PHP 7 Tutorial #34.1 - wirklich sicheres Speichern mit salted Passwort Hashes"
+        title: "wirklich sicheres Speichern mit salted Passwort Hashes"
         description:
         type: youtube
         video_id: "jWn6rR4y5uQ"
         duration: 538
+  - id: section5
+    title: "OOP in PHP"
+    description:
+    lectures:
       - id: "iLghOcEFybE"
-        title: "PHP 7 Tutorial #35 - Klassen"
+        title: "Klassen"
         description:
         type: youtube
         video_id: "iLghOcEFybE"
         duration: 613
       - id: "xc3PtywceoY"
-        title: "PHP 7 Tutorial #36 - Konstruktoren"
+        title: "Konstruktoren"
         description:
         type: youtube
         video_id: "xc3PtywceoY"
         duration: 211
       - id: "7JeDMo3JKi4"
-        title: "PHP 7 Tutorial #37 - Vererbung"
+        title: "Vererbung"
         description:
         type: youtube
         video_id: "7JeDMo3JKi4"
         duration: 371
       - id: "P0Z2ri47Cx0"
-        title: "PHP 7 Tutorial #38 - Funktionen überschreiben"
+        title: "Funktionen überschreiben"
         description:
         type: youtube
         video_id: "P0Z2ri47Cx0"
         duration: 407
       - id: "W-eHyeK9eSI"
-        title: "PHP 7 Tutorial #39 - Private, Public und Protected"
+        title: "Private, Public und Protected"
         description:
         type: youtube
         video_id: "W-eHyeK9eSI"
         duration: 634
       - id: "lKbClm76LKI"
-        title: "PHP 7 Tutorial #40 - Interfaces, Abstrakte Klassen und Mehrfachvererbung"
+        title: "Interfaces, Abstrakte Klassen und Mehrfachvererbung"
         description:
         type: youtube
         video_id: "lKbClm76LKI"
         duration: 842
       - id: "vV-Hsebm9is"
-        title: "PHP 7 Tutorial #41 - letzte Worte zu Klassen, final und parent constructor"
+        title: "letzte Worte zu Klassen, final und parent constructor"
         description:
         type: youtube
         video_id: "vV-Hsebm9is"
