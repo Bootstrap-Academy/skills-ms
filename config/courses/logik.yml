@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7r7ztDWJ66pMNRYaa_TUjKP
 title: "Formale Logik"
-description:
+description: "If True ... Else If False... - aber was wenn es etwas komplexer sein darf? Was wenn ein ganzes Gleichungssystem daherkommt? Vielleicht sogar noch Funktionen dazu? Jup, das kann man auch rechnen."
 category:
 language: de
-image:
+image: "https://static.bootstrap.academy/thumbnails/formale logik.jpg"
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
