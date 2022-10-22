@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7o4qcD8tepVY5k7YiHYfMu5
 title: "Algorithmen in Java"
-description:
+description: "Ihr könnt Java? Ein bisschen Übung kann nicht schaden, um eure Kenntnisse über Algorithmen in der Praxis zu vertiefen."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/java.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
