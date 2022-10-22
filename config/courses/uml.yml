@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oC7U6tm0BOnGg1R9ont0Vo
-title: "UML Tutorial Deutsch - Unified Modeling Language"
+title: "UML - Unified Modeling Language"
 description:
 category:
 language: de
@@ -11,77 +11,89 @@ requirements: []
 last_update: 1665508356
 sections:
   - id: section
-    title: "UML Tutorial Deutsch - Unified Modeling Language"
+    title: "Klassendiagramme"
     description:
     lectures:
       - id: "PdlP8gzpRyo"
-        title: "UML Tutorial #1 - Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "PdlP8gzpRyo"
         duration: 718
       - id: "F5k1u5mzZ3U"
-        title: "UML Tutorial #2 - Klassendiagrammen Intro"
+        title: "Klassendiagrammen"
         description:
         type: youtube
         video_id: "F5k1u5mzZ3U"
         duration: 475
       - id: "fQZOFYuLd-k"
-        title: "UML Tutorial #3 - Vererbung"
+        title: "Vererbung"
         description:
         type: youtube
         video_id: "fQZOFYuLd-k"
         duration: 601
       - id: "fO7YTqZWZNQ"
-        title: "UML Tutorial #4 - Assoziationen"
+        title: "Assoziationen"
         description:
         type: youtube
         video_id: "fO7YTqZWZNQ"
         duration: 491
       - id: "JvJjOZR6q9s"
-        title: "UML Tutorial #5 - Assoziationsklassen"
+        title: "Assoziationsklassen"
         description:
         type: youtube
         video_id: "JvJjOZR6q9s"
         duration: 234
       - id: "WKKZo1tiOy0"
-        title: "UML Tutorial #6 - Aggregationen"
+        title: "Aggregationen"
         description:
         type: youtube
         video_id: "WKKZo1tiOy0"
         duration: 259
       - id: "uSrBTr7d_g8"
-        title: "UML Tutorial #7 - reflexive Assoziationen"
+        title: "reflexive Assoziationen"
         description:
         type: youtube
         video_id: "uSrBTr7d_g8"
         duration: 504
+  - id: section2
+    title: "OCL - Object Constraint Language"
+    description:
+    lectures:
       - id: "7sluwA4RSoU"
-        title: "UML Tutorial #8 - OCL - Object Constraint Language [GERMAN/DEUTSCH]"
+        title: "OCL - Object Constraint Language"
         description:
         type: youtube
         video_id: "7sluwA4RSoU"
         duration: 782
+  - id: section3
+    title: "Aktivitätsdiagramme"
+    description:
+    lectures:
       - id: "FdH51Ujp-GU"
-        title: "UML Tutorial #9 - Aktivitätsdiagramme"
+        title: "Aktivitätsdiagramme"
         description:
         type: youtube
         video_id: "FdH51Ujp-GU"
         duration: 761
       - id: "XClT7gR6hz0"
-        title: "UML Tutorial #10 - Aktivitätsdiagramme #2 - Swim Lanes und Nebenläufigkeit"
+        title: "Swim Lanes und Nebenläufigkeit"
         description:
         type: youtube
         video_id: "XClT7gR6hz0"
         duration: 472
+  - id: section4
+    title: "Weitere Diagramme"
+    description:
+    lectures:
       - id: "L_auS6pd_l0"
-        title: "UML Tutorial #11 - Sequenzdiagramme"
+        title: "Sequenzdiagramme"
         description:
         type: youtube
         video_id: "L_auS6pd_l0"
         duration: 808
       - id: "dYfr5Opkw38"
-        title: "UML Tutorial #12 - Use Case Diagramme"
+        title: "Use Case Diagramme"
         description:
         type: youtube
         video_id: "dYfr5Opkw38"
