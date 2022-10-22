@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pb4apqIMKvCz37t_dLznMm
 title: "Datenvisualisierung"
-description:
+description: "Data Science ist das eine, aber wie Daten gut dargestellt werden können, damit man auch auf den ersten Blick einen Zusammenhang zwischen zwei Dimensionen erkennen kann ein ganz anderer. Dazu gibt es Datenvisualisierung."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/datenvisualisierung.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
