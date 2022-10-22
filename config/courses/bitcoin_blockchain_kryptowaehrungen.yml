@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oiW2UVh1Go8JgllRbZRcPK
 title: "Bitcoin, die Blockchain und Kryptowährungen einfach erklärt und praktisch angewandt"
-description:
+description: "Blockchain-Technologien haben einen fragwürdigen Ruf - manche lieben sie, manche hassen sie. Eines ist aber sicher: Die wenigsten haben ein so tiefes technisches Verständnis, dass sie wissen, was es bedeutet, Transaktionen nachverfolgen zu können. Auch die kryptographischen Hintergründe von Blockchain-Technologien könnte man sich längst für viele weitere Anwendungen zunutze machen. Höchste Zeit, diese Technologie besser zu verstehen."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/blockchain.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
