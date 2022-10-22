@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rvhHip_LTM-J-5wHw7dWnw
 title: "Ray Tracing - Grafikprogrammierung in Java"
-description:
+description: "Habt ihr jemals gedacht, es wäre schon cool, selbst mal einen Raytracer zu programmieren? Hier seht ihr meinen Anlauf, der von euch ergänzt werden will."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/java.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
