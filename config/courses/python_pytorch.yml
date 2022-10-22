@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rx55Mai21reZtd_8m-qe27
 title: "PyTorch Tutorial - Neuronale Netze in Python"
-description:
+description: "Neuronale Netze programmieren in Python. Der Traum für KI. Wenn du es bis hier geschafft hast, hast du 2 Bibliotheken zur Auswahl: PyTorch und Tensorflow. Hier geht's um PyTorch. An der Stelle kurze Warnung, dass PyTorch ein echt großes Update bekommen hat und vieles hier mittlerweile etwas anders geht."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/pytorch.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
