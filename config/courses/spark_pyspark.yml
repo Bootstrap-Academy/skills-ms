@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pkk8-Yxa7mjAqi_E9DE_Z9
 title: "Spark und PySpark"
-description:
+description: "Data Science im ganz großen Stil? Da wirst du vermutlich mehr als einen Server brauchen.. und das muss man erstmal implementieren."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/python.jpg
 author: "The Morpheus Tutorials"
 price: 3000
 learning_goals: []
