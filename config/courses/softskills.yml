@@ -1,11 +1,11 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rC5g_bZNxZF6lOjSfNBKkE
 title: "Softskills für Informatiker"
-description:
+description: "Informatiker sitzen im Keller und reden nicht mit anderen? Da hast du wohl einigen Vorurteilen aufgesessen. Informatik und vor allem Softwareentwicklung ist mittlerweile fast schon ein sozialer Beruf! Furchtbar? Nein, das kann man lernen!"
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/softskills.jpg
-author: "The Morpheus Tutorials"
-price: 0
+author: "The Morpheus Tutorials und Tom Klein"
+price: 5000
 learning_goals: []
 requirements: []
 last_update: 1666399091
