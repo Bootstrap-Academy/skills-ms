@@ -15,7 +15,7 @@ sections:
     description:
     lectures:
       - id: "rkO6flF0VXs"
-        title: "Einen Server bei @Hetzner mieten und sich via SSH verbinden"
+        title: "Einen Server bei Hetzner mieten und sich via SSH verbinden"
         description:
         type: youtube
         video_id: "rkO6flF0VXs"
@@ -81,31 +81,31 @@ sections:
         video_id: "xlI2EA9Q7Kc"
         duration: 551
       - id: "tVX2z85wGmg"
-        title: "OpnSense: VMs anlegen in Proxmox [Hetzner Server]"
+        title: "OpnSense: VMs anlegen in Proxmox"
         description:
         type: youtube
         video_id: "tVX2z85wGmg"
         duration: 2836
       - id: "5D4U0kVxbJ4"
-        title: "Proxmox: Zertifikat via ACME.sh beantragen [Hetzner Server]"
+        title: "Proxmox: Zertifikat via ACME.sh beantragen"
         description:
         type: youtube
         video_id: "5D4U0kVxbJ4"
         duration: 796
       - id: "O2CHWr_AQT0"
-        title: "OpnSense: TLS Zertifikat via ACME.sh [Hetzner Server]"
+        title: "OpnSense: TLS Zertifikat via ACME.sh"
         description:
         type: youtube
         video_id: "O2CHWr_AQT0"
         duration: 1214
       - id: "lGA3ifzAnRk"
-        title: "OpnSense: VPN zum Server [Hetzner Server]"
+        title: "OpnSense: VPN zum Server"
         description:
         type: youtube
         video_id: "lGA3ifzAnRk"
         duration: 2026
       - id: "F9uMNMl-GAw"
-        title: "OpnSense: User Certificates für den VPN einrichten [Hetzner Server]"
+        title: "OpnSense: User Certificates für den VPN einrichten"
         description:
         type: youtube
         video_id: "F9uMNMl-GAw"
