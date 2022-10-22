@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rZMP1lj32Qyp4bkarvzCGm
 title: "PHP Programmierung"
-description:
+description: "PHP, meine erste serverseitige Programmiersprache und vermutlich das, was ihr von alten Browsergames kennt. Mittlerweile nur noch in Wordpress und alten Websites... doch halt! Was ist das? Moderne Anwendungen, APIs, ja, das geht auch mit PHP und kommt gerade immer mehr!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/php.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
