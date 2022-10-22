@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oxg9u5X2a-9X_jpN8iPOQy
 title: "Cloud Technologien"
-description:
+description: "Die Cloud ist überall, so sagt man doch. Doch gerade wenn ihr selbst eine Software wirklich hosten wollt, verbreiten wollt, anderen zugänglich machen wollt - je kleiner man ist, desto wertvoller sind Cloud Technologien. Logisch: Es ist als eine Person kaum finanzierbar, ein ganzes Serverzentrum zu betreiben. Deswegen ziehen viele kleinere Firmen gerade immer mehr in die Cloud. Aber was heißt das? Dazu ist diese Serie da."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/cloud.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
