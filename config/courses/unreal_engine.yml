@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7olLCliQ05e6hvEOl6sbBgv
 title: "Unreal Engine 4"
-description:
+description: "Ihr wolltet schon immer mal Spiele entwickeln? Eine der bekanntesten Engines überhaupt - und dazu bis zu einem gewissen Wert noch völlig kostenlos - ist die Unreal Engine 4!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/unrealengine.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
