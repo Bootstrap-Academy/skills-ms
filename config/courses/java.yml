@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qI9vtiiU5bJBfbxqBailVM
 title: "Java Programmierung für Anfänger"
-description:
+description: "X Milliarden Geräte nutzen Java - und das hat einen Grund. Java kann plattformübergreifend verwendet werden und das macht es so unfassbar angenehm zu nutzen. In den meisten Softwaresystemen von Unternehmen findet sich noch immer Java - auch wenn es weniger werden."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/java.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
