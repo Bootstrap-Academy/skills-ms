@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qoIUw0MBYQ9qJffZAVdRWC
 title: "Machine Learning und Künstliche Intelligenz"
-description:
+description: "KI, klar, tolles Thema, aber was verbirgt sich eigentlich dahinter? Es stellt sich raus - zumindest in der Theorie reine Mathematik!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/machinelearning.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
