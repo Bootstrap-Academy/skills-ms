@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pwHqtQSBXGBUNkyGGOJQXf
 title: "TypeScript: Volle Typisierung für JavaScript"
-description:
+description: "Was ist das größte Problem von JavaScript? Viele werden hier 'keine Typisierung' schreien. Und deswegen gibt's TypeScript. TypeScript ist mittlerweile so verbreitet, dass die allermeisten großen Webframeworks es genauso wie JavaScript unterstützen."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/typescript.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
