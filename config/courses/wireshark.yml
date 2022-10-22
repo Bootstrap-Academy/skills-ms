@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oIlWv3K9xACZi3fHfYLKtj
 title: "Wireshark: Netzwerkanalyse"
-description:
+description: "Wenn ihr Netzwerktraffic analysieren wollt, also schauen, was da so alles passiert, vielleicht einzelne Verbindungen untersuchen wollt, ob da jetzt jemand Sachen schickt, die nicht sein sollten - dann kommt ihr um Wireshark fast nicht drum herum!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/wireshark.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
