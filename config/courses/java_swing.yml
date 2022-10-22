@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7o5ALam15-pQWtf22RgU6D7
 title: "Java Swing: GUI Erstellung in Java"
-description:
+description: "Grafische Oberflächen für Desktop-PCs werden zwar seltener, aber manchmal macht das durchaus Sinn. Warum also nicht mit Java Swing?"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/java.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
