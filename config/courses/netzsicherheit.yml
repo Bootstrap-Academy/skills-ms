@@ -65,6 +65,7 @@ sections:
   - id: section2
     title: "Kerberos"
     description:
+    lectures:
       - id: "ooe1G24vzYI"
         title: "Kerberos Einführung"
         description:
@@ -92,6 +93,7 @@ sections:
   - id: section3
     title: "IPSec"
     description:
+    lectures:
       - id: "5wjEJurs_Mo"
         title: "Angriffe auf IP"
         description:
@@ -137,6 +139,7 @@ sections:
   - id: section4
     title: "TLS"
     description:
+    lectures:
       - id: "sye1azuEZXw"
         title: "Einleitung"
         description:
@@ -164,6 +167,7 @@ sections:
   - id: section5
     title: "Netzzugang"
     description:
+    lectures:
       - id: "Vqh19T66rhM"
         title: "Einleitung"
         description:
@@ -203,6 +207,7 @@ sections:
   - id: section6
     title: "Bonus"
     description:
+    lectures:
       - id: "a5-83uboWzs"
         title: "JSON Web Tokens"
         description:
