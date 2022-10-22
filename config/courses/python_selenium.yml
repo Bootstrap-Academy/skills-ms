@@ -1,10 +1,10 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7ruEf-FwVD3Z5owHgdXNKlb
 title: "Python Selenium - Den Browser automatisch bedienen"
-description:
+description: "Ihr wollt direkt eure Ende-zu-Ende Tests der Website in Python programmieren? Oder einfach nur ein paar lästige Aufgaben fernsteuern? Dann braucht ihr vermutlich Selenium."
 category:
 language: de
-image:
-author: null
+image: https://static.bootstrap.academy/thumbnails/python.jpg
+author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
 requirements: []
