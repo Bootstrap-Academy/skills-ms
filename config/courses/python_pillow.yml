@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7p6tJ5S5Yvbw3reoZcHdyfR
-title: "Pillow - Bildbearbeitung mit Python 3"
+title: "Pillow - Bildbearbeitung mit Python"
 description:
 category:
 language: de
@@ -11,53 +11,53 @@ requirements: []
 last_update: 1665506587
 sections:
   - id: section
-    title: "Pillow - Bildbearbeitung mit Python 3"
+    title: "Pillow"
     description:
     lectures:
       - id: "d5YQf8gs2_o"
-        title: "Python Bildbearbeitung mit Pillow Tutorial #1 - Installation und Einleitung - mit Umfrage!"
+        title: "Installation und Einleitung"
         description:
         type: youtube
         video_id: "d5YQf8gs2_o"
         duration: 252
       - id: "fXoI_tZJDeI"
-        title: "Python Bildbearbeitung mit Pillow Tutorial #2 - Konvertieren von Bildern"
+        title: "Konvertieren von Bildern"
         description:
         type: youtube
         video_id: "fXoI_tZJDeI"
         duration: 344
       - id: "XgevO_Tw64M"
-        title: "Python Bildbearbeitung mit Pillow Tutorial #3 - Thumbnails"
+        title: "Thumbnails"
         description:
         type: youtube
         video_id: "XgevO_Tw64M"
         duration: 296
       - id: "-DNX4GjP0fw"
-        title: "Python Bildbearbeitung mit Pillow Tutorial #4 - einzelne Pixel lesen"
+        title: "einzelne Pixel lesen"
         description:
         type: youtube
         video_id: "-DNX4GjP0fw"
         duration: 403
       - id: "HIgy3fr9BoA"
-        title: "Python Bildbearbeitung mit Pillow Tutorial #5 - Zuschneiden, Drehen und Verbessern"
+        title: "Zuschneiden, Drehen und Verbessern"
         description:
         type: youtube
         video_id: "HIgy3fr9BoA"
         duration: 450
       - id: "NntGgQUrUuE"
-        title: "Python Bildbearbeitung mit Pillow Tutorial #6 - Filter und ImageOps"
+        title: "Filter und ImageOps"
         description:
         type: youtube
         video_id: "NntGgQUrUuE"
         duration: 239
       - id: "_fjCo5KdzeE"
-        title: "Python Bildbearbeitung mit Pillow Tutorial #7 - Farbauswahl, Masken und Pixel setzen"
+        title: "Farbauswahl, Masken und Pixel setzen"
         description:
         type: youtube
         video_id: "_fjCo5KdzeE"
         duration: 435
       - id: "wI9yE7ZIbMg"
-        title: "Python Let's Code: Wasserzeichen und Komprimieren von Bildern"
+        title: "Wasserzeichen und Komprimieren von Bildern"
         description:
         type: youtube
         video_id: "wI9yE7ZIbMg"
