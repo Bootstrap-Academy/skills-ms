@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pFIXDN1NLw6jMExuK-wN8I
-title: "Haskell"
-description:
+title: "Haskell Programmierung"
+description: "Die Programmiersprache gilt wohl als das, was funktionale Programmierung mit am meisten beeinflusst hat. Mittlerweile finden sich Züge hiervon in Python, JavaScript, Kotlin und C++. Doch Haskell zwingt euch als einzige dazu, wirklich anders zu DENKEN - und das macht sie ideal, um funktionale Programmierung besser zu verstehen."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/haskell.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
