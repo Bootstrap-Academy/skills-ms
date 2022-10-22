@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7ruNQIfS8NRpjzZIRq0A8QP
 title: "Python GUI Programmierung mit PyQT"
-description:
+description: "Ihr wollt graphische Oberflächen erstellen, um eure Kommandozeilentools etwas griffiger zu machen? Auch das geht mit Python."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/python.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
