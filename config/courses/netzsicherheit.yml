@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7ovwsL-PKfByCX-jGuZAopM
 title: "Netzsicherheit - IT Security in Netzwerken"
-description:
+description: "Haltet eure Netzwerke frei von Angreifern - dazu braucht ihr Zertifikate, IPSec und mehr"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/netzsicherheit.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
