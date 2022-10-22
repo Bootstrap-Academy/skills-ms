@@ -1,9 +1,9 @@
 # https://www.dropbox.com/t/2QXeTTH1ZwdkNU07
 title: "Python zum Pentesting"
-description:
+description: "In Python gibt es unfassbar viele Bibliotheken - und einige davon sind definitiv zum Pentesting gedacht!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/python.jpg
 author: "The Morpheus Tutorials"
 price: 500
 learning_goals: []
