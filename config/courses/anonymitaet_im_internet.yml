@@ -1,9 +1,11 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7on8Ckrk2wo4ySeenf3rgf0
 title: "Anonymität im Internet"
-description:
+description: |
+  "Anonymität ist heutzutage keine Seltenheit mehr. Leider führt das zu allerlei Problemen - unter anderem auch grundsätzlicher Angreifbarkeit zum Beispiel durch Social Engineering."
+  "In diesem Kurs erfahrt ihr, warum das problematisch ist, welche Methoden es gibt und was ihr tun könnt."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/anonymity.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
