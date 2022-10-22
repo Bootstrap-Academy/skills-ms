@@ -1,9 +1,9 @@
 # https://www.dropbox.com/t/e1CSdYLRYWviD86b
 title: "Schwachstellen von Web Anwendungen"
-description:
+description: "Websites sind mittlerweile überall und sind damit das Ding, was am meisten angegriffen wird. Hier erfahrt ihr alles über die wichtigsten Angriffe und die Möglichkeiten sich zu verteidigen."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/pentesting.jpg
 author: "The Morpheus Tutorials"
 price: 1000
 learning_goals: []
