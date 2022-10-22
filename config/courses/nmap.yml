@@ -1,141 +1,141 @@
 # https://www.dropbox.com/t/StNqLy6nuirPr18C
-title: "NMap"
+title: "NMap: Netzscans in der Praxis"
 description:
 category:
 language: de
 image:
 author: "The Morpheus Tutorials"
-price: 0
+price: 3000
 learning_goals: []
 requirements: []
 last_update: 1665584088
 sections:
   - id: section
-    title: "Hacking"
+    title: "NMap"
     description:
     lectures:
-      - id: "10_ack_scans"
-        title: "10 - Ack Scans"
-        description:
-        type: mp4
-        duration: 384
-      - id: "11_x_mas_fin_und_null_scans"
-        title: "11 - X-Mas, Fin und Null Scans"
-        description:
-        type: mp4
-        duration: 414
-      - id: "12_timeouts_und_geschwindigkeiten"
-        title: "12 - Timeouts und Geschwindigkeiten"
-        description:
-        type: mp4
-        duration: 345
-      - id: "13_hostgroups"
-        title: "13 - Hostgroups"
-        description:
-        type: mp4
-        duration: 317
-      - id: "14_hosts_gleichzeitig_scannen"
-        title: "14 - Hosts gleichzeitig scannen"
-        description:
-        type: mp4
-        duration: 226
-      - id: "15_host_timeouts_vs_rtt_timeouts"
-        title: "15 - Host Timeouts vs RTT Timeouts"
-        description:
-        type: mp4
-        duration: 373
-      - id: "16_ping_sweeps_list_scans_und_disable_pings"
-        title: "16 - Ping Sweeps, List Scans und Disable Pings"
-        description:
-        type: mp4
-        duration: 592
-      - id: "17_tcp_windows_scan"
-        title: "17 - TCP Windows Scan"
-        description:
-        type: mp4
-        duration: 314
-      - id: "18_tcp_maimon_scan"
-        title: "18 - TCP Maimon Scan"
-        description:
-        type: mp4
-        duration: 150
-      - id: "19_service_und_versionserkennung_einleitung"
-        title: "19 - Service und Versionserkennung - Einleitung"
-        description:
-        type: mp4
-        duration: 477
       - id: "1_was_ist_nmap"
-        title: "1- Was ist Nmap"
+        title: "Was ist Nmap?"
         description:
         type: mp4
         duration: 469
-      - id: "20_service_und_versionserkennung_praxis"
-        title: "20 - Service und Versionserkennung - Praxis"
-        description:
-        type: mp4
-        duration: 645
-      - id: "21_betriebssysteme_erkennen"
-        title: "21 - Betriebssysteme erkennen"
-        description:
-        type: mp4
-        duration: 423
-      - id: "22_nmap_scripting_engine"
-        title: "22 - Nmap Scripting Engine"
-        description:
-        type: mp4
-        duration: 459
-      - id: "23_nmap_scripting_engine_viele_möglichkeiten_scripte_auszuführen"
-        title: "23 - Nmap Scripting Engine - viele Möglichkeiten Scripte auszuführen"
-        description:
-        type: mp4
-        duration: 330
-      - id: "24_nmap_scripting_engine_die_scripte"
-        title: "24 - Nmap Scripting Engine - Die Scripte"
-        description:
-        type: mp4
-        duration: 1383
-      - id: "25_letzte_worte"
-        title: "25 - Letzte Worte"
-        description:
-        type: mp4
-        duration: 124
       - id: "2_der_erste_scan"
-        title: "2 - Der erste Scan"
+        title: "Der erste Scan"
         description:
         type: mp4
         duration: 590
       - id: "3_subnetze_scannen"
-        title: "3 - Subnetze scannen"
+        title: "Subnetze scannen"
         description:
         type: mp4
         duration: 464
       - id: "4_nicht_alles_scannen"
-        title: "4 - Nicht alles scannen"
+        title: "Nicht alles scannen"
         description:
         type: mp4
         duration: 457
       - id: "5_ausgaben"
-        title: "5 - Ausgaben"
+        title: "Ausgaben"
         description:
         type: mp4
         duration: 506
       - id: "6_wichtige_ports"
-        title: "6 - Wichtige Ports"
+        title: "Wichtige Ports"
         description:
         type: mp4
         duration: 647
       - id: "7_tcp_und_udp_scans"
-        title: "7 - TCP und UDP Scans"
+        title: "TCP und UDP Scans"
         description:
         type: mp4
         duration: 449
       - id: "8_einzelne_ports_und_port_bereiche"
-        title: "8 - Einzelne Ports und Port-Bereiche"
+        title: "Einzelne Ports und Port-Bereiche"
         description:
         type: mp4
         duration: 237
       - id: "9_syn_scans"
-        title: "9 - Syn Scans"
+        title: "Syn Scans"
         description:
         type: mp4
         duration: 364
+      - id: "10_ack_scans"
+        title: "Ack Scans"
+        description:
+        type: mp4
+        duration: 384
+      - id: "11_x_mas_fin_und_null_scans"
+        title: "X-Mas, Fin und Null Scans"
+        description:
+        type: mp4
+        duration: 414
+      - id: "12_timeouts_und_geschwindigkeiten"
+        title: "Timeouts und Geschwindigkeiten"
+        description:
+        type: mp4
+        duration: 345
+      - id: "13_hostgroups"
+        title: "Hostgroups"
+        description:
+        type: mp4
+        duration: 317
+      - id: "14_hosts_gleichzeitig_scannen"
+        title: "Hosts gleichzeitig scannen"
+        description:
+        type: mp4
+        duration: 226
+      - id: "15_host_timeouts_vs_rtt_timeouts"
+        title: "Host Timeouts vs RTT Timeouts"
+        description:
+        type: mp4
+        duration: 373
+      - id: "16_ping_sweeps_list_scans_und_disable_pings"
+        title: "Ping Sweeps, List Scans und Disable Pings"
+        description:
+        type: mp4
+        duration: 592
+      - id: "17_tcp_windows_scan"
+        title: "TCP Windows Scan"
+        description:
+        type: mp4
+        duration: 314
+      - id: "18_tcp_maimon_scan"
+        title: "TCP Maimon Scan"
+        description:
+        type: mp4
+        duration: 150
+      - id: "19_service_und_versionserkennung_einleitung"
+        title: "Service und Versionserkennung - Einleitung"
+        description:
+        type: mp4
+        duration: 477
+      - id: "20_service_und_versionserkennung_praxis"
+        title: "Service und Versionserkennung - Praxis"
+        description:
+        type: mp4
+        duration: 645
+      - id: "21_betriebssysteme_erkennen"
+        title: "Betriebssysteme erkennen"
+        description:
+        type: mp4
+        duration: 423
+      - id: "22_nmap_scripting_engine"
+        title: "Nmap Scripting Engine"
+        description:
+        type: mp4
+        duration: 459
+      - id: "23_nmap_scripting_engine_viele_möglichkeiten_scripte_auszuführen"
+        title: "Nmap Scripting Engine - viele Möglichkeiten Scripte auszuführen"
+        description:
+        type: mp4
+        duration: 330
+      - id: "24_nmap_scripting_engine_die_scripte"
+        title: "Nmap Scripting Engine - Die Scripte"
+        description:
+        type: mp4
+        duration: 1383
+      - id: "25_letzte_worte"
+        title: "Letzte Worte"
+        description:
+        type: mp4
+        duration: 124
