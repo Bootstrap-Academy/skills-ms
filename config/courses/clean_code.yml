@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7ryyZikMDPxxyYxEKtKn0ji
 title: "Clean Code"
-description:
+description: "Denkt immer daran: Wenn ihr schlechten Code schreibt, muss irgendein armer Mensch später damit weiter arbeiten - im Zweifel seid ihr das selbst. Spaß beiseite, schlechter Code kann dazu führen, dass ein Projekt bis zu Faktor 60 langsamer entwickelt wird. Irgendwann kommt man zum Stillstand. Deswegen BRAUCHEN wir sauberen Code."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/cleancode.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
