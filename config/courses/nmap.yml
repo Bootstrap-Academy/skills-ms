@@ -1,9 +1,9 @@
 # https://www.dropbox.com/t/StNqLy6nuirPr18C
 title: "NMap: Netzscans in der Praxis"
-description:
+description: "NMap ist das am meisten genutzte Tool, um Netzwerke zu scannen - welche Geräte gibt es, wo sind diese erreichbar. Damit ist es das wohl am meisten genutzte Tool für IT-Security überhaupt."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/nmap.jpg
 author: "The Morpheus Tutorials"
 price: 3000
 learning_goals: []
