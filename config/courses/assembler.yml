@@ -1,8 +1,8 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rhjy2t320NvKKGwP6Rxnpg
 title: "Assembler Lernen"
 description: |
-  "Assembler - die Grundlage für alle modernen Programmiersprachen, die maschinennaheste Art der Programmierung überhaupt."
-  "Heutzutage ist Assemblerprogrammierung wohl selten ein wirkliches Thema. Dennoch kann es in manchen Fällen nötig sein, Assembler lesen zu können - beispielsweise beim Verständnis des Compiler-generierten Codes oder bei der Analyse von Malware."
+  Assembler - die Grundlage für alle modernen Programmiersprachen, die maschinennaheste Art der Programmierung überhaupt.
+  Heutzutage ist Assemblerprogrammierung wohl selten ein wirkliches Thema. Dennoch kann es in manchen Fällen nötig sein, Assembler lesen zu können - beispielsweise beim Verständnis des Compiler-generierten Codes oder bei der Analyse von Malware.
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/assembler.jpg
