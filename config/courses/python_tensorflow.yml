@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oj8ijyHSTOoW9bHLlXQ7hp
 title: "TensorFlow 2: Neuronale Netze in Python erstellen"
-description:
+description: "Neuronale Netze programmieren in Python. Der Traum für KI. Wenn du es bis hier geschafft hast, hast du 2 Bibliotheken zur Auswahl: PyTorch und Tensorflow. Hier geht's um Tensorflow - die neue Version allerdings, denn die ist um einiges leichter und angenehmer geworden."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/tensorflow.jpg
 author: "The Morpheus Tutorials"
 price: 3000
 learning_goals: []
