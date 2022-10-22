@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7o46LI06XkxAqcg4Ucm7pwn
 title: "Data Science in Python"
-description:
+description: "Data Science, also wie genau gehe ich eigentlich mit meinen Daten um, ist in vielen Fällen einfach harte Programmierung. Und weil die beliebtesten Bibliotheken für die Sprache Python verfügbar sind, meist in Python. In diesem Kurs geht's um diese beliebtesten Bibliotheken!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/python.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
