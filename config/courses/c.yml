@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7q4shI4L__SRpetWff9BjLZ
 title: "C Programmierung"
-description:
+description: "C ist die Sprache, die als Vorlage für unsere modernen Sprachen zum Einsatz kam. Und sie ist noch immer weit verbreitet - hardwarenahe Programmierung, Treiber, Firmware, Betriebssysteme: Fast alles wird nach wie vor in C geschrieben. Wollt ihr hier einsteigen, solltet ihr C definitiv beherrschen."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/c.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
