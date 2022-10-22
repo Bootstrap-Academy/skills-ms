@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qOfMI2ZNk-LXUAiXKrwDIi
 title: "JavaScript Programmierung"
-description:
+description: "JavaScript - die Sprache ohne die kaum eine Website heutzutage noch läuft. Die Sprache, die für die meisten Web-Frameworks zum Einsatz kommt und auch die Sprache, in der mittlerweile eine wahre Vielzahl an Servern(!) geschrieben wurden. Jap. Essentiell."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/javascript.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
