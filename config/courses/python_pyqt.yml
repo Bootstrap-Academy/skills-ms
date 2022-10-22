@@ -4,7 +4,7 @@ description:
 category:
 language: de
 image:
-author: null
+author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
 requirements: []
@@ -15,73 +15,73 @@ sections:
     description:
     lectures:
       - id: "FiaPzdWKhJU"
-        title: "Python GUI Programmierung mit PyQT 5 #1 - Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "FiaPzdWKhJU"
         duration: 693
       - id: "Z66AtVqdLUc"
-        title: "Python GUI Programmierung mit PyQT 5 #2 - Der QT-Designer"
+        title: "Der QT-Designer"
         description:
         type: youtube
         video_id: "Z66AtVqdLUc"
         duration: 463
       - id: "B9Zkn4GEDCE"
-        title: "Python GUI Programmierung mit PyQT 5 #3 - Buttons, Tooltips und Quit"
+        title: "Buttons, Tooltips und Quit"
         description:
         type: youtube
         video_id: "B9Zkn4GEDCE"
         duration: 729
       - id: "zIbQhLc_boI"
-        title: "Python GUI Programmierung mit PyQT 5 #4 - Signale und Events"
+        title: "Signale und Events"
         description:
         type: youtube
         video_id: "zIbQhLc_boI"
         duration: 983
       - id: "pa4XlYyIa2o"
-        title: "Python GUI Programmierung mit PyQT 5 #5 - StatusBar, MenuBar und ToolBar"
+        title: "StatusBar, MenuBar und ToolBar"
         description:
         type: youtube
         video_id: "pa4XlYyIa2o"
         duration: 686
       - id: "YvaGU9tKerY"
-        title: "Python GUI Programmierung mit PyQT 5 #6 - Layouts"
+        title: "Layouts"
         description:
         type: youtube
         video_id: "YvaGU9tKerY"
         duration: 935
       - id: "6qriyonapEE"
-        title: "Python GUI Programmierung mit PyQT 5 #7 - CheckBox, RadioButton, ToggleButton"
+        title: "CheckBox, RadioButton, ToggleButton"
         description:
         type: youtube
         video_id: "6qriyonapEE"
         duration: 837
       - id: "qdW_XlnOCxM"
-        title: "Python GUI Programmierung mit PyQT 5 #8 - Input-Felder aller Art"
+        title: "Input-Felder aller Art"
         description:
         type: youtube
         video_id: "qdW_XlnOCxM"
         duration: 1131
       - id: "3uJpHA4l9zg"
-        title: "Python GUI Programmierung mit PyQT 5 #9 - DateTimeEdit, ProgressBar und der Kalendar"
+        title: "DateTimeEdit, ProgressBar und der Kalendar"
         description:
         type: youtube
         video_id: "3uJpHA4l9zg"
         duration: 708
       - id: "VvHePllETng"
-        title: "Python GUI Programmierung mit PyQT 5 #10 - Dialoge"
+        title: "Dialoge"
         description:
         type: youtube
         video_id: "VvHePllETng"
         duration: 909
       - id: "ykUhAp8yTFE"
-        title: "Python GUI Programmierung mit PyQT 5 #11 - Tabs und die ScrollArea"
+        title: "Tabs und die ScrollArea"
         description:
         type: youtube
         video_id: "ykUhAp8yTFE"
         duration: 643
       - id: "DaIfM0jkbIk"
-        title: "Python GUI Programmierung mit PyQT 5 #12 - Drag n' Drop"
+        title: "Drag n' Drop"
         description:
         type: youtube
         video_id: "DaIfM0jkbIk"
