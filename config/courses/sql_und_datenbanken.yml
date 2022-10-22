@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qYPusTRflv3tkzhYoT-KiB
 title: "Datenbanken und die Structured Query Language SQL"
-description:
+description: "Datenbanken braucht es einfach immer. Daten speichern, Daten holen, wir können ja nicht alles für immer zwischenspeichern. Und Datenbanken werden mit SQL angesprochen."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/sql.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
