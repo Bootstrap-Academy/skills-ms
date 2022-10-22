@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oirQMpjPjrmNx4vcVIGIGY
 title: "Java für Fortgeschrittene"
-description:
+description: "Ihr denkt, ihr könnt Java? Abwarten. Hier sind eingie Themen drin, die ihr in (fast) keinem Studium, Ausbildung und sogar nur in wenigen Betrieben lernt - denn sie machen Entwicklern Angst. Bereit für eine wilde Runde in den Expertenkreisen?"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/java.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
