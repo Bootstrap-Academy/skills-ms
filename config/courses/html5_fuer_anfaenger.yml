@@ -1,10 +1,10 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qIbKPeroqn3-BkUTWzYBT4
 title: "HTML 5"
-description:
+description: "HTML bildet die Grundlage des Internets. Mit HTML ist auf jeder Website definiert, was der Inhalt ist. HTML ist leicht zu lernen, aber ein absolutes Must-Have, da es mittlerweile sogar häufig außerhalb der Web-Entwicklung zum Einsatz kommt."
 category:
 language: de
-image:
-author: null
+image: https://static.bootstrap.academy/thumbnails/html.jpg
+author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
 requirements: []
