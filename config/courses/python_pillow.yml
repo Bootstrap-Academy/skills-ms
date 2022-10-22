@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7p6tJ5S5Yvbw3reoZcHdyfR
 title: "Pillow - Bildbearbeitung mit Python"
-description:
+description: "Ihr wollt Bilder bearbeiten, am besten vollautomatisch und in Python? Kein Problem!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/python.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
