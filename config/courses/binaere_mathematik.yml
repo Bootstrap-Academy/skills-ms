@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rsjQsc8hFAdR4BlO_MQib1
 title: "Binäre Mathematik"
-description:
+description: "Binäre Mathematik hat zwar nichts direkt mit Programmierung zu tun, hilft aber extrem zu verstehen, warum genau das Programm plötzlich eine Ungenauigkeit bei einer Gleitkommazahl hat oder was ein Overflow ist. Sie ist daher fast schon Pflicht, wenn man wirklich IT machen möchte."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/binary.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
