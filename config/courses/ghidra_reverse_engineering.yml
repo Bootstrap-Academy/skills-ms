@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oQc3MxjWB-rYHHo9vX905a
 title: "Reverse Engineering mit Ghidra"
-description:
+description: "Malware ist mittlerweile überall - doch was genau tut sie? Stiehlt sie Informationen, verschlüsselt sie nur oder nutzt sie das System als Botnetz? Das sind wichtige Informationen, nicht zuletzt um Kunden zu informieren oder die Täter zu schnappen. Und daher muss man die Malware genau analysieren - Beispielsweise mit Ghidra, einem Tool der NSA selbst."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/reversing.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
