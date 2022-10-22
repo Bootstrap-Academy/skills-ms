@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oopYYGy5hX-Y6b07_3DPp5
 title: "SASS und SCSS - CSS auf Steroiden"
-description:
+description: "Hattet ihr jemals das Gefühl in CSS fehlt was? Variablen, Funktionen, Parameter, eben richtige Programmierung? Willkommen bei SCSS."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/CSS.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
