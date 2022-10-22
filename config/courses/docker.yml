@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oea6IDCLzpKe5XfLmWCwgr
 title: "Docker"
-description:
+description: "Auf meinem System läuft's doch. Dieses Problem kennen wir alle. Abhängigkeiten, Bibliotheken, die nicht installiert sind oder irgendwas anderes, das gerade Probleme macht. Docker ist eine Container-Software, das heißt hier wird eine Laufzeitumgebung für eure Software bereitgestellt, die sich einfach dynamisch alles holt, was sie braucht und schon sind diese Probleme Vergangenheit. Bonus: Sicherheit und einfacheres Deployment!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/docker.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
