@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7q7ODiEAnq2EnsP-8LMGtfw
 title: "Prolog: Logische Programmierung"
-description:
+description: "Habt ihr jemals von logischer Programmierung gehört? Prolog verfolgt ein grundlegend anderes Konzept als Python oder auch Haskell. Und so etwas ist immer spannend!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/prolog.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
