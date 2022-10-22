@@ -11,347 +11,269 @@ requirements: []
 last_update: 1665507403
 sections:
   - id: section
-    title: "Data Science in Python"
+    title: "Einleitung"
     description:
     lectures:
       - id: "EW0rpuPoRNA"
-        title: "Python für Data Science #1 - Einleitung"
+        title: "Einleitung"
         description:
         type: youtube
         video_id: "EW0rpuPoRNA"
         duration: 686
+  - id: section2
+    title: "Numpy"
+    description:
+    lectures:
       - id: "XamW67vUJ-Q"
-        title: "Numpy Tutorial #1 - Arrays erstellen (Python für Data Science)"
+        title: "Arrays erstellen"
         description:
         type: youtube
         video_id: "XamW67vUJ-Q"
         duration: 800
       - id: "0tNt4Lu7EZg"
-        title: "Numpy Tutorial #2 - Numpy Arrays vs Python Lists (Python für Data Science)"
+        title: "Numpy Arrays vs Python Lists"
         description:
         type: youtube
         video_id: "0tNt4Lu7EZg"
         duration: 927
       - id: "mQ_P06Z7e5Y"
-        title: "Numpy Tutorial #3 - Datentypen (Python für Data Science)"
+        title: "Datentypen"
         description:
         type: youtube
         video_id: "mQ_P06Z7e5Y"
         duration: 1081
       - id: "RWWjSm5F8uM"
-        title: "Numpy Tutorial #4 - Shape erklärt (Python für Data Science)"
+        title: "Shape erklärt"
         description:
         type: youtube
         video_id: "RWWjSm5F8uM"
         duration: 693
       - id: "bWl4I-kYpio"
-        title: "Numpy Tutorial #5 - Shapes in komplexen Dtypes (Python für Data Science)"
+        title: "Shapes in komplexen Dtypes"
         description:
         type: youtube
         video_id: "bWl4I-kYpio"
         duration: 906
       - id: "OTrslIWEf54"
-        title: "Numpy Tutorial #6 - benannte DTypes (Python für Data Science)"
+        title: "benannte DTypes"
         description:
         type: youtube
         video_id: "OTrslIWEf54"
         duration: 979
       - id: "kxpGn6DQVB4"
-        title: "Numpy Tutorial #7 - Slicen und Indexierung (Python für Data Science)"
+        title: "Slicen und Indexierung"
         description:
         type: youtube
         video_id: "kxpGn6DQVB4"
         duration: 848
       - id: "cccNKHvzofw"
-        title: "Numpy Tutorial #8 - Operationen mit Vektoren und Matrizen (Python für Data Science)"
+        title: "Operationen mit Vektoren und Matrizen"
         description:
         type: youtube
         video_id: "cccNKHvzofw"
         duration: 1183
       - id: "ZQj8qY6e5uw"
-        title: "Numpy Tutorial #9 - Ravel und Flatten (Python für Data Science)"
+        title: "Ravel und Flatten"
         description:
         type: youtube
         video_id: "ZQj8qY6e5uw"
         duration: 583
       - id: "bjfmlHghW34"
-        title: "Numpy Tutorial #10 - Reshape (Python für Data Science)"
+        title: "Reshape"
         description:
         type: youtube
         video_id: "bjfmlHghW34"
         duration: 436
       - id: "UMYbeltcyA8"
-        title: "Numpy Tutorial #11 - Stacks, Tiles, Konkatenation und Padding (Python für Data Science)"
+        title: "Stacks, Tiles, Konkatenation und Padding"
         description:
         type: youtube
         video_id: "UMYbeltcyA8"
         duration: 639
       - id: "btA5mOXcQYs"
-        title: "Numpy Tutorial #12 - Zufall in Numpy (Python für Data Science)"
+        title: "Zufall in Numpy"
         description:
         type: youtube
         video_id: "btA5mOXcQYs"
         duration: 333
       - id: "l6Z2Fhxp6ZE"
-        title: "Numpy Tutorial #13 - Dateien laden und speichern (Python für Data Science)"
+        title: "Dateien laden und speichern"
         description:
         type: youtube
         video_id: "l6Z2Fhxp6ZE"
         duration: 656
       - id: "pv3KvUMRZKs"
-        title: "Numpy Tutorial #14 - Mehr Möglichkeiten Arrays zu erstellen (Python für Data Science)"
+        title: "Mehr Möglichkeiten Arrays zu erstellen"
         description:
         type: youtube
         video_id: "pv3KvUMRZKs"
         duration: 490
       - id: "7gWWxAJv_fA"
-        title: "Numpy Tutorial #15 - Fancy Operationen (Python für Data Science)"
+        title: "Fancy Operationen"
         description:
         type: youtube
         video_id: "7gWWxAJv_fA"
         duration: 959
+  - id: section3
+    title: "Pandas"
+    description:
+    lectures:
       - id: "Uu1Skwz98B4"
-        title: "Pandas Tutorial #1 - DataFrames (Python für Data Science)"
+        title: "DataFrames"
         description:
         type: youtube
         video_id: "Uu1Skwz98B4"
         duration: 557
       - id: "tSSMQdNtz38"
-        title: "Pandas Tutorial #2 - Series (Python für Data Science)"
+        title: "Series"
         description:
         type: youtube
         video_id: "tSSMQdNtz38"
         duration: 907
       - id: "yRSV-wLWhSw"
-        title: "Pandas Tutorial #3 - Multiindexierte und normale DataFrames erstellen (Python für Data Science)"
+        title: "Multiindexierte und normale DataFrames erstellen"
         description:
         type: youtube
         video_id: "yRSV-wLWhSw"
         duration: 1341
       - id: "u0kBG9rMHjI"
-        title: "Pandas Tutorial #4 - Operationen und Indexierung von DataFrames (Python für Data Science)"
+        title: "Operationen und Indexierung von DataFrames"
         description:
         type: youtube
         video_id: "u0kBG9rMHjI"
         duration: 966
       - id: "SAdh1JnOBYQ"
-        title: "Pandas Tutorial #5 - Mehr wichtige Operationen auf DataFrames (Python für Data Science)"
+        title: "Mehr wichtige Operationen auf DataFrames"
         description:
         type: youtube
         video_id: "SAdh1JnOBYQ"
         duration: 1027
       - id: "lttSd1sBzq0"
-        title: "Pandas Tutorial #6 - Einfache Statistik (Python für Data Science)"
+        title: "Einfache Statistik"
         description:
         type: youtube
         video_id: "lttSd1sBzq0"
         duration: 639
       - id: "4rjNHNrr6_U"
-        title: "Pandas Tutorial #7 - Reindex vs Zuweisen von Columns (Python für Data Science)"
+        title: "Reindex vs Zuweisen von Columns"
         description:
         type: youtube
         video_id: "4rjNHNrr6_U"
         duration: 544
       - id: "RuQxtM99IK4"
-        title: "Pandas Tutorial #8 - Fortgeschrittene Indexierung (Python für Data Science)"
+        title: "Fortgeschrittene Indexierung"
         description:
         type: youtube
         video_id: "RuQxtM99IK4"
         duration: 976
       - id: "wNnVHNZfyqA"
-        title: "Pandas Tutorial #9 - Iterieren über Dataframes (Python für Data Science)"
+        title: "Iterieren über Dataframes"
         description:
         type: youtube
         video_id: "wNnVHNZfyqA"
         duration: 816
       - id: "mQVq-pzd5Tg"
-        title: "Pandas Tutorial #10 - Diskretisierung und Histogramme erstellen bei Floats (Python für Data Science)"
+        title: "Diskretisierung und Histogramme erstellen bei Floats"
         description:
         type: youtube
         video_id: "mQVq-pzd5Tg"
         duration: 616
       - id: "HaLpJgaGBTE"
-        title: "Pandas Tutorial #11 - Mehr zu Kategorien (Python für Data Science)"
+        title: "Mehr zu Kategorien"
         description:
         type: youtube
         video_id: "HaLpJgaGBTE"
         duration: 1122
       - id: "2JsAlrBDmUE"
-        title: "Pandas Tutorial #12 -  Konkatenieren von DataFrames (Python für Data Science)"
+        title: "Konkatenieren von DataFrames"
         description:
         type: youtube
         video_id: "2JsAlrBDmUE"
         duration: 837
       - id: "4iua5KvH8YA"
-        title: "Pandas Tutorial #13 - Merge bei DataFrames (Python für Data Science)"
+        title: "Merge bei DataFrames"
         description:
         type: youtube
         video_id: "4iua5KvH8YA"
         duration: 1078
       - id: "118j186E5JI"
-        title: "Pandas Tutorial #14 - Gruppieren (Python für Data Science)"
+        title: "Gruppieren"
         description:
         type: youtube
         video_id: "118j186E5JI"
         duration: 869
       - id: "o7iiox_xsko"
-        title: "Pandas Tutorial #15 - Pivottables erstellen (Python für Data Science)"
+        title: "Pivottables erstellen"
         description:
         type: youtube
         video_id: "o7iiox_xsko"
         duration: 438
       - id: "Hz4t7K9NaCw"
-        title: "Pandas Tutorial #16 - Stacking und Unstacking (Python für Data Science)"
+        title: "Stacking und Unstacking"
         description:
         type: youtube
         video_id: "Hz4t7K9NaCw"
         duration: 653
       - id: "rfmiu5NKFjI"
-        title: "Pandas Tutorial #17 - DateTime (Python für Data Science)"
+        title: "DateTime"
         description:
         type: youtube
         video_id: "rfmiu5NKFjI"
         duration: 828
       - id: "fyi83xMSLjw"
-        title: "Pandas Tutorial #18 - Datum und Uhrzeit als Index (Python für Data Science)"
+        title: "Datum und Uhrzeit als Index"
         description:
         type: youtube
         video_id: "fyi83xMSLjw"
         duration: 934
       - id: "NyJdW0Pyj2E"
-        title: "Pandas Tutorial #19 - TimeDeltas (Python für Data Science)"
+        title: "TimeDeltas"
         description:
         type: youtube
         video_id: "NyJdW0Pyj2E"
         duration: 437
       - id: "_VZQIIz5ofQ"
-        title: "Pandas Tutorial #20 - CSV Dateien lesen und schreiben (Python für Data Science)"
+        title: "CSV Dateien lesen und schreiben"
         description:
         type: youtube
         video_id: "_VZQIIz5ofQ"
         duration: 841
       - id: "nzWBDfqe4ng"
-        title: "Pandas Tutorial #21 - SQLalchemy nutzen, um in Datenbanken zu schreiben (Python für Data Science)"
+        title: "SQLalchemy nutzen, um in Datenbanken zu schreiben"
         description:
         type: youtube
         video_id: "nzWBDfqe4ng"
         duration: 619
-      - id: "Eo8b3Y2ibvY"
-        title: "Plotly #1 - hübsche Grafiken mit Python erstellen: Daten visualisieren"
-        description:
-        type: youtube
-        video_id: "Eo8b3Y2ibvY"
-        duration: 514
-      - id: "tMW5yWpo7H0"
-        title: "Plotly #2 - Graph Objects vs Dictionaries"
-        description:
-        type: youtube
-        video_id: "tMW5yWpo7H0"
-        duration: 587
-      - id: "JnOM7s1BSN8"
-        title: "Plotly #3 - Scatter Plots mit Express"
-        description:
-        type: youtube
-        video_id: "JnOM7s1BSN8"
-        duration: 615
-      - id: "H0VPGq0RcZU"
-        title: "Plotly #4 - Scatter Plots mit Fehlern"
-        description:
-        type: youtube
-        video_id: "H0VPGq0RcZU"
-        duration: 197
-      - id: "6sVXa1gfIbA"
-        title: "Plotly #5 - Bar Diagramme mit Express"
-        description:
-        type: youtube
-        video_id: "6sVXa1gfIbA"
-        duration: 718
-      - id: "a982sb3bDD0"
-        title: "Plotly #6 - Scatter Matrix - perfekt zum Überblick verschaffen"
-        description:
-        type: youtube
-        video_id: "a982sb3bDD0"
-        duration: 632
-      - id: "r4GdOcQLbeY"
-        title: "Plotly #7 - Parallel Graphen"
-        description:
-        type: youtube
-        video_id: "r4GdOcQLbeY"
-        duration: 719
-      - id: "EMMLaY2GSX0"
-        title: "Plotly #8 - Animationen in Scatter Plots und mehr fortgeschrittene Themen"
-        description:
-        type: youtube
-        video_id: "EMMLaY2GSX0"
-        duration: 727
-      - id: "lej3-XxmAr4"
-        title: "Plotly #9 - Linien und Flächen Plots"
-        description:
-        type: youtube
-        video_id: "lej3-XxmAr4"
-        duration: 731
-      - id: "h2YYjgG_LtI"
-        title: "Plotly #10 - Kuchen und Sunburst Diagramme"
-        description:
-        type: youtube
-        video_id: "h2YYjgG_LtI"
-        duration: 868
-      - id: "knBjYw7e6z4"
-        title: "Plotly #11 - Histogramme erstellen"
-        description:
-        type: youtube
-        video_id: "knBjYw7e6z4"
-        duration: 647
-      - id: "IXOE-IPFuFc"
-        title: "Plotly #12 - Histogramme mit weiterverwendbaren Counts"
-        description:
-        type: youtube
-        video_id: "IXOE-IPFuFc"
-        duration: 339
-      - id: "XkE6YRR6voU"
-        title: "Plotly #13 - fortgeschrittene Histogramme"
-        description:
-        type: youtube
-        video_id: "XkE6YRR6voU"
-        duration: 598
-      - id: "dXPIayOZBQA"
-        title: "Plotly #14 - Templates"
-        description:
-        type: youtube
-        video_id: "dXPIayOZBQA"
-        duration: 275
       - id: "Mb-fuYgEaFM"
-        title: "Pandas Tutorial #22 - SQLalchemy: aus Datenbanken lesen (Python für Data Science)"
+        title: "SQLalchemy: aus Datenbanken lesen"
         description:
         type: youtube
         video_id: "Mb-fuYgEaFM"
         duration: 303
-      - id: "soVqW_yoKIU"
-        title: "Graphen zeichnen | Python"
-        description:
-        type: youtube
-        video_id: "soVqW_yoKIU"
-        duration: 618
       - id: "iaYBUkl2u3U"
-        title: "Pandas Tutorial - Performance von loc, iloc, iat und at"
+        title: "Performance von loc, iloc, iat und at"
         description:
         type: youtube
         video_id: "iaYBUkl2u3U"
         duration: 538
       - id: "_a87bkOZ3Jg"
-        title: "Pandas Tutorial #23 - SQLAlchemy nutzen für Datum und Uhrzeit (Python für Data Science)"
+        title: "SQLAlchemy nutzen für Datum und Uhrzeit"
         description:
         type: youtube
         video_id: "_a87bkOZ3Jg"
         duration: 357
       - id: "op42i9oheSI"
-        title: "Pandas Tutorial #24 - SQLalchemy: Datum in Unix Timestamp konvertieren (Python für Data Science)"
+        title: "SQLalchemy: Datum in Unix Timestamp konvertieren"
         description:
         type: youtube
         video_id: "op42i9oheSI"
         duration: 475
+  - id: section4
+    title: "Bonus"
+    description:
+    lectures:
       - id: "JX0cHWUBkUQ"
-        title: "Data Science: Nutzt keine CSV-Dateien, sondern Feathers!"
+        title: "Nutzt keine CSV-Dateien, sondern Feathers!"
         description:
         type: youtube
         video_id: "JX0cHWUBkUQ"
