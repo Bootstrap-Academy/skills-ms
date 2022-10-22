@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7p09TLbRQmqzbH81DHjBO8E
 title: "Python Let's Code"
-description:
+description: "Es gibt so viele Bibliotheken in Python, in diesem Kurs gibt es ein paar Praxisbeispiele, was man damit machen kann!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/python.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
