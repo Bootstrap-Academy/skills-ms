@@ -1,0 +1,8 @@
+name: Start
+dependencies: []
+skills:
+  medienkompetenz:
+    name: Medienkompetenz
+    dependencies: []
+    courses:
+      - medienkompetenz
