@@ -1,11 +1,11 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7qIOuGJrd-lu-ZZc9t4EdwM
 title: "Eine kurze Einführung ins Data Mining"
-description:
+description: "Alle sprechen von Data Science oder KI, die ja auch Daten nutzt. Doch.. wie kommen wir eigentlich an die Daten? Eine kurze Einführung gibt es hier."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/datamining.jpg
 author: "The Morpheus Tutorials"
-price: 1000
+price: 100
 learning_goals: []
 requirements: []
 last_update: 1665508109
