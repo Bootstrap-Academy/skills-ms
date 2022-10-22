@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7onyAB57T0xqV2ZVSZOo79a
 title: "Gemeinsamkeiten von Programmiersprachen"
-description:
+description: "Ihr lernt Java, Python, C++, .... wann ist endlich mal gut? Naja, vielleicht sind euch ja einige Gemeinsamkeiten aufgefallen? Diese Konzepte und Mechanismen besprechen wir in dieser Serie."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/progsprachen.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
