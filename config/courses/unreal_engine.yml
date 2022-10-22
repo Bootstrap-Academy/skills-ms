@@ -342,7 +342,7 @@ sections:
         type: youtube
         video_id: "z5bJHLxnrDE"
         duration: 587
-  - id: section5
+  - id: section6
     title: "Zwischensequenzen mit dem Sequencer"
     description:
     lectures:
@@ -418,7 +418,7 @@ sections:
         type: youtube
         video_id: "H6X31sfRbcc"
         duration: 283
-  - id: section5
+  - id: section7
     title: "Paper2D"
     description:
     lectures:
