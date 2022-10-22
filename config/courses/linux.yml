@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oaopPUB0SEmzZLf3aE5msy
 title: "Erste Schritte mit Linux"
-description:
+description: "Linux ist überall - auf Servern, auf eurem Handy und vermutlich nach dieser Serie auch auf eurem Rechner :) Viel Spaß."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/linux.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
