@@ -1,10 +1,10 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7pUKpzMbzggvudByxULkut-
 title: "GnuPG unter Linux"
-description:
+description: "Wir waren uns ja einig: Verschlüsseln ist absolut essentiell. Aber.. wie? Dazu gibt's unter Linux GnuPG."
 category:
 language: de
-image:
-author: null
+image: https://static.bootstrap.academy/thumbnails/krypto.jpg
+author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
 requirements: []
