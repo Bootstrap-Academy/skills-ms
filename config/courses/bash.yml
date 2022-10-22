@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7r-Tw-cNntRgvwA7nXPAjP4
 title: "Bash"
-description:
+description: "Bash ist die Programmiersprache für das Linux Terminal. Hiermit lässt sich jede Kette an Befehlen komplett automatisieren. Sie ist das Zuhause für Linux-Systemadministratoren."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/bash.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
