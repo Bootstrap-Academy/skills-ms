@@ -275,7 +275,7 @@ sections:
     description:
     lectures:
       - id: "06_web_anwendungen_hacken_tutorial_directory_enumeration_dirsearch"
-        title: dirsearch"
+        title: "dirsearch"
         description:
         type: mp4
         duration: 561

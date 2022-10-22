@@ -1,8 +1,8 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7q2hZHyLJS6IeHQIlyEgKqf
 title: "Algorithmen und Datenstrukturen einfach erklärt"
 description: |
-  "Dieser Kurs ist ein Must-Have für alle Informatiker. Im Studium eines der Pflichtfächer, mittlerweile sogar in vielen Schulen unterrichtet, so ist Algorithmik und algorithmisches Denken so wichtig wie nie zuvor, denn Algorithmen bestimmen unser Leben. Suchalgorithmen bestimmen, welche Plattformen wir nutzen, welche Inhalte wir sehen und welche Filme und Serien wir konsumieren. Doch wie funktionieren sie? Das lernt ihr hier!"
-  "Der Kurs umfasst nicht nur ausgiebige und anschaulich visualisierte Theorie-Lektionen, sondern auch häufige Python Implementierungen der Algorithmen."
+  Dieser Kurs ist ein Must-Have für alle Informatiker. Im Studium eines der Pflichtfächer, mittlerweile sogar in vielen Schulen unterrichtet, so ist Algorithmik und algorithmisches Denken so wichtig wie nie zuvor, denn Algorithmen bestimmen unser Leben. Suchalgorithmen bestimmen, welche Plattformen wir nutzen, welche Inhalte wir sehen und welche Filme und Serien wir konsumieren. Doch wie funktionieren sie? Das lernt ihr hier!
+  Der Kurs umfasst nicht nur ausgiebige und anschaulich visualisierte Theorie-Lektionen, sondern auch häufige Python Implementierungen der Algorithmen.
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/algorithmen.jpg
