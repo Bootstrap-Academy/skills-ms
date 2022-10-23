@@ -32,16 +32,16 @@ sections:
         type: youtube
         video_id: "LiyA3mEedYM"
         duration: 684
+  - id: section2
+    title: "Schicht 1: Die physische Schicht"
+    description:
+    lectures:
       - id: "VSOK-jK4Q6k"
         title: "Simplex, Duplex und Halbduplex"
         description:
         type: youtube
         video_id: "VSOK-jK4Q6k"
         duration: 292
-  - id: section2
-    title: "Schicht 1: Die physische Schicht"
-    description:
-    lectures:
       - id: "zNRkP2I7TMs"
         title: "Signalklassen"
         description:
