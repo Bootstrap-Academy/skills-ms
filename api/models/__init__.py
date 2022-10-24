@@ -1,4 +1,5 @@
 from .course_access import CourseAccess
+from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
 from .root_skill import RootSkill
 from .skill_course import SkillCourse
@@ -9,6 +10,7 @@ from .xp import XP
 
 __all__ = [
     "CourseAccess",
+    "LastWatch",
     "LectureProgress",
     "RootSkill",
     "SkillCourse",

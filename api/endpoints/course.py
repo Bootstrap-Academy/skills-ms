@@ -1,7 +1,7 @@
 """Endpoints related to courses and lectures"""
 
 from secrets import token_urlsafe
-from typing import Any
+from typing import Any, Iterable
 
 from fastapi import APIRouter, Depends, Query
 from fastapi.responses import FileResponse
@@ -71,11 +71,12 @@ async def list_courses(
     author: str | None = Query(None, max_length=256, description="The author to search for"),
     free: bool | None = Query(None, description="Whether to search for free courses"),
     owned: bool | None = Query(None, description="Whether to search for courses the user owns"),
+    recent_first: bool = Query(False, description="Whether to return the most recently watched courses first"),
     user: User | None = public_auth,
 ) -> Any:
     """Return a list of all available courses."""
 
-    out = iter(COURSES.values())
+    out: Iterable[Course] = iter(COURSES.values())
 
     if search_term:
         out = (course for course in out if search_term.lower() in course.title.lower())
@@ -95,6 +96,13 @@ async def list_courses(
         relevant = courses if owned else set(COURSES) - courses
         out = (course for course in out if course.id in relevant)
 
+    if recent_first and user:
+        last_watches = {
+            lw.course_id: lw.timestamp.timestamp()
+            async for lw in await db.stream(filter_by(models.LastWatch, user_id=user.id))
+        }
+        out = sorted(out, key=lambda c: last_watches.get(c.id, 0), reverse=True)
+
     return [course.summary for course in out]
 
 
@@ -103,6 +111,18 @@ async def get_course_summary(course: Course = get_course) -> Any:
     """Return a summary of the course."""
 
     return course.summary
+
+
+@router.post(
+    "/courses/{course_id}/watch",
+    dependencies=[require_verified_email, has_course_access],
+    responses=responses(bool, CourseNotFoundException, NoCourseAccessException),
+)
+async def watch_course(course: Course = get_course, user: User = user_auth) -> Any:
+    """Mark the course as watched for the user."""
+
+    await models.LastWatch.update(user.id, course.id)
+    return True
 
 
 @router.get(
