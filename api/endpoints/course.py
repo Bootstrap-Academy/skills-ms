@@ -78,12 +78,7 @@ async def list_courses(
     out = iter(COURSES.values())
 
     if search_term:
-        out = (
-            course
-            for course in out
-            if search_term.lower() in course.title.lower()
-            or (course.description is not None and search_term.lower() in course.description)
-        )
+        out = (course for course in out if search_term.lower() in course.title.lower())
     if language:
         out = (course for course in out if course.language is not None and language.lower() in course.language.lower())
     if author:
