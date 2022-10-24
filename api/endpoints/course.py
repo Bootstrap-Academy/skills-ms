@@ -61,7 +61,9 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
 
 @redis_cached("course_access", "user_id")
 async def get_owned_courses(user_id: str) -> set[str]:
-    return {ca.course_id async for ca in await db.stream(filter_by(models.CourseAccess, user_id=user_id))}
+    return {ca.course_id async for ca in await db.stream(filter_by(models.CourseAccess, user_id=user_id))} | {
+        lw.course_id async for lw in await db.stream(filter_by(models.LastWatch, user_id=user_id))
+    }
 
 
 @router.get("/courses", responses=responses(list[CourseSummary]))
@@ -87,10 +89,8 @@ async def list_courses(
     if free is not None:
         out = (course for course in out if course.free == free)
     if owned is not None:
-        courses = {course.id for course in COURSES.values() if course.free}
-        if user and user.admin:
-            courses = set(COURSES)
-        elif user:
+        courses = set()
+        if user:
             courses |= await get_owned_courses(user.id)
 
         relevant = courses if owned else set(COURSES) - courses
