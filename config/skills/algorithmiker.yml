@@ -6,7 +6,8 @@ skills:
   graphentheorie:
     name: Graphentheorie
     dependencies: []
-    courses: graphentheorie
+    courses:
+      - graphentheorie
   fortgeschrittene_algorithmen_und_datenstrukturen:
     name: Fortgeschrittene Algorithmen und Datenstrukturen
     dependencies: []
