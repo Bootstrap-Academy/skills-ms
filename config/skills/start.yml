@@ -6,3 +6,7 @@ skills:
     dependencies: []
     courses:
       - medienkompetenz
+  it_security_awareness:
+    name: IT Security Awareness
+    dependencies: []
+    courses: []
