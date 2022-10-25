@@ -21,7 +21,8 @@ skills:
   kotlin_fuer_fortgeschrittene:
     name: Kotlin für Fortgeschrittene
     dependencies: []
-    courses: []
+    courses: 
+      - kotlin_fortgeschrittene_techniken
   c_plus_plus:
     name: C++
     dependencies: []
