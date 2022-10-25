@@ -44,6 +44,11 @@ class Mp4Lecture(BaseModel):
 Lecture = YoutubeLecture | Mp4Lecture
 
 
+class LectureSummary(BaseModel):
+    title: str = Field(description="Title of the lecture")
+    duration: int = Field(description="Duration of the lecture in seconds")
+
+
 class Section(BaseModel):
     id: str = Field(description="ID of the section")
     title: str = Field(description="Title of the section")
@@ -55,6 +60,11 @@ class Section(BaseModel):
         description="Introduction to the course",
         lectures=[get_example(YoutubeLecture), get_example(Mp4Lecture)],
     )
+
+
+class SectionSummary(BaseModel):
+    title: str = Field(description="Title of the section")
+    lectures: list[LectureSummary] = Field(description="Lectures in the section")
 
 
 class BaseCourse(BaseModel):
@@ -98,8 +108,15 @@ class Course(BaseCourse):
     def summary(self) -> CourseSummary:
         return CourseSummary(
             **{key: value for key, value in self.dict().items() if key in BaseCourse.__fields__},
-            sections=len(self.sections),
-            lectures=sum(len(section.lectures) for section in self.sections),
+            sections=[
+                SectionSummary(
+                    title=section.title,
+                    lectures=[
+                        LectureSummary(title=lecture.title, duration=lecture.duration) for lecture in section.lectures
+                    ],
+                )
+                for section in self.sections
+            ],
         )
 
     def to_user_course(self, completed_lectures: set[str]) -> UserCourse:
@@ -123,10 +140,7 @@ class Course(BaseCourse):
 
 
 class CourseSummary(BaseCourse):
-    sections: int = Field(description="Number of sections in the course")
-    lectures: int = Field(description="Number of lectures in the course")
-
-    Config = example(**get_example(BaseCourse), sections=42, lectures=1337)
+    sections: list[SectionSummary] = Field(description="Lectures of the course")
 
 
 class UserYoutubeLecture(YoutubeLecture):
