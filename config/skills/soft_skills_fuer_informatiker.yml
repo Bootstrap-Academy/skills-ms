@@ -4,4 +4,5 @@ skills:
   soft_skills:
     name: Soft Skills
     dependencies: []
-    courses: []
+    courses: 
+      - softskills
