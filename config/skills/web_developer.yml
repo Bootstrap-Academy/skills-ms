@@ -68,12 +68,14 @@ skills:
     name: React
     dependencies:
       - typescript
-    courses: []
+    courses: 
+      - react_js
   angular:
     name: Angular
     dependencies:
       - typescript
-    courses: []
+    courses: 
+      - angular_5
   three_js:
     name: 3D Animationen mit ThreeJS
     dependencies:
