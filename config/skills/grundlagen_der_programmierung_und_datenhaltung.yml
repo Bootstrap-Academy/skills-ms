@@ -19,11 +19,13 @@ skills:
   c_grundlagen:
     name: C Grundlagen
     dependencies: []
-    courses: []
+    courses:
+      - c
   c_sharp_grundlagen:
     name: C# Grundlagen
     dependencies: []
-    courses: []
+    courses: 
+      - c_sharp
   sql_grundlagen:
     name: SQL Grundlagen
     dependencies: []
