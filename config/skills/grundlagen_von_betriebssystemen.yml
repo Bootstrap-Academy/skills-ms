@@ -8,7 +8,8 @@ skills:
       - windows10
   powershell_und_fortgeschrittene_windows_administration:
     name: Powershell und fortgeschrittene Windows-Administration
-    dependencies: []
+    dependencies: 
+      - windows_grundlagen
     courses: []
   linux_grundlagen:
     name: Linux Grundlagen
@@ -18,7 +19,8 @@ skills:
       - linux
   bash_und_fortgeschrittene_linux_administration:
     name: Bash und fortgeschrittene Linux-Administration
-    dependencies: []
+    dependencies: 
+      - linux_grundlagen
     courses:
       - bash
       - linux_autokey
