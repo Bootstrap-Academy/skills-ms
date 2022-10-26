@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7rlNexPh8wjI2DyABX8It7U
 title: "C#"
-description: "C# - das Java von Microsoft - ist eine moderne, objektorientierte Sprache, die überall da ganz gerne eingesetzt wird, wo Microsoft ist - und das ist häufig!
+description: "C# - das Java von Microsoft - ist eine moderne, objektorientierte Sprache, die überall da ganz gerne eingesetzt wird, wo Microsoft ist - und das ist häufig!"
 category:
 language: de
-image: 
+image: https://static.bootstrap.academy/thumbnails/c_sharp.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
