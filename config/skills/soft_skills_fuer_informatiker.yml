@@ -1,5 +1,6 @@
 name: Soft Skills für Informatiker
-dependencies: []
+dependencies: 
+  - start
 skills:
   soft_skills:
     name: Soft Skills
