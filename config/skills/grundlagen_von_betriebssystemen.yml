@@ -1,5 +1,6 @@
 name: Grundlagen von Betriebssystemen
-dependencies: []
+dependencies: 
+  - start
 skills:
   windows_grundlagen:
     name: Windows Grundlagen
