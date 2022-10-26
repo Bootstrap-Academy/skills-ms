@@ -1,5 +1,6 @@
 name: Mathematik für Informatiker
-dependencies: []
+dependencies: 
+  - start
 skills:
   formale_logik_und_mengenlehre:
     name: Formale Logik und Mengenlehre
