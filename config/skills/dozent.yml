@@ -1,8 +1,0 @@
-name: Academy Dozent
-skills:
-  instructor:
-    name: Instructor
-    dependencies: []
-  examiner:
-    name: Examiner
-    dependencies: []
