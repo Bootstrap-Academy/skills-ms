@@ -21,6 +21,22 @@ async def get_skills() -> Any:
     return [skill.serialize async for skill in await db.stream(select(models.SubSkill))]
 
 
+@router.get("/skills/{skill_id}/dependencies", responses=responses(set[str], SkillNotFoundException))
+@redis_cached("skills", "skill_id")
+async def get_skill_dependencies(skill_id: str) -> Any:
+    """Return a list of all skills that are required to learn this skill."""
+
+    skill = await db.get(models.SubSkill, id=skill_id)
+    if not skill:
+        raise SkillNotFoundException
+
+    out = {s.id for s in skill.dependencies}
+    for root in skill.parent.dependencies:
+        out |= {s.id for s in root.sub_skills}
+
+    return out
+
+
 @router.get("/skills/{user_id}", responses=responses(list[str]))
 @redis_cached("xp", "user_id")
 async def get_completed_skills(user_id: str) -> Any:

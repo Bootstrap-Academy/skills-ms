@@ -30,7 +30,7 @@ class RootSkill(Base):
     sub_tree_columns: Mapped[int] = Column(Integer)
     icon: Mapped[str | None] = Column(String(256), nullable=True)
     sub_skills: list[SubSkill] = relationship(
-        "SubSkill", back_populates="parent", cascade="all, delete", lazy="selectin", join_depth=2
+        "SubSkill", back_populates="parent", cascade="all, delete", lazy="selectin", join_depth=3
     )
     dependencies: list[RootSkill] = relationship(
         "RootSkill",
