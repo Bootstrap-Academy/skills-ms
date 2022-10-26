@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oi_Q4whC28Yp12l1I-hauk
-title: "React JS Tutorial Deutsch"
-description:
+title: "React JS"
+description: "React, das Frontend Framework von Facebook, ist ein bisschen kleiner und flexibler, aber dennoch genauso mächtig wie Angular!"
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/javascript.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
@@ -11,125 +11,129 @@ requirements: []
 last_update: 1666715550
 sections:
   - id: section
-    title: "React JS Tutorial Deutsch"
+    title: "React JS"
     description:
     lectures:
       - id: "HCJCFV-OGnY"
-        title: "ReactJS Tutorial #1 - React vs. Angular"
+        title: "React vs. Angular"
         description:
         type: youtube
         video_id: "HCJCFV-OGnY"
         duration: 495
       - id: "cSRop5CJQws"
-        title: "ReactJS Tutorial #2 - Installation und Setup der Umgebung"
+        title: "Installation und Setup der Umgebung"
         description:
         type: youtube
         video_id: "cSRop5CJQws"
         duration: 665
       - id: "WMf5UEZLXyM"
-        title: "React Tutorial #3 - JSX und Rendern von Objekten"
+        title: "JSX und Rendern von Objekten"
         description:
         type: youtube
         video_id: "WMf5UEZLXyM"
         duration: 954
       - id: "NRpuaZrilCU"
-        title: "React Tutorial #4 - Eine Uhr - Selbst aktualisierende Komponenten"
+        title: "Eine Uhr - Selbst aktualisierende Komponenten"
         description:
         type: youtube
         video_id: "NRpuaZrilCU"
         duration: 809
       - id: "dk0KWGOOvdQ"
-        title: "React Tutorial #5 - Mehrere Elemente und Events"
+        title: "Mehrere Elemente und Events"
         description:
         type: youtube
         video_id: "dk0KWGOOvdQ"
         duration: 944
       - id: "1KlCH6rPpgI"
-        title: "React Tutorial #6 - Euro in Dollar umrechnen - Forms und Live Änderungen"
+        title: "Euro in Dollar umrechnen - Forms und Live Änderungen"
         description:
         type: youtube
         video_id: "1KlCH6rPpgI"
         duration: 1026
       - id: "FfAiMfxxxA8"
-        title: "React Tutorial #7 - Ordnerstrukturen"
+        title: "Ordnerstrukturen"
         description:
         type: youtube
         video_id: "FfAiMfxxxA8"
         duration: 705
       - id: "pRROp0bwxOE"
-        title: "React Tutorial #8 - Routing"
+        title: "Routing"
         description:
         type: youtube
         video_id: "pRROp0bwxOE"
         duration: 760
       - id: "-Y73N2uqQiM"
-        title: "React Tutorial #9 - Parameter in URLs"
+        title: "Parameter in URLs"
         description:
         type: youtube
         video_id: "-Y73N2uqQiM"
         duration: 370
       - id: "K9P-ZclspJg"
-        title: "React Tutorial #10 - Sass / Scss verwenden"
+        title: "Sass / Scss verwenden"
         description:
         type: youtube
         video_id: "K9P-ZclspJg"
         duration: 262
       - id: "cwrS3omZbR4"
-        title: "React Tutorial #11 - Redirects"
+        title: "Redirects"
         description:
         type: youtube
         video_id: "cwrS3omZbR4"
         duration: 316
       - id: "PcGQ6nzTXgY"
-        title: "React Tutorial #12 - Deployment"
+        title: "Deployment"
         description:
         type: youtube
         video_id: "PcGQ6nzTXgY"
         duration: 533
       - id: "ZDOo8iCjOMs"
-        title: "React App - Logik beim Erstellen einer Anwendung mit TypeScript"
+        title: "Logik beim Erstellen einer Anwendung mit TypeScript"
         description:
         type: youtube
         video_id: "ZDOo8iCjOMs"
         duration: 2707
       - id: "mG7yXW7jluc"
-        title: "React - Umbau und erste Tests mit Jest"
+        title: "Umbau und erste Tests mit Jest"
         description:
         type: youtube
         video_id: "mG7yXW7jluc"
         duration: 492
       - id: "G2KljzRBfNM"
-        title: "React - Testen mit Jest"
+        title: "Testen mit Jest"
         description:
         type: youtube
         video_id: "G2KljzRBfNM"
         duration: 843
+  - id: section2
+    title: "Redux"
+    description:
+    lectures:
       - id: "IglaWZAWVgc"
-        title: "React Redux Tutorial #1 - Was ist React Redux"
+        title: "Was ist React Redux"
         description:
         type: youtube
         video_id: "IglaWZAWVgc"
         duration: 550
       - id: "jfBmMztAlxQ"
-        title: "React Redux Tutorial #2 - Die Beispiel App"
+        title: "Die Beispiel App"
         description:
         type: youtube
         video_id: "jfBmMztAlxQ"
         duration: 1014
       - id: "SKSxwCX8oGE"
-        title: "React Redux Tutorial #3 - Ein neues Feature hinzufügen"
+        title: "Ein neues Feature hinzufügen"
         description:
         type: youtube
         video_id: "SKSxwCX8oGE"
         duration: 795
       - id: "DkkSEbgsjmQ"
-        title: "React Redux Tutorial #4 - Reducer für das Feature"
+        title: "Reducer für das Feature"
         description:
         type: youtube
         video_id: "DkkSEbgsjmQ"
         duration: 891
       - id: "Nci56RDMlF8"
-        title: "React Redux Tutorial #5 - Asynchronität ermöglichen via Thunks"
+        title: "Asynchronität ermöglichen via Thunks"
         description:
         type: youtube
         video_id: "Nci56RDMlF8"
