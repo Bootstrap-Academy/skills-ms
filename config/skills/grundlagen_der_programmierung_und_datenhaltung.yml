@@ -1,5 +1,6 @@
 name: Grundlagen der Programmierung und Datenhaltung
-dependencies: []
+dependencies: 
+  - start
 skills:
   python_grundlagen:
     name: Python Grundlagen
