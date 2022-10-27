@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from api import models
 from api.auth import public_auth, require_verified_email, user_auth
 from api.database import db, filter_by
-from api.exceptions.auth import verified_responses
+from api.exceptions.auth import user_responses, verified_responses
 from api.exceptions.course import (
     AlreadyCompletedLectureException,
     AlreadyPurchasedCourseException,
@@ -116,7 +116,7 @@ async def get_course_summary(course: Course = get_course) -> Any:
 @router.post(
     "/courses/{course_id}/watch",
     dependencies=[require_verified_email, has_course_access],
-    responses=responses(bool, CourseNotFoundException, NoCourseAccessException),
+    responses=user_responses(bool, CourseNotFoundException, NoCourseAccessException),
 )
 async def watch_course(course: Course = get_course, user: User = user_auth) -> Any:
     """Mark the course as watched for the user."""
