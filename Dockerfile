@@ -40,6 +40,7 @@ COPY alembic.ini /app/
 COPY --from=builder /build/VERSION /app/
 
 COPY config /app/config/
+COPY templates /app/templates/
 COPY api /app/api/
 
 HEALTHCHECK --interval=20s --timeout=5s --retries=1 \

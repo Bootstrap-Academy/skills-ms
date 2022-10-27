@@ -22,11 +22,13 @@ from api.exceptions.course import (
 from api.redis import redis
 from api.schemas.course import Course, CourseSummary, Lecture, UserCourse
 from api.schemas.user import User
+from api.services.auth import get_email
 from api.services.courses import COURSES
 from api.services.shop import spend_coins
 from api.settings import settings
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
+from api.utils.email import BOUGHT_COURSE
 
 
 router = APIRouter()
@@ -246,6 +248,8 @@ async def buy_course(user: User = user_auth, course: Course = get_course) -> Any
         raise NotEnoughCoinsError
 
     await models.CourseAccess.create(user.id, course.id)
+    if email := await get_email(user.id):
+        await BOUGHT_COURSE.send(email, title=course.title)
 
     await clear_cache("course_access")
 
