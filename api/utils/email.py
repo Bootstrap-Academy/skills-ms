@@ -31,7 +31,7 @@ class Message:
         await send_email(recipient, self.title, content, reply_to=reply_to)
 
 
-BOUGHT_COURSE = Message(title="Bought course", template="bought_course.html")
+BOUGHT_COURSE = Message(title="Kaufbestätigung - Bootstrap Academy", template="bought_course.html")
 
 
 @run_in_thread
