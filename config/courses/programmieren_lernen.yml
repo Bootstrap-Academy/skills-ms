@@ -361,7 +361,7 @@ sections:
         video_id: "tcj7g_Q9Wnc"
         duration: 304
   - id: section6
-    title: "Einführung in die objektorientierte Programmierung"
+    title: "Parallelität"
     description:
     lectures:
       - id: "d50Nir52aS8"
