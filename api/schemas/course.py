@@ -47,6 +47,7 @@ Lecture = YoutubeLecture | Mp4Lecture
 class LectureSummary(BaseModel):
     title: str = Field(description="Title of the lecture")
     duration: int = Field(description="Duration of the lecture in seconds")
+    completed: bool | None = Field(description="If the lecture is completed")
 
 
 class Section(BaseModel):
@@ -65,6 +66,7 @@ class Section(BaseModel):
 class SectionSummary(BaseModel):
     title: str = Field(description="Title of the section")
     lectures: list[LectureSummary] = Field(description="Lectures in the section")
+    completed: bool | None = Field(description="If the section is completed")
 
 
 class BaseCourse(BaseModel):
@@ -104,19 +106,29 @@ class Course(BaseCourse):
 
     Config = example(**get_example(BaseCourse), sections=[get_example(Section)])
 
-    @property
-    def summary(self) -> CourseSummary:
-        return CourseSummary(
-            **{key: value for key, value in self.dict().items() if key in BaseCourse.__fields__},
-            sections=[
+    def summary(self, completed_lectures: set[str] | None) -> CourseSummary:
+        sections = []
+        for section in self.sections:
+            lectures = [
+                LectureSummary(
+                    title=lecture.title,
+                    duration=lecture.duration,
+                    completed=None if completed_lectures is None else lecture.id in completed_lectures,
+                )
+                for lecture in section.lectures
+            ]
+            sections.append(
                 SectionSummary(
                     title=section.title,
-                    lectures=[
-                        LectureSummary(title=lecture.title, duration=lecture.duration) for lecture in section.lectures
-                    ],
+                    lectures=lectures,
+                    completed=None if completed_lectures is None else all(lecture.completed for lecture in lectures),
                 )
-                for section in self.sections
-            ],
+            )
+
+        return CourseSummary(
+            **{key: value for key, value in self.dict().items() if key in BaseCourse.__fields__},
+            sections=sections,
+            completed=None if completed_lectures is None else all(section.completed for section in sections),
         )
 
     def to_user_course(self, completed_lectures: set[str]) -> UserCourse:
@@ -141,6 +153,7 @@ class Course(BaseCourse):
 
 class CourseSummary(BaseCourse):
     sections: list[SectionSummary] = Field(description="Lectures of the course")
+    completed: bool | None = Field(description="If the course is completed")
 
 
 class UserYoutubeLecture(YoutubeLecture):

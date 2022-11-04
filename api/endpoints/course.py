@@ -105,14 +105,23 @@ async def list_courses(
         }
         out = sorted(out, key=lambda c: last_watches.get(c.id, 0), reverse=True)
 
-    return [course.summary for course in out]
+    completed_lectures: dict[str, set[str]] | None = None
+    if user:
+        completed_lectures = {}
+        async for lecture in await db.stream(filter_by(models.LectureProgress, user_id=user.id)):
+            completed_lectures.setdefault(lecture.course_id, set()).add(lecture.lecture_id)
+
+    return [
+        course.summary(None if completed_lectures is None else completed_lectures.get(course.id, set()))
+        for course in out
+    ]
 
 
 @router.get("/courses/{course_id}/summary", responses=responses(CourseSummary, CourseNotFoundException))
-async def get_course_summary(course: Course = get_course) -> Any:
+async def get_course_summary(course: Course = get_course, user: User | None = public_auth) -> Any:
     """Return a summary of the course."""
 
-    return course.summary
+    return course.summary(None if user is None else await models.LectureProgress.get_completed(user.id, course.id))
 
 
 @router.post(
@@ -221,9 +230,13 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
     *Requirements:* **VERIFIED**
     """
 
+    completed_lectures: dict[str, set[str]] = {}
+    async for lecture in await db.stream(filter_by(models.LectureProgress, user_id=user.id)):
+        completed_lectures.setdefault(lecture.course_id, set()).add(lecture.lecture_id)
+
     course_ids = {k for k, v in COURSES.items() if v.free or user.admin}
     course_ids |= (await get_owned_courses(user.id)) & set(COURSES)
-    return [COURSES[course_id].summary for course_id in course_ids]
+    return [COURSES[course_id].summary(completed_lectures.get(course_id, set())) for course_id in course_ids]
 
 
 @router.post(
