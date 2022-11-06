@@ -43,6 +43,7 @@ skills:
       - javascript_grundlagen
     courses:
       - jquery
+      - lustige_web_ui_effekte
   serverside_javascript_mit_node_und_express:
     name: Serverside JavaScript mit Node und Express
     dependencies:
