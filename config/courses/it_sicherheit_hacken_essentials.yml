@@ -1,0 +1,220 @@
+# https://www.youtube.com/playlist?list=PLNmsVeXQZj7oVGaVtkLlu3jYl_D8ugxeT
+title: "IT-Sicherheit und Hacken - die Essentials"
+description:
+category:
+language: de
+image:
+author: "The Morpheus Tutorials"
+price: 0
+learning_goals: []
+requirements: []
+last_update: 1668100929
+sections:
+  - id: section
+    title: "IT-Sicherheit und Hacken - die Essentials"
+    description:
+    lectures:
+      - id: "BCsEkMRzrOo"
+        title: "IT-Sicherheit #1 - Hacken ist mehr als nur Tools"
+        description:
+        type: youtube
+        video_id: "BCsEkMRzrOo"
+        duration: 803
+      - id: "0XVvU__CQBU"
+        title: "IT Sicherheit #2 - Hackerarten und ihre Hüte"
+        description:
+        type: youtube
+        video_id: "0XVvU__CQBU"
+        duration: 595
+      - id: "na3vuTTa30o"
+        title: "IT Sicherheit #3 - Schutzziele"
+        description:
+        type: youtube
+        video_id: "na3vuTTa30o"
+        duration: 637
+      - id: "7vsSK0GspqU"
+        title: "IT Sicherheit #4 - Social Engineering und Phishing"
+        description:
+        type: youtube
+        video_id: "7vsSK0GspqU"
+        duration: 589
+      - id: "ZjvcMd3VG_A"
+        title: "IT Sicherheit #5 - Trojaner und der SourceCode von Meterpreter"
+        description:
+        type: youtube
+        video_id: "ZjvcMd3VG_A"
+        duration: 1601
+      - id: "IlRMgDJPQQE"
+        title: "IT Sicherheit #6 - Viren und Würmer"
+        description:
+        type: youtube
+        video_id: "IlRMgDJPQQE"
+        duration: 701
+      - id: "oKwjmtHMgsM"
+        title: "IT Sicherheit #7 - Ransomwares"
+        description:
+        type: youtube
+        video_id: "oKwjmtHMgsM"
+        duration: 487
+      - id: "jYykpF5Y6o4"
+        title: "IT Sicherheit #8 - Drive-by-Downloads"
+        description:
+        type: youtube
+        video_id: "jYykpF5Y6o4"
+        duration: 476
+      - id: "7x8omaV58lQ"
+        title: "IT-Sicherheit #9 - Schwachstellen, Bedrohungen, Exploits, Zero Days und CVEs"
+        description:
+        type: youtube
+        video_id: "7x8omaV58lQ"
+        duration: 672
+      - id: "P6ieMg9e0N8"
+        title: "IT Sicherheit #10 - kurzer Kryptographie-Crashkurs für Hacker"
+        description:
+        type: youtube
+        video_id: "P6ieMg9e0N8"
+        duration: 437
+      - id: "k8zJh1tAcok"
+        title: "IT Sicherheit #11 - Praxis mit OpenSSL und Angriff gegen AES-ECB"
+        description:
+        type: youtube
+        video_id: "k8zJh1tAcok"
+        duration: 596
+      - id: "gPvudBI2a9g"
+        title: "IT Sicherheit #12 - Aktive Angreifer und Replay Angriffe"
+        description:
+        type: youtube
+        video_id: "gPvudBI2a9g"
+        duration: 559
+      - id: "nlSmsEJOAsQ"
+        title: "IT Sicherheit #13 - Asymmetrische Krypto und Man in the middle Angriffe"
+        description:
+        type: youtube
+        video_id: "nlSmsEJOAsQ"
+        duration: 445
+      - id: "qK7BhpkeGxs"
+        title: "IT Sicherheit #14 - X.509-Zertifikate und Zertifizierungsstellen"
+        description:
+        type: youtube
+        video_id: "qK7BhpkeGxs"
+        duration: 681
+      - id: "aDsc6C2OgEU"
+        title: "IT Sicherheit #15 - Wie wird wirklich verschlüsselt am Beispiel von TLS"
+        description:
+        type: youtube
+        video_id: "aDsc6C2OgEU"
+        duration: 580
+      - id: "1kV3-Wcu2zw"
+        title: "IT Sicherheit #16 - Zertifikatwiderruf"
+        description:
+        type: youtube
+        video_id: "1kV3-Wcu2zw"
+        duration: 408
+      - id: "vAjElfpTwKo"
+        title: "IT Sicherheit #17 - Bot-Netze und DDoS"
+        description:
+        type: youtube
+        video_id: "vAjElfpTwKo"
+        duration: 526
+      - id: "tPWduYBZ2c8"
+        title: "IT Sicherheit #18 - Wie werden Passwörter gespeichert"
+        description:
+        type: youtube
+        video_id: "tPWduYBZ2c8"
+        duration: 366
+      - id: "a5-83uboWzs"
+        title: "JSON Web Tokens"
+        description:
+        type: youtube
+        video_id: "a5-83uboWzs"
+        duration: 876
+      - id: "_RUrT74bui0"
+        title: "Wenn Cybersecurity Leben kostet"
+        description:
+        type: youtube
+        video_id: "_RUrT74bui0"
+        duration: 818
+      - id: "8a6KH7JD4Dg"
+        title: "Wie Instagram Accounts gehackt werden und was ihr dagegen tun könnt"
+        description:
+        type: youtube
+        video_id: "8a6KH7JD4Dg"
+        duration: 838
+      - id: "LErF12H60zo"
+        title: "Warum du Antiviren-Programme meiden solltest und wie Experten sie nutzen [inkl. Python]"
+        description:
+        type: youtube
+        video_id: "LErF12H60zo"
+        duration: 1342
+      - id: "SisN1R_Aei4"
+        title: "Visual Hacking und wie ihr euch verteidigen könnt"
+        description:
+        type: youtube
+        video_id: "SisN1R_Aei4"
+        duration: 393
+      - id: "1ct0j5AuvRU"
+        title: "Passwort Manager - Warum ihr einen nutzen solltet und welchen ich nutze"
+        description:
+        type: youtube
+        video_id: "1ct0j5AuvRU"
+        duration: 1155
+      - id: "Agfqr5Ur6l0"
+        title: "Passwortsicherheit ist egal - So machen Google und Co 2FA, MFA und U2F"
+        description:
+        type: youtube
+        video_id: "Agfqr5Ur6l0"
+        duration: 1438
+      - id: "EUxsBVjyiTY"
+        title: "Veracrypt: verschlüsselte USB Sticks und Dateien erstellen mit Geheim-Fach"
+        description:
+        type: youtube
+        video_id: "EUxsBVjyiTY"
+        duration: 1686
+      - id: "-WymP8TwfcQ"
+        title: "GnuPG für Windows #1  - Installation und Schlüssel erstellen"
+        description:
+        type: youtube
+        video_id: "-WymP8TwfcQ"
+        duration: 620
+      - id: "y78MITuTqAs"
+        title: "GnuPG Windows #2 - Nachrichten, Dateien verschlüsseln, signieren und prüfen"
+        description:
+        type: youtube
+        video_id: "y78MITuTqAs"
+        duration: 815
+      - id: "qSz-y7wXF5s"
+        title: "In Outlook E-Mails verschlüsseln"
+        description:
+        type: youtube
+        video_id: "qSz-y7wXF5s"
+        duration: 259
+      - id: "53llt5oY5I0"
+        title: "Gmail und Sonstige Web Mail Anbieter verschlüsseln"
+        description:
+        type: youtube
+        video_id: "53llt5oY5I0"
+        duration: 490
+      - id: "mQFdUFDNaUs"
+        title: "GnuPG Verschlüsselung unter Android mit OpenKeyChain"
+        description:
+        type: youtube
+        video_id: "mQFdUFDNaUs"
+        duration: 675
+      - id: "DmddGxbgEQk"
+        title: "Mit Virtuellen Maschinen SICHER arbeiten mit Snapshots, Exports und Co"
+        description:
+        type: youtube
+        video_id: "DmddGxbgEQk"
+        duration: 1741
+      - id: "hBuM1qfc3Yw"
+        title: "Bestes Linux-Backup-Tool: BorgBackup"
+        description:
+        type: youtube
+        video_id: "hBuM1qfc3Yw"
+        duration: 1278
+      - id: "IZzU89SzLWc"
+        title: "Chrome sicher machen"
+        description:
+        type: youtube
+        video_id: "IZzU89SzLWc"
+        duration: 2102

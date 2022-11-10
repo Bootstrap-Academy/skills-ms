@@ -6,7 +6,8 @@ skills:
   grundlagen_der_it_sicherheit:
     name: Grundlagen der IT Sicherheit
     dependencies: []
-    courses: []
+    courses:
+      - it_sicherheit_hacken_essentials
   osint:
     name: OSINT
     dependencies:
