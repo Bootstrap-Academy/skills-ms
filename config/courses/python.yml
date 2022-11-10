@@ -116,12 +116,6 @@ sections:
         type: youtube
         video_id: "bNk14P3vsRk"
         duration: 351
-      - id: "GPXEVsOxZVw"
-        title: "Übung - Temperaturen umrechnen"
-        description:
-        type: youtube
-        video_id: "GPXEVsOxZVw"
-        duration: 801
       - id: "xTwGWLijyX8"
         title: "User Input"
         description:
@@ -202,6 +196,12 @@ sections:
         type: youtube
         video_id: "9A3GtZxB4ug"
         duration: 741
+      - id: "GPXEVsOxZVw"
+        title: "Übung - Temperaturen umrechnen"
+        description:
+        type: youtube
+        video_id: "GPXEVsOxZVw"
+        duration: 801
       - id: "KLQvQLU5bvI"
         title: "Übung - Ein Textadventure"
         description:
