@@ -1,5 +1,5 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7oVGaVtkLlu3jYl_D8ugxeT
-title: "IT-Sicherheit und Hacken - die Essentials"
+title: "Grundlagen der IT-Sicherheit"
 description:
 category:
 language: de
@@ -11,113 +11,113 @@ requirements: []
 last_update: 1668100929
 sections:
   - id: section
-    title: "IT-Sicherheit und Hacken - die Essentials"
+    title: "Grundlagen der IT-Sicherheit"
     description:
     lectures:
       - id: "BCsEkMRzrOo"
-        title: "IT-Sicherheit #1 - Hacken ist mehr als nur Tools"
+        title: "Was ist IT Sicherheit"
         description:
         type: youtube
         video_id: "BCsEkMRzrOo"
         duration: 803
       - id: "0XVvU__CQBU"
-        title: "IT Sicherheit #2 - Hackerarten und ihre Hüte"
+        title: "Hackerarten und ihre Hüte"
         description:
         type: youtube
         video_id: "0XVvU__CQBU"
         duration: 595
       - id: "na3vuTTa30o"
-        title: "IT Sicherheit #3 - Schutzziele"
+        title: "Schutzziele"
         description:
         type: youtube
         video_id: "na3vuTTa30o"
         duration: 637
       - id: "7vsSK0GspqU"
-        title: "IT Sicherheit #4 - Social Engineering und Phishing"
+        title: "Social Engineering und Phishing"
         description:
         type: youtube
         video_id: "7vsSK0GspqU"
         duration: 589
       - id: "ZjvcMd3VG_A"
-        title: "IT Sicherheit #5 - Trojaner und der SourceCode von Meterpreter"
+        title: "Trojaner und der SourceCode von Meterpreter"
         description:
         type: youtube
         video_id: "ZjvcMd3VG_A"
         duration: 1601
       - id: "IlRMgDJPQQE"
-        title: "IT Sicherheit #6 - Viren und Würmer"
+        title: "Viren und Würmer"
         description:
         type: youtube
         video_id: "IlRMgDJPQQE"
         duration: 701
       - id: "oKwjmtHMgsM"
-        title: "IT Sicherheit #7 - Ransomwares"
+        title: "Ransomwares"
         description:
         type: youtube
         video_id: "oKwjmtHMgsM"
         duration: 487
       - id: "jYykpF5Y6o4"
-        title: "IT Sicherheit #8 - Drive-by-Downloads"
+        title: "Drive-by-Downloads"
         description:
         type: youtube
         video_id: "jYykpF5Y6o4"
         duration: 476
       - id: "7x8omaV58lQ"
-        title: "IT-Sicherheit #9 - Schwachstellen, Bedrohungen, Exploits, Zero Days und CVEs"
+        title: "Schwachstellen, Bedrohungen, Exploits, Zero Days und CVEs"
         description:
         type: youtube
         video_id: "7x8omaV58lQ"
         duration: 672
       - id: "P6ieMg9e0N8"
-        title: "IT Sicherheit #10 - kurzer Kryptographie-Crashkurs für Hacker"
+        title: "kurzer Kryptographie-Crashkurs"
         description:
         type: youtube
         video_id: "P6ieMg9e0N8"
         duration: 437
       - id: "k8zJh1tAcok"
-        title: "IT Sicherheit #11 - Praxis mit OpenSSL und Angriff gegen AES-ECB"
+        title: "Praxis mit OpenSSL und Angriff gegen AES-ECB"
         description:
         type: youtube
         video_id: "k8zJh1tAcok"
         duration: 596
       - id: "gPvudBI2a9g"
-        title: "IT Sicherheit #12 - Aktive Angreifer und Replay Angriffe"
+        title: "Aktive Angreifer und Replay Angriffe"
         description:
         type: youtube
         video_id: "gPvudBI2a9g"
         duration: 559
       - id: "nlSmsEJOAsQ"
-        title: "IT Sicherheit #13 - Asymmetrische Krypto und Man in the middle Angriffe"
+        title: "Asymmetrische Krypto und Man in the middle Angriffe"
         description:
         type: youtube
         video_id: "nlSmsEJOAsQ"
         duration: 445
       - id: "qK7BhpkeGxs"
-        title: "IT Sicherheit #14 - X.509-Zertifikate und Zertifizierungsstellen"
+        title: "X.509-Zertifikate und Zertifizierungsstellen"
         description:
         type: youtube
         video_id: "qK7BhpkeGxs"
         duration: 681
       - id: "aDsc6C2OgEU"
-        title: "IT Sicherheit #15 - Wie wird wirklich verschlüsselt am Beispiel von TLS"
+        title: "Wie wird wirklich verschlüsselt am Beispiel von TLS"
         description:
         type: youtube
         video_id: "aDsc6C2OgEU"
         duration: 580
       - id: "1kV3-Wcu2zw"
-        title: "IT Sicherheit #16 - Zertifikatwiderruf"
+        title: "Zertifikatwiderruf"
         description:
         type: youtube
         video_id: "1kV3-Wcu2zw"
         duration: 408
       - id: "vAjElfpTwKo"
-        title: "IT Sicherheit #17 - Bot-Netze und DDoS"
+        title: "Bot-Netze und DDoS"
         description:
         type: youtube
         video_id: "vAjElfpTwKo"
         duration: 526
       - id: "tPWduYBZ2c8"
-        title: "IT Sicherheit #18 - Wie werden Passwörter gespeichert"
+        title: "Wie werden Passwörter gespeichert"
         description:
         type: youtube
         video_id: "tPWduYBZ2c8"
@@ -140,12 +140,6 @@ sections:
         type: youtube
         video_id: "8a6KH7JD4Dg"
         duration: 838
-      - id: "LErF12H60zo"
-        title: "Warum du Antiviren-Programme meiden solltest und wie Experten sie nutzen [inkl. Python]"
-        description:
-        type: youtube
-        video_id: "LErF12H60zo"
-        duration: 1342
       - id: "SisN1R_Aei4"
         title: "Visual Hacking und wie ihr euch verteidigen könnt"
         description:
