@@ -212,15 +212,8 @@ async def list_sub_skills(*, root_skill_id: str, user: User | None = public_auth
 
     root_skill: models.RootSkill = await get_root_skill.dependency(root_skill_id)
 
-    completed: set[str] | None = (
-        await models.XP.get_user_completed_skills(user.id) if user and user.email_verified else None
-    )
-
     return SubSkillTree(
-        skills=[
-            {**sub_skill.serialize, "completed": (sub_skill.id in completed if completed is not None else None)}
-            for sub_skill in root_skill.sub_skills
-        ],
+        skills=[sub_skill.serialize for sub_skill in root_skill.sub_skills],
         rows=root_skill.sub_tree_rows,
         columns=root_skill.sub_tree_columns,
     )

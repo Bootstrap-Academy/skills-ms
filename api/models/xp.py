@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, relationship
 
 from api.database import Base, db, filter_by
 from api.models import SubSkill
+from api.services.xp import calc_sub_skill_level, calc_sub_skill_xp_needed
 
 
 class XP(Base):
@@ -35,9 +36,17 @@ class XP(Base):
         return sum(cast(XP, record).xp for record in await db.all(filter_by(cls, user_id=user_id, skill_id=skill_id)))
 
     @classmethod
-    async def get_user_completed_skills(cls, user_id: str) -> set[str]:
-        return {record.skill_id async for record in await db.stream(filter_by(cls, user_id=user_id, completed=True))}
+    async def get_user_skill_levels(cls, user_id: str) -> dict[str, int]:
+        return {
+            record.skill_id: calc_sub_skill_level(record.xp)
+            async for record in await db.stream(filter_by(cls, user_id=user_id, completed=True))
+        }
 
     @classmethod
-    async def get_skill_graduates(cls, skill_id: str) -> set[str]:
-        return {record.user_id async for record in await db.stream(filter_by(cls, skill_id=skill_id, completed=True))}
+    async def get_skill_graduates(cls, skill_id: str, level: int) -> set[str]:
+        return {
+            record.user_id
+            async for record in await db.stream(
+                filter_by(cls, skill_id=skill_id).where(XP.xp >= calc_sub_skill_xp_needed(level))
+            )
+        }
