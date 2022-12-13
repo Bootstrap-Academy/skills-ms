@@ -190,28 +190,6 @@ sections:
         type: youtube
         video_id: "R6tpJojTedA"
         duration: 107
-  - id: section4
-    title: "PGP Verschlüsselung mit GnuPG"
-    description:
-    lectures:
-      - id: "YPQh1Z5zlqw"
-        title: "Schlüssel generieren"
-        description:
-        type: youtube
-        video_id: "YPQh1Z5zlqw"
-        duration: 416
-      - id: "hVjcKBUAvxk"
-        title: "Schlüssel austauschen"
-        description:
-        type: youtube
-        video_id: "hVjcKBUAvxk"
-        duration: 384
-      - id: "oitvqDTWQBs"
-        title: "Verschlüsseln und Signieren"
-        description:
-        type: youtube
-        video_id: "oitvqDTWQBs"
-        duration: 673
   - id: section5
     title: "Mehr nützliche Features und Tools"
     description:
