@@ -204,11 +204,7 @@ async def delete_root_skill(skill: models.RootSkill = get_root_skill) -> Any:
 @router.get("/skilltree/{root_skill_id}", responses=responses(SubSkillTree, SkillNotFoundException))
 @redis_cached("skills", "root_skill_id", "user")
 async def list_sub_skills(*, root_skill_id: str, user: User | None = public_auth) -> Any:
-    """
-    Return a list of all sub skills of a root skill.
-
-    `completed` is included iff the **VERIFIED** requirement is met.
-    """
+    """Return a list of all sub skills of a root skill."""
 
     root_skill: models.RootSkill = await get_root_skill.dependency(root_skill_id)
 

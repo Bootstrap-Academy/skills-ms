@@ -17,15 +17,13 @@ class XP(Base):
     skill_id: Mapped[str] = Column(String(256), ForeignKey("skills_sub_skill.id"))
     skill: SubSkill = relationship("SubSkill", back_populates="xp", lazy="selectin")
     xp: Mapped[int] = Column(BigInteger)
-    completed: Mapped[bool] = Column(Boolean)
 
     @classmethod
-    async def add_xp(cls, user_id: str, skill_id: str, xp: int, complete: bool = False) -> None:
+    async def add_xp(cls, user_id: str, skill_id: str, xp: int) -> None:
         if not (record := await db.get(cls, user_id=user_id, skill_id=skill_id)):
-            record = XP(id=str(uuid4()), user_id=user_id, skill_id=skill_id, xp=0, completed=False)
+            record = XP(id=str(uuid4()), user_id=user_id, skill_id=skill_id, xp=0)
             await db.add(record)
         record.xp += xp
-        record.completed = record.completed or complete
 
     @classmethod
     async def get_user_xp(cls, user_id: str) -> int:
@@ -39,7 +37,7 @@ class XP(Base):
     async def get_user_skill_levels(cls, user_id: str) -> dict[str, int]:
         return {
             record.skill_id: calc_sub_skill_level(record.xp)
-            async for record in await db.stream(filter_by(cls, user_id=user_id, completed=True))
+            async for record in await db.stream(filter_by(cls, user_id=user_id))
         }
 
     @classmethod

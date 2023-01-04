@@ -8,7 +8,6 @@ class SubSkillXP(BaseModel):
     xp: int = Field(description="Amount of XP the user has in this skill")
     level: int = Field(description="Level of the user in this skill")
     progress: float = Field(ge=0, le=1, description="Progress towards the next level")
-    completed: bool = Field(description="Whether the user has completed the skill")
 
 
 class RootSkillXP(BaseModel):
@@ -28,7 +27,6 @@ class XPResponse(BaseModel):
 
 class UpdateXP(BaseModel):
     xp: int | None = Field(ge=0, description="Amount of XP the user has in this skill")
-    completed: bool | None = Field(description="Whether the user has completed the skill")
 
 
 class CertificateUser(BaseModel):
@@ -39,7 +37,7 @@ class CertificateUser(BaseModel):
     avatar_url: str = Field(description="URL of the user's avatar")
 
 
-class Certificate(BaseModel):
-    user: CertificateUser = Field(description="User who completed the skill")
-    root_skill: RootSkill = Field(description="Parent skill of the skill that was completed")
-    sub_skill: SubSkill = Field(description="Sub skill that was completed")
+# class Certificate(BaseModel):
+#     user: CertificateUser = Field(description="User who completed the skill")
+#     root_skill: RootSkill = Field(description="Parent skill of the skill that was completed")
+#     sub_skill: SubSkill = Field(description="Sub skill that was completed")

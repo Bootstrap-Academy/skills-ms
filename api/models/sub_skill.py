@@ -66,5 +66,4 @@ class SubSkill(Base):
             "row": self.row,
             "column": self.column,
             "icon": self.icon,
-            "completed": None,
         }
