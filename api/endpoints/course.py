@@ -257,7 +257,7 @@ async def buy_course(user: User = user_auth, course: Course = get_course) -> Any
     if await db.exists(filter_by(models.CourseAccess, user_id=user.id, course_id=course.id)):
         raise AlreadyPurchasedCourseException
 
-    if not await spend_coins(user.id, course.price):
+    if not await spend_coins(user.id, course.price, f"Course '{course.title}'"):
         raise NotEnoughCoinsError
 
     await models.CourseAccess.create(user.id, course.id)
