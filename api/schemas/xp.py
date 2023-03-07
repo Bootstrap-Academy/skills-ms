@@ -1,7 +1,5 @@
 from pydantic import BaseModel, Field
 
-from api.schemas.skill import RootSkill, SubSkill
-
 
 class SubSkillXP(BaseModel):
     skill: str = Field(description="ID of the skill")

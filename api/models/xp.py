@@ -1,7 +1,7 @@
 from typing import cast
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, Boolean, Column, ForeignKey, String
+from sqlalchemy import BigInteger, Column, ForeignKey, String
 from sqlalchemy.orm import Mapped, relationship
 
 from api.database import Base, db, filter_by
