@@ -1,9 +1,9 @@
 # https://www.youtube.com/playlist?list=PLNmsVeXQZj7q_xBcMAlQ2K18HjMpAe0Nm
 title: "Mengenlehre"
-description:
+description: "Mengenlehre, eine fundamentale Thematik für die Mathematik, in der es um Mengen, Ringe, Körper und deren Rechenregeln geht."
 category:
 language: de
-image:
+image: https://static.bootstrap.academy/thumbnails/mengenlehre.jpg
 author: "The Morpheus Tutorials"
 price: 0
 learning_goals: []
