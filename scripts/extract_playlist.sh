@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -e
 
-pl=$(youtube-dl -j --playlist-end 1 "$1" | jq -c '[.playlist_title,.playlist_uploader]')
+pl=$(yt-dlp -j --playlist-end 1 "$1" | jq -c '[.playlist_title,.playlist_uploader]')
 cat << EOF
 # $1
 title: $(jq .[0] <<< "$pl")
@@ -35,4 +35,4 @@ while read line; do
         video_id: $id
         duration: $duration
 EOF
-done < <(youtube-dl -j "$1" | jq -r 'tojson|@base64')
+done < <(yt-dlp -j "$1" | jq -r 'tojson|@base64')
