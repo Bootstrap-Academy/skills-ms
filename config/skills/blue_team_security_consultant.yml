@@ -12,7 +12,8 @@ skills:
     name: IT Sicherheitsberater
     dependencies:
       - netzsicherheit
-    courses: []
+    courses:
+      - iam
   incident_response:
     name: Incident Response
     dependencies:
