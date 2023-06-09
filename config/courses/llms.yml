@@ -12,21 +12,16 @@ description: |
   **Zielgruppe:**
 
   Dieser Kurs richtet sich an Entwickler, Datenwissenschaftler und alle, die daran interessiert sind, die Möglichkeiten von Large Language Models zu nutzen und zu verstehen.
-
-  **Lernziele:**
-
-  Am Ende des Kurses werden die Teilnehmer in der Lage sein:
-
-  1. Die Grundlagen und Anwendungen von Large Language Models zu verstehen.
-  2. ChatGPT und andere LLMs effizient für verschiedene Aufgaben einzusetzen.
-  3. Fortgeschrittene Techniken wie Prompt Engineering und Bildgenerierung zu beherrschen.
-  4. Die Grenzen und Möglichkeiten von Open-Source-KI im Vergleich zu proprietären Modellen wie ChatGPT zu verstehen.
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/llms.jpg
 author: "The Morpheus Tutorials"
 price: 0
-learning_goals: []
+learning_goals:
+  -  Die Grundlagen und Anwendungen von Large Language Models zu verstehen.
+  -  ChatGPT und andere LLMs effizient für verschiedene Aufgaben einzusetzen.
+  -  Fortgeschrittene Techniken wie Prompt Engineering und Bildgenerierung zu beherrschen.
+  -  Die Grenzen und Möglichkeiten von Open-Source-KI im Vergleich zu proprietären Modellen wie ChatGPT zu verstehen.
 requirements: []
 last_update: 1686300755
 sections:
