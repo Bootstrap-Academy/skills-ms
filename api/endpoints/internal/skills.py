@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastapi import APIRouter, Body, Query
+from pydantic import BaseModel
 
 from api import models
 from api.database import db, filter_by, select
@@ -61,3 +62,34 @@ async def add_skill_progress(user_id: str, skill_id: str, xp: int = Body(embed=T
     await clear_cache("xp")
 
     return True
+
+
+class Rank(BaseModel):
+    xp: int
+    rank: int
+
+
+class LeaderboardUser(Rank):
+    user: str
+
+
+class Leaderboard(BaseModel):
+    leaderboard: list[LeaderboardUser]
+    total: int
+
+
+@router.get("/leaderboard", responses=responses(Leaderboard))
+async def get_leaderboard(limit: int, offset: int) -> Leaderboard:
+    return Leaderboard(
+        leaderboard=[
+            LeaderboardUser(user=user, xp=xp, rank=rank)
+            for user, xp, rank in await models.XP.get_leaderboard(limit, offset)
+        ],
+        total=await models.XP.count_users(),
+    )
+
+
+@router.get("/leaderboard/{user_id}", responses=responses(Rank))
+async def get_leaderboard_user(user_id: str) -> Rank:
+    xp = await models.XP.get_user_xp(user_id)
+    return Rank(xp=xp, rank=await models.XP.rank_of(xp))
