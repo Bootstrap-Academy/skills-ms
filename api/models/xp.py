@@ -56,12 +56,7 @@ class XP(Base):
     @classmethod
     async def rank_of(cls, xp: int) -> int:
         return (
-            await db.first(
-                sa_select(func.count(distinct(XP.user_id)))
-                .select_from(XP)
-                .group_by(XP.user_id)
-                .having(func.sum(cls.xp) > xp)
-            )
+            await db.count(sa_select(XP.user_id).select_from(XP).group_by(XP.user_id).having(func.sum(cls.xp) > xp))
             or 0
         ) + 1
 
