@@ -24,7 +24,7 @@ from api.schemas.course import Course, CourseSummary, Lecture, UserCourse
 from api.schemas.user import User
 from api.services.auth import get_email
 from api.services.courses import COURSES
-from api.services.shop import spend_coins
+from api.services.shop import has_premium, spend_coins
 from api.settings import settings
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
@@ -57,8 +57,13 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
     if course.free or user.admin:
         return
 
-    if course.id not in await get_owned_courses(user.id):
-        raise NoCourseAccessException
+    if course.id in await get_owned_courses(user.id):
+        return
+
+    if await has_premium(user.id):
+        return
+
+    raise NoCourseAccessException
 
 
 @redis_cached("course_access", "user_id")
