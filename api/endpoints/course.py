@@ -196,6 +196,7 @@ async def download_mp4_lecture(token: str, file: str) -> Any:
 
 @router.get(
     "/courses/{course_id}/next_unseen",
+    dependencies=[require_verified_email, has_course_access],
     responses=responses(Lecture, CourseNotFoundException, NoCourseAccessException),  # type: ignore
 )
 async def next_unseen_lecture(course: Course = get_course, user: User = user_auth) -> Any:
