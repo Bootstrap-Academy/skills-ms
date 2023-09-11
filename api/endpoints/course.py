@@ -194,6 +194,20 @@ async def download_mp4_lecture(token: str, file: str) -> Any:
     return FileResponse(path, media_type="video/mp4", filename=file)
 
 
+@router.get(
+    "/courses/{course_id}/next_unseen",
+    responses=responses(Lecture, CourseNotFoundException, NoCourseAccessException),  # type: ignore
+)
+async def next_unseen_lecture(course: Course = get_course, user: User = user_auth) -> Any:
+    already_watched = await models.LectureProgress.get_completed(user_id=user.id, course_id=course.id)
+    for section in course.sections:
+        for lecture in section.lectures:
+            if lecture.id not in already_watched:
+                return lecture
+    else:
+        return course.sections[0].lectures[0]
+
+
 @router.put(
     "/courses/{course_id}/lectures/{lecture_id}/complete",
     dependencies=[require_verified_email, has_course_access],
