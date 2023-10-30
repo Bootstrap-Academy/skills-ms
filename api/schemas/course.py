@@ -57,6 +57,7 @@ class Section(BaseModel):
     lectures: list[Lecture] = Field(description="Lectures in the section")
 
     Config = example(
+        id="intro",
         title="Introduction",
         description="Introduction to the course",
         lectures=[get_example(YoutubeLecture), get_example(Mp4Lecture)],
