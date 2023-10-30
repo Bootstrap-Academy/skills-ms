@@ -8,8 +8,6 @@ from alembic import op
 
 import sqlalchemy as sa
 
-from api import models
-
 
 # revision identifiers, used by Alembic.
 revision = "efd84fdce9fc"
@@ -20,8 +18,6 @@ depends_on = None
 
 def upgrade() -> None:
     op.add_column("skills_xp", sa.Column("completed", sa.Boolean(), nullable=True))
-
-    op.execute(sa.update(models.XP).values(completed=False))
 
 
 def downgrade() -> None:
