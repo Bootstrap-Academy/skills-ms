@@ -183,3 +183,8 @@ class UserCourse(Course):
     sections: list[UserSection] = Field(description="Sections in the course")  # type: ignore
 
     Config = example(**{**get_example(Course), "sections": [get_example(UserSection)]})
+
+
+class NextUnseenResponse(BaseModel):
+    lecture: Lecture
+    section: Section

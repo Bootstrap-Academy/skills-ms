@@ -20,7 +20,7 @@ from api.exceptions.course import (
     NotEnoughCoinsError,
 )
 from api.redis import redis
-from api.schemas.course import Course, CourseSummary, Lecture, UserCourse
+from api.schemas.course import Course, CourseSummary, Lecture, NextUnseenResponse, UserCourse
 from api.schemas.user import User
 from api.services.auth import get_email
 from api.services.courses import COURSES
@@ -197,16 +197,18 @@ async def download_mp4_lecture(token: str, file: str) -> Any:
 @router.get(
     "/courses/{course_id}/next_unseen",
     dependencies=[require_verified_email, has_course_access],
-    responses=responses(Lecture, CourseNotFoundException, NoCourseAccessException),  # type: ignore
+    responses=responses(NextUnseenResponse, CourseNotFoundException, NoCourseAccessException),
 )
 async def next_unseen_lecture(course: Course = get_course, user: User = user_auth) -> Any:
     already_watched = await models.LectureProgress.get_completed(user_id=user.id, course_id=course.id)
     for section in course.sections:
         for lecture in section.lectures:
             if lecture.id not in already_watched:
-                return lecture
-    else:
-        return course.sections[0].lectures[0]
+                return NextUnseenResponse(section=section, lecture=lecture)
+
+    section = course.sections[0]
+    lecture = section.lectures[0]
+    return NextUnseenResponse(section=section, lecture=lecture)
 
 
 @router.put(
