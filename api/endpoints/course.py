@@ -1,10 +1,10 @@
 """Endpoints related to courses and lectures"""
 
+from pathlib import Path
 from secrets import token_urlsafe
 from typing import Any, Iterable
 
-from fastapi import APIRouter, Depends, Query
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, Depends, Header, Query, Response
 
 from api import models
 from api.auth import public_auth, require_verified_email, user_auth
@@ -186,12 +186,24 @@ async def get_mp4_lecture_link(course: Course = get_course, lecture: Lecture = g
 
 
 @router.get("/lectures/{token}/{file}", include_in_schema=False)
-async def download_mp4_lecture(token: str, file: str) -> Any:
+async def download_mp4_lecture(
+    token: str, file: str, range: str = Header("bytes=0-", regex=r"^bytes=\d{1,16}-(\d{1,16})?$")
+) -> Any:
     path = await redis.get(f"mp4_lecture:{token}:{file}")
     if not path:
         raise LectureNotFoundException
 
-    return FileResponse(path, media_type="video/mp4", filename=file)
+    path = Path(path)
+    _start, _end = range.removeprefix("bytes=").split("-")
+    start = int(_start)
+    end = max(start, int(_end) + 1) if _end else start + settings.stream_chunk_size
+    filesize = path.stat().st_size
+    end = min(end, filesize)
+    with open(path, "rb") as video:
+        video.seek(start)
+        data = video.read(end - start)
+        headers = {"Content-Range": f"bytes {start}-{end - 1}/{filesize}", "Accept-Ranges": "bytes"}
+        return Response(data, status_code=206, headers=headers, media_type="video/mp4")
 
 
 @router.get(
