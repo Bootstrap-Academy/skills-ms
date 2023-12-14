@@ -180,7 +180,7 @@ async def get_mp4_lecture_link(course: Course = get_course, lecture: Lecture = g
 
     token = token_urlsafe(64)
     name = f"{course.id}_{lecture.id}.mp4"
-    await redis.setex(f"mp4_lecture:{token}:{name}", 60, str(path))
+    await redis.setex(f"mp4_lecture:{token}:{name}", settings.stream_token_ttl, str(path))
 
     return f"{settings.public_base_url.rstrip('/')}/lectures/{token}/{name}"
 

@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     public_base_url: str = "http://localhost:8000"
     mp4_lectures: Path = Path("lectures")
     stream_chunk_size: int = 4 * 1024 * 1024  # bytes
+    stream_token_ttl: int = 8 * 60 * 60  # seconds
 
     internal_jwt_ttl: int = 10
 
