@@ -25,7 +25,7 @@ alembic = "^1.13.1"
 PyJWT = "^2.8.0"
 PyYAML = "^6.0.1"
 Jinja2 = "^3.1.2"
-aiosmtplib = "^1.1.7"
+aiosmtplib = "^3.0.1"
 email-validator = "^2.1.0"
 redis = "^5.0.1"
 
