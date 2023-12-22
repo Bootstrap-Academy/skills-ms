@@ -24,6 +24,8 @@ class Settings(BaseSettings):
 
     lecture_xp: int = 10
 
+    courses: Path = Path("config/courses")
+
     public_base_url: str = "http://localhost:8000"
     mp4_lectures: Path = Path("lectures")
     stream_chunk_size: int = 4 * 1024 * 1024  # bytes

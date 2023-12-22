@@ -32,6 +32,8 @@
         python = pkgs.python311;
         doCheck = false;
       };
+
+      courses = ./config/courses;
     });
 
     nixosModules.default = {
