@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pydantic
 from yaml import safe_load
 
@@ -13,7 +11,7 @@ logger = get_logger(__name__)
 
 def _load_courses() -> dict[str, Course]:
     courses = {}
-    for file in sorted(Path("config/courses").glob("*.yml")):
+    for file in sorted(settings.courses.glob("*.yml")):
         with file.open() as f:
             _id = file.name.removesuffix(".yml")
             logger.debug(f"loading course {_id}")
