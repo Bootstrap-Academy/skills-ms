@@ -350,16 +350,16 @@ sections:
         type: youtube
         video_id: "7Z0msgsQ5gQ"
         duration: 605
+  - id: section11
+    title: "Mathematik"
+    description:
+    lectures:
       - id: "MLrBA2pr4eg"
         title: "Mathematik Umgebungen"
         description:
         type: youtube
         video_id: "MLrBA2pr4eg"
         duration: 386
-  - id: section11
-    title: "Mathematik"
-    description:
-    lectures:
       - id: "9O13UFtK4ek"
         title: "griechische Buchstaben und Sonderzeichen"
         description:
