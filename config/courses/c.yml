@@ -51,7 +51,7 @@ sections:
         video_id: "a0S_1Yl4k2s"
         duration: 438
       - id: "pJ1g-mWXJoc"
-        title: "Logische Operatoren und mehr als eine if"
+        title: "Logische Operatoren und mehr als ein if"
         description:
         type: youtube
         video_id: "pJ1g-mWXJoc"
@@ -183,7 +183,7 @@ sections:
         video_id: "7D5nsUZiGEc"
         duration: 929
       - id: "xKX854l3How"
-        title: "Header Dateien"
+        title: "Header-Dateien"
         description:
         type: youtube
         video_id: "xKX854l3How"
