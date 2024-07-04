@@ -4,7 +4,9 @@ description: Wir nutzen alle das Internet, ob wir wollen oder nicht, doch dadurc
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/medienkompetenz.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

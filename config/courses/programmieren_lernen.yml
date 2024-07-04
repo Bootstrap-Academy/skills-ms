@@ -4,7 +4,9 @@ description: "Ihr lernt Java, Python, C++, .... wann ist endlich mal gut? Naja, 
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/progsprachen.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

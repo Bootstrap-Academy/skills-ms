@@ -4,7 +4,9 @@ description: "NMap ist das am meisten genutzte Tool, um Netzwerke zu scannen - w
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/nmap.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 3000
 learning_goals: []
 requirements: []

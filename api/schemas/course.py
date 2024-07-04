@@ -77,7 +77,7 @@ class BaseCourse(BaseModel):
     category: str | None = Field(description="Category of the course")
     language: str | None = Field(description="Language of the course")
     image: str | None = Field(description="Image URL of the course")
-    author: str | None = Field(description="Author of the course")
+    authors: list[dict[str, str]] = Field(description="Authors of the course")
     price: int = Field(min=0, description="Price of the course in morphcoins")
     learning_goals: list[str] = Field(description="Learning goals of the course")
     requirements: list[str] = Field(description="Requirements of the course")
@@ -90,7 +90,7 @@ class BaseCourse(BaseModel):
         category="Programming",
         language="en",
         image="https://example.com/image.png",
-        author="John Doe",
+        authors=[{"name": "John Doe", "url": "https://example.com"}],
         price=100,
         learning_goals=["Learn Python"],
         requirements=["Basic knowledge of programming"],

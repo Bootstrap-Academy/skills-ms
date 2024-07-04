@@ -4,7 +4,9 @@ description: "Ich weiß, ich weiß, testen ist so ein Ding, das will man nicht u
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/javascript.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

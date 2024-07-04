@@ -4,7 +4,9 @@ description: "Ihr versucht gerade eure Software zu definieren und malt einfach d
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/uml.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

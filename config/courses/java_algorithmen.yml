@@ -4,7 +4,9 @@ description: "Ihr könnt Java? Ein bisschen Übung kann nicht schaden, um eure K
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/java.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

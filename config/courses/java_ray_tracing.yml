@@ -4,7 +4,9 @@ description: "Habt ihr jemals gedacht, es wäre schon cool, selbst mal einen Ray
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/java.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

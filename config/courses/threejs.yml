@@ -4,7 +4,9 @@ description: "Wunderschöne 3D Animationen im Browser, vielleicht sogar 3D Spiel
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/threejs.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

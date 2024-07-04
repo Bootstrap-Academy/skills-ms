@@ -5,7 +5,9 @@ description: |
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/algorithmen.jpg
-author: 'Unleashed Design'
+authors:
+  - name: "Unleashed Design"
+    url: "https://www.youtube.com/@UnleashedDesign"
 price: 0
 learning_goals: []
 requirements: []

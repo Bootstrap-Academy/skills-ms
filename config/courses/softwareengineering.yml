@@ -4,7 +4,9 @@ description: "Softwareentwickeln ist - so leid es mir tut, das sagen zu müssen 
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/softwareengineering.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

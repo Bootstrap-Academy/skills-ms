@@ -4,7 +4,9 @@ description: "Ihr denkt, ihr könnt Java? Abwarten. Hier sind eingie Themen drin
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/java.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

@@ -4,7 +4,9 @@ description: "Ihr wollt graphische Oberflächen erstellen, um eure Kommandozeile
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/python.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

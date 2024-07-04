@@ -4,7 +4,9 @@ description: "Mit Python Biosignale auslesen - Stimme, Bilder aber auch EEG Wert
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/signalverarbeitung.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

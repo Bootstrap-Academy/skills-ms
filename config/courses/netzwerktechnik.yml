@@ -4,7 +4,9 @@ description: "In einer Welt, in der jeder mit jedem immer verbunden sein kann, b
 category:
 language: de
 image:
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []
