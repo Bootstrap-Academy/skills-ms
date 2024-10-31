@@ -121,6 +121,7 @@ async def create_root_skill(data: CreateRootSkill) -> Any:
     skill = models.RootSkill(
         id=data.id,
         name=data.name,
+        description=data.description,
         sub_skills=[],
         dependencies=cast(list[models.RootSkill], dependencies),
         row=data.row,
@@ -150,6 +151,9 @@ async def update_root_skill(*, skill: models.RootSkill = get_root_skill, data: U
 
     if data.name is not None and data.name != skill.name:
         skill.name = data.name
+
+    if data.description is not None and data.description != skill.description:
+        skill.description = data.description
 
     if data.dependencies is not None and data.dependencies != {dep.id for dep in skill.dependencies}:
         skills: dict[str, models.RootSkill] = {
@@ -244,6 +248,7 @@ async def create_sub_skill(*, root_skill: models.RootSkill = get_root_skill, dat
         id=data.id,
         parent_id=root_skill.id,
         name=data.name,
+        description=data.description,
         dependencies=cast(list[models.SubSkill], dependencies),
         courses=[models.SkillCourse(skill_id=data.id, course_id=course.id) for course in cast(list[Course], courses)],
         row=data.row,
@@ -271,6 +276,9 @@ async def update_sub_skill(*, skill: models.SubSkill = get_sub_skill, data: Upda
 
     if data.name is not None and data.name != skill.name:
         skill.name = data.name
+
+    if data.description is not None and data.description != skill.description:
+        skill.description = data.description
 
     if data.dependencies is not None and data.dependencies != {dep.id for dep in skill.dependencies}:
         skills: dict[str, models.RootSkill] = {

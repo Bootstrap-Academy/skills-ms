@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, relationship
 
 from api.database import Base
@@ -24,6 +24,7 @@ class RootSkill(Base):
 
     id: Mapped[str] = Column(String(256), primary_key=True, unique=True)
     name: Mapped[str] = Column(String(256))
+    description: Mapped[str | None] = Column(Text)
     row: Mapped[int] = Column(Integer)
     column: Mapped[int] = Column(Integer)
     sub_tree_rows: Mapped[int] = Column(Integer)
@@ -56,6 +57,7 @@ class RootSkill(Base):
         return {
             "id": self.id,
             "name": self.name,
+            "description": self.description,
             "dependencies": [dependency.id for dependency in self.dependencies],
             "dependents": [dependent.id for dependent in self.dependents],
             "skills": [sub_skill.id for sub_skill in self.sub_skills],

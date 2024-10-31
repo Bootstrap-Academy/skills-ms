@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Column, ForeignKey, Integer, String
+from sqlalchemy import Column, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import Mapped, relationship
 
 from api.database import Base
@@ -29,6 +29,7 @@ class SubSkill(Base):
     parent_id: Mapped[str] = Column(String(256), ForeignKey("skills_root_skill.id"))
     parent: RootSkill = relationship("RootSkill", back_populates="sub_skills", lazy="selectin")
     name: Mapped[str] = Column(String(256))
+    description: Mapped[str | None] = Column(Text)
     row: Mapped[int] = Column(Integer)
     column: Mapped[int] = Column(Integer)
     icon: Mapped[str | None] = Column(String(256), nullable=True)
@@ -61,6 +62,7 @@ class SubSkill(Base):
             id=self.id,
             parent_id=self.parent_id,
             name=self.name,
+            description=self.description,
             dependencies=[dependency.id for dependency in self.dependencies],
             dependents=[dependent.id for dependent in self.dependents],
             courses=[course.course_id for course in self.courses],
