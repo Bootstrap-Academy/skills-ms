@@ -4,7 +4,9 @@ description: "Ja, irgendwer muss diese ganzen digitalen Bücher auch layouten, i
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/latex.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 3000
 learning_goals: []
 requirements: []

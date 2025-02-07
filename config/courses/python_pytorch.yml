@@ -4,7 +4,9 @@ description: "Neuronale Netze programmieren in Python. Der Traum für KI. Wenn d
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/pytorch.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

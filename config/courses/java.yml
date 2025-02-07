@@ -4,7 +4,9 @@ description: "X Milliarden Geräte nutzen Java - und das hat einen Grund. Java k
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/java.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

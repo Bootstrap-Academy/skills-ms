@@ -4,7 +4,9 @@ description: "Data Science ist das eine, aber wie Daten gut dargestellt werden k
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/datenvisualisierung.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

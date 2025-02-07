@@ -4,7 +4,9 @@ description: "Websites sind mittlerweile überall und sind damit das Ding, was a
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/pentesting.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 1000
 learning_goals: []
 requirements: []

@@ -4,7 +4,9 @@ description: "Habt ihr jemals von logischer Programmierung gehört? Prolog verfo
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/prolog.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

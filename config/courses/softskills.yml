@@ -4,7 +4,11 @@ description: "Informatiker sitzen im Keller und reden nicht mit anderen? Da hast
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/softskills.jpg
-author: "The Morpheus Tutorials und Tom Klein"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
+  - name: "Tom Klein"
+    url: "https://www.tomklein.de/"
 price: 5000
 learning_goals: []
 requirements: []

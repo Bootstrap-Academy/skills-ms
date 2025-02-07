@@ -4,7 +4,9 @@ description: "Die Programmiersprache gilt wohl als das, was funktionale Programm
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/haskell.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

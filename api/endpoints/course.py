@@ -92,7 +92,11 @@ async def list_courses(
     if language:
         out = (course for course in out if course.language is not None and language.lower() in course.language.lower())
     if author:
-        out = (course for course in out if course.author is not None and author.lower() in course.author.lower())
+        out = [
+            course
+            for course in out
+            if course.authors is not None and any(author.lower() == a["name"].lower() for a in course.authors)
+        ]
     if free is not None:
         out = (course for course in out if course.free == free)
     if owned is not None:

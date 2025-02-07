@@ -4,7 +4,9 @@ description: "JavaScript - die Sprache ohne die kaum eine Website heutzutage noc
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/javascript.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

@@ -4,7 +4,9 @@ description: "Blockchain-Technologien haben einen fragwürdigen Ruf - manche lie
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/blockchain.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

@@ -4,7 +4,9 @@ description: "Alle sprechen von Data Science oder KI, die ja auch Daten nutzt. D
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/datamining.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 100
 learning_goals: []
 requirements: []

@@ -4,7 +4,9 @@ description: "Kann man Kotlin, kann man programmieren - und zwar wirklich fast a
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/kotlin.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []

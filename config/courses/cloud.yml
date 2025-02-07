@@ -4,7 +4,9 @@ description: "Die Cloud ist überall, so sagt man doch. Doch gerade wenn ihr sel
 category:
 language: de
 image: https://static.bootstrap.academy/thumbnails/cloud.jpg
-author: "The Morpheus Tutorials"
+authors:
+  - name: "The Morpheus Tutorials"
+    url: "https://www.youtube.com/@TheMorpheusTutorials"
 price: 0
 learning_goals: []
 requirements: []
