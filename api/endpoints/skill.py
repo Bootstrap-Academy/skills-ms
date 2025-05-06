@@ -15,9 +15,11 @@ from api.schemas.skill import (
     CreateRootSkill,
     CreateSubSkill,
     RootSkill,
-    SkillTree,
+    RootSkillResponse,
+    SkillTreeResponse,
     SubSkill,
-    SubSkillTree,
+    SubSkillResponse,
+    SubSkillTreeResponse,
     UpdateRootSkill,
     UpdateRootTree,
     UpdateSubSkill,
@@ -65,18 +67,35 @@ def get_skill_dependents(skill_id: str, skills: dict[str, models.RootSkill] | di
     return dependents
 
 
-@router.get("/skilltree", responses=responses(SkillTree))
-@redis_cached("skills")
-async def list_root_skills() -> Any:
+@router.get("/skilltree", responses=responses(SkillTreeResponse))
+@redis_cached("skills", "user")
+async def list_root_skills(user: User | None = public_auth) -> Any:
     """Return a list of all root skills."""
-
     settings = await models.TreeSettings.get()
 
-    return SkillTree(
-        skills=[skill.serialize async for skill in await db.stream(select(models.RootSkill))],
-        rows=settings.rows,
-        columns=settings.columns,
-    )
+    bookmarked_root_skill_ids = []
+    if user:
+        for bookmark in await db.all(filter_by(models.SubSkillBookmark, user_id=user.id)):
+            bookmarked_root_skill_ids.append(bookmark.root_skill_id)
+
+    skills: list[RootSkillResponse] = [
+        RootSkillResponse(
+            id=skill.id,
+            name=skill.name,
+            dependencies=[dep.id for dep in skill.dependencies],
+            dependents=[dep.id for dep in skill.dependents],
+            skills=[sub_skill.id for sub_skill in skill.sub_skills],
+            row=skill.row,
+            column=skill.column,
+            sub_tree_rows=skill.sub_tree_rows,
+            sub_tree_columns=skill.sub_tree_columns,
+            icon=skill.icon,
+            is_bookmarked=(skill.id in bookmarked_root_skill_ids) if user else None,
+        )
+        async for skill in aiter(await db.stream(select(models.RootSkill)))
+    ]
+
+    return SkillTreeResponse(skills=skills, rows=settings.rows, columns=settings.columns)
 
 
 @router.patch("/skilltree", dependencies=[admin_auth], responses=admin_responses(UpdateRootTree))
@@ -201,18 +220,35 @@ async def delete_root_skill(skill: models.RootSkill = get_root_skill) -> Any:
     return True
 
 
-@router.get("/skilltree/{root_skill_id}", responses=responses(SubSkillTree, SkillNotFoundException))
+@router.get("/skilltree/{root_skill_id}", responses=responses(SubSkillTreeResponse, SkillNotFoundException))
 @redis_cached("skills", "root_skill_id", "user")
 async def list_sub_skills(*, root_skill_id: str, user: User | None = public_auth) -> Any:
     """Return a list of all sub skills of a root skill."""
 
     root_skill: models.RootSkill = await get_root_skill.dependency(root_skill_id)
 
-    return SubSkillTree(
-        skills=[sub_skill.serialize for sub_skill in root_skill.sub_skills],
-        rows=root_skill.sub_tree_rows,
-        columns=root_skill.sub_tree_columns,
-    )
+    bookmarked_sub_skill_ids = []
+    if user:
+        for bookmark in await db.all(filter_by(models.SubSkillBookmark, user_id=user.id, root_skill_id=root_skill_id)):
+            bookmarked_sub_skill_ids.append(bookmark.sub_skill_id)
+
+    skills: list[SubSkillResponse] = [
+        SubSkillResponse(
+            id=sub_skill.id,
+            parent_id=sub_skill.parent_id,
+            name=sub_skill.name,
+            dependencies=[dep.id for dep in sub_skill.dependencies],
+            dependents=[dep.id for dep in sub_skill.dependents],
+            courses=[course.course_id for course in sub_skill.courses],
+            row=sub_skill.row,
+            column=sub_skill.column,
+            icon=sub_skill.icon,
+            is_bookmarked=(sub_skill.id in bookmarked_sub_skill_ids) if user else None,
+        )
+        for sub_skill in root_skill.sub_skills
+    ]
+
+    return SubSkillTreeResponse(skills=skills, rows=root_skill.sub_tree_rows, columns=root_skill.sub_tree_columns)
 
 
 @router.post(

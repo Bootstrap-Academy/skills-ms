@@ -2,7 +2,7 @@ from typing import Any
 
 from fastapi import APIRouter
 
-from . import course, skill, xp
+from . import bookmarks, course, skill, xp
 from .internal import INTERNAL_ROUTERS
 from ..auth import internal_auth
 
@@ -10,7 +10,7 @@ from ..auth import internal_auth
 ROUTER = APIRouter()
 TAGS: list[dict[str, Any]] = []
 
-for module in [skill, course, xp]:
+for module in [skill, bookmarks, course, xp]:
     name = module.__name__.split(".")[-1]
     router = APIRouter(tags=[name])
     router.include_router(module.router)

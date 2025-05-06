@@ -1,3 +1,4 @@
+from .bookmarks import SubSkillBookmark
 from .course_access import CourseAccess
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
@@ -18,4 +19,5 @@ __all__ = [
     "SubSkillDependency",
     "TreeSettings",
     "XP",
+    "SubSkillBookmark",
 ]
