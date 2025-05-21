@@ -1,6 +1,6 @@
 """Endpoints related to the skilltree"""
 
-from typing import Any, cast
+from typing import Any, Iterable, cast
 
 from fastapi import APIRouter, Depends
 
@@ -11,6 +11,7 @@ from api.exceptions.auth import admin_responses
 from api.exceptions.course import CourseNotFoundException
 from api.exceptions.skill import CycleInSkillTreeException, SkillAlreadyExistsException, SkillNotFoundException
 from api.schemas.course import Course
+from api.schemas.search import SearchResults
 from api.schemas.skill import (
     CreateRootSkill,
     CreateSubSkill,
@@ -249,6 +250,38 @@ async def list_sub_skills(*, root_skill_id: str, user: User | None = public_auth
     ]
 
     return SubSkillTreeResponse(skills=skills, rows=root_skill.sub_tree_rows, columns=root_skill.sub_tree_columns)
+
+
+@router.get("/search", responses=responses(SearchResults))
+@redis_cached("skills", "search_term")
+async def search_sub_skill(*, search_term: str) -> Any:
+    """Search for sub skills, root skills, and courses."""
+    search_term = search_term.strip().lower()
+
+    sub_skills = [
+        sub_skill.serialize
+        async for sub_skill in await db.stream(
+            select(models.SubSkill).where(models.SubSkill.name.ilike(f"%{search_term}%"))
+        )
+    ]
+
+    root_skills = [
+        root_skill.serialize
+        async for root_skill in await db.stream(
+            select(models.RootSkill).where(models.RootSkill.name.ilike(f"%{search_term}%"))
+        )
+    ]
+
+    out: Iterable[Course] = (course for course in iter(COURSES.values()) if search_term in course.title.lower())
+
+    completed_lectures: dict[str, set[str]] | None = None
+
+    courses = [
+        course.summary(None if completed_lectures is None else completed_lectures.get(course.id, set()))
+        for course in out
+    ]
+
+    return SearchResults(root_skills=root_skills, sub_skills=sub_skills, courses=courses)
 
 
 @router.post(
