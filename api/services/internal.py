@@ -18,6 +18,7 @@ class InternalServiceError(Exception):
 class InternalService(Enum):
     AUTH = settings.auth_url
     SHOP = settings.shop_url
+    CHALLENGES = settings.challenges_url
 
     def _get_token(self) -> str:
         return encode_jwt({"aud": self.name.lower()}, timedelta(seconds=settings.internal_jwt_ttl))
@@ -33,5 +34,12 @@ class InternalService(Enum):
         return AsyncClient(
             base_url=self.value.rstrip("/") + "/_internal",
             headers={"Authorization": self._get_token()},
+            event_hooks={"response": [self._handle_error]},
+        )
+
+    def client_external(self, auth_token: str) -> AsyncClient:
+        return AsyncClient(
+            base_url=self.value,
+            headers={"Authorization": f"Bearer {auth_token}"},
             event_hooks={"response": [self._handle_error]},
         )

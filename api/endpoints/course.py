@@ -4,10 +4,10 @@ from pathlib import Path
 from secrets import token_urlsafe
 from typing import Any, Iterable
 
-from fastapi import APIRouter, Depends, Header, Query, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from api import models
-from api.auth import public_auth, require_verified_email, user_auth
+from api.auth import get_token, public_auth, require_verified_email, user_auth
 from api.database import db, filter_by
 from api.exceptions.auth import user_responses, verified_responses
 from api.exceptions.course import (
@@ -19,10 +19,13 @@ from api.exceptions.course import (
     NoCourseAccessException,
     NotEnoughCoinsError,
 )
+from api.exceptions.view_time import DataFetchError
 from api.redis import redis
 from api.schemas.course import Course, CourseSummary, Lecture, NextUnseenResponse, UserCourse
 from api.schemas.user import User
+from api.schemas.view_time import TotalTime, ViewTime, ViewTimeLecture, ViewTimeSection, ViewTimeSubSkill
 from api.services.auth import get_email
+from api.services.challenges import challenge_subtasks
 from api.services.courses import COURSES
 from api.services.shop import has_premium, spend_coins
 from api.settings import settings
@@ -305,3 +308,88 @@ async def buy_course(user: User = user_auth, course: Course = get_course) -> Any
     await clear_cache("course_access")
 
     return True
+
+
+@router.get("/courses_viewtime", responses=responses(ViewTime))
+async def get_course_viewtime(user: User = user_auth) -> Any:
+    """
+    Return the total viewtime of all courses.
+
+    *Requirements:* **VERIFIED**
+    """
+
+    completed_lectures: dict[str, set[str]] = {}
+
+    async for lecture in await db.stream(filter_by(models.LectureProgress, user_id=user.id)):
+        completed_lectures.setdefault(lecture.course_id, set()).add(lecture.lecture_id)
+
+    lecture_data = [
+        course.summary(None if completed_lectures is None else completed_lectures.get(course.id, set()))
+        for course in iter(COURSES.values())
+    ]
+
+    sub_skill_reponses = []
+
+    for sub_skill in lecture_data:
+        total_time = 0
+        sections = []
+
+        for section in sub_skill.sections:
+            section_time = 0
+            lectures = []
+
+            for lecture in section.lectures:
+                if lecture.duration > 0 and lecture.completed:
+                    lectures.append(ViewTimeLecture(lecture_name=lecture.title, time=lecture.duration))
+                    section_time += lecture.duration
+
+            if section_time > 0:
+                sections.append(ViewTimeSection(section_name=section.title, total_time=section_time, lectures=lectures))
+                total_time += section_time
+
+        if total_time > 0:
+            sub_skill_reponses.append(
+                ViewTimeSubSkill(
+                    sub_skill_id=sub_skill.id, sub_skill_name=sub_skill.title, total_time=total_time, sections=sections
+                )
+            )
+
+    return ViewTime(
+        total_time=sum([sub_skill.total_time for sub_skill in sub_skill_reponses]), sub_skills=sub_skill_reponses
+    )
+
+
+@router.get("/tasks_viewtime", responses=responses(TotalTime, DataFetchError))
+async def get_tasks_viewtime(request: Request, user: User = user_auth) -> Any:
+    """
+    Return the total viewtime of all tasks.
+
+    *Requirements:* **VERIFIED**
+    """
+    tasks_data = await challenge_subtasks(auth_token=get_token(request), solved=True)
+
+    if not isinstance(tasks_data, list):
+        return DataFetchError()
+
+    total_time = 0
+    for task in tasks_data:
+        task_type = task.type
+        if task_type == "MULTIPLE_CHOICE_QUESTION" or task_type == "MATCHING":
+            total_time += 60
+        elif task_type == "CODING_CHALLENGE":
+            total_time += 60 * 30
+
+    return TotalTime(total_time=total_time)
+
+
+@router.get("/viewtime", responses=responses(TotalTime))
+async def get_viewtime(request: Request, user: User = user_auth) -> Any:
+    """
+    Return the total viewtime of all tasks.
+
+    *Requirements:* **VERIFIED**
+    """
+    get_course_viewtime_response = await get_course_viewtime(user)
+    get_tasks_viewtime_response = await get_tasks_viewtime(request, user)
+
+    return TotalTime(total_time=get_course_viewtime_response.total_time + get_tasks_viewtime_response.total_time)

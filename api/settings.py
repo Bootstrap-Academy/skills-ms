@@ -21,6 +21,7 @@ class Settings(BaseSettings):
 
     auth_url: str = ""
     shop_url: str = ""
+    challenges_url: str = "https://localhost:8005"  # TODO: change to real URL
 
     lecture_xp: int = 10
 
