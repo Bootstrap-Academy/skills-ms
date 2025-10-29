@@ -1,6 +1,8 @@
 import argparse
 import hashlib
 import re
+import uuid
+from datetime import timedelta
 from graphlib import TopologicalSorter
 from pathlib import Path
 
@@ -12,6 +14,8 @@ from rich import print
 
 from api.logger import get_logger
 from api.services.courses import COURSES
+from api.settings import settings
+from api.utils.jwt import encode_jwt
 
 
 logger = get_logger(__name__)
@@ -35,10 +39,10 @@ class RootSkillDescription(BaseModel):
 
 def _load_skills(path: Path) -> dict[str, RootSkillDescription]:
     skills = {}
-    for file in path.glob("*.yml"):
+    for file in sorted(path.glob("*.yml")):
         name = file.name.removesuffix(".yml")
         logger.debug(f"loading root skill {name} from {file}")
-        with file.open() as f:
+        with file.open(encoding="utf-8") as f:
             skills[name] = pydantic.parse_obj_as(RootSkillDescription, yaml.safe_load(f))
     return skills
 
@@ -93,6 +97,95 @@ def _get_position(name: str) -> dict[str, int]:
     return {"row": row, "column": col}
 
 
+def _normalize_host(host: str) -> str:
+    return host.rstrip("/")
+
+
+def _ensure_bearer(token: str) -> str:
+    token = token.strip()
+    if not token:
+        raise ValueError("Token must not be empty when authentication is required.")
+    if token.lower().startswith("bearer "):
+        return token
+    return f"Bearer {token}"
+
+
+def _read_token_from_file(token_file: Path | None) -> str:
+    if token_file is None:
+        return ""
+    if not token_file.is_file():
+        raise FileNotFoundError(f"Token file {token_file} does not exist.")
+    return token_file.read_text(encoding="utf-8").strip()
+
+
+def _generate_admin_token(admin_id: str, ttl_seconds: int) -> str:
+    payload = {
+        "uid": admin_id,
+        "rt": f"sync-skills:{uuid.uuid4().hex}",
+        "data": {"admin": True, "email_verified": True},
+    }
+    return encode_jwt(payload, timedelta(seconds=ttl_seconds))
+
+
+def _resolve_token(
+    token: str, token_file: Path | None, *, admin_id: str, ttl_seconds: int, no_auth: bool
+) -> str | None:
+    if no_auth:
+        logger.debug("Skipping authentication as requested via --no-auth.")
+        return None
+
+    if ttl_seconds <= 0:
+        raise ValueError("--token-ttl must be greater than zero seconds.")
+
+    if token:
+        return _ensure_bearer(token)
+
+    file_token = _read_token_from_file(token_file)
+    if file_token:
+        logger.debug("Using token read from %s.", token_file)
+        return _ensure_bearer(file_token)
+
+    generated = _generate_admin_token(admin_id, ttl_seconds)
+    logger.debug("Generated short-lived admin token for %s (ttl=%s seconds).", admin_id, ttl_seconds)
+    return _ensure_bearer(generated)
+
+
+def _export_remote_skills(path: Path, client: Client, *, overwrite: bool) -> None:
+    path = path.resolve()
+    path.mkdir(parents=True, exist_ok=True)
+
+    response = client.get("/skilltree")
+    response.raise_for_status()
+    payload = response.json()
+    remote_skills = payload.get("skills", [])
+
+    for skill in sorted(remote_skills, key=lambda item: item["id"]):
+        detail_response = client.get(f"/skilltree/{skill['id']}")
+        detail_response.raise_for_status()
+        sub_tree = detail_response.json().get("skills", [])
+
+        root_description = RootSkillDescription(
+            name=skill["name"],
+            dependencies=list(skill.get("dependencies", [])),
+            skills={
+                sub["id"]: SubSkillDescription(
+                    name=sub["name"],
+                    dependencies=list(sub.get("dependencies", [])),
+                    courses=list(sub.get("courses", [])),
+                )
+                for sub in sorted(sub_tree, key=lambda item: item["id"])
+            },
+        )
+
+        destination_file = path / f"{skill['id']}.yml"
+        if destination_file.exists() and not overwrite:
+            raise FileExistsError(f"{destination_file} already exists. Pass --overwrite to replace existing files.")
+
+        with destination_file.open("w", encoding="utf-8") as file_handle:
+            yaml.safe_dump(root_description.dict(), file_handle, sort_keys=False, allow_unicode=True)
+        logger.info("Exported %s to %s", skill["id"], destination_file)
+
+
 def main(
     path: Path,
     *,
@@ -101,17 +194,50 @@ def main(
     update_positions: bool = False,
     host: str = "",
     token: str = "",
+    token_file: Path | None = None,
+    admin_id: str = "sync-skills-cli",
+    token_ttl: int = 600,
+    no_auth: bool = False,
+    pull: bool = False,
+    overwrite: bool = False,
 ):
+    if pull:
+        resolved_host = _normalize_host(host or settings.public_base_url)
+        if not resolved_host:
+            raise ValueError("A host must be provided when using --pull.")
+        if "://" not in resolved_host:
+            raise ValueError(f"Host '{resolved_host}' must include a scheme such as http:// or https://.")
+
+        token_header = _resolve_token(token, token_file, admin_id=admin_id, ttl_seconds=token_ttl, no_auth=no_auth)
+        headers = {"Authorization": token_header} if token_header else None
+
+        with Client(base_url=resolved_host, headers=headers) as client:
+            _export_remote_skills(path, client, overwrite=overwrite)
+
+        return
+
+    if not path.is_dir():
+        raise NotADirectoryError(f"Path {path} must be a directory containing skill YAML files.")
+
     skills = _load_skills(path)
     _check_skills_definitions(skills)
     _check_skill_dependencies(skills)
     _check_skill_courses(skills, set(COURSES))
     print(skills)
 
-    if _list or not host or not token:
+    if _list:
         return
 
-    with Client(base_url=host, headers={"Authorization": token}) as client:
+    resolved_host = _normalize_host(host or settings.public_base_url)
+    if not resolved_host:
+        raise ValueError("Unable to determine host. Pass --host explicitly or configure PUBLIC_BASE_URL.")
+    if "://" not in resolved_host:
+        raise ValueError(f"Host '{resolved_host}' must include a scheme such as http:// or https://.")
+
+    token_header = _resolve_token(token, token_file, admin_id=admin_id, ttl_seconds=token_ttl, no_auth=no_auth)
+    headers = {"Authorization": token_header} if token_header else None
+
+    with Client(base_url=resolved_host, headers=headers) as client:
         response = client.get("/skilltree")
         response.raise_for_status()
         remote_skills = {skill["id"]: skill for skill in response.json()["skills"]}
@@ -223,8 +349,45 @@ if __name__ == "__main__":
     parser.add_argument("--list", action="store_true", help="list all skills without syncing")
     parser.add_argument("--dry", action="store_true", help="dry run")
     parser.add_argument("--update-positions", action="store_true", help="update positions")
-    parser.add_argument("--host", metavar="host", type=str, help="Host of the backend")
-    parser.add_argument("--token", metavar="token", type=str, help="Token for the backend")
+    parser.add_argument(
+        "--host",
+        metavar="host",
+        type=str,
+        default=settings.public_base_url,
+        help="Host of the skills backend (defaults to PUBLIC_BASE_URL from settings).",
+    )
+    parser.add_argument("--token", metavar="token", type=str, help="JWT token to use for authentication.")
+    parser.add_argument(
+        "--token-file",
+        metavar="token-file",
+        type=Path,
+        help="Read the JWT token from the given file (ignored when --token is provided).",
+    )
+    parser.add_argument(
+        "--admin-id",
+        metavar="admin-id",
+        type=str,
+        default="sync-skills-cli",
+        help="User ID used when generating a short-lived admin token.",
+    )
+    parser.add_argument(
+        "--token-ttl",
+        metavar="seconds",
+        type=int,
+        default=600,
+        help="Lifetime in seconds for generated admin tokens (default: 600).",
+    )
+    parser.add_argument(
+        "--no-auth",
+        action="store_true",
+        help="Do not send an Authorization header (useful for unsecured or test instances).",
+    )
+    parser.add_argument(
+        "--pull",
+        action="store_true",
+        help="Fetch skills from the remote host and write YAML files instead of pushing local changes.",
+    )
+    parser.add_argument("--overwrite", action="store_true", help="Allow overwriting existing files when using --pull.")
     parser.add_argument("path", metavar="path", type=Path, help="Path to the yaml files")
     args = parser.parse_args()
     main(
@@ -234,4 +397,10 @@ if __name__ == "__main__":
         update_positions=args.update_positions,
         host=args.host,
         token=args.token,
+        token_file=args.token_file,
+        admin_id=args.admin_id,
+        token_ttl=args.token_ttl,
+        no_auth=args.no_auth,
+        pull=args.pull,
+        overwrite=args.overwrite,
     )

@@ -57,8 +57,34 @@ poe migrate         # run database migrations
 poe env             # show settings from .env file
 poe jwt             # generate a jwt with the given payload and ttl in seconds
 poe check           # check course definitions
-poe sync_skills     # push local skills to backend (deprecated)
+poe sync_skills     # sync local YAML skills with a running skills service
 ```
+
+## Skill Synchronization
+
+The `poe sync_skills` helper wraps `python scripts/sync_skills.py` and can both push local YAML files to a running skills
+service and export the live tree to disk. The script automatically creates a short-lived admin JWT using the local
+`JWT_SECRET`, so no manual token handling is needed for the standard development stack.
+
+- Push local definitions (default host comes from `PUBLIC_BASE_URL` in `.env`):
+  ```bash
+  poe sync_skills -- config/skills
+  ```
+- Target another host:
+  ```bash
+  poe sync_skills -- --host http://localhost:8001 config/skills
+  ```
+- Re-use an existing JWT:
+  ```bash
+  poe sync_skills -- --token "Bearer <token>" config/skills
+  ```
+- Export the live skill tree into YAML files (pass `--overwrite` to replace existing files):
+  ```bash
+  poe sync_skills -- --pull --overwrite config/skills
+  ```
+
+Pass `--help` to view the full list of options, including `--token-file`, `--token-ttl`, and `--no-auth` for unsecured test
+instances.
 
 ## PyCharm configuration
 Configure the Python interpreter:
