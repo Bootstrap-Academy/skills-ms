@@ -128,12 +128,7 @@ def _generate_admin_token(admin_id: str, ttl_seconds: int) -> str:
 
 
 def _resolve_token(
-    token: str,
-    token_file: Path | None,
-    *,
-    admin_id: str,
-    ttl_seconds: int,
-    no_auth: bool,
+    token: str, token_file: Path | None, *, admin_id: str, ttl_seconds: int, no_auth: bool
 ) -> str | None:
     if no_auth:
         logger.debug("Skipping authentication as requested via --no-auth.")
@@ -184,17 +179,10 @@ def _export_remote_skills(path: Path, client: Client, *, overwrite: bool) -> Non
 
         destination_file = path / f"{skill['id']}.yml"
         if destination_file.exists() and not overwrite:
-            raise FileExistsError(
-                f"{destination_file} already exists. Pass --overwrite to replace existing files."
-            )
+            raise FileExistsError(f"{destination_file} already exists. Pass --overwrite to replace existing files.")
 
         with destination_file.open("w", encoding="utf-8") as file_handle:
-            yaml.safe_dump(
-                root_description.dict(),
-                file_handle,
-                sort_keys=False,
-                allow_unicode=True,
-            )
+            yaml.safe_dump(root_description.dict(), file_handle, sort_keys=False, allow_unicode=True)
         logger.info("Exported %s to %s", skill["id"], destination_file)
 
 
@@ -399,11 +387,7 @@ if __name__ == "__main__":
         action="store_true",
         help="Fetch skills from the remote host and write YAML files instead of pushing local changes.",
     )
-    parser.add_argument(
-        "--overwrite",
-        action="store_true",
-        help="Allow overwriting existing files when using --pull.",
-    )
+    parser.add_argument("--overwrite", action="store_true", help="Allow overwriting existing files when using --pull.")
     parser.add_argument("path", metavar="path", type=Path, help="Path to the yaml files")
     args = parser.parse_args()
     main(
