@@ -56,5 +56,9 @@ class Settings(BaseSettings):
     sentry_dsn: str | None = None
     sentry_environment: str = "test"
 
+    class Config:
+        env_file = ".env"
+        env_file_encoding = "utf-8"
+
 
 settings = Settings()  # type: ignore
