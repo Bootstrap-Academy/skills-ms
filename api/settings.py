@@ -45,6 +45,10 @@ class Settings(BaseSettings):
         "mysql+aiomysql://fastapi:fastapi@mariadb:3306/fastapi",
         regex=r"^(mysql\+aiomysql|postgresql\+asyncpg|sqlite\+aiosqlite)://.*$",
     )
+    challenges_database_url: str | None = Field(
+        None,
+        regex=r"^(mysql\+aiomysql|postgresql\+asyncpg|sqlite\+aiosqlite)://.*$",
+    )
     pool_recycle: int = 300
     pool_size: int = 20
     max_overflow: int = 20

@@ -189,3 +189,70 @@ class UserCourse(Course):
 class NextUnseenResponse(BaseModel):
     lecture: Lecture
     section: Section
+
+
+class CourseReference(BaseModel):
+    id: str = Field(description="ID of the course")
+    title: str = Field(description="Title of the course")
+    image: str | None = Field(description="Image URL of the course")
+
+    Config = example(id="python", title="Python", image="https://example.com/image.png")
+
+
+class SectionReference(BaseModel):
+    id: str = Field(description="ID of the section")
+    title: str = Field(description="Title of the section")
+
+    Config = example(id="intro", title="Introduction")
+
+
+class TaskPointer(BaseModel):
+    id: str = Field(description="ID of the task")
+    subtask_id: str = Field(description="ID of the subtask")
+    subtask_type: str = Field(description="Type of the subtask")
+
+    Config = example(
+        id="7e8a9455-1847-40f2-9b86-ccb03e887d6c",
+        subtask_id="c4ac38ee-53f8-4880-b170-807062bdac16",
+        subtask_type="multiple_choice_question",
+    )
+
+
+class NextLectureRecommendation(BaseModel):
+    course: CourseReference
+    section: SectionReference
+    lecture: Lecture
+
+    Config = example(
+        course=get_example(CourseReference),
+        section=get_example(SectionReference),
+        lecture=get_example(YoutubeLecture),
+    )
+
+
+class NextTaskRecommendation(BaseModel):
+    course: CourseReference
+    section: SectionReference
+    lecture: Lecture
+    task: TaskPointer
+
+    Config = example(
+        course=get_example(CourseReference),
+        section=get_example(SectionReference),
+        lecture=get_example(YoutubeLecture),
+        task=get_example(TaskPointer),
+    )
+
+
+class NextLabRecommendation(BaseModel):
+    course: CourseReference
+    section: SectionReference
+    lecture: Lecture
+    task: TaskPointer
+
+    Config = example(
+        course=get_example(CourseReference),
+        section=get_example(SectionReference),
+        lecture=get_example(YoutubeLecture),
+        task={**get_example(TaskPointer), "subtask_type": "coding_challenge"},
+    )

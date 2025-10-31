@@ -19,13 +19,34 @@ from api.exceptions.course import (
     CourseIsFreeException,
     CourseNotFoundException,
     LectureNotFoundException,
+    NextLabNotFoundException,
+    NextLectureNotFoundException,
+    NextTaskNotFoundException,
     NoCourseAccessException,
     NotEnoughCoinsError,
 )
 from api.redis import redis
-from api.schemas.course import Course, CourseSummary, Lecture, NextUnseenResponse, UserCourse
+from api.schemas.course import (
+    Course,
+    CourseReference,
+    CourseSummary,
+    Lecture,
+    NextLabRecommendation,
+    NextLectureRecommendation,
+    NextTaskRecommendation,
+    NextUnseenResponse,
+    Section,
+    SectionReference,
+    TaskPointer,
+    UserCourse,
+)
 from api.schemas.user import User
 from api.services.auth import get_email
+from api.services.challenges import (
+    SubtaskRecommendation,
+    get_unsolved_labs_for_lecture,
+    get_unsolved_quizzes_for_lecture,
+)
 from api.services.courses import COURSES
 from api.services.shop import has_premium, spend_coins
 from api.settings import settings
@@ -135,6 +156,194 @@ async def _resolve_next_course(user_id: str) -> tuple[Course, set[str]] | None:
     return choice(candidates)
 
 
+async def _resolve_course_for_recommendations(user_id: str) -> tuple[Course, set[str]] | None:
+    """Return the course context used for lecture/task recommendations."""
+
+    if current := await _resolve_current_course(user_id):
+        return current
+    if next_course := await _resolve_next_course(user_id):
+        return next_course
+
+    # Fallback: return the most recently progressed course even if fully completed.
+    progress = await _collect_course_progress(user_id)
+    candidate: tuple[Course, set[str], datetime] | None = None
+    for course_id, course_progress in progress.items():
+        course = COURSES.get(course_id)
+        if course is None:
+            continue
+        latest = _normalize_timestamp(course_progress.latest_completed_at)
+        if candidate is None or latest > candidate[2]:
+            candidate = (course, course_progress.completed_lectures, latest)
+
+    if candidate:
+        course, completed, _ = candidate
+        return course, completed
+
+    return None
+
+
+def _course_reference(course: Course) -> CourseReference:
+    return CourseReference(id=course.id, title=course.title, image=course.image)
+
+
+def _section_reference(section: Section) -> SectionReference:
+    return SectionReference(id=section.id, title=section.title)
+
+
+def _iter_course_lectures(course: Course) -> list[tuple[Section, Lecture]]:
+    return [(section, lecture) for section in course.sections for lecture in section.lectures]
+
+
+def _find_next_unseen_lecture(course: Course, completed: set[str]) -> tuple[Section, Lecture] | None:
+    for section, lecture in _iter_course_lectures(course):
+        if lecture.id not in completed:
+            return section, lecture
+    return None
+
+
+async def _get_completed_lecture_ids(user_id: str, course_id: str) -> list[str]:
+    records = [
+        record
+        async for record in await db.stream(filter_by(models.LectureProgress, user_id=user_id, course_id=course_id))
+    ]
+    records.sort(key=lambda record: _normalize_timestamp(record.completed), reverse=True)
+    return [record.lecture_id for record in records]
+
+
+def _build_task_recommendation(
+    course: Course,
+    section: Section,
+    lecture: Lecture,
+    subtask: SubtaskRecommendation,
+) -> NextTaskRecommendation:
+    return NextTaskRecommendation(
+        course=_course_reference(course),
+        section=_section_reference(section),
+        lecture=lecture,
+        task=TaskPointer(
+            id=subtask.task_id,
+            subtask_id=subtask.subtask_id,
+            subtask_type=subtask.subtask_type,
+        ),
+    )
+
+
+def _build_lab_recommendation(
+    course: Course,
+    section: Section,
+    lecture: Lecture,
+    subtask: SubtaskRecommendation,
+) -> NextLabRecommendation:
+    return NextLabRecommendation(
+        course=_course_reference(course),
+        section=_section_reference(section),
+        lecture=lecture,
+        task=TaskPointer(
+            id=subtask.task_id,
+            subtask_id=subtask.subtask_id,
+            subtask_type=subtask.subtask_type,
+        ),
+    )
+
+
+async def _resolve_next_lecture_recommendation(user_id: str) -> NextLectureRecommendation | None:
+    context = await _resolve_course_for_recommendations(user_id)
+    if context is None:
+        return None
+
+    course, completed = context
+    next_pair = _find_next_unseen_lecture(course, completed)
+    if next_pair is None:
+        return None
+
+    section, lecture = next_pair
+    return NextLectureRecommendation(
+        course=_course_reference(course),
+        section=_section_reference(section),
+        lecture=lecture,
+    )
+
+
+async def _resolve_next_task_recommendation(user_id: str) -> NextTaskRecommendation | None:
+    context = await _resolve_course_for_recommendations(user_id)
+    if context is None:
+        return None
+
+    course, completed = context
+    lecture_lookup: dict[str, tuple[Section, Lecture]] = {
+        lecture.id: (section, lecture) for section, lecture in _iter_course_lectures(course)
+    }
+
+    for lecture_id in await _get_completed_lecture_ids(user_id, course.id):
+        section_lecture = lecture_lookup.get(lecture_id)
+        if section_lecture is None:
+            continue
+
+        section, lecture = section_lecture
+        quizzes = await get_unsolved_quizzes_for_lecture(
+            user_id=user_id,
+            course_id=course.id,
+            lecture_id=lecture_id,
+        )
+        if quizzes:
+            return _build_task_recommendation(course, section, lecture, quizzes[0])
+
+    next_pair = _find_next_unseen_lecture(course, completed)
+    if next_pair is None:
+        return None
+
+    section, lecture = next_pair
+    quizzes = await get_unsolved_quizzes_for_lecture(
+        user_id=user_id,
+        course_id=course.id,
+        lecture_id=lecture.id,
+    )
+    if not quizzes:
+        return None
+
+    return _build_task_recommendation(course, section, lecture, quizzes[0])
+
+
+async def _resolve_next_lab_recommendation(user_id: str) -> NextLabRecommendation | None:
+    context = await _resolve_course_for_recommendations(user_id)
+    if context is None:
+        return None
+
+    course, completed = context
+    lecture_lookup: dict[str, tuple[Section, Lecture]] = {
+        lecture.id: (section, lecture) for section, lecture in _iter_course_lectures(course)
+    }
+
+    for lecture_id in await _get_completed_lecture_ids(user_id, course.id):
+        section_lecture = lecture_lookup.get(lecture_id)
+        if section_lecture is None:
+            continue
+
+        section, lecture = section_lecture
+        labs = await get_unsolved_labs_for_lecture(
+            user_id=user_id,
+            course_id=course.id,
+            lecture_id=lecture_id,
+        )
+        if labs:
+            return _build_lab_recommendation(course, section, lecture, labs[0])
+
+    next_pair = _find_next_unseen_lecture(course, completed)
+    if next_pair is None:
+        return None
+
+    section, lecture = next_pair
+    labs = await get_unsolved_labs_for_lecture(
+        user_id=user_id,
+        course_id=course.id,
+        lecture_id=lecture.id,
+    )
+    if not labs:
+        return None
+
+    return _build_lab_recommendation(course, section, lecture, labs[0])
+
+
 @Depends
 async def get_course(course_id: str) -> Course:
     if course_id not in COURSES:
@@ -207,6 +416,48 @@ async def get_next_course(user: User = user_auth) -> Any:
         raise CourseNotFoundException
     course_obj, completed = course
     return course_obj.summary(completed)
+
+
+@router.get(
+    "/courses/next/lecture",
+    dependencies=[require_verified_email],
+    responses=verified_responses(NextLectureRecommendation, NextLectureNotFoundException),
+)
+async def get_next_lecture(user: User = user_auth) -> Any:
+    """Return the next lecture recommendation for the user."""
+
+    recommendation = await _resolve_next_lecture_recommendation(user.id)
+    if recommendation is None:
+        raise NextLectureNotFoundException
+    return recommendation
+
+
+@router.get(
+    "/courses/next/task",
+    dependencies=[require_verified_email],
+    responses=verified_responses(NextTaskRecommendation, NextTaskNotFoundException),
+)
+async def get_next_task(user: User = user_auth) -> Any:
+    """Return the next unsolved quiz recommendation for the user."""
+
+    recommendation = await _resolve_next_task_recommendation(user.id)
+    if recommendation is None:
+        raise NextTaskNotFoundException
+    return recommendation
+
+
+@router.get(
+    "/courses/next/lab",
+    dependencies=[require_verified_email],
+    responses=verified_responses(NextLabRecommendation, NextLabNotFoundException),
+)
+async def get_next_lab(user: User = user_auth) -> Any:
+    """Return the next unsolved lab (coding/hacking) recommendation for the user."""
+
+    recommendation = await _resolve_next_lab_recommendation(user.id)
+    if recommendation is None:
+        raise NextLabNotFoundException
+    return recommendation
 
 
 @router.get("/courses", responses=responses(list[CourseSummary]))
