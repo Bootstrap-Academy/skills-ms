@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from random import choice
 from secrets import token_urlsafe
 from typing import Any, Iterable
 
@@ -84,9 +83,7 @@ async def _collect_course_progress(user_id: str) -> dict[str, CourseProgress]:
     async for lecture in await db.stream(filter_by(models.LectureProgress, user_id=user_id)):
         entry = progress.setdefault(lecture.course_id, CourseProgress(completed_lectures=set()))
         entry.completed_lectures.add(lecture.lecture_id)
-        if lecture.completed and (
-            entry.latest_completed_at is None or lecture.completed > entry.latest_completed_at
-        ):
+        if lecture.completed and (entry.latest_completed_at is None or lecture.completed > entry.latest_completed_at):
             entry.latest_completed_at = lecture.completed
 
     async for last_watch in await db.stream(filter_by(models.LastWatch, user_id=user_id)):
@@ -153,7 +150,7 @@ async def _resolve_next_course(user_id: str) -> tuple[Course, set[str]] | None:
     if not candidates:
         return None
 
-    return choice(candidates)
+    return candidates[0]
 
 
 async def _resolve_course_for_recommendations(user_id: str) -> tuple[Course, set[str]] | None:
@@ -211,38 +208,24 @@ async def _get_completed_lecture_ids(user_id: str, course_id: str) -> list[str]:
 
 
 def _build_task_recommendation(
-    course: Course,
-    section: Section,
-    lecture: Lecture,
-    subtask: SubtaskRecommendation,
+    course: Course, section: Section, lecture: Lecture, subtask: SubtaskRecommendation
 ) -> NextTaskRecommendation:
     return NextTaskRecommendation(
         course=_course_reference(course),
         section=_section_reference(section),
         lecture=lecture,
-        task=TaskPointer(
-            id=subtask.task_id,
-            subtask_id=subtask.subtask_id,
-            subtask_type=subtask.subtask_type,
-        ),
+        task=TaskPointer(id=subtask.task_id, subtask_id=subtask.subtask_id, subtask_type=subtask.subtask_type),
     )
 
 
 def _build_lab_recommendation(
-    course: Course,
-    section: Section,
-    lecture: Lecture,
-    subtask: SubtaskRecommendation,
+    course: Course, section: Section, lecture: Lecture, subtask: SubtaskRecommendation
 ) -> NextLabRecommendation:
     return NextLabRecommendation(
         course=_course_reference(course),
         section=_section_reference(section),
         lecture=lecture,
-        task=TaskPointer(
-            id=subtask.task_id,
-            subtask_id=subtask.subtask_id,
-            subtask_type=subtask.subtask_type,
-        ),
+        task=TaskPointer(id=subtask.task_id, subtask_id=subtask.subtask_id, subtask_type=subtask.subtask_type),
     )
 
 
@@ -258,9 +241,7 @@ async def _resolve_next_lecture_recommendation(user_id: str) -> NextLectureRecom
 
     section, lecture = next_pair
     return NextLectureRecommendation(
-        course=_course_reference(course),
-        section=_section_reference(section),
-        lecture=lecture,
+        course=_course_reference(course), section=_section_reference(section), lecture=lecture
     )
 
 
@@ -280,11 +261,7 @@ async def _resolve_next_task_recommendation(user_id: str) -> NextTaskRecommendat
             continue
 
         section, lecture = section_lecture
-        quizzes = await get_unsolved_quizzes_for_lecture(
-            user_id=user_id,
-            course_id=course.id,
-            lecture_id=lecture_id,
-        )
+        quizzes = await get_unsolved_quizzes_for_lecture(user_id=user_id, course_id=course.id, lecture_id=lecture_id)
         if quizzes:
             return _build_task_recommendation(course, section, lecture, quizzes[0])
 
@@ -293,11 +270,7 @@ async def _resolve_next_task_recommendation(user_id: str) -> NextTaskRecommendat
         return None
 
     section, lecture = next_pair
-    quizzes = await get_unsolved_quizzes_for_lecture(
-        user_id=user_id,
-        course_id=course.id,
-        lecture_id=lecture.id,
-    )
+    quizzes = await get_unsolved_quizzes_for_lecture(user_id=user_id, course_id=course.id, lecture_id=lecture.id)
     if not quizzes:
         return None
 
@@ -320,11 +293,7 @@ async def _resolve_next_lab_recommendation(user_id: str) -> NextLabRecommendatio
             continue
 
         section, lecture = section_lecture
-        labs = await get_unsolved_labs_for_lecture(
-            user_id=user_id,
-            course_id=course.id,
-            lecture_id=lecture_id,
-        )
+        labs = await get_unsolved_labs_for_lecture(user_id=user_id, course_id=course.id, lecture_id=lecture_id)
         if labs:
             return _build_lab_recommendation(course, section, lecture, labs[0])
 
@@ -333,11 +302,7 @@ async def _resolve_next_lab_recommendation(user_id: str) -> NextLabRecommendatio
         return None
 
     section, lecture = next_pair
-    labs = await get_unsolved_labs_for_lecture(
-        user_id=user_id,
-        course_id=course.id,
-        lecture_id=lecture.id,
-    )
+    labs = await get_unsolved_labs_for_lecture(user_id=user_id, course_id=course.id, lecture_id=lecture.id)
     if not labs:
         return None
 

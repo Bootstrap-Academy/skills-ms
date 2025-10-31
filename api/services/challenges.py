@@ -20,11 +20,7 @@ class SubtaskRecommendation:
 
 
 async def _get_unsolved_subtasks_for_lecture(
-    *,
-    user_id: str,
-    course_id: str,
-    lecture_id: str,
-    allowed_types: Iterable[str],
+    *, user_id: str, course_id: str, lecture_id: str, allowed_types: Iterable[str]
 ) -> list[SubtaskRecommendation]:
     """Return unsolved subtasks of the given types for a lecture."""
 
@@ -46,8 +42,7 @@ async def _get_unsolved_subtasks_for_lecture(
                 .select_from(
                     challenges_db.challenges_course_tasks.join(
                         challenges_db.challenges_subtasks,
-                        challenges_db.challenges_course_tasks.c.task_id
-                        == challenges_db.challenges_subtasks.c.task_id,
+                        challenges_db.challenges_course_tasks.c.task_id == challenges_db.challenges_subtasks.c.task_id,
                     ).outerjoin(
                         challenges_db.challenges_user_subtasks,
                         and_(
@@ -75,46 +70,28 @@ async def _get_unsolved_subtasks_for_lecture(
         return []
 
     return [
-        SubtaskRecommendation(
-            task_id=row["task_id"],
-            subtask_id=row["subtask_id"],
-            subtask_type=row["ty"],
-        )
+        SubtaskRecommendation(task_id=row["task_id"], subtask_id=row["subtask_id"], subtask_type=row["ty"])
         for row in rows
     ]
 
 
 async def get_unsolved_quizzes_for_lecture(
-    *,
-    user_id: str,
-    course_id: str,
-    lecture_id: str,
-    allowed_types: Iterable[str] | None = None,
+    *, user_id: str, course_id: str, lecture_id: str, allowed_types: Iterable[str] | None = None
 ) -> list[SubtaskRecommendation]:
     """Return unsolved quiz-like subtasks for the lecture."""
 
     return await _get_unsolved_subtasks_for_lecture(
-        user_id=user_id,
-        course_id=course_id,
-        lecture_id=lecture_id,
-        allowed_types=allowed_types or QUIZ_SUBTASK_TYPES,
+        user_id=user_id, course_id=course_id, lecture_id=lecture_id, allowed_types=allowed_types or QUIZ_SUBTASK_TYPES
     )
 
 
 async def get_unsolved_labs_for_lecture(
-    *,
-    user_id: str,
-    course_id: str,
-    lecture_id: str,
-    allowed_types: Iterable[str] | None = None,
+    *, user_id: str, course_id: str, lecture_id: str, allowed_types: Iterable[str] | None = None
 ) -> list[SubtaskRecommendation]:
     """Return unsolved lab-style subtasks (coding/hacking challenges) for the lecture."""
 
     return await _get_unsolved_subtasks_for_lecture(
-        user_id=user_id,
-        course_id=course_id,
-        lecture_id=lecture_id,
-        allowed_types=allowed_types or LAB_SUBTASK_TYPES,
+        user_id=user_id, course_id=course_id, lecture_id=lecture_id, allowed_types=allowed_types or LAB_SUBTASK_TYPES
     )
 
 

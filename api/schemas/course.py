@@ -224,9 +224,7 @@ class NextLectureRecommendation(BaseModel):
     lecture: Lecture
 
     Config = example(
-        course=get_example(CourseReference),
-        section=get_example(SectionReference),
-        lecture=get_example(YoutubeLecture),
+        course=get_example(CourseReference), section=get_example(SectionReference), lecture=get_example(YoutubeLecture)
     )
 
 

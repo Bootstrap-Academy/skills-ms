@@ -5,8 +5,8 @@ import pytest
 from pytest_mock import MockerFixture
 
 from api import models
-from api.database import db, db_context
 from api.database import challenges as challenges_db
+from api.database import db, db_context
 from api.endpoints.course import (
     _get_completed_lecture_ids,
     _resolve_current_course,
@@ -64,20 +64,10 @@ async def test_resolve_current_course_prefers_latest_activity(mocker: MockerFixt
     mocker.patch("api.endpoints.course.COURSES", courses)
 
     async with db_context():
+        await db.add(models.LectureProgress(user_id=user_id, course_id="course-1", lecture_id="c1-1", completed=now))
         await db.add(
             models.LectureProgress(
-                user_id=user_id,
-                course_id="course-1",
-                lecture_id="c1-1",
-                completed=now,
-            )
-        )
-        await db.add(
-            models.LectureProgress(
-                user_id=user_id,
-                course_id="course-2",
-                lecture_id="c2-1",
-                completed=now - timedelta(days=1),
+                user_id=user_id, course_id="course-2", lecture_id="c2-1", completed=now - timedelta(days=1)
             )
         )
         result = await _resolve_current_course(user_id)
@@ -104,50 +94,20 @@ async def test_resolve_current_course_returns_none_without_progress(mocker: Mock
 @pytest.mark.asyncio
 async def test_resolve_next_course_prefers_bookmarks(mocker: MockerFixture) -> None:
     user_id = "user-3"
-    courses = {
-        "course-a": _build_course("course-a", ["ca-1", "ca-2"]),
-        "course-b": _build_course("course-b", ["cb-1"]),
-    }
+    courses = {"course-a": _build_course("course-a", ["ca-1", "ca-2"]), "course-b": _build_course("course-b", ["cb-1"])}
     mocker.patch("api.services.courses.COURSES", courses)
     mocker.patch("api.endpoints.course.COURSES", courses)
-    mocker.patch("api.endpoints.course.choice", side_effect=lambda seq: seq[0])
 
     async with db_context():
         await db.add(
-            models.RootSkill(
-                id="root-1",
-                name="Root",
-                row=0,
-                column=0,
-                sub_tree_rows=1,
-                sub_tree_columns=1,
-                icon=None,
-            )
+            models.RootSkill(id="root-1", name="Root", row=0, column=0, sub_tree_rows=1, sub_tree_columns=1, icon=None)
         )
-        await db.add(
-            models.SubSkill(
-                id="skill-1",
-                parent_id="root-1",
-                name="Skill",
-                row=0,
-                column=0,
-                icon=None,
-            )
-        )
+        await db.add(models.SubSkill(id="skill-1", parent_id="root-1", name="Skill", row=0, column=0, icon=None))
         await db.add(models.SkillCourse(skill_id="skill-1", course_id="course-a"))
-        await db.add(
-            models.SubSkillBookmark(
-                user_id=user_id,
-                root_skill_id="root-1",
-                sub_skill_id="skill-1",
-            )
-        )
+        await db.add(models.SubSkillBookmark(user_id=user_id, root_skill_id="root-1", sub_skill_id="skill-1"))
         await db.add(
             models.LectureProgress(
-                user_id=user_id,
-                course_id="course-a",
-                lecture_id="ca-1",
-                completed=datetime.now(timezone.utc),
+                user_id=user_id, course_id="course-a", lecture_id="ca-1", completed=datetime.now(timezone.utc)
             )
         )
         next_course = await _resolve_next_course(user_id)
@@ -161,60 +121,27 @@ async def test_resolve_next_course_prefers_bookmarks(mocker: MockerFixture) -> N
 @pytest.mark.asyncio
 async def test_resolve_next_course_skips_completed_courses(mocker: MockerFixture) -> None:
     user_id = "user-4"
-    courses = {
-        "course-a": _build_course("course-a", ["ca-1", "ca-2"]),
-        "course-b": _build_course("course-b", ["cb-1"]),
-    }
+    courses = {"course-a": _build_course("course-a", ["ca-1", "ca-2"]), "course-b": _build_course("course-b", ["cb-1"])}
     mocker.patch("api.services.courses.COURSES", courses)
     mocker.patch("api.endpoints.course.COURSES", courses)
-    mocker.patch("api.endpoints.course.choice", side_effect=lambda seq: seq[0])
 
     async with db_context():
         await db.add(
-            models.RootSkill(
-                id="root-2",
-                name="Root",
-                row=0,
-                column=0,
-                sub_tree_rows=1,
-                sub_tree_columns=1,
-                icon=None,
-            )
+            models.RootSkill(id="root-2", name="Root", row=0, column=0, sub_tree_rows=1, sub_tree_columns=1, icon=None)
         )
-        await db.add(
-            models.SubSkill(
-                id="skill-2",
-                parent_id="root-2",
-                name="Skill",
-                row=0,
-                column=0,
-                icon=None,
-            )
-        )
+        await db.add(models.SubSkill(id="skill-2", parent_id="root-2", name="Skill", row=0, column=0, icon=None))
         await db.add(models.SkillCourse(skill_id="skill-2", course_id="course-a"))
         await db.add(models.SkillCourse(skill_id="skill-2", course_id="course-b"))
-        await db.add(
-            models.SubSkillBookmark(
-                user_id=user_id,
-                root_skill_id="root-2",
-                sub_skill_id="skill-2",
-            )
-        )
+        await db.add(models.SubSkillBookmark(user_id=user_id, root_skill_id="root-2", sub_skill_id="skill-2"))
         # mark course-a as fully completed
         await db.add(
             models.LectureProgress(
-                user_id=user_id,
-                course_id="course-a",
-                lecture_id="ca-1",
-                completed=datetime.now(timezone.utc),
+                user_id=user_id, course_id="course-a", lecture_id="ca-1", completed=datetime.now(timezone.utc)
             )
         )
         await db.add(
             models.LectureProgress(
-                user_id=user_id,
-                course_id="course-a",
-                lecture_id="ca-2",
-                completed=datetime.now(timezone.utc),
+                user_id=user_id, course_id="course-a", lecture_id="ca-2", completed=datetime.now(timezone.utc)
             )
         )
         next_course = await _resolve_next_course(user_id)
@@ -236,10 +163,7 @@ async def test_resolve_next_lecture_recommendation_returns_next_unseen(mocker: M
     async with db_context():
         await db.add(
             models.LectureProgress(
-                user_id=user_id,
-                course_id="course-1",
-                lecture_id="c1-1",
-                completed=now - timedelta(days=1),
+                user_id=user_id, course_id="course-1", lecture_id="c1-1", completed=now - timedelta(days=1)
             )
         )
 
@@ -262,10 +186,7 @@ async def _insert_challenge_records(
 ) -> None:
     await challenges_db.execute(
         challenges_db.challenges_course_tasks.insert().values(
-            task_id=task_id,
-            course_id=course_id,
-            section_id=section_id,
-            lecture_id=lecture_id,
+            task_id=task_id, course_id=course_id, section_id=section_id, lecture_id=lecture_id
         )
     )
     await challenges_db.execute(
@@ -349,11 +270,7 @@ async def test_resolve_next_task_prefers_latest_unsolved(mocker: MockerFixture) 
         user_id=user_id,
     )
 
-    quizzes = await get_unsolved_quizzes_for_lecture(
-        user_id=user_id,
-        course_id="course-1",
-        lecture_id="c1-2",
-    )
+    quizzes = await get_unsolved_quizzes_for_lecture(user_id=user_id, course_id="course-1", lecture_id="c1-2")
     assert [quiz.subtask_id for quiz in quizzes] == [unsolved_subtask]
 
     recommendation = await _resolve_next_task_recommendation(user_id)
@@ -464,11 +381,7 @@ async def test_resolve_next_lab_prefers_latest_unsolved(mocker: MockerFixture) -
         subtask_type="coding_challenge",
     )
 
-    labs = await get_unsolved_labs_for_lecture(
-        user_id=user_id,
-        course_id="course-1",
-        lecture_id="c1-2",
-    )
+    labs = await get_unsolved_labs_for_lecture(user_id=user_id, course_id="course-1", lecture_id="c1-2")
     assert [lab.subtask_id for lab in labs] == [unsolved_lab_subtask]
 
     recommendation = await _resolve_next_lab_recommendation(user_id)

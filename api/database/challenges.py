@@ -1,14 +1,13 @@
-
 from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from typing import Any, AsyncIterator
 
 from sqlalchemy import Boolean, Column, DateTime, Integer, MetaData, String, Table
+from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.sql import Select
-from sqlalchemy.engine import make_url
 
 from api.settings import settings
 
@@ -51,7 +50,7 @@ challenges_user_subtasks = Table(
 )
 
 _engine: AsyncEngine | None = None
-_sessionmaker: sessionmaker | None = None
+_sessionmaker: sessionmaker[AsyncSession] | None = None
 
 
 def _ensure_engine() -> AsyncEngine | None:
@@ -64,18 +63,13 @@ def _ensure_engine() -> AsyncEngine | None:
     global _engine, _sessionmaker
     if _engine is None:
         url_info = make_url(url)
-        engine_kwargs: dict[str, Any] = {
-            "pool_pre_ping": True,
-            "echo": settings.sql_show_statements,
-        }
+        engine_kwargs: dict[str, Any] = {"pool_pre_ping": True, "echo": settings.sql_show_statements}
         if url_info.get_backend_name().startswith("sqlite"):
             # SQLite (used in tests) does not support these pooling options.
-            engine_kwargs["connect_args"] = {"check_same_thread": False}  # type: ignore[assignment]
+            engine_kwargs["connect_args"] = {"check_same_thread": False}
         else:
             engine_kwargs.update(
-                pool_recycle=settings.pool_recycle,
-                pool_size=settings.pool_size,
-                max_overflow=settings.max_overflow,
+                pool_recycle=settings.pool_recycle, pool_size=settings.pool_size, max_overflow=settings.max_overflow
             )
 
         _engine = create_async_engine(url, **engine_kwargs)
@@ -98,24 +92,28 @@ async def challenges_session() -> AsyncIterator[AsyncSession]:
     The caller must ensure that a connection string is configured.
     """
 
-    if _sessionmaker is None:
-        if _ensure_engine() is None:
-            raise RuntimeError("Challenges database is not configured")
-    assert _sessionmaker is not None
+    if _sessionmaker is None and _ensure_engine() is None:
+        raise RuntimeError("Challenges database is not configured")
 
-    async with _sessionmaker() as session:
+    session_factory = _sessionmaker
+    if session_factory is None:
+        raise RuntimeError("Challenges database sessionmaker is unavailable")
+
+    async with session_factory() as session:
         yield session
 
 
 async def execute(statement: Any) -> None:
     """Execute a statement on the challenges database and commit."""
 
-    if _sessionmaker is None:
-        if _ensure_engine() is None:
-            raise RuntimeError("Challenges database is not configured")
-    assert _sessionmaker is not None
+    if _sessionmaker is None and _ensure_engine() is None:
+        raise RuntimeError("Challenges database is not configured")
 
-    async with _sessionmaker() as session:
+    session_factory = _sessionmaker
+    if session_factory is None:
+        raise RuntimeError("Challenges database sessionmaker is unavailable")
+
+    async with session_factory() as session:
         await session.execute(statement)
         await session.commit()
 
@@ -123,12 +121,14 @@ async def execute(statement: Any) -> None:
 async def fetch_all(statement: Select | Any) -> list[Any]:
     """Fetch all rows for the given statement from the challenges database."""
 
-    if _sessionmaker is None:
-        if _ensure_engine() is None:
-            raise RuntimeError("Challenges database is not configured")
-    assert _sessionmaker is not None
+    if _sessionmaker is None and _ensure_engine() is None:
+        raise RuntimeError("Challenges database is not configured")
 
-    async with _sessionmaker() as session:
+    session_factory = _sessionmaker
+    if session_factory is None:
+        raise RuntimeError("Challenges database sessionmaker is unavailable")
+
+    async with session_factory() as session:
         result = await session.execute(statement)
         return list(result)
 

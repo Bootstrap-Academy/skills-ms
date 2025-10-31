@@ -9,8 +9,8 @@ from pytest_mock import MockerFixture
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from api.app import app
-from api.database import db
 from api.database import challenges as challenges_db
+from api.database import db
 from api.settings import settings
 
 
@@ -26,12 +26,7 @@ async def challenges_database(monkeypatch: MonkeyPatch) -> AsyncIterator[None]:
     if test_db.exists():
         test_db.unlink()
 
-    monkeypatch.setattr(
-        settings,
-        "challenges_database_url",
-        f"sqlite+aiosqlite:///{test_db.as_posix()}",
-        raising=False,
-    )
+    monkeypatch.setattr(settings, "challenges_database_url", f"sqlite+aiosqlite:///{test_db.as_posix()}", raising=False)
     await challenges_db.dispose_engine()
     await challenges_db.ensure_schema()
     yield
@@ -51,11 +46,7 @@ async def auth_client(client: AsyncClient, mocker: MockerFixture) -> AsyncIterat
     mocker.patch(
         "api.auth.JWTAuth.__call__",
         AsyncMock(
-            return_value={
-                "uid": "user-1",
-                "rt": "refresh-token",
-                "data": {"email_verified": True, "admin": False},
-            }
+            return_value={"uid": "user-1", "rt": "refresh-token", "data": {"email_verified": True, "admin": False}}
         ),
     )
     mocker.patch("api.schemas.user.auth_redis.exists", AsyncMock(return_value=False))
