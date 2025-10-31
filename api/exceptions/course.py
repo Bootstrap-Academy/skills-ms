@@ -15,6 +15,24 @@ class LectureNotFoundException(APIException):
     description = "The requested lecture does not exist."
 
 
+class NextLectureNotFoundException(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "No lecture suggestion available"
+    description = "The user does not currently have a lecture recommendation."
+
+
+class NextTaskNotFoundException(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "No task suggestion available"
+    description = "The user does not currently have a task recommendation."
+
+
+class NextLabNotFoundException(APIException):
+    status_code = status.HTTP_404_NOT_FOUND
+    detail = "No lab suggestion available"
+    description = "The user does not currently have a lab recommendation."
+
+
 class NoCourseAccessException(APIException):
     status_code = status.HTTP_403_FORBIDDEN
     detail = "No course access"

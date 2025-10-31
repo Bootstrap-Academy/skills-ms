@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 def _load_courses() -> dict[str, Course]:
     courses = {}
     for file in sorted(settings.courses.glob("*.yml")):
-        with file.open() as f:
+        with file.open(encoding="utf-8") as f:
             _id = file.name.removesuffix(".yml")
             logger.debug(f"loading course {_id}")
             courses[_id] = pydantic.parse_obj_as(Course, {"id": _id} | safe_load(f))
