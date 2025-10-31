@@ -1,6 +1,9 @@
 """Endpoints related to courses and lectures"""
 
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from pathlib import Path
+from random import choice
 from secrets import token_urlsafe
 from typing import Any, Iterable
 
@@ -8,7 +11,7 @@ from fastapi import APIRouter, Depends, Header, Query, Response
 
 from api import models
 from api.auth import public_auth, require_verified_email, user_auth
-from api.database import db, filter_by
+from api.database import db, filter_by, select
 from api.exceptions.auth import user_responses, verified_responses
 from api.exceptions.course import (
     AlreadyCompletedLectureException,
@@ -32,6 +35,104 @@ from api.utils.email import BOUGHT_COURSE
 
 
 router = APIRouter()
+
+
+@dataclass
+class CourseProgress:
+    completed_lectures: set[str]
+    latest_completed_at: datetime | None = None
+
+
+def _normalize_timestamp(value: datetime | None) -> datetime:
+    if value is None:
+        return datetime.min.replace(tzinfo=timezone.utc)
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value
+
+
+def _course_completed(course: Course, completed_lectures: set[str]) -> bool:
+    total_lectures = sum(len(section.lectures) for section in course.sections)
+    if total_lectures == 0:
+        return True
+    return len(completed_lectures) >= total_lectures
+
+
+async def _collect_course_progress(user_id: str) -> dict[str, CourseProgress]:
+    progress: dict[str, CourseProgress] = {}
+    async for lecture in await db.stream(filter_by(models.LectureProgress, user_id=user_id)):
+        entry = progress.setdefault(lecture.course_id, CourseProgress(completed_lectures=set()))
+        entry.completed_lectures.add(lecture.lecture_id)
+        if lecture.completed and (
+            entry.latest_completed_at is None or lecture.completed > entry.latest_completed_at
+        ):
+            entry.latest_completed_at = lecture.completed
+
+    async for last_watch in await db.stream(filter_by(models.LastWatch, user_id=user_id)):
+        entry = progress.setdefault(last_watch.course_id, CourseProgress(completed_lectures=set()))
+        if entry.latest_completed_at is None or last_watch.timestamp > entry.latest_completed_at:
+            entry.latest_completed_at = last_watch.timestamp
+
+    return progress
+
+
+async def _resolve_current_course(user_id: str) -> tuple[Course, set[str]] | None:
+    progress = await _collect_course_progress(user_id)
+    candidate: tuple[Course, set[str], datetime] | None = None
+
+    for course_id, course_progress in progress.items():
+        course = COURSES.get(course_id)
+        if course is None:
+            continue
+
+        if _course_completed(course, course_progress.completed_lectures):
+            continue
+
+        latest = _normalize_timestamp(course_progress.latest_completed_at)
+        if candidate is None or latest > candidate[2]:
+            candidate = (course, course_progress.completed_lectures, latest)
+
+    if candidate is None:
+        return None
+
+    course, completed, _timestamp = candidate
+    return course, completed
+
+
+async def _resolve_next_course(user_id: str) -> tuple[Course, set[str]] | None:
+    progress = await _collect_course_progress(user_id)
+    bookmarks = await db.all(filter_by(models.SubSkillBookmark, user_id=user_id))
+    bookmarked_skill_ids = {bookmark.sub_skill_id for bookmark in bookmarks}
+
+    candidates: list[tuple[Course, set[str]]] = []
+    seen: set[str] = set()
+
+    def append_course(course_id: str) -> None:
+        if course_id in seen:
+            return
+        course = COURSES.get(course_id)
+        if course is None:
+            return
+        entry = progress.get(course_id)
+        completed = set() if entry is None else entry.completed_lectures
+        if entry and _course_completed(course, completed):
+            return
+        seen.add(course_id)
+        candidates.append((course, completed))
+
+    if bookmarked_skill_ids:
+        query = select(models.SkillCourse).where(models.SkillCourse.skill_id.in_(bookmarked_skill_ids))
+        async for mapping in await db.stream(query):
+            append_course(mapping.course_id)
+
+    if not candidates:
+        for course_id in COURSES:
+            append_course(course_id)
+
+    if not candidates:
+        return None
+
+    return choice(candidates)
 
 
 @Depends
@@ -71,6 +172,41 @@ async def get_owned_courses(user_id: str) -> set[str]:
     return {ca.course_id async for ca in await db.stream(filter_by(models.CourseAccess, user_id=user_id))} | {
         lw.course_id async for lw in await db.stream(filter_by(models.LastWatch, user_id=user_id))
     }
+
+
+@router.get(
+    "/courses/current",
+    dependencies=[require_verified_email],
+    responses=verified_responses(CourseSummary, CourseNotFoundException),
+)
+async def get_current_course(user: User = user_auth) -> Any:
+    """Return the most recently progressed but unfinished course for the user."""
+
+    current = await _resolve_current_course(user.id)
+    if current is None:
+        fallback = await _resolve_next_course(user.id)
+        if fallback is None:
+            raise CourseNotFoundException
+        course, completed = fallback
+        return course.summary(completed)
+
+    course, completed = current
+    return course.summary(completed)
+
+
+@router.get(
+    "/courses/next",
+    dependencies=[require_verified_email],
+    responses=verified_responses(CourseSummary, CourseNotFoundException),
+)
+async def get_next_course(user: User = user_auth) -> Any:
+    """Return a recommended next course (bookmarks preferred, otherwise random)."""
+
+    course = await _resolve_next_course(user.id)
+    if course is None:
+        raise CourseNotFoundException
+    course_obj, completed = course
+    return course_obj.summary(completed)
 
 
 @router.get("/courses", responses=responses(list[CourseSummary]))
