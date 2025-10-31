@@ -1,7 +1,10 @@
+import logging
 from datetime import datetime, timedelta, timezone
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
+from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
 from api import models
@@ -16,7 +19,14 @@ from api.endpoints.course import (
     _resolve_next_task_recommendation,
 )
 from api.schemas.course import Course, Section, YoutubeLecture
-from api.services.challenges import get_unsolved_labs_for_lecture, get_unsolved_quizzes_for_lecture
+from api.services.challenges import (
+    SubtaskRecommendation,
+    get_unsolved_labs_for_lecture,
+    get_unsolved_quizzes_for_lecture,
+)
+
+
+logging.disable(logging.CRITICAL)
 
 
 def _build_course(course_id: str, lecture_ids: list[str]) -> Course:
@@ -273,7 +283,7 @@ async def test_resolve_next_task_prefers_latest_unsolved(mocker: MockerFixture) 
     quizzes = await get_unsolved_quizzes_for_lecture(user_id=user_id, course_id="course-1", lecture_id="c1-2")
     assert [quiz.subtask_id for quiz in quizzes] == [unsolved_subtask]
 
-    recommendation = await _resolve_next_task_recommendation(user_id)
+    recommendation = await _resolve_next_task_recommendation(user_id=user_id)
     assert recommendation is not None
     assert recommendation.lecture.id == "c1-2"
     assert recommendation.task.subtask_id == unsolved_subtask
@@ -322,10 +332,63 @@ async def test_resolve_next_task_falls_back_to_unseen_lecture(mocker: MockerFixt
         user_id=user_id,
     )
 
-    recommendation = await _resolve_next_task_recommendation(user_id)
+    recommendation = await _resolve_next_task_recommendation(user_id=user_id)
     assert recommendation is not None
     assert recommendation.lecture.id == "c1-2"
     assert recommendation.task.subtask_id == upcoming_subtask
+
+
+@pytest.mark.asyncio
+async def test_resolve_next_task_for_specific_lecture(mocker: MockerFixture) -> None:
+    user_id = "user-specific-task"
+    course = _build_course("course-1", ["c1-1", "c1-2"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    section_id = course.sections[0].id
+    target_task = str(uuid4())
+    target_subtask = str(uuid4())
+    await _insert_challenge_records(
+        course_id="course-1",
+        section_id=section_id,
+        lecture_id="c1-2",
+        subtask_id=target_subtask,
+        task_id=target_task,
+        solved_timestamp=None,
+        user_id=user_id,
+    )
+
+    recommendation = await _resolve_next_task_recommendation(user_id=user_id, course_id="course-1", lecture_id="c1-2")
+    assert recommendation is not None
+    assert recommendation.course.id == "course-1"
+    assert recommendation.lecture.id == "c1-2"
+    assert recommendation.task.subtask_id == target_subtask
+
+
+@pytest.mark.asyncio
+async def test_resolve_next_task_for_specific_lecture_returns_none_when_completed(mocker: MockerFixture) -> None:
+    user_id = "user-specific-task-complete"
+    course = _build_course("course-1", ["c1-1"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    section_id = course.sections[0].id
+    solved_task = str(uuid4())
+    solved_subtask = str(uuid4())
+    await _insert_challenge_records(
+        course_id="course-1",
+        section_id=section_id,
+        lecture_id="c1-1",
+        subtask_id=solved_subtask,
+        task_id=solved_task,
+        solved_timestamp=datetime.now(timezone.utc),
+        user_id=user_id,
+    )
+
+    recommendation = await _resolve_next_task_recommendation(user_id=user_id, course_id="course-1", lecture_id="c1-1")
+    assert recommendation is None
 
 
 @pytest.mark.asyncio
@@ -384,7 +447,7 @@ async def test_resolve_next_lab_prefers_latest_unsolved(mocker: MockerFixture) -
     labs = await get_unsolved_labs_for_lecture(user_id=user_id, course_id="course-1", lecture_id="c1-2")
     assert [lab.subtask_id for lab in labs] == [unsolved_lab_subtask]
 
-    recommendation = await _resolve_next_lab_recommendation(user_id)
+    recommendation = await _resolve_next_lab_recommendation(user_id=user_id)
     assert recommendation is not None
     assert recommendation.lecture.id == "c1-2"
     assert recommendation.task.subtask_type == "coding_challenge"
@@ -436,10 +499,65 @@ async def test_resolve_next_lab_falls_back_to_unseen_lecture(mocker: MockerFixtu
         subtask_type="coding_challenge",
     )
 
-    recommendation = await _resolve_next_lab_recommendation(user_id)
+    recommendation = await _resolve_next_lab_recommendation(user_id=user_id)
     assert recommendation is not None
     assert recommendation.lecture.id == "c1-2"
     assert recommendation.task.subtask_id == upcoming_lab_subtask
+
+
+@pytest.mark.asyncio
+async def test_resolve_next_lab_for_specific_lecture(mocker: MockerFixture) -> None:
+    user_id = "user-specific-lab"
+    course = _build_course("course-1", ["c1-1", "c1-2"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    section_id = course.sections[0].id
+    target_lab_task = str(uuid4())
+    target_lab_subtask = str(uuid4())
+    await _insert_challenge_records(
+        course_id="course-1",
+        section_id=section_id,
+        lecture_id="c1-2",
+        subtask_id=target_lab_subtask,
+        task_id=target_lab_task,
+        solved_timestamp=None,
+        user_id=user_id,
+        subtask_type="coding_challenge",
+    )
+
+    recommendation = await _resolve_next_lab_recommendation(user_id=user_id, course_id="course-1", lecture_id="c1-2")
+    assert recommendation is not None
+    assert recommendation.course.id == "course-1"
+    assert recommendation.lecture.id == "c1-2"
+    assert recommendation.task.subtask_id == target_lab_subtask
+
+
+@pytest.mark.asyncio
+async def test_resolve_next_lab_for_specific_lecture_returns_none_when_completed(mocker: MockerFixture) -> None:
+    user_id = "user-specific-lab-complete"
+    course = _build_course("course-1", ["c1-1"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    section_id = course.sections[0].id
+    solved_lab_task = str(uuid4())
+    solved_lab_subtask = str(uuid4())
+    await _insert_challenge_records(
+        course_id="course-1",
+        section_id=section_id,
+        lecture_id="c1-1",
+        subtask_id=solved_lab_subtask,
+        task_id=solved_lab_task,
+        solved_timestamp=datetime.now(timezone.utc),
+        user_id=user_id,
+        subtask_type="coding_challenge",
+    )
+
+    recommendation = await _resolve_next_lab_recommendation(user_id=user_id, course_id="course-1", lecture_id="c1-1")
+    assert recommendation is None
 
 
 @pytest.mark.asyncio
@@ -460,5 +578,103 @@ async def test_resolve_next_lab_returns_none_when_no_labs(mocker: MockerFixture)
             )
         )
 
-    recommendation = await _resolve_next_lab_recommendation(user_id)
+    recommendation = await _resolve_next_lab_recommendation(user_id=user_id)
     assert recommendation is None
+
+
+@pytest.mark.asyncio
+async def test_get_next_task_requires_both_params(auth_client: AsyncClient, mocker: MockerFixture) -> None:
+    course = _build_course("course-1", ["c1-1"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    response = await auth_client.get("/courses/next/task", params={"course_id": "course-1"})
+    assert response.status_code == 400
+    assert response.headers["content-type"] == "application/json"
+    assert response.json()["detail"] == "course_id and lecture_id must be provided together"
+
+
+@pytest.mark.asyncio
+async def test_get_next_task_for_specific_lecture_endpoint(auth_client: AsyncClient, mocker: MockerFixture) -> None:
+    course = _build_course("course-1", ["c1-1", "c1-2"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    mocker.patch(
+        "api.endpoints.course.get_unsolved_quizzes_for_lecture",
+        AsyncMock(return_value=[SubtaskRecommendation(task_id="task", subtask_id="sub", subtask_type="quiz")]),
+    )
+
+    response = await auth_client.get("/courses/next/task", params={"course_id": "course-1", "lecture_id": "c1-2"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["course"]["id"] == "course-1"
+    assert data["lecture"]["id"] == "c1-2"
+    assert data["task"]["subtask_id"] == "sub"
+
+
+@pytest.mark.asyncio
+async def test_get_next_task_for_specific_lecture_endpoint_returns_404(
+    auth_client: AsyncClient, mocker: MockerFixture
+) -> None:
+    course = _build_course("course-1", ["c1-1"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    mocker.patch("api.endpoints.course.get_unsolved_quizzes_for_lecture", AsyncMock(return_value=[]))
+
+    response = await auth_client.get("/courses/next/task", params={"course_id": "course-1", "lecture_id": "c1-1"})
+    assert response.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_get_next_lab_requires_both_params(auth_client: AsyncClient, mocker: MockerFixture) -> None:
+    course = _build_course("course-1", ["c1-1"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    response = await auth_client.get("/courses/next/lab", params={"lecture_id": "c1-1"})
+    assert response.status_code == 400
+    assert response.headers["content-type"] == "application/json"
+    assert response.json()["detail"] == "course_id and lecture_id must be provided together"
+
+
+@pytest.mark.asyncio
+async def test_get_next_lab_for_specific_lecture_endpoint(auth_client: AsyncClient, mocker: MockerFixture) -> None:
+    course = _build_course("course-1", ["c1-1", "c1-2"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    mocker.patch(
+        "api.endpoints.course.get_unsolved_labs_for_lecture",
+        AsyncMock(
+            return_value=[SubtaskRecommendation(task_id="lab-task", subtask_id="lab-sub", subtask_type="coding")]
+        ),
+    )
+
+    response = await auth_client.get("/courses/next/lab", params={"course_id": "course-1", "lecture_id": "c1-2"})
+    assert response.status_code == 200
+    data = response.json()
+    assert data["course"]["id"] == "course-1"
+    assert data["lecture"]["id"] == "c1-2"
+    assert data["task"]["subtask_id"] == "lab-sub"
+
+
+@pytest.mark.asyncio
+async def test_get_next_lab_for_specific_lecture_endpoint_returns_404(
+    auth_client: AsyncClient, mocker: MockerFixture
+) -> None:
+    course = _build_course("course-1", ["c1-1"])
+    courses = {"course-1": course}
+    mocker.patch("api.services.courses.COURSES", courses)
+    mocker.patch("api.endpoints.course.COURSES", courses)
+
+    mocker.patch("api.endpoints.course.get_unsolved_labs_for_lecture", AsyncMock(return_value=[]))
+
+    response = await auth_client.get("/courses/next/lab", params={"course_id": "course-1", "lecture_id": "c1-1"})
+    assert response.status_code == 404

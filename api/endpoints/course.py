@@ -7,6 +7,8 @@ from secrets import token_urlsafe
 from typing import Any, Iterable
 
 from fastapi import APIRouter, Depends, Header, Query, Response
+from fastapi.responses import JSONResponse
+from starlette import status
 
 from api import models
 from api.auth import public_auth, require_verified_email, user_auth
@@ -245,7 +247,33 @@ async def _resolve_next_lecture_recommendation(user_id: str) -> NextLectureRecom
     )
 
 
-async def _resolve_next_task_recommendation(user_id: str) -> NextTaskRecommendation | None:
+def _find_lecture_in_course(course: Course, lecture_id: str) -> tuple[Section, Lecture] | None:
+    for section in course.sections:
+        for lecture in section.lectures:
+            if lecture.id == lecture_id:
+                return section, lecture
+    return None
+
+
+async def _resolve_next_task_recommendation(
+    user_id: str, *, course_id: str | None = None, lecture_id: str | None = None
+) -> NextTaskRecommendation | None:
+    if course_id and lecture_id:
+        course = COURSES.get(course_id)
+        if course is None:
+            return None
+
+        section_lecture = _find_lecture_in_course(course, lecture_id)
+        if section_lecture is None:
+            return None
+
+        section, lecture = section_lecture
+        quizzes = await get_unsolved_quizzes_for_lecture(user_id=user_id, course_id=course.id, lecture_id=lecture.id)
+        if not quizzes:
+            return None
+
+        return _build_task_recommendation(course, section, lecture, quizzes[0])
+
     context = await _resolve_course_for_recommendations(user_id)
     if context is None:
         return None
@@ -277,7 +305,25 @@ async def _resolve_next_task_recommendation(user_id: str) -> NextTaskRecommendat
     return _build_task_recommendation(course, section, lecture, quizzes[0])
 
 
-async def _resolve_next_lab_recommendation(user_id: str) -> NextLabRecommendation | None:
+async def _resolve_next_lab_recommendation(
+    user_id: str, *, course_id: str | None = None, lecture_id: str | None = None
+) -> NextLabRecommendation | None:
+    if course_id and lecture_id:
+        course = COURSES.get(course_id)
+        if course is None:
+            return None
+
+        section_lecture = _find_lecture_in_course(course, lecture_id)
+        if section_lecture is None:
+            return None
+
+        section, lecture = section_lecture
+        labs = await get_unsolved_labs_for_lecture(user_id=user_id, course_id=course.id, lecture_id=lecture.id)
+        if not labs:
+            return None
+
+        return _build_lab_recommendation(course, section, lecture, labs[0])
+
     context = await _resolve_course_for_recommendations(user_id)
     if context is None:
         return None
@@ -402,10 +448,20 @@ async def get_next_lecture(user: User = user_auth) -> Any:
     dependencies=[require_verified_email],
     responses=verified_responses(NextTaskRecommendation, NextTaskNotFoundException),
 )
-async def get_next_task(user: User = user_auth) -> Any:
+async def get_next_task(
+    course_id: str | None = Query(None, description="Filter recommendations to a specific course"),
+    lecture_id: str | None = Query(None, description="Filter recommendations to a specific lecture"),
+    user: User = user_auth,
+) -> Any:
     """Return the next unsolved quiz recommendation for the user."""
 
-    recommendation = await _resolve_next_task_recommendation(user.id)
+    if (course_id is None) != (lecture_id is None):
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "course_id and lecture_id must be provided together"},
+        )
+
+    recommendation = await _resolve_next_task_recommendation(user.id, course_id=course_id, lecture_id=lecture_id)
     if recommendation is None:
         raise NextTaskNotFoundException
     return recommendation
@@ -416,10 +472,20 @@ async def get_next_task(user: User = user_auth) -> Any:
     dependencies=[require_verified_email],
     responses=verified_responses(NextLabRecommendation, NextLabNotFoundException),
 )
-async def get_next_lab(user: User = user_auth) -> Any:
+async def get_next_lab(
+    course_id: str | None = Query(None, description="Filter recommendations to a specific course"),
+    lecture_id: str | None = Query(None, description="Filter recommendations to a specific lecture"),
+    user: User = user_auth,
+) -> Any:
     """Return the next unsolved lab (coding/hacking) recommendation for the user."""
 
-    recommendation = await _resolve_next_lab_recommendation(user.id)
+    if (course_id is None) != (lecture_id is None):
+        return JSONResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content={"detail": "course_id and lecture_id must be provided together"},
+        )
+
+    recommendation = await _resolve_next_lab_recommendation(user.id, course_id=course_id, lecture_id=lecture_id)
     if recommendation is None:
         raise NextLabNotFoundException
     return recommendation
