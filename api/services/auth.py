@@ -5,11 +5,17 @@ from api.services.internal import InternalService
 from api.utils.cache import redis_cached
 
 
-@redis_cached("user", "user_id")
-async def exists_user(user_id: str) -> bool:
+async def get_user_status(user_id: str) -> int:
+    """Return the status code of the auth microservice for a user without using the cache."""
+
     async with InternalService.AUTH.client as client:
         response = await client.get(f"/users/{user_id}")
-        return response.status_code == 200
+        return response.status_code
+
+
+@redis_cached("user", "user_id")
+async def exists_user(user_id: str) -> bool:
+    return await get_user_status(user_id) == 200
 
 
 @redis_cached("user", "user_id")

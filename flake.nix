@@ -57,6 +57,17 @@
         settings = mkOption {
           inherit (settingsFormat) type;
         };
+        sweepDeletedUsers = {
+          enable = mkEnableOption "periodic deletion of data belonging to deleted users";
+          interval = mkOption {
+            type = types.str;
+            default = "daily";
+          };
+          randomizedDelay = mkOption {
+            type = types.str;
+            default = "5m";
+          };
+        };
       };
 
       config = let
@@ -85,6 +96,28 @@
               script = ''
                 ${self.packages.${pkgs.system}.default}/bin/api
               '';
+            };
+
+            academy-skills-sweep-deleted-users = lib.mkIf cfg.sweepDeletedUsers.enable {
+              serviceConfig = {
+                Type = "oneshot";
+                User = "academy-skills";
+                Group = "academy-skills";
+                DynamicUser = true;
+                EnvironmentFile = cfg.environmentFiles ++ [(settingsFormat.generate "config" cfg.settings)];
+              };
+              script = ''
+                ${self.packages.${pkgs.system}.default}/bin/sweep-deleted-users
+              '';
+            };
+          };
+
+          systemd.timers.academy-skills-sweep-deleted-users = lib.mkIf cfg.sweepDeletedUsers.enable {
+            wantedBy = ["timers.target"];
+            timerConfig = {
+              OnCalendar = cfg.sweepDeletedUsers.interval;
+              RandomizedDelaySec = cfg.sweepDeletedUsers.randomizedDelay;
+              Persistent = true;
             };
           };
         };
