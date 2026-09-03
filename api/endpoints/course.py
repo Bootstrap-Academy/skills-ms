@@ -73,6 +73,21 @@ async def get_owned_courses(user_id: str) -> set[str]:
     }
 
 
+async def get_unlocked_courses(user: User) -> set[str]:
+    """Return the ids of the courses the user can open without buying them first.
+
+    This is the same rule :func:`has_course_access` applies to a single course:
+    admins and premium members can open every course, everyone else only the
+    courses they own. Free courses are not included, because owning a course and
+    a course being free are two different things for the callers.
+    """
+
+    if user.admin or await has_premium(user.id):
+        return set(COURSES)
+
+    return await get_owned_courses(user.id) & set(COURSES)
+
+
 @router.get("/courses", responses=responses(list[CourseSummary]))
 async def list_courses(
     search_term: str | None = Query(None, max_length=256, description="A search term to filter courses by"),
@@ -102,7 +117,7 @@ async def list_courses(
     if owned is not None:
         courses = set()
         if user:
-            courses |= await get_owned_courses(user.id)
+            courses |= await get_unlocked_courses(user)
 
         relevant = courses if owned else set(COURSES) - courses
         out = (course for course in out if course.id in relevant)
@@ -272,8 +287,8 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
     async for lecture in await db.stream(filter_by(models.LectureProgress, user_id=user.id)):
         completed_lectures.setdefault(lecture.course_id, set()).add(lecture.lecture_id)
 
-    course_ids = {k for k, v in COURSES.items() if v.free or user.admin}
-    course_ids |= (await get_owned_courses(user.id)) & set(COURSES)
+    course_ids = {k for k, v in COURSES.items() if v.free}
+    course_ids |= await get_unlocked_courses(user)
     return [COURSES[course_id].summary(completed_lectures.get(course_id, set())) for course_id in course_ids]
 
 
