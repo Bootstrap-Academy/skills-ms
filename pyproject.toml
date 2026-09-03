@@ -47,10 +47,12 @@ ruff = "^0.4.2"
 
 [tool.poetry.scripts]
 api = "api.main:main"
+sweep-deleted-users = "api.sweep:main"
 alembic = "alembic.config:main"
 
 [tool.poe.tasks]
 api = { script = "api.main:main", envfile = ".env" }
+sweep-deleted-users = { script = "api.sweep:main", envfile = ".env" }
 flake8 = "flake8 . --count --statistics --show-source"
 isort = "isort ."
 black = "black ."
