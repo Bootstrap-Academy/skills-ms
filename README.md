@@ -58,7 +58,30 @@ poe env             # show settings from .env file
 poe jwt             # generate a jwt with the given payload and ttl in seconds
 poe check           # check course definitions
 poe sync_skills     # push local skills to backend (deprecated)
+poe sweep-deleted-users  # delete the data of users the auth service no longer knows
 ```
+
+## Account Deletion
+When an account is deleted, the auth service calls `DELETE /_internal/users/{user_id}` on this microservice.
+The endpoint requires an internal token with the `skills` audience, deletes every row that belongs to the user (course access, last watch, lecture progress, sub skill bookmarks and XP), drops the cache entries keyed on a user id, and answers `204` — also for a user that has no data here, so it can be retried safely.
+
+Because the auth service logs and swallows a failing call, a periodic sweep catches the deletions that were lost:
+
+```bash
+poe sweep-deleted-users
+```
+
+It walks the distinct user ids in those tables in batches, asks the auth service for each one and deletes the data of every user it answers `404` for.
+The relevant settings are:
+
+| Variable | Default | Description |
+| --- | --- | --- |
+| `AUTH_URL` | `""` | Base url of the auth service the sweep asks whether a user still exists. |
+| `INTERNAL_JWT_TTL` | `10` | Lifetime in seconds of the token used for those requests. |
+| `DELETED_USER_SWEEP_BATCH_SIZE` | `500` | Number of user ids loaded from the database per batch. |
+| `DELETED_USER_SWEEP_RATE_LIMIT` | `10` | Auth service requests per second. Set to `0` to disable the delay. |
+
+In the NixOS module the sweep is a oneshot service with a timer, enabled through `academy.backend.skills.sweepDeletedUsers.enable` (`interval`, default `daily`, and `randomizedDelay`, default `5m`).
 
 ## PyCharm configuration
 Configure the Python interpreter:
