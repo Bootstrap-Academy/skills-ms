@@ -92,8 +92,26 @@ class Base(metaclass=DeclarativeMeta):
 
 
 class DB:
-    def __init__(self, url: str, **kwargs: Any):
-        self.engine: AsyncEngine = create_async_engine(url, **kwargs)
+    def __init__(self, url: str, *, reserve_admission_connection: bool = False, **kwargs: Any):
+        self.admission_engine: AsyncEngine | None = None
+        if reserve_admission_connection:
+            if "pool" in kwargs or "poolclass" in kwargs:
+                raise ValueError("Course admission requires separate managed connection pools")
+            pool_size = kwargs.get("pool_size", 5)
+            max_overflow = kwargs.get("max_overflow", 10)
+            if pool_size < 1 or max_overflow < 0 or pool_size + max_overflow < 2:
+                raise ValueError("Course admission requires a finite connection pool with capacity of at least two")
+            # Reserve one of the existing slots, rather than allowing outer
+            # transactions to occupy every connection needed by fresh reads.
+            normal = {**kwargs, "pool_size": pool_size, "max_overflow": max_overflow}
+            if pool_size > 1:
+                normal["pool_size"] -= 1
+            else:
+                normal["max_overflow"] -= 1
+            self.engine = create_async_engine(url, **normal)
+            self.admission_engine = create_async_engine(url, **{**kwargs, "pool_size": 1, "max_overflow": 0})
+        else:
+            self.engine = create_async_engine(url, **kwargs)
         self._session: ContextVar[AsyncSession | None] = ContextVar("session", default=None)
         self._close_event: ContextVar[Event | None] = ContextVar("close_event", default=None)
 
@@ -103,6 +121,15 @@ class DB:
         logger.debug("creating tables")
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+
+    async def dispose(self) -> None:
+        """Release both pools after the service's database work has stopped."""
+
+        try:
+            await self.engine.dispose()
+        finally:
+            if self.admission_engine is not None:
+                await self.admission_engine.dispose()
 
     async def add(self, obj: T) -> T:
         """
@@ -202,6 +229,7 @@ def get_database() -> DB:
 
     return DB(
         url=settings.database_url,
+        reserve_admission_connection=True,
         pool_pre_ping=True,
         pool_recycle=settings.pool_recycle,
         pool_size=settings.pool_size,

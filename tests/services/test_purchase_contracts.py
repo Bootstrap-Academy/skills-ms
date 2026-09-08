@@ -12,9 +12,9 @@ import pytest
 from fastapi import HTTPException
 from httpx import AsyncClient
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine
 
 from api.database import Base, db, db_context, filter_by
+from api.database.database import DB
 from api.models.course_access import CourseAccess
 from api.models.purchase import CoursePurchase, PurchaseUser
 from api.schemas.course import Course
@@ -32,32 +32,42 @@ FOO = "a8d95e0f-71ae-4c49-995e-695b7c93848c"
 async def ledger(mocker: Any) -> Any:
     if not os.getenv("T6_BACKEND_URL"):
         pytest.skip("requires isolated synthetic backend/PostgreSQL")
-    engine = create_async_engine(os.environ["T6_SOURCE_DB"])
-    mocker.patch.object(db, "engine", engine)
-    async with engine.begin() as schema_conn:
-        await schema_conn.run_sync(Base.metadata.drop_all)
-        await schema_conn.run_sync(Base.metadata.create_all)
-    mocker.patch.object(
-        InternalService,
-        "client",
-        new_callable=property,
-        fget=lambda _: AsyncClient(
-            base_url=os.environ["T6_BACKEND_URL"],
-            headers={
-                "Authorization": encode_jwt({"aud": "shop"}, timedelta(minutes=10), secret="synthetic-T6-local-test")
-            },
-        ),
-    )
-    mocker.patch("api.services.purchases.get_user_status", AsyncMock(return_value=200))
-    mocker.patch("api.services.user_deletion.clear_cache", AsyncMock())
-    conn = await asyncpg.connect(os.environ["T6_BACKEND_DB"])
-    await conn.execute(
-        "INSERT INTO coins(user_id,coins,withheld_coins) VALUES($1,100000,0) ON CONFLICT(user_id) DO UPDATE SET coins=100000",
-        UUID(FOO),
-    )
-    yield conn
-    await conn.close()
-    await engine.dispose()
+    source = DB(os.environ["T6_SOURCE_DB"], reserve_admission_connection=True)
+    conn = None
+    try:
+        mocker.patch.object(db, "engine", source.engine)
+        mocker.patch.object(db, "admission_engine", source.admission_engine)
+        async with source.engine.begin() as schema_conn:
+            await schema_conn.run_sync(Base.metadata.drop_all)
+            await schema_conn.run_sync(Base.metadata.create_all)
+        mocker.patch.object(
+            InternalService,
+            "client",
+            new_callable=property,
+            fget=lambda _: AsyncClient(
+                base_url=os.environ["T6_BACKEND_URL"],
+                headers={
+                    "Authorization": encode_jwt(
+                        {"aud": "shop"}, timedelta(minutes=10), secret="synthetic-T6-local-test"
+                    )
+                },
+            ),
+        )
+        mocker.patch("api.services.purchases.get_user_status", AsyncMock(return_value=200))
+        mocker.patch("api.services.user_deletion.clear_cache", AsyncMock())
+        conn = await asyncpg.connect(os.environ["T6_BACKEND_DB"])
+        await conn.execute(
+            "INSERT INTO coins(user_id,coins,withheld_coins) VALUES($1,100000,0) "
+            "ON CONFLICT(user_id) DO UPDATE SET coins=100000",
+            UUID(FOO),
+        )
+        yield conn
+    finally:
+        try:
+            if conn is not None:
+                await conn.close()
+        finally:
+            await source.dispose()
 
 
 def course() -> Course:

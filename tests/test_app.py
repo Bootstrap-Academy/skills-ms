@@ -79,10 +79,16 @@ async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> N
 
 async def test__on_shutdown(mocker: MockerFixture) -> None:
     fastapi_patch = mocker.patch("fastapi.FastAPI")
+    db_patch = mocker.patch("api.database.db")
+    db_patch.dispose = AsyncMock()
 
-    _, on_shutdown = get_decorated_function(fastapi_patch, "on_event", "shutdown")
+    module, on_shutdown = get_decorated_function(fastapi_patch, "on_event", "shutdown")
+    task = asyncio.create_task(asyncio.Event().wait())
+    module.app.state.purchase_recovery = task
 
     await on_shutdown()
+    assert task.cancelled()
+    db_patch.dispose.assert_awaited_once_with()
 
 
 async def test__status(client: AsyncClient) -> None:

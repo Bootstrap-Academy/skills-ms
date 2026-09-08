@@ -76,7 +76,11 @@ async def get_owned_courses(user_id: str) -> set[str]:
         .where(models.CourseAccess.user_id == user_id)
         .union(select(models.LastWatch.course_id).where(models.LastWatch.user_id == user_id))
     )
-    async with AsyncSession(db.engine) as session:
+    # Only this short SELECT uses the reserved pool. It never needs the outer
+    # request pool, whose slots can all be retained by waiting transactions.
+    if db.admission_engine is None:
+        raise RuntimeError("Committed course admission pool is unavailable")
+    async with AsyncSession(db.admission_engine) as session:
         return set((await session.execute(query)).scalars())
 
 

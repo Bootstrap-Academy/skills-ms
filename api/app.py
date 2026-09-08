@@ -73,8 +73,12 @@ async def on_startup() -> None:
 
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
-    if task := getattr(app.state, "purchase_recovery", None):
-        task.cancel()
+    try:
+        if task := getattr(app.state, "purchase_recovery", None):
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+    finally:
+        await db.dispose()
 
 
 @app.head("/status", include_in_schema=False)
