@@ -111,6 +111,8 @@ async def offer(user_id: str, course: Course) -> dict[str, Any]:
                 response.status_code if response.status_code in (409, 412) else 503, "Offer unavailable"
             )
         result = response.json()
+    if result["state"] != "offered":
+        return cast(dict[str, Any], result)
     await db.add(
         CoursePurchase(
             id=result["offer"]["id"],
@@ -216,6 +218,11 @@ async def deliver(order_id: str) -> None:
         if row.state == "failed":
             row.active_key = None
         if row.state == "paid" and outcome.get("confirmation_smtp_accepted_at"):
+            deadline = outcome.get("provision_deadline")
+            if deadline and datetime.now(timezone.utc) >= datetime.fromisoformat(deadline.replace("Z", "+00:00")):
+                row.state = "review"
+                await db.commit()
+                return
             if not await db.exists(filter_by(CourseAccess, user_id=row.user_id, course_id=row.course_id)):
                 await CourseAccess.create(row.user_id, row.course_id)
             row.state = "fulfilled"
