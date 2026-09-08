@@ -2,6 +2,7 @@ from .bookmarks import SubSkillBookmark
 from .course_access import CourseAccess
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
+from .purchase import CoursePurchase, PurchaseUser
 from .root_skill import RootSkill
 from .skill_course import SkillCourse
 from .sub_skill import SubSkill, SubSkillDependency
@@ -10,6 +11,8 @@ from .xp import XP
 
 
 __all__ = [
+    "CoursePurchase",
+    "PurchaseUser",
     "CourseAccess",
     "LastWatch",
     "LectureProgress",

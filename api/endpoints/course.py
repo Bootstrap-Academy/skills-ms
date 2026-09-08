@@ -22,13 +22,12 @@ from api.exceptions.course import (
 from api.redis import redis
 from api.schemas.course import Course, CourseSummary, Lecture, NextUnseenResponse, UserCourse
 from api.schemas.user import User
-from api.services.auth import get_email
+from api.services import purchases
 from api.services.courses import COURSES
-from api.services.shop import has_premium, spend_coins
+from api.services.shop import has_premium
 from api.settings import settings
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
-from api.utils.email import BOUGHT_COURSE
 
 
 router = APIRouter()
@@ -295,28 +294,15 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
 @router.post(
     "/course_access/{course_id}",
     dependencies=[require_verified_email],
-    responses=verified_responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException, NotEnoughCoinsError),
+    responses=verified_responses(
+        dict[str, Any], CourseIsFreeException, AlreadyPurchasedCourseException, NotEnoughCoinsError
+    ),
 )
-async def buy_course(user: User = user_auth, course: Course = get_course) -> Any:
-    """
-    Buy access to a course for a user.
+async def buy_course(data: purchases.Acceptance, user: User = user_auth, course: Course = get_course) -> Any:
+    """Accept the exact authenticated course offer; uncertain commands recover by order ID."""
+    return await purchases.buy(user.id, course, data)
 
-    *Requirements:* **VERIFIED**
-    """
 
-    if course.free:
-        raise CourseIsFreeException
-
-    if await db.exists(filter_by(models.CourseAccess, user_id=user.id, course_id=course.id)):
-        raise AlreadyPurchasedCourseException
-
-    if not await spend_coins(user.id, course.price, f"Course '{course.title}'"):
-        raise NotEnoughCoinsError
-
-    await models.CourseAccess.create(user.id, course.id)
-    if email := await get_email(user.id):
-        await BOUGHT_COURSE.send(email, title=course.title)
-
-    await clear_cache("course_access")
-
-    return True
+@router.post("/course_access/{course_id}/offer", dependencies=[require_verified_email])
+async def course_offer(user: User = user_auth, course: Course = get_course) -> Any:
+    return await purchases.offer(user.id, course)

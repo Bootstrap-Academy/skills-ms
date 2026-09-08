@@ -11,6 +11,8 @@ TIMESTAMP = datetime(2026, 9, 3, 12, 34, 56, tzinfo=timezone.utc)
 
 # maps every field of the export to the model it is read from
 EXPORTED_MODELS: dict[str, Any] = {
+    "purchases": models.CoursePurchase,
+    "purchase_user": models.PurchaseUser,
     "course_access": models.CourseAccess,
     "last_watch": models.LastWatch,
     "lecture_progress": models.LectureProgress,
@@ -67,3 +69,32 @@ async def test__export_user_data__unknown_user() -> None:
         export = await export_user_data("user")
 
     assert export == UserDataExport(course_access=[], last_watch=[], lecture_progress=[], sub_skill_bookmarks=[], xp=[])
+
+
+async def test__export_retained_purchase_evidence_is_owner_bound() -> None:
+    async with db_context():
+        for owner in ["user", "other_user"]:
+            await db.add(models.PurchaseUser(user_id=owner, deleted=True))
+            await db.add(
+                models.CoursePurchase(
+                    id=f"purchase-{owner}",
+                    user_id=owner,
+                    course_id="course",
+                    state="review",
+                    active_key=f"{owner}:course",
+                    offer={"recipient": f"{owner}@example.invalid"},
+                    acceptance={"order_id": f"purchase-{owner}"},
+                    result={"state": "paid"},
+                    created_at=TIMESTAMP,
+                    fulfillment=None,
+                    reported=False,
+                )
+            )
+    async with db_context():
+        export = await export_user_data("user")
+    assert export.purchase_user == [{"user_id": "user", "deleted": True}]
+    assert len(export.purchases) == 1
+    assert export.purchases[0]["id"] == "purchase-user"
+    assert export.purchases[0]["result"] == {"state": "paid"}
+    assert export.purchases[0]["fulfillment"] is None
+    assert "other_user" not in export.json()

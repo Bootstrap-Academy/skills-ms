@@ -3,6 +3,7 @@
 See [Auth Microservice](/auth/docs).
 """
 
+import asyncio
 from typing import Awaitable, Callable, TypeVar
 
 from fastapi import FastAPI, HTTPException, Request
@@ -67,13 +68,26 @@ async def rollback_on_exception(request: Request, exc: HTTPException) -> Respons
 @app.on_event("startup")
 async def on_startup() -> None:
     await clear_cache("courses")
+    app.state.purchase_recovery = asyncio.create_task(purchase_recovery())
 
 
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
-    pass
+    if task := getattr(app.state, "purchase_recovery", None):
+        task.cancel()
 
 
 @app.head("/status", include_in_schema=False)
 async def status() -> None:
     pass
+
+
+async def purchase_recovery() -> None:
+    from api.services.purchases import recover
+
+    while True:
+        try:
+            await recover()
+        except Exception:
+            logger.exception("Course purchase recovery unavailable")
+        await asyncio.sleep(30)

@@ -5,7 +5,7 @@ from api.database import db, delete
 from api.utils.cache import clear_cache
 
 
-# all models that contain data which belongs to a specific user
+# Live service data removed on account erasure. Purchase evidence is retained separately.
 USER_MODELS: list[Any] = [
     models.CourseAccess,
     models.LastWatch,
@@ -14,12 +14,26 @@ USER_MODELS: list[Any] = [
     models.XP,
 ]
 
+# Durable claims and deletion tombstones must not recreate service access.
+RETAINED_USER_MODELS: list[Any] = [models.CoursePurchase, models.PurchaseUser]
+
 # all cache prefixes that contain data which belongs to a specific user
 USER_CACHE_PREFIXES = ["course_access", "lecture_progress", "skills", "user", "xp"]
 
 
 async def delete_user_data(user_id: str) -> None:
-    """Delete all data of a user."""
+    """Remove live service data and retain purchase obligations with a deletion tombstone."""
+
+    from api.database import filter_by
+    from api.models.purchase import CoursePurchase
+    from api.services.purchases import lock_user
+
+    guard = await lock_user(user_id)
+    guard.deleted = True
+    for purchase in await db.all(
+        filter_by(CoursePurchase, user_id=user_id).where(CoursePurchase.state.in_(["prepared", "paid"]))
+    ):
+        purchase.state = "review"
 
     for model in USER_MODELS:
         await db.exec(delete(model).where(model.user_id == user_id))

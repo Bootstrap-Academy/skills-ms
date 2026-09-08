@@ -12,6 +12,14 @@ async def export_user_data(user_id: str) -> UserDataExport:
     """
 
     return UserDataExport(
+        purchases=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in await db.all(filter_by(models.CoursePurchase, user_id=user_id))
+        ],
+        purchase_user=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in await db.all(filter_by(models.PurchaseUser, user_id=user_id))
+        ],
         course_access=[
             CourseAccess(course_id=row.course_id)
             async for row in await db.stream(filter_by(models.CourseAccess, user_id=user_id))

@@ -1,3 +1,4 @@
+import asyncio
 from typing import Any, Callable
 from unittest.mock import AsyncMock, MagicMock
 
@@ -71,6 +72,9 @@ async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> N
 
     db_patch.create_tables.assert_not_called()  # use alembic migrations instead
     clear_cache_patch.assert_called_once_with("courses")
+    task = module.app.state.purchase_recovery
+    task.cancel()
+    await asyncio.gather(task, return_exceptions=True)
 
 
 async def test__on_shutdown(mocker: MockerFixture) -> None:

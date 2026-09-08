@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -35,6 +36,8 @@ class UserDataExport(BaseModel):
     All points in time are ISO 8601 timestamps in UTC.
     """
 
+    purchases: list[dict[str, Any]] = Field(default_factory=list)
+    purchase_user: list[dict[str, Any]] = Field(default_factory=list)
     course_access: list[CourseAccess] = Field(description="Courses the user has unlocked")
     last_watch: list[LastWatch] = Field(description="When the user last watched each course")
     lecture_progress: list[LectureProgress] = Field(description="Lectures the user has completed")
