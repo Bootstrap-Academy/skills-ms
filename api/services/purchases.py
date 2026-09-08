@@ -21,7 +21,6 @@ from api.models.purchase import CoursePurchase, PurchaseUser
 from api.schemas.course import Course
 from api.services.auth import get_user_status
 from api.services.internal import InternalService
-from api.utils.cache import clear_cache
 
 
 logger = get_logger(__name__)
@@ -234,7 +233,6 @@ async def deliver(order_id: str) -> None:
                 "order_id": row.id,
                 "ledger_id": row.id if row.offer["product"]["coins"] else None,
             }
-            await clear_cache("course_access")
     # Transport, 5xx, malformed and auth failures retain the exact prepared command.
     await db.commit()
     if row.state == "fulfilled":

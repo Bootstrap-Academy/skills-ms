@@ -5,6 +5,8 @@ from secrets import token_urlsafe
 from typing import Any, Iterable
 
 from fastapi import APIRouter, Depends, Header, Query, Response
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from api import models
 from api.auth import public_auth, require_verified_email, user_auth
@@ -65,11 +67,17 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
     raise NoCourseAccessException
 
 
-@redis_cached("course_access", "user_id")
 async def get_owned_courses(user_id: str) -> set[str]:
-    return {ca.course_id async for ca in await db.stream(filter_by(models.CourseAccess, user_id=user_id))} | {
-        lw.course_id async for lw in await db.stream(filter_by(models.LastWatch, user_id=user_id))
-    }
+    # Admission must see committed paid rights, not an older Redis value or
+    # the request transaction's repeatable-read snapshot. A delayed lookup
+    # from before purchase cannot publish an authoritative negative afterward.
+    query = (
+        select(models.CourseAccess.course_id)
+        .where(models.CourseAccess.user_id == user_id)
+        .union(select(models.LastWatch.course_id).where(models.LastWatch.user_id == user_id))
+    )
+    async with AsyncSession(db.engine) as session:
+        return set((await session.execute(query)).scalars())
 
 
 async def get_unlocked_courses(user: User) -> set[str]:

@@ -11,6 +11,7 @@ import asyncpg
 import pytest
 from fastapi import HTTPException
 from httpx import AsyncClient
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from api.database import Base, db, db_context, filter_by
@@ -48,7 +49,6 @@ async def ledger(mocker: Any) -> Any:
         ),
     )
     mocker.patch("api.services.purchases.get_user_status", AsyncMock(return_value=200))
-    mocker.patch("api.services.purchases.clear_cache", AsyncMock())
     mocker.patch("api.services.user_deletion.clear_cache", AsyncMock())
     conn = await asyncpg.connect(os.environ["T6_BACKEND_DB"])
     await conn.execute(
@@ -198,3 +198,73 @@ async def test_older_snapshot_cannot_charge_after_other_order_completed(ledger: 
         )
         == 1
     )
+
+
+async def test_admission_reads_paid_rights_beyond_callers_old_snapshot(ledger: Any) -> None:
+    from api.endpoints.course import get_owned_courses
+
+    c = course()
+    q = await quote(c)
+    snapshot_ready, committed = asyncio.Event(), asyncio.Event()
+
+    async def older_reader() -> None:
+        async with db_context():
+            if db.engine.dialect.name == "postgresql":
+                await db.exec(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ"))
+            else:
+                assert db.engine.dialect.name == "mysql"
+                assert (await db.exec(text("SELECT @@tx_isolation"))).scalar() == "REPEATABLE-READ"
+            assert not await db.exists(filter_by(CourseAccess, user_id=FOO, course_id=c.id))
+            snapshot_ready.set()
+            await committed.wait()
+            # Prove this caller still has the earlier database snapshot, then
+            # exercise the exact shared reader used by course/list admission.
+            assert not await db.exists(filter_by(CourseAccess, user_id=FOO, course_id=c.id))
+            assert c.id in await get_owned_courses(FOO)
+
+    task = asyncio.create_task(older_reader())
+    await snapshot_ready.wait()
+    try:
+        result = await buy(c, accept(q))
+        assert result["state"] == "fulfilled", result
+    finally:
+        committed.set()
+    await task
+    assert await ledger.fetchval("SELECT count(*) FROM transactions WHERE id=$1", UUID(q["offer"]["id"])) == 1
+
+
+async def test_admission_observes_deletion_beyond_callers_old_positive_snapshot(ledger: Any) -> None:
+    from api.endpoints.course import get_owned_courses
+
+    c = course()
+    q = await quote(c)
+    assert (await buy(c, accept(q)))["state"] == "fulfilled"
+    snapshot_ready, deleted = asyncio.Event(), asyncio.Event()
+
+    async def older_reader() -> None:
+        async with db_context():
+            if db.engine.dialect.name == "postgresql":
+                await db.exec(text("SET TRANSACTION ISOLATION LEVEL REPEATABLE READ"))
+            else:
+                assert db.engine.dialect.name == "mysql"
+                assert (await db.exec(text("SELECT @@tx_isolation"))).scalar() == "REPEATABLE-READ"
+            assert await db.exists(filter_by(CourseAccess, user_id=FOO, course_id=c.id))
+            snapshot_ready.set()
+            await deleted.wait()
+            assert await db.exists(filter_by(CourseAccess, user_id=FOO, course_id=c.id))
+            assert c.id not in await get_owned_courses(FOO)
+
+    task = asyncio.create_task(older_reader())
+    await snapshot_ready.wait()
+    try:
+        async with db_context():
+            await delete_user_data(FOO)
+    finally:
+        deleted.set()
+    await task
+    await purchases.recover()
+    async with db_context():
+        guard = await db.get(PurchaseUser, user_id=FOO)
+        assert guard and guard.deleted
+        assert c.id not in await get_owned_courses(FOO)
+    assert await ledger.fetchval("SELECT count(*) FROM transactions WHERE id=$1", UUID(q["offer"]["id"])) == 1
