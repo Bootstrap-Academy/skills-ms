@@ -3,8 +3,9 @@
 These transport-authorized awards do not grant login or purchase authority.
 An exact completed receipt precedes recipient lookup, including after erasure.
 """
+
 import json
-from typing import Any
+from typing import TYPE_CHECKING, Any
 from uuid import UUID
 
 from fastapi import HTTPException
@@ -12,14 +13,20 @@ from pydantic import BaseModel, conint
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, filter_by
-from api.models import SubSkill, XP, XPOperation
+from api.models import XP, SubSkill, XPOperation
 from api.services.auth import get_user_status
 from api.services.purchases import lock_user
 from api.utils.utc import utcnow
 
 
+if TYPE_CHECKING:
+    XPAmount = int
+else:
+    XPAmount = conint(strict=True, ge=-9223372036854775808, le=9223372036854775807)
+
+
 class XPAward(BaseModel):
-    xp: conint(strict=True, ge=-9223372036854775808, le=9223372036854775807)
+    xp: XPAmount
     earning_id: UUID
 
     class Config:
@@ -36,7 +43,9 @@ async def apply_xp(operation: str, user_id: str, skill_id: str, award: XPAward) 
             await db.session.flush()
     except IntegrityError:
         pass
-    row = await db.first(filter_by(XPOperation, id=operation).with_for_update().execution_options(populate_existing=True))
+    row: XPOperation | None = await db.first(
+        filter_by(XPOperation, id=operation).with_for_update().execution_options(populate_existing=True)
+    )
     if row is None:
         raise HTTPException(503, "Benefit receipt unavailable")
     if row.request != request:

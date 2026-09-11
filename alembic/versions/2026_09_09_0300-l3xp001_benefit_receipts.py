@@ -1,6 +1,9 @@
 """Prospective exact XP receipts; no inference about historic awards."""
+
 from alembic import op
+
 import sqlalchemy as sa
+
 
 revision = "l3xp001"
 down_revision = "l3courseright001"

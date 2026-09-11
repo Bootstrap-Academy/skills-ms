@@ -1,8 +1,11 @@
 """Minimum observed course entitlement, independent of erased learning history."""
+
 from datetime import datetime
 from typing import Any
+
 from sqlalchemy import JSON, Column, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped
+
 from api.database import Base
 from api.database.database import UTCDateTime
 

@@ -167,7 +167,8 @@ async def test_source_completion_report_survives_backend_review(ledger: Any, moc
     with pytest.raises(OSError):
         await buy(c, a)
     await ledger.execute(
-        "UPDATE purchase_progress SET state='review',review_reason='synthetic deletion review after source completion' WHERE order_id=$1",
+        "UPDATE purchase_progress SET state='review',"
+        "review_reason='synthetic deletion review after source completion' WHERE order_id=$1",
         a.order_id,
     )
     mocker.patch.object(purchases, "report", original)

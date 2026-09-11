@@ -1,9 +1,11 @@
 """Owning receipt/effect controls with only physical backend status stubbed."""
+
 from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
+from pytest_mock import MockerFixture
 
 from api import models
 from api.database import db, db_context, filter_by
@@ -12,7 +14,7 @@ from api.services.user_deletion import delete_user_data
 from api.services.user_export import export_user_data
 
 
-async def seed(mocker):
+async def seed(mocker: MockerFixture) -> tuple[str, str, XPAward]:
     mocker.patch("api.services.benefits.get_user_status", AsyncMock(return_value=200))
     mocker.patch("api.services.user_deletion.clear_cache", AsyncMock())
     async with db_context():
@@ -20,7 +22,7 @@ async def seed(mocker):
     return str(uuid4()), str(uuid4()), XPAward(xp=17, earning_id=uuid4())
 
 
-async def test__reply_loss_replay_and_erasure_preserve_receipt_without_new_xp(mocker):
+async def test__reply_loss_replay_and_erasure_preserve_receipt_without_new_xp(mocker: MockerFixture) -> None:
     operation, user, award = await seed(mocker)
     async with db_context():
         result = await apply_xp(operation, user, "skill", award)
@@ -29,7 +31,9 @@ async def test__reply_loss_replay_and_erasure_preserve_receipt_without_new_xp(mo
         assert await models.XP.get_user_skill_xp(user, "skill") == 17
     async with db_context():
         await delete_user_data(user)
-    unavailable = mocker.patch("api.services.benefits.get_user_status", AsyncMock(side_effect=AssertionError("Exact receipt first")))
+    unavailable = mocker.patch(
+        "api.services.benefits.get_user_status", AsyncMock(side_effect=AssertionError("Exact receipt first"))
+    )
     async with db_context():
         assert await apply_xp(operation, user, "skill", award) == result
         assert await models.XP.get_user_skill_xp(user, "skill") == 0
@@ -39,7 +43,7 @@ async def test__reply_loss_replay_and_erasure_preserve_receipt_without_new_xp(mo
     unavailable.assert_not_called()
 
 
-async def test__failed_local_transaction_commits_neither_receipt_nor_effect(mocker):
+async def test__failed_local_transaction_commits_neither_receipt_nor_effect(mocker: MockerFixture) -> None:
     operation, user, award = await seed(mocker)
     with pytest.raises(RuntimeError):
         async with db_context():
@@ -57,7 +61,7 @@ async def test__failed_local_transaction_commits_neither_receipt_nor_effect(mock
         assert await models.XP.get_user_skill_xp(user, "skill") == 17
 
 
-async def test__changed_payload_and_remote_unavailability_do_not_apply_or_invent_erasure(mocker):
+async def test__changed_payload_and_remote_unavailability_do_not_apply_or_invent_erasure(mocker: MockerFixture) -> None:
     operation, user, award = await seed(mocker)
     async with db_context():
         await apply_xp(operation, user, "skill", award)
@@ -83,11 +87,13 @@ async def test__changed_payload_and_remote_unavailability_do_not_apply_or_invent
         assert await models.XP.get_user_skill_xp("unavailable", "skill") == 17
 
 
-async def test__local_erasure_marker_is_distinct_from_remote_unavailability(mocker):
+async def test__local_erasure_marker_is_distinct_from_remote_unavailability(mocker: MockerFixture) -> None:
     operation, user, award = await seed(mocker)
     async with db_context():
         await delete_user_data(user)
-    status = mocker.patch("api.services.benefits.get_user_status", AsyncMock(side_effect=AssertionError("Local marker owns this fact")))
+    status = mocker.patch(
+        "api.services.benefits.get_user_status", AsyncMock(side_effect=AssertionError("Local marker owns this fact"))
+    )
     async with db_context():
         result = await apply_xp(operation, user, "skill", award)
         assert result["state"] == "recipient_erased" and result["applied"] is False
@@ -97,7 +103,7 @@ async def test__local_erasure_marker_is_distinct_from_remote_unavailability(mock
     status.assert_not_called()
 
 
-async def test__zero_distinct_awards_and_unkeyed_writer_share_current_counter(mocker):
+async def test__zero_distinct_awards_and_unkeyed_writer_share_current_counter(mocker: MockerFixture) -> None:
     operation, user, award = await seed(mocker)
     async with db_context():
         assert (await apply_xp(operation, user, "skill", XPAward(xp=0, earning_id=award.earning_id)))["applied"]

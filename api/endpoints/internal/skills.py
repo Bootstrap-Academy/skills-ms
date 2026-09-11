@@ -8,9 +8,9 @@ from api import models
 from api.database import db, filter_by, select
 from api.exceptions.skill import SkillNotFoundException
 from api.schemas.skill import SubSkill
+from api.services.benefits import XPAward, apply_xp
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
-from api.services.benefits import XPAward, apply_xp
 
 
 router = APIRouter()

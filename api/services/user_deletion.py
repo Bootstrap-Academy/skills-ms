@@ -15,7 +15,13 @@ USER_MODELS: list[Any] = [
 ]
 
 # Durable claims and deletion tombstones must not recreate service access.
-RETAINED_USER_MODELS: list[Any] = [models.CoursePurchase, models.PurchaseUser, models.RetainedCourseRight, models.CourseRightGrant, models.XPOperation]
+RETAINED_USER_MODELS: list[Any] = [
+    models.CoursePurchase,
+    models.PurchaseUser,
+    models.RetainedCourseRight,
+    models.CourseRightGrant,
+    models.XPOperation,
+]
 
 # all cache prefixes that contain data which belongs to a specific user
 USER_CACHE_PREFIXES = ["course_access", "lecture_progress", "skills", "user", "xp"]
@@ -30,11 +36,14 @@ async def delete_user_data(user_id: str) -> None:
 
     guard = await lock_user(user_id)
     from api.services.retained_rights import preserve_before_erasure
+
     await preserve_before_erasure(user_id)
     guard.deleted = True
     for purchase in await db.all(
-        filter_by(CoursePurchase, user_id=user_id).where(CoursePurchase.state.in_(["prepared", "paid"]))
-        .with_for_update().execution_options(populate_existing=True)
+        filter_by(CoursePurchase, user_id=user_id)
+        .where(CoursePurchase.state.in_(["prepared", "paid"]))
+        .with_for_update()
+        .execution_options(populate_existing=True)
     ):
         purchase.state = "review"
 

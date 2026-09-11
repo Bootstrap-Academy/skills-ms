@@ -8,6 +8,7 @@ from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.future import select as sa_select
 from sqlalchemy.orm import DeclarativeMeta, registry, selectinload
+from sqlalchemy.schema import SchemaItem
 from sqlalchemy.sql import Executable
 from sqlalchemy.sql.expression import Delete
 from sqlalchemy.sql.expression import delete as sa_delete
@@ -85,7 +86,7 @@ class Base(metaclass=DeclarativeMeta):
     registry = registry()
     metadata = registry.metadata
 
-    __table_args__ = {"mysql_collate": "utf8mb4_bin"}
+    __table_args__: dict[str, str] | tuple[SchemaItem | dict[str, str], ...] = {"mysql_collate": "utf8mb4_bin"}
 
     def __init__(self, **kwargs: Any) -> None:
         self.registry.constructor(self, **kwargs)

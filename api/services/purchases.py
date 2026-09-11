@@ -48,7 +48,8 @@ async def lock_user(user_id: str) -> PurchaseUser:
     row = await db.first(
         filter_by(PurchaseUser, user_id=user_id).with_for_update().execution_options(populate_existing=True)
     )
-    assert row is not None
+    if row is None:
+        raise AssertionError
     return cast(PurchaseUser, row)
 
 
@@ -56,7 +57,10 @@ def product(course: Course) -> dict[str, Any]:
     facts = {
         "course_id": course.id,
         "course": json.loads(course.summary(None).json()),
-        "access": "Einzelzugang zu diesem Kurs gemäß dem hier wiedergegebenen Angebot und den beigefügten AGB; keine automatische Verlängerung.",
+        "access": (
+            "Einzelzugang zu diesem Kurs gemäß dem hier wiedergegebenen Angebot und den beigefügten AGB; "
+            "keine automatische Verlängerung."
+        ),
     }
     description = "\n".join(
         [
@@ -73,7 +77,8 @@ def product(course: Course) -> dict[str, Any]:
             "Gesamte Videodauer: "
             + str(sum(lecture.duration for section in course.sections for lecture in section.lectures))
             + " Sekunden.",
-            "Bereitstellung des Zugangs nach Vertragsbestätigung; die Bestellung bleibt bei ausstehender Bereitstellung zur Klärung erhalten.",
+            "Bereitstellung des Zugangs nach Vertragsbestätigung; "
+            "die Bestellung bleibt bei ausstehender Bereitstellung zur Klärung erhalten.",
         ]
     )
     revision = hashlib.sha256(json.dumps(facts, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
@@ -172,7 +177,8 @@ async def buy(user_id: str, course: Course, acceptance: Acceptance) -> dict[str,
 
     await deliver(order_id)
     row = await db.get(CoursePurchase, id=order_id)
-    assert row is not None
+    if row is None:
+        raise AssertionError
     return {"offer": row.offer, "state": row.state, "fulfillment": row.result}
 
 
@@ -184,7 +190,8 @@ async def deliver(order_id: str) -> None:
     row = await db.first(
         filter_by(CoursePurchase, id=order_id).with_for_update().execution_options(populate_existing=True)
     )
-    assert row is not None
+    if row is None:
+        raise AssertionError
     if row.state == "fulfilled":
         await report(row)
         return

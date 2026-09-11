@@ -1,7 +1,7 @@
 """Explicit limited-service course routes; no ordinary login or publication authority."""
 
-from hashlib import sha256
 import json
+from hashlib import sha256
 from pathlib import Path
 from secrets import token_urlsafe
 from typing import Any
@@ -10,6 +10,7 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
 from httpx import HTTPError
 from pydantic import ValidationError
 
+from . import course as courses
 from api.redis import redis
 from api.schemas.course import Course, Lecture
 from api.schemas.user import User
@@ -17,7 +18,7 @@ from api.services import purchases
 from api.services.courses import COURSES
 from api.services.internal import InternalService
 from api.settings import settings
-from . import course as courses
+
 
 router = APIRouter(prefix="/learning")
 
@@ -35,9 +36,13 @@ async def learning_subject(digest: str) -> User:
         value = response.json()
         if value is None:
             raise HTTPException(401, "Limited learning authority unavailable")
-        if (value.get("purpose") != "retained_learning" or value.get("ordinary_authority") is not False
-                or value.get("financial_authority") is not False or value.get("admin") is not False
-                or value.get("email_verified") is not True):
+        if (
+            value.get("purpose") != "retained_learning"
+            or value.get("ordinary_authority") is not False
+            or value.get("financial_authority") is not False
+            or value.get("admin") is not False
+            or value.get("email_verified") is not True
+        ):
             raise HTTPException(503, "Invalid scoped authority response")
         return User(id=value["subject"], email_verified=True, admin=False)
     except (HTTPError, ValueError, KeyError, TypeError, ValidationError):
@@ -93,8 +98,9 @@ async def next_unseen(course: Course = courses.get_course, user: User = learning
 
 
 @router.put("/courses/{course_id}/lectures/{lecture_id}/complete", dependencies=[learning_course_access])
-async def complete(course: Course = courses.get_course, lecture: Lecture = courses.get_lecture,
-                   user: User = learning_auth) -> Any:
+async def complete(
+    course: Course = courses.get_course, lecture: Lecture = courses.get_lecture, user: User = learning_auth
+) -> Any:
     # Preserve actual configured XP and the existing duplicate-completion guard.
     return await courses.complecte_lecture(course=course, lecture=lecture, user=user)
 
@@ -105,31 +111,41 @@ async def offer(course: Course = courses.get_course, user: User = learning_auth)
 
 
 @router.post("/course_access/{course_id}")
-async def buy(data: purchases.Acceptance, course: Course = courses.get_course,
-              user: User = learning_auth) -> Any:
+async def buy(data: purchases.Acceptance, course: Course = courses.get_course, user: User = learning_auth) -> Any:
     # The backend submission guard requires a separate exact claimant election.
     # The learning credential and this microservice's transport cannot supply it.
     return await purchases.buy(user.id, course, data)
 
 
 @router.get("/courses/{course_id}/lectures/{lecture_id}", dependencies=[learning_course_access])
-async def lecture_link(request: Request, course: Course = courses.get_course,
-                       lecture: Lecture = courses.get_lecture, user: User = learning_auth) -> Any:
+async def lecture_link(
+    request: Request,
+    course: Course = courses.get_course,
+    lecture: Lecture = courses.get_lecture,
+    user: User = learning_auth,
+) -> Any:
     path = settings.mp4_lectures.joinpath(course.id, lecture.id + ".mp4")
     if lecture.type != "mp4" or not path.is_file():
         raise HTTPException(404, "Lecture unavailable")
     token = token_urlsafe(64)
     name = f"{course.id}_{lecture.id}.mp4"
-    await redis.setex(f"learning_mp4:{token}:{name}", min(settings.stream_token_ttl, 900), json.dumps({
-        "path": str(path), "course": course.id, "subject": user.id,
-        "authority": sha256(request.headers["x-learning-key"].encode()).hexdigest(),
-    }))
+    await redis.setex(
+        f"learning_mp4:{token}:{name}",
+        min(settings.stream_token_ttl, 900),
+        json.dumps(
+            {
+                "path": str(path),
+                "course": course.id,
+                "subject": user.id,
+                "authority": sha256(request.headers["x-learning-key"].encode()).hexdigest(),
+            }
+        ),
+    )
     return f"{settings.public_base_url.rstrip('/')}/learning/lectures/{token}/{name}"
 
 
 @router.get("/lectures/{token}/{file}", include_in_schema=False)
-async def stream(token: str, file: str,
-                 range: str = Header("bytes=0-", regex=r"^bytes=\d{1,16}-(\d{1,16})?$")) -> Any:
+async def stream(token: str, file: str, range: str = Header("bytes=0-", regex=r"^bytes=\d{1,16}-(\d{1,16})?$")) -> Any:
     raw = await redis.get(f"learning_mp4:{token}:{file}")
     if raw is None:
         raise HTTPException(404, "Lecture link unavailable")

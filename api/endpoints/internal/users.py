@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import APIRouter, Response
 
 from api.schemas.user_export import UserDataExport
@@ -26,10 +28,12 @@ async def delete_user(user_id: str) -> Response:
 
 
 @router.post("/users/{user_id}/course-rights/{operation}")
-async def course_rights(user_id: str, operation: str, body: dict) -> dict | list:
+async def course_rights(user_id: str, operation: str, body: dict[str, Any]) -> dict[str, Any] | list[Any]:
     """Fixed internal retained-course evidence and exact continuation delivery."""
     from fastapi import HTTPException
+
     from api.services import retained_rights
+
     if operation == "list" and body == {}:
         return await retained_rights.list_rights(user_id)
     if operation == "original" and set(body) == {"right_id"} and isinstance(body["right_id"], str):

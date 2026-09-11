@@ -1,4 +1,5 @@
 """Exact benefit receipts survive removal of the mutable XP counter."""
+
 from datetime import datetime
 from typing import Any
 

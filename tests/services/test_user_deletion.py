@@ -18,7 +18,8 @@ async def _add_user_data(user_id: str) -> None:
 
 def test__user_models() -> None:
     assert {model.__tablename__ for model in [*USER_MODELS, *RETAINED_USER_MODELS]} == {
-        table.name for table in Base.metadata.tables.values()
+        table.name
+        for table in Base.metadata.tables.values()
         if any(key in table.columns for key in ("user_id", "source_user_id", "subject"))
     }
 
@@ -116,10 +117,28 @@ async def test__erasure_preserves_both_existing_access_predicates_without_histor
 async def test__later_erasure_withdraws_current_grant_without_duplicate_right(mocker: MockerFixture) -> None:
     mocker.patch("api.services.user_deletion.clear_cache", AsyncMock())
     async with db_context():
-        await db.add(models.RetainedCourseRight(id="original-right", source_user_id="old", course_id="course",
-            observed_at=utcnow(), original={"actual_prior_access": True}, current_subject="fresh", generation=1))
-        await db.add(models.CourseRightGrant(id="grant", right_id="original-right", subject="fresh",
-            request={"existing_right": "original-right"}, state="granted", result={"course_id": "course"}, created_at=utcnow()))
+        await db.add(
+            models.RetainedCourseRight(
+                id="original-right",
+                source_user_id="old",
+                course_id="course",
+                observed_at=utcnow(),
+                original={"actual_prior_access": True},
+                current_subject="fresh",
+                generation=1,
+            )
+        )
+        await db.add(
+            models.CourseRightGrant(
+                id="grant",
+                right_id="original-right",
+                subject="fresh",
+                request={"existing_right": "original-right"},
+                state="granted",
+                result={"course_id": "course"},
+                created_at=utcnow(),
+            )
+        )
         await db.add(models.CourseAccess(user_id="fresh", course_id="course"))
         await db.add(models.LastWatch(user_id="fresh", course_id="course", timestamp=utcnow()))
     async with db_context():
@@ -127,6 +146,7 @@ async def test__later_erasure_withdraws_current_grant_without_duplicate_right(mo
     async with db_context():
         right = await db.get(models.RetainedCourseRight, id="original-right")
         grant = await db.get(models.CourseRightGrant, id="grant")
+        assert right is not None and grant is not None
         assert right.current_subject is None and right.generation == 2
         assert right.original == {"actual_prior_access": True}
         assert grant.state == "withdrawn" and grant.result == {"course_id": "course"}

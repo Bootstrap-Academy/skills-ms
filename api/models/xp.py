@@ -28,14 +28,18 @@ class XP(Base):
     @classmethod
     async def add_xp(cls, user_id: str, skill_id: str, xp: int) -> None:
         from fastapi import HTTPException
+
         from api.services.purchases import lock_user
 
         if (await lock_user(user_id)).deleted:
             raise HTTPException(404, "Learning data was erased")
         # Every XP writer shares deletion's subject guard. Refresh after waiting;
         # an earlier InnoDB snapshot must not overwrite another committed award.
-        record = await db.first(filter_by(cls, user_id=user_id, skill_id=skill_id)
-                                .with_for_update().execution_options(populate_existing=True))
+        record = await db.first(
+            filter_by(cls, user_id=user_id, skill_id=skill_id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
         if record is None:
             record = XP(id=str(uuid4()), user_id=user_id, skill_id=skill_id, xp=0, last_update=utcnow())
             await db.add(record)

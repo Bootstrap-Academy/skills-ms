@@ -1,6 +1,10 @@
 """Prospectively preserve actual course-access observations before erasure."""
+
 from alembic import op
+
 import sqlalchemy as sa
+
+
 revision = "l3courseright001"
 down_revision = "l1course001"
 branch_labels = None
@@ -20,8 +24,12 @@ def upgrade() -> None:
         sa.UniqueConstraint("source_user_id", "course_id"),
         mysql_collate="utf8mb4_bin",
     )
-    op.create_index("ix_skills_retained_course_rights_source_user_id", "skills_retained_course_rights", ["source_user_id"])
-    op.create_index("ix_skills_retained_course_rights_current_subject", "skills_retained_course_rights", ["current_subject"])
+    op.create_index(
+        "ix_skills_retained_course_rights_source_user_id", "skills_retained_course_rights", ["source_user_id"]
+    )
+    op.create_index(
+        "ix_skills_retained_course_rights_current_subject", "skills_retained_course_rights", ["current_subject"]
+    )
     op.create_table(
         "skills_course_right_grants",
         sa.Column("id", sa.String(36), primary_key=True),
