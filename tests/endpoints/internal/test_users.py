@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 
 from httpx import AsyncClient
@@ -60,6 +61,24 @@ async def test__export_user__returns_the_data_of_the_user(auth_client: AsyncClie
 
     assert response.status_code == 200
     assert [xp["xp"] for xp in response.json()["xp"]] == [42]
+
+
+async def test__export_user__preserves_missing_and_recorded_xp_timestamps(auth_client: AsyncClient) -> None:
+    timestamp = datetime(2026, 9, 11, 12, 34, 56, 123456, tzinfo=timezone.utc)
+    async with db_context():
+        await db.add(models.XP(id="old-xp", user_id="user", skill_id="old", xp=42))
+        await db.add(models.XP(id="dated-xp", user_id="user", skill_id="dated", xp=7, last_update=timestamp))
+        await db.add(models.XP(id="foreign-xp", user_id="other", skill_id="foreign", xp=99))
+
+        response = await auth_client.get("/_internal/users/user/export")
+
+        assert response.status_code == 200
+        assert sorted(response.json()["xp"], key=lambda row: row["skill_id"]) == [
+            {"skill_id": "dated", "xp": 7, "last_update": timestamp.isoformat()},
+            {"skill_id": "old", "xp": 42, "last_update": None},
+        ]
+        old = await db.get(models.XP, id="old-xp")
+        assert old is not None and old.last_update is None
 
 
 async def test__export_user__unknown_user(auth_client: AsyncClient) -> None:

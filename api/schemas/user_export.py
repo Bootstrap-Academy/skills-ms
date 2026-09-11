@@ -27,7 +27,9 @@ class SubSkillBookmark(BaseModel):
 class XP(BaseModel):
     skill_id: str = Field(description="ID of the sub skill")
     xp: int = Field(description="Amount of XP the user has collected in this skill")
-    last_update: datetime = Field(description="Point in time at which the XP were last updated")
+    last_update: datetime | None = Field(
+        ..., description="Point in time at which the XP were last updated; null if no timestamp was recorded"
+    )
 
 
 class UserDataExport(BaseModel):
