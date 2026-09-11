@@ -38,6 +38,9 @@ class UserDataExport(BaseModel):
 
     purchases: list[dict[str, Any]] = Field(default_factory=list)
     purchase_user: list[dict[str, Any]] = Field(default_factory=list)
+    retained_course_rights: list[dict[str, Any]] = Field(default_factory=list)
+    course_right_grants: list[dict[str, Any]] = Field(default_factory=list)
+    xp_operations: list[dict[str, Any]] = Field(default_factory=list)
     course_access: list[CourseAccess] = Field(description="Courses the user has unlocked")
     last_watch: list[LastWatch] = Field(description="When the user last watched each course")
     lecture_progress: list[LectureProgress] = Field(description="Lectures the user has completed")

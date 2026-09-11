@@ -13,11 +13,14 @@ TIMESTAMP = datetime(2026, 9, 3, 12, 34, 56, tzinfo=timezone.utc)
 EXPORTED_MODELS: dict[str, Any] = {
     "purchases": models.CoursePurchase,
     "purchase_user": models.PurchaseUser,
+    "retained_course_rights": models.RetainedCourseRight,
+    "course_right_grants": models.CourseRightGrant,
     "course_access": models.CourseAccess,
     "last_watch": models.LastWatch,
     "lecture_progress": models.LectureProgress,
     "sub_skill_bookmarks": models.SubSkillBookmark,
     "xp": models.XP,
+    "xp_operations": models.XPOperation,
 }
 
 
@@ -40,7 +43,8 @@ async def _add_user_data(user_id: str) -> None:
 def test__export_covers_every_table_with_user_data() -> None:
     assert set(EXPORTED_MODELS) == set(UserDataExport.__fields__)
     assert {model.__tablename__ for model in EXPORTED_MODELS.values()} == {
-        table.name for table in Base.metadata.tables.values() if "user_id" in table.columns
+        table.name for table in Base.metadata.tables.values()
+        if any(name in table.columns for name in ("user_id", "source_user_id", "subject"))
     }
 
 
@@ -98,3 +102,32 @@ async def test__export_retained_purchase_evidence_is_owner_bound() -> None:
     assert export.purchases[0]["result"] == {"state": "paid"}
     assert export.purchases[0]["fulfillment"] is None
     assert "other_user" not in export.json()
+
+
+async def test__export_preserved_right_and_withdrawn_grant_remain_owner_bound() -> None:
+    async with db_context():
+        for owner in ["user", "other_user"]:
+            await db.add(models.RetainedCourseRight(
+                id=f"right-{owner}", source_user_id=owner, course_id="course",
+                observed_at=TIMESTAMP, original={"observed_started_course_access": True},
+                current_subject=None, generation=1,
+            ))
+            await db.add(models.CourseRightGrant(
+                id=f"grant-{owner}", right_id=f"right-{owner}", subject=f"successor-{owner}",
+                request={"original_right": f"right-{owner}"}, state="withdrawn",
+                result={"state": "granted"}, created_at=TIMESTAMP,
+            ))
+    async with db_context():
+        original_export = await export_user_data("user")
+        successor_export = await export_user_data("successor-user")
+        unrelated_export = await export_user_data("unrelated")
+    for export in [original_export, successor_export]:
+        assert [row["id"] for row in export.retained_course_rights] == ["right-user"]
+        assert export.retained_course_rights[0]["original"] == {"observed_started_course_access": True}
+        assert [row["id"] for row in export.course_right_grants] == ["grant-user"]
+        assert export.course_right_grants[0]["state"] == "withdrawn"
+        assert export.course_right_grants[0]["result"] == {"state": "granted"}
+        assert export.last_watch == []
+        assert "other_user" not in export.json()
+    assert unrelated_export.retained_course_rights == []
+    assert unrelated_export.course_right_grants == []
