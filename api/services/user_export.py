@@ -14,6 +14,14 @@ async def export_user_data(user_id: str) -> UserDataExport:
     """
 
     return UserDataExport(
+        room_states=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in await db.all(filter_by(models.RoomState, user_id=user_id))
+        ],
+        room_requests=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in await db.all(filter_by(models.RoomRequest, user_id=user_id))
+        ],
         xp_operations=[
             {column.name: getattr(row, column.name) for column in row.__table__.columns}
             for row in await db.all(filter_by(models.XPOperation, user_id=user_id))

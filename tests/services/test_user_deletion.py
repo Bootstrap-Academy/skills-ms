@@ -9,6 +9,28 @@ from api.utils.utc import utcnow
 
 
 async def _add_user_data(user_id: str) -> None:
+    await db.add(
+        models.RoomState(
+            user_id=user_id,
+            unit_id="intro",
+            revision=1,
+            state={"step": 1},
+            status="in_progress",
+            result=None,
+            updated_at=utcnow(),
+        )
+    )
+    await db.add(
+        models.RoomRequest(
+            user_id=user_id,
+            request_id="request",
+            unit_id="intro",
+            revision=1,
+            fingerprint="f" * 64,
+            progress={"revision": 1, "state": {"step": 1}, "status": "in_progress", "result": None},
+            created_at=utcnow(),
+        )
+    )
     await db.add(models.CourseAccess(user_id=user_id, course_id="course"))
     await db.add(models.LastWatch(user_id=user_id, course_id="course", timestamp=utcnow()))
     await db.add(models.LectureProgress(user_id=user_id, course_id="course", lecture_id="lecture", completed=utcnow()))

@@ -28,6 +28,10 @@ class Settings(BaseSettings):
 
     auth_url: str = ""
     shop_url: str = ""
+    # Operator-owned service origin; room content and client requests supply only IDs.
+    challenges_url: str = Field("http://127.0.0.1:8005", regex=r"^https?://[^?#@]+$")
+    rooms_enabled: bool = False
+    learning_rooms_exercise_refs: dict[str, dict[str, str]] = Field(default_factory=dict)
 
     lecture_xp: int = 10
 
