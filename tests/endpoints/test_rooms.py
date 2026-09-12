@@ -14,7 +14,9 @@ from pytest import MonkeyPatch
 from api import models
 from api.auth import user_auth
 from api.database import db, db_context, filter_by
+from api.endpoints import course as course_endpoints
 from api.endpoints.rooms import router
+from api.schemas.course import Course
 from api.schemas.rooms import Catalogue, CataloguePath, SaveState
 from api.schemas.user import User
 from api.services import rooms
@@ -93,6 +95,7 @@ async def room_client(content: Catalogue) -> AsyncIterator[httpx.AsyncClient]:
     app = FastAPI()
     app.dependency_overrides[user_auth.dependency] = identity
     app.include_router(router, dependencies=[Depends(session)])
+    app.include_router(course_endpoints.router, dependencies=[Depends(session)])
     async with httpx.AsyncClient(
         app=app, base_url="http://rooms.synthetic", headers={"Authorization": "Bearer subject-a"}
     ) as client:
@@ -556,3 +559,128 @@ async def test_repeat_proof_binds_attempt_owner_exercise_time_and_verdict(
     )
     suffix = "/submissions" if kind == "coding" else f"/attempts/{attempt}"
     assert str(requests[0].url).endswith(suffix)
+
+
+def linked_course(monkeypatch: MonkeyPatch, price: int = 0) -> Course:
+    value = Course(
+        id="synthetic-course",
+        title="Course",
+        description=None,
+        category=None,
+        language="de",
+        image=None,
+        authors=[],
+        price=price,
+        learning_goals=[],
+        requirements=[],
+        last_update=0,
+        learning_path_id="python-loops",
+    )
+    monkeypatch.setattr(rooms, "COURSES", {value.id: value})
+    monkeypatch.setattr(course_endpoints, "COURSES", {value.id: value})
+    return value
+
+
+async def test_course_outline_and_stream_share_private_progress_without_video_or_new_rewards(
+    room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch
+) -> None:
+    course = linked_course(monkeypatch)
+    response = await room_client.get(f"/courses/{course.id}/learning")
+    assert response.status_code == 200 and response.headers["Cache-Control"] == "private, no-store"
+    outline = response.json()
+    assert [unit["id"] for unit in outline["units"]] == ["intro", "exercise", "later"]
+    assert [unit["available"] for unit in outline["units"]] == [True, False, True]
+    assert not outline["completed"] and outline["next"]["unit"]["id"] == "intro"
+    assert (await room_client.get(f"/courses/{course.id}/next_unseen")).status_code == 404
+    assert course.sections == []
+    assert course.summary(set()).completed is None  # videos never assert completion of the linked path
+    saved = await room_client.put("/rooms/intro/state", json=payload(state={"draft": "only-a"}))
+    outline = (await room_client.get(f"/courses/{course.id}/learning")).json()
+    assert outline["units"][0]["status"] == "in_progress" and outline["next"] == saved.json()
+    other = await room_client.get(f"/courses/{course.id}/learning", headers={"Authorization": "Bearer subject-b"})
+    assert other.json()["next"]["progress"]["state"] == {}
+    assert "only-a" not in other.text
+    monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=True))
+    for uid, revision in (("intro", 1), ("exercise", 0), ("later", 0)):
+        assert (
+            await room_client.post(
+                f"/rooms/{uid}/complete", json=payload(revision, action="complete", answer={"answer": 6})
+            )
+        ).status_code == 200
+    finished = (await room_client.get(f"/courses/{course.id}/learning")).json()
+    assert finished["completed"] and finished["next"] is None and finished["empty_reason"] == "completed"
+    assert [unit["result"]["kind"] for unit in finished["units"]] == ["introduced", "solved", "introduced"]
+    async with db_context():
+        assert await rooms.course_completions(USER) == {"python-loops": True}
+        for model in (models.XP, models.LectureProgress, models.CourseAccess, models.LastWatch):
+            assert await db.all(filter_by(model, user_id=USER.id)) == []
+    # Starting a new review keeps the original course completion.
+    assert (await room_client.post("/rooms/intro/review", json=payload(2))).status_code == 200
+    assert (await room_client.get(f"/courses/{course.id}/learning")).json()["completed"] is True
+
+
+@pytest.mark.parametrize("admission", ["purchased", "historical", "premium"])
+async def test_paid_path_cannot_bypass_course_admission_and_keeps_existing_rights(
+    room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch, admission: str
+) -> None:
+    course = linked_course(monkeypatch, price=100)
+    premium = AsyncMock(return_value=False)
+    monkeypatch.setattr(rooms, "has_premium", premium)
+    monkeypatch.setattr(course_endpoints, "has_premium", premium)
+    for route in (f"/courses/{course.id}/learning", "/rooms/intro", "/rooms?continuous=true"):
+        assert (await room_client.get(route)).status_code == 403
+    assert (await room_client.put("/rooms/intro/state", json=payload(state={}))).status_code == 403
+    assert (await room_client.post("/rooms/intro/complete", json=payload(action="skip"))).status_code == 403
+    if admission == "premium":
+        premium.return_value = True
+    else:
+        async with db_context():
+            if admission == "purchased":
+                await db.add(models.CourseAccess(user_id=USER.id, course_id=course.id))
+            else:
+                await models.LastWatch.update(USER.id, course.id)
+    for route in (f"/courses/{course.id}/learning", "/rooms/intro", "/rooms?continuous=true"):
+        assert (await room_client.get(route)).status_code == 200
+
+
+async def test_selected_direction_resumes_own_work_then_other_chapters_and_repeats(
+    room_client: httpx.AsyncClient, content: Catalogue, monkeypatch: MonkeyPatch
+) -> None:
+    content.paths[0].direction_id = "python"
+    for path_id, direction in (("math", "math"), ("python-next", "python")):
+        other = content.units[0].copy(deep=True, update={"id": path_id, "path_id": path_id})
+        content.units.append(other)
+        content.paths.append(CataloguePath(id=path_id, title=other.title, units=[path_id], direction_id=direction))
+    assert (await room_client.get("/rooms?continuous=true&direction=math")).status_code == 404
+    assert (
+        await room_client.put("/rooms/python-next/state", json=payload(state={"draft": "continue me"}))
+    ).status_code == 200
+    resumed = (await room_client.get("/rooms?continuous=true")).json()
+    assert resumed["next"]["unit"]["id"] == "python-next"
+    assert {path["id"] for path in resumed["paths"]} == {"python-loops", "python-next", "math"}
+    # An explicit next request leaves that draft intact and continues the same subject.
+    following = (await room_client.get("/rooms?continuous=true&path=python-next&after=python-next")).json()
+    assert following["next"]["unit"]["id"] == "intro"
+    await finish_pilot(room_client, monkeypatch)
+    assert (
+        await room_client.post("/rooms/python-next/complete", json=payload(1, action="complete", answer={"answer": 6}))
+    ).status_code == 200
+    repeated = (await room_client.get("/rooms?continuous=true&path=python-next&after=python-next")).json()
+    assert repeated["next"]["review_available"] and repeated["next"]["unit"]["id"] == "intro"
+    assert repeated["path"]["direction_id"] == "python"
+    assert (await room_client.get("/rooms/math")).json()["progress"]["status"] == "new"
+
+
+async def test_guided_lesson_uses_exact_server_answers_without_claiming_solved_skill(
+    room_client: httpx.AsyncClient, content: Catalogue
+) -> None:
+    lesson = content.units[0]
+    lesson.room = "guided-lesson"
+    assert lesson.completion is not None
+    lesson.completion.answer = {"checks": {"variable": "name", "amount": 3}}
+    wrong = payload(action="complete", answer={"checks": {"variable": "name", "amount": True}})
+    assert (await room_client.post("/rooms/intro/complete", json=wrong)).status_code == 422
+    response = await room_client.post(
+        "/rooms/intro/complete", json=payload(action="complete", answer=lesson.completion.answer)
+    )
+    assert response.status_code == 200 and response.json()["progress"]["result"] == {"kind": "introduced"}

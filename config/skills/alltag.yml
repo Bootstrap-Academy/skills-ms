@@ -1,0 +1,9 @@
+name: Alltag
+dependencies:
+  - start
+skills:
+  prozentrechnung:
+    name: Prozentrechnung
+    dependencies: []
+    courses:
+      - everyday-maths

@@ -1,0 +1,34 @@
+title: "IT-Grundlagen: Computer wirklich verstehen"
+description: Baue dir Schritt für Schritt eine kleine digitale Arbeitsumgebung. Probiere aus, wie Computer Daten verarbeiten, Dateien speichern und Programme ausführen. Verbinde Geräte, erkunde den Weg zu einer Website und finde selbst heraus, warum etwas nicht funktioniert.
+category: IT-Grundlagen
+language: de
+image: null
+authors:
+  - name: Bootstrap Academy
+    url: https://bootstrap.academy
+price: 0
+learning_path_id: it-foundations
+learning_goals:
+  - Eingabe, Verarbeitung, Ausgabe und die Aufgaben der Hardware unterscheiden
+  - Bits, Texte und Pixelbilder an eigenen Beispielen verstehen
+  - Dateien speichern, wiederfinden und aus einer Sicherung wiederherstellen
+  - Programme, Arbeitsspeicher und Zugriffsrechte auseinanderhalten
+  - Eindeutige Abläufe mit Bedingungen und Wiederholungen bauen
+  - Netzwerk, Internet und den Aufruf einer Website nachvollziehen
+  - Fehler mit passenden Tests eingrenzen und die Lösung überprüfen
+requirements: []
+last_update: 1789171200
+sections: []
+translations:
+  en:
+    title: "IT foundations: understand computers"
+    description: Build a small digital workspace step by step. Explore how computers process data, save files and run programs. Connect devices, follow the journey to a website and find out for yourself why something is not working.
+    learning_goals:
+      - Distinguish input, processing, output and the roles of hardware
+      - Explore bits, text and pixel images using your own examples
+      - Save, find and restore files from a backup
+      - Distinguish programs, working memory and access permissions
+      - Build precise procedures with conditions and repetition
+      - Understand networks, the internet and loading a web page
+      - Narrow down faults with suitable tests and verify a repair
+    requirements: []

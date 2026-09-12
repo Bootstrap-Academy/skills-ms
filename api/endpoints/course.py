@@ -4,12 +4,10 @@ from pathlib import Path
 from secrets import token_urlsafe
 from typing import Any, Iterable
 
-from fastapi import APIRouter, Depends, Header, Query, Response
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from api import models
-from api.auth import public_auth, require_verified_email, user_auth
+from api.auth import get_token, public_auth, require_verified_email, user_auth
 from api.database import db, filter_by
 from api.exceptions.auth import user_responses, verified_responses
 from api.exceptions.course import (
@@ -23,9 +21,11 @@ from api.exceptions.course import (
 )
 from api.redis import redis
 from api.schemas.course import Course, CourseSummary, Lecture, NextUnseenResponse, UserCourse
+from api.schemas.rooms import CourseLearning
 from api.schemas.user import User
-from api.services import purchases
+from api.services import purchases, rooms
 from api.services.courses import COURSES
+from api.services.courses import get_owned_courses as get_owned_courses
 from api.services.shop import has_premium
 from api.settings import settings
 from api.utils.cache import clear_cache, redis_cached
@@ -65,23 +65,6 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
         return
 
     raise NoCourseAccessException
-
-
-async def get_owned_courses(user_id: str) -> set[str]:
-    # Admission must see committed paid rights, not an older Redis value or
-    # the request transaction's repeatable-read snapshot. A delayed lookup
-    # from before purchase cannot publish an authoritative negative afterward.
-    query = (
-        select(models.CourseAccess.course_id)
-        .where(models.CourseAccess.user_id == user_id)
-        .union(select(models.LastWatch.course_id).where(models.LastWatch.user_id == user_id))
-    )
-    # Only this short SELECT uses the reserved pool. It never needs the outer
-    # request pool, whose slots can all be retained by waiting transactions.
-    if db.admission_engine is None:
-        raise RuntimeError("Committed course admission pool is unavailable")
-    async with AsyncSession(db.admission_engine) as session:
-        return set((await session.execute(query)).scalars())
 
 
 async def get_unlocked_courses(user: User) -> set[str]:
@@ -146,8 +129,12 @@ async def list_courses(
         async for lecture in await db.stream(filter_by(models.LectureProgress, user_id=user.id)):
             completed_lectures.setdefault(lecture.course_id, set()).add(lecture.lecture_id)
 
+    learning_completed = await rooms.course_completions(user)
     return [
-        course.summary(None if completed_lectures is None else completed_lectures.get(course.id, set()))
+        course.summary(
+            None if completed_lectures is None else completed_lectures.get(course.id, set()),
+            learning_completed.get(course.learning_path_id or ""),
+        )
         for course in out
     ]
 
@@ -156,7 +143,24 @@ async def list_courses(
 async def get_course_summary(course: Course = get_course, user: User | None = public_auth) -> Any:
     """Return a summary of the course."""
 
-    return course.summary(None if user is None else await models.LectureProgress.get_completed(user.id, course.id))
+    learning_completed = await rooms.course_completions(user)
+    return course.summary(
+        None if user is None else await models.LectureProgress.get_completed(user.id, course.id),
+        learning_completed.get(course.learning_path_id or ""),
+    )
+
+
+@router.get(
+    "/courses/{course_id}/learning",
+    dependencies=[require_verified_email, has_course_access],
+    response_model=CourseLearning,
+)
+async def get_course_learning(
+    request: Request, response: Response, course: Course = get_course, user: User = user_auth
+) -> CourseLearning:
+    """One course outline backed by the same private state as the learning stream."""
+    response.headers["Cache-Control"] = "private, no-store"
+    return await rooms.course_learning(course, user, get_token(request))
 
 
 @router.post(
@@ -248,9 +252,10 @@ async def next_unseen_lecture(course: Course = get_course, user: User = user_aut
             if lecture.id not in already_watched:
                 return NextUnseenResponse(section=section, lecture=lecture)
 
-    section = course.sections[0]
-    lecture = section.lectures[0]
-    return NextUnseenResponse(section=section, lecture=lecture)
+    for section in course.sections:
+        if section.lectures:
+            return NextUnseenResponse(section=section, lecture=section.lectures[0])
+    raise LectureNotFoundException
 
 
 @router.put(
@@ -300,7 +305,13 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
 
     course_ids = {k for k, v in COURSES.items() if v.free}
     course_ids |= await get_unlocked_courses(user)
-    return [COURSES[course_id].summary(completed_lectures.get(course_id, set())) for course_id in course_ids]
+    learning_completed = await rooms.course_completions(user)
+    return [
+        COURSES[course_id].summary(
+            completed_lectures.get(course_id, set()), learning_completed.get(COURSES[course_id].learning_path_id or "")
+        )
+        for course_id in course_ids
+    ]
 
 
 @router.post(

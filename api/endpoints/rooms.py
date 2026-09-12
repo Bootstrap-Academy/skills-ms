@@ -33,9 +33,10 @@ async def next_room(
     path: str = "python-loops",
     after: str | None = None,
     continuous: bool = False,
+    direction: str | None = None,
     user: User = user_auth,
 ) -> Rooms:
-    return await rooms.next_room(user, get_token(request), path, after, continuous)
+    return await rooms.next_room(user, get_token(request), path, after, continuous, direction)
 
 
 @private.get("/{unit_id}", response_model=RoomEnvelope)
