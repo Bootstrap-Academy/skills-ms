@@ -1,10 +1,12 @@
 """Curated learning flow with private state; never awards XP or changes courses."""
 
 import json
+from datetime import datetime, timezone
 from functools import lru_cache
 from hashlib import sha256
 from pathlib import Path
 from typing import Any, Literal, cast
+from uuid import UUID
 
 import httpx
 from fastapi import HTTPException
@@ -27,6 +29,7 @@ from api.schemas.rooms import (
     RoomEnvelope,
     Rooms,
     SaveState,
+    StartReview,
 )
 from api.schemas.user import User
 from api.services.purchases import lock_user
@@ -71,8 +74,21 @@ async def read_states(user_id: str) -> dict[str, RoomState]:
 def progress(row: RoomState | None) -> Progress:
     if row is None:
         return Progress()
+    reviewing = row.review_id is not None
+    status = row.review_status if reviewing else row.status
+    result = row.result
+    if reviewing and status == "completed" and row.status == "skipped":
+        # Only introductions can originally be skipped. Completing their review
+        # introduces the concept without rewriting the original achievement.
+        result = {"kind": "introduced"}
     return Progress.parse_obj(
-        {"revision": row.revision, "state": row.state, "status": row.status, "result": row.result}
+        {
+            "revision": row.revision,
+            "state": row.state,
+            "status": status,
+            "result": result if status == "completed" else None,
+            "review_id": row.review_id,
+        }
     )
 
 
@@ -155,12 +171,14 @@ async def get_room(unit_id: str, user: User, token: str) -> RoomEnvelope:
     return RoomEnvelope(unit=unit.public(), progress=progress(states.get(unit.id)))
 
 
-async def next_room(user: User, token: str, path_id: str, after: str | None) -> Rooms:
+async def next_room(user: User, token: str, path_id: str, after: str | None, continuous: bool = False) -> Rooms:
     content = catalogue()
     states = await read_states(user.id)
     path = next((path for path in content.paths if path.id == path_id), None)
     if path is None or (after is not None and after not in path.units):
         raise HTTPException(404, "This learning path is unavailable")
+    if continuous:
+        return await continuous_room(content, states, user, token, path_id, after)
     start = path.units.index(after) + 1 if after is not None else 0
     ids = path.units[start:]
     if after is None:
@@ -196,10 +214,141 @@ async def next_room(user: User, token: str, path_id: str, after: str | None) -> 
     )
 
 
-def request_fingerprint(unit_id: str, data: SaveState | Complete) -> str:
-    payload = {"unit_id": unit_id, "operation": "save" if isinstance(data, SaveState) else "complete"}
+async def continuous_room(
+    content: Catalogue, states: dict[str, RoomState], user: User, token: str, path_id: str, after: str | None
+) -> Rooms:
+    paths = content.paths
+    index = next(i for i, path in enumerate(paths) if path.id == path_id)
+    ordered_paths = paths[index:] + paths[:index]
+    all_ids = [uid for path in ordered_paths for uid in path.units]
+    cursor = all_ids.index(after) + 1 if after is not None else 0
+    review_ids = all_ids[cursor:] + all_ids[:cursor]
+    blocked = False
+
+    async def available(uid: str) -> CatalogueUnit | None:
+        nonlocal blocked
+        try:
+            unit = find_unit(content, uid, states)
+            await challenge_status(unit, user, token)
+            return unit
+        except HTTPException as exc:
+            if exc.status_code not in (403, 404):
+                raise
+            blocked = blocked or exc.status_code == 403
+            return None
+
+    def response(unit: CatalogueUnit, start_review: bool = False) -> Rooms:
+        selected_path = next(path for path in paths if path.id == unit.path_id)
+        return Rooms(
+            paths=[LearningPath.parse_obj(path.dict(exclude={"units"})) for path in paths],
+            path=LearningPath.parse_obj(selected_path.dict(exclude={"units"})),
+            next=RoomEnvelope(
+                unit=unit.public(), progress=progress(states.get(unit.id)), review_available=start_review
+            ),
+        )
+
+    # Finish new learning before repeating completed material. A path boundary
+    # never sends the learner out of the stream; old GET callers retain their API.
+    for path in ordered_paths:
+        ids = path.units
+        if path.id == path_id and after is not None:
+            split = ids.index(after)
+            following = split + 1
+            ids = ids[following:] + ids[:split]
+        elif after is None:
+            ids = sorted(ids, key=lambda uid: 0 if uid in states and states[uid].status == "in_progress" else 1)
+        for uid in ids:
+            if uid in states and states[uid].status in ("completed", "skipped"):
+                continue
+            if unit := await available(uid):
+                return response(unit)
+    # Resume private repeat work, then cycle through available completed rooms.
+    # The cursor moves across paths and never implies a fixed type alternation.
+    for resume in (True, False):
+        for uid in review_ids:
+            row = states.get(uid)
+            if row is None or row.status not in ("completed", "skipped"):
+                continue
+            active = row.review_id is not None and row.review_status == "in_progress"
+            if active != resume or (active and uid == after):
+                continue
+            if unit := await available(uid):
+                return response(unit, start_review=not active)
+    # A one-room stream can still resume its only skipped working state.
+    if after is not None and (unit := await available(after)):
+        row = states.get(after)
+        return response(
+            unit,
+            start_review=row is not None
+            and row.status in ("completed", "skipped")
+            and row.review_status != "in_progress",
+        )
+    return Rooms(
+        paths=[LearningPath.parse_obj(path.dict(exclude={"units"})) for path in paths],
+        path=LearningPath.parse_obj(ordered_paths[0].dict(exclude={"units"})),
+        next=None,
+        empty_reason="prerequisites" if blocked else "unavailable",
+    )
+
+
+async def review_attempt_solved(unit: CatalogueUnit, user: User, token: str, row: RoomState, attempt_id: UUID) -> bool:
+    exercise = unit.exercise
+    if exercise is None or row.review_started_at is None:
+        return False
+    resource = {"multiple_choice": "multiple_choice", "matching": "matchings", "coding": "coding_challenges"}[
+        exercise.type
+    ]
+    path = f"/tasks/{exercise.task_id}/{resource}/{exercise.subtask_id}"
+    coding = exercise.type == "coding"
+    path += "/submissions" if coding else f"/attempts/{attempt_id}"
+    try:
+        async with httpx.AsyncClient(timeout=8, follow_redirects=False, trust_env=False) as client:
+            response = await client.get(
+                settings.challenges_url.rstrip("/") + path, headers={"Authorization": f"Bearer {token}"}
+            )
+        if response.status_code == 401:
+            raise HTTPException(401, "Please sign in again")
+        if response.status_code in (403, 404):
+            return False
+        if response.status_code != 200:
+            raise HTTPException(503, "The attempt could not be checked")
+        data = response.json()
+        if coding:
+            if not isinstance(data, list):
+                raise HTTPException(503, "The attempt could not be checked")
+            data = next((item for item in data if isinstance(item, dict) and item.get("id") == str(attempt_id)), None)
+        if not isinstance(data, dict) or data.get("id") != str(attempt_id):
+            return False
+        if data.get("subtask_id") != str(exercise.subtask_id):
+            return False
+        if data.get("creator" if coding else "user_id") != user.id:
+            return False
+        if not coding and data.get("task_id") != str(exercise.task_id):
+            return False
+        timestamp = datetime.fromisoformat(
+            data["creation_timestamp" if coding else "created_at"].replace("Z", "+00:00")
+        )
+        if timestamp.tzinfo is None:
+            return False
+        started = row.review_started_at
+        if started.tzinfo is None:
+            started = started.replace(tzinfo=timezone.utc)
+        if timestamp < started:
+            return False
+        if coding:
+            return isinstance(data.get("result"), dict) and data["result"].get("verdict") == "OK"
+        return data.get("solved") is True
+    except (httpx.HTTPError, ValueError, TypeError, KeyError, AttributeError):
+        raise HTTPException(503, "The attempt could not be checked") from None
+
+
+def request_fingerprint(unit_id: str, data: SaveState | Complete | StartReview) -> str:
+    operation = "save" if isinstance(data, SaveState) else "review" if isinstance(data, StartReview) else "complete"
+    payload = {"unit_id": unit_id, "operation": operation}
     return sha256(
-        json.dumps({**payload, **json.loads(data.json())}, sort_keys=True, separators=(",", ":")).encode()
+        json.dumps(
+            {**payload, **json.loads(data.json(exclude_none=True))}, sort_keys=True, separators=(",", ":")
+        ).encode()
     ).hexdigest()
 
 
@@ -222,7 +371,7 @@ def completed_progress(unit: CatalogueUnit, current: Progress, data: Complete, s
     return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
 
 
-async def mutate_room(unit_id: str, user: User, token: str, data: SaveState | Complete) -> RoomEnvelope:
+async def mutate_room(unit_id: str, user: User, token: str, data: SaveState | Complete | StartReview) -> RoomEnvelope:
     content = catalogue()
     fingerprint = request_fingerprint(unit_id, data)
     # This is also the erasure lock. A request admitted before erasure must not
@@ -241,15 +390,31 @@ async def mutate_room(unit_id: str, user: User, token: str, data: SaveState | Co
     current = progress(row)
     if current.revision != data.expected_revision:
         raise HTTPException(409, "Your room has changed in another session")
+    if not isinstance(data, StartReview) and data.review_id != current.review_id:
+        raise HTTPException(409, "Your practice round has changed in another session")
     solved = await challenge_status(unit, user, token)
-    if isinstance(data, SaveState):
+    if isinstance(data, StartReview):
+        if row is None or row.status not in ("completed", "skipped") or row.review_status == "in_progress":
+            raise HTTPException(409, "This room is already in progress")
+        current = Progress(revision=current.revision, status="in_progress", review_id=data.request_id)
+    elif isinstance(data, SaveState):
         current.state = data.state
         if current.status == "new":
             current.status = "in_progress"
     else:
+        if current.review_id is not None and unit.exercise is not None:
+            solved = (
+                row is not None
+                and data.attempt_id is not None
+                and await review_attempt_solved(unit, user, token, row, data.attempt_id)
+            )
         current = completed_progress(unit, current, data, solved)
     current.revision += 1
-    values: dict[str, Any] = {**current.dict(), "updated_at": utcnow()}
+    values: dict[str, Any] = {**json.loads(current.json()), "updated_at": utcnow()}
+    if current.review_id is not None and row is not None:
+        values.update(status=row.status, result=row.result, review_status=current.status)
+        if isinstance(data, StartReview):
+            values["review_started_at"] = utcnow()
     if row is None:
         await db.add(RoomState(user_id=user.id, unit_id=unit_id, **values))
     else:
@@ -270,7 +435,7 @@ async def mutate_room(unit_id: str, user: User, token: str, data: SaveState | Co
             unit_id=unit_id,
             revision=current.revision,
             fingerprint=fingerprint,
-            progress=current.dict(),
+            progress=json.loads(current.json()),
             created_at=utcnow(),
         )
     )

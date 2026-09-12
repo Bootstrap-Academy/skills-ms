@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from api.auth import get_token, require_verified_email, user_auth
-from api.schemas.rooms import Complete, RoomEnvelope, Rooms, SaveState
+from api.schemas.rooms import Complete, RoomEnvelope, Rooms, SaveState, StartReview
 from api.schemas.user import User
 from api.services import rooms
 from api.settings import settings
@@ -29,9 +29,13 @@ private = APIRouter(prefix="/rooms", dependencies=[Depends(enabled), require_ver
 
 @private.get("", response_model=Rooms)
 async def next_room(
-    request: Request, path: str = "python-loops", after: str | None = None, user: User = user_auth
+    request: Request,
+    path: str = "python-loops",
+    after: str | None = None,
+    continuous: bool = False,
+    user: User = user_auth,
 ) -> Rooms:
-    return await rooms.next_room(user, get_token(request), path, after)
+    return await rooms.next_room(user, get_token(request), path, after, continuous)
 
 
 @private.get("/{unit_id}", response_model=RoomEnvelope)
@@ -46,6 +50,11 @@ async def save_state(unit_id: str, data: SaveState, request: Request, user: User
 
 @private.post("/{unit_id}/complete", response_model=RoomEnvelope)
 async def complete(unit_id: str, data: Complete, request: Request, user: User = user_auth) -> RoomEnvelope:
+    return await rooms.mutate_room(unit_id, user, get_token(request), data)
+
+
+@private.post("/{unit_id}/review", response_model=RoomEnvelope)
+async def start_review(unit_id: str, data: StartReview, request: Request, user: User = user_auth) -> RoomEnvelope:
     return await rooms.mutate_room(unit_id, user, get_token(request), data)
 
 
