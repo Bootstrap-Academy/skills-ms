@@ -57,10 +57,7 @@ def product(course: Course) -> dict[str, Any]:
     facts = {
         "course_id": course.id,
         "course": json.loads(course.summary(None).json()),
-        "access": (
-            "Einzelzugang zu diesem Kurs gemäß dem hier wiedergegebenen Angebot und den beigefügten AGB; "
-            "keine automatische Verlängerung."
-        ),
+        "access": "Du erhältst Zugang zu diesem Kurs. Es gibt keine automatische Verlängerung.",
     }
     description = "\n".join(
         [
@@ -77,8 +74,8 @@ def product(course: Course) -> dict[str, Any]:
             "Gesamte Videodauer: "
             + str(sum(lecture.duration for section in course.sections for lecture in section.lectures))
             + " Sekunden.",
-            "Bereitstellung des Zugangs nach Vertragsbestätigung; "
-            "die Bestellung bleibt bei ausstehender Bereitstellung zur Klärung erhalten.",
+            "Dein Kurs wird nach der Vertragsbestätigung freigeschaltet. "
+            "Solange du auf die Freischaltung wartest, bleibt deine Bestellung in der Bestellübersicht.",
         ]
     )
     revision = hashlib.sha256(json.dumps(facts, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
