@@ -253,7 +253,8 @@ async def continuous_room(
         ids = path.units
         if path.id == path_id and after is not None:
             split = ids.index(after)
-            ids = ids[split + 1 :] + ids[:split]
+            following = split + 1
+            ids = ids[following:] + ids[:split]
         elif after is None:
             ids = sorted(ids, key=lambda uid: 0 if uid in states and states[uid].status == "in_progress" else 1)
         for uid in ids:
