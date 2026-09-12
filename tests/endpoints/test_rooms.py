@@ -1,6 +1,7 @@
 """Routed learning-room checks on a disposable real SQL database, without network."""
 
 import asyncio
+from datetime import timedelta
 from typing import Any, AsyncIterator
 from unittest.mock import AsyncMock
 from uuid import uuid4
@@ -14,7 +15,7 @@ from api import models
 from api.auth import user_auth
 from api.database import db, db_context, filter_by
 from api.endpoints.rooms import router
-from api.schemas.rooms import Catalogue, SaveState
+from api.schemas.rooms import Catalogue, CataloguePath, SaveState
 from api.schemas.user import User
 from api.services import rooms
 from api.services.user_deletion import delete_user_data
@@ -108,7 +109,13 @@ async def test_gate_auth_private_get_and_no_read_side_effects(
     assert (await room_client.get("/rooms", headers={"Authorization": ""})).status_code == 401
     response = await room_client.get("/rooms")
     assert response.status_code == 200 and response.headers["Cache-Control"] == "private, no-store"
-    assert response.json()["next"]["progress"] == {"revision": 0, "state": {}, "status": "new", "result": None}
+    assert response.json()["next"]["progress"] == {
+        "revision": 0,
+        "state": {},
+        "status": "new",
+        "result": None,
+        "review_id": None,
+    }
     assert "completion" not in response.json()["next"]["unit"]
     assert (await room_client.get("/rooms/intro")).status_code == 200
     async with db_context():
@@ -389,3 +396,163 @@ async def test_unavailable_path_is_distinct_from_completed(
     content.units[1].retired = True
     finished = (await room_client.get("/rooms")).json()
     assert finished["next"] is None and finished["empty_reason"] == "completed"
+
+
+async def finish_pilot(client: httpx.AsyncClient, monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=True))
+    for uid in ("intro", "exercise", "later"):
+        response = await client.post(f"/rooms/{uid}/complete", json=payload(action="complete", answer={"answer": 6}))
+        assert response.status_code == 200
+
+
+async def test_continuous_paths_then_repeat_without_get_writes(
+    room_client: httpx.AsyncClient, content: Catalogue, monkeypatch: MonkeyPatch
+) -> None:
+    other = content.units[0].copy(deep=True, update={"id": "other", "path_id": "math"})
+    content.units.append(other)
+    content.paths.append(
+        CataloguePath.parse_obj({"id": "math", "title": {"de": "Mathe", "en": "Math"}, "units": ["other"]})
+    )
+    await finish_pilot(room_client, monkeypatch)
+    assert (await room_client.get("/rooms?after=later")).json()["next"] is None
+    selected = (await room_client.get("/rooms?continuous=true&after=later")).json()
+    assert selected["path"]["id"] == "math" and selected["next"]["unit"]["id"] == "other"
+    assert selected["next"]["review_available"] is False
+    assert (
+        await room_client.post("/rooms/other/complete", json=payload(action="complete", answer={"answer": 6}))
+    ).status_code == 200
+    async with db_context():
+        before = [(row.unit_id, row.revision) for row in await db.all(filter_by(models.RoomState, user_id=USER.id))]
+    selected = (await room_client.get("/rooms?continuous=true&path=math&after=other")).json()
+    assert selected["path"]["id"] == "python-loops"
+    assert selected["next"]["unit"]["id"] == "intro" and selected["next"]["review_available"] is True
+    async with db_context():
+        after = [(row.unit_id, row.revision) for row in await db.all(filter_by(models.RoomState, user_id=USER.id))]
+        assert before == after
+        assert await db.all(filter_by(models.XP, user_id=USER.id)) == []
+
+
+@pytest.mark.parametrize("originally_skipped", [False, True])
+async def test_review_keeps_original_achievement_and_private_resume(
+    room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch, originally_skipped: bool
+) -> None:
+    monkeypatch.setattr("api.services.user_deletion.clear_cache", AsyncMock())
+    await finish_pilot(room_client, monkeypatch)
+    if originally_skipped:
+        async with db_context():
+            row = await db.get(models.RoomState, user_id=USER.id, unit_id="intro")
+            assert row is not None
+            row.status, row.result = "skipped", None
+    start = payload(1)
+    opened = await room_client.post("/rooms/intro/review", json=start)
+    assert opened.status_code == 200
+    value = opened.json()["progress"]
+    assert value == {
+        "revision": 2,
+        "state": {},
+        "status": "in_progress",
+        "result": None,
+        "review_id": start["request_id"],
+    }
+    assert (await room_client.post("/rooms/intro/review", json=start)).json() == opened.json()
+    assert (await room_client.post("/rooms/intro/review", json=payload(2))).status_code == 409
+    assert (await room_client.put("/rooms/intro/state", json=payload(2, state={"stale": True}))).status_code == 409
+    saved = await room_client.put(
+        "/rooms/intro/state", json=payload(2, review_id=start["request_id"], state={"step": 2})
+    )
+    assert saved.status_code == 200
+    resumed = (await room_client.get("/rooms?continuous=true")).json()["next"]
+    assert resumed["progress"] == saved.json()["progress"] and resumed["review_available"] is False
+    assert (await room_client.get("/rooms/exercise")).status_code == 200  # prerequisite survives the repeat
+    wrong = payload(3, review_id=start["request_id"], action="complete", answer={"answer": 5})
+    assert (await room_client.post("/rooms/intro/complete", json=wrong)).status_code == 422
+    completed = await room_client.post(
+        "/rooms/intro/complete", json=payload(3, review_id=start["request_id"], action="complete", answer={"answer": 6})
+    )
+    assert completed.status_code == 200 and completed.json()["progress"]["status"] == "completed"
+    assert completed.json()["progress"]["result"] == {"kind": "introduced"}
+    assert (await room_client.get("/rooms/intro")).json()["progress"] == completed.json()["progress"]
+    next_room = (await room_client.get("/rooms?continuous=true&after=intro")).json()["next"]
+    assert next_room["unit"]["id"] == "exercise" and next_room["review_available"] is True
+    async with db_context():
+        row = await db.get(models.RoomState, user_id=USER.id, unit_id="intro")
+        assert row is not None
+        assert row.status == ("skipped" if originally_skipped else "completed")
+        assert row.result == (None if originally_skipped else {"kind": "introduced"})
+        assert row.review_id == start["request_id"] and row.review_status == "completed"
+        exported = await export_user_data(USER.id)
+        assert any(item["review_id"] == start["request_id"] for item in exported.room_states)
+        await delete_user_data(USER.id)
+    assert (await room_client.post("/rooms/intro/review", json=start)).status_code == 401
+
+
+async def test_repeat_completion_requires_its_own_new_attempt(
+    room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch
+) -> None:
+    await finish_pilot(room_client, monkeypatch)
+    start = payload(1)
+    assert (await room_client.post("/rooms/exercise/review", json=start)).status_code == 200
+    # The old solved=true is deliberately still returned by challenge_status.
+    proof = AsyncMock(return_value=False)
+    monkeypatch.setattr(rooms, "review_attempt_solved", proof)
+    body = payload(2, action="complete", review_id=start["request_id"])
+    assert (await room_client.post("/rooms/exercise/complete", json=body)).status_code == 409
+    assert proof.await_count == 0
+    body["attempt_id"] = str(uuid4())
+    assert (await room_client.post("/rooms/exercise/complete", json=body)).status_code == 409
+    proof.return_value = True
+    result = await room_client.post("/rooms/exercise/complete", json=body)
+    assert result.status_code == 200 and result.json()["progress"]["result"] == {"kind": "solved"}
+    assert (await room_client.post("/rooms/exercise/complete", json=body)).json() == result.json()
+    assert proof.await_count == 2  # replay uses the receipt, not another proof or charge
+
+
+@pytest.mark.parametrize("kind", ["multiple_choice", "matching", "coding"])
+async def test_repeat_proof_binds_attempt_owner_exercise_time_and_verdict(
+    content: Catalogue, monkeypatch: MonkeyPatch, kind: str
+) -> None:
+    monkeypatch.setattr(settings, "learning_rooms_exercise_refs", {"exercise": {**REF, "type": kind}})
+    monkeypatch.setattr(settings, "challenges_url", "http://challenges.synthetic")
+    started = utcnow()
+    row = models.RoomState(review_started_at=started)
+    attempt = uuid4()
+    data = {
+        "id": str(attempt),
+        "task_id": REF["task_id"],
+        "subtask_id": REF["subtask_id"],
+        "user_id": USER.id,
+        "creator": USER.id,
+        "solved": True,
+        "result": {"verdict": "OK"},
+        "created_at": (started + timedelta(seconds=1)).isoformat(),
+        "creation_timestamp": (started + timedelta(seconds=1)).isoformat(),
+    }
+    original = httpx.AsyncClient
+    requests: list[httpx.Request] = []
+
+    def remote(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json=[data] if kind == "coding" else data)
+
+    monkeypatch.setattr(
+        httpx, "AsyncClient", lambda **kwargs: original(**kwargs, transport=httpx.MockTransport(remote))
+    )
+    unit = rooms.catalogue().units[1]
+    assert await rooms.review_attempt_solved(unit, USER, "own-token", row, attempt) is True
+    original_data = dict(data)
+    for key, wrong in [
+        ("id", str(uuid4())),
+        ("subtask_id", str(uuid4())),
+        ("creator" if kind == "coding" else "user_id", "another-owner"),
+        ("creation_timestamp" if kind == "coding" else "created_at", (started - timedelta(seconds=1)).isoformat()),
+        ("result" if kind == "coding" else "solved", {"verdict": "WRONG_ANSWER"} if kind == "coding" else False),
+    ]:
+        data.clear()
+        data.update(original_data)
+        data[key] = wrong
+        assert await rooms.review_attempt_solved(unit, USER, "own-token", row, attempt) is False
+    assert all(
+        request.method == "GET" and request.headers["Authorization"] == "Bearer own-token" for request in requests
+    )
+    suffix = "/submissions" if kind == "coding" else f"/attempts/{attempt}"
+    assert str(requests[0].url).endswith(suffix)

@@ -98,11 +98,13 @@ class Progress(RoomModel):
     state: dict[str, Any] = Field(default_factory=dict)
     status: Literal["new", "in_progress", "completed", "skipped"] = "new"
     result: Result | None = None
+    review_id: UUID | None = None
 
 
 class RoomEnvelope(RoomModel):
     unit: Unit
     progress: Progress
+    review_available: bool = False
 
 
 class Rooms(RoomModel):
@@ -137,11 +139,18 @@ class Mutation(RoomModel):
 
 
 class SaveState(Mutation):
+    review_id: UUID | None = None
     state: dict[str, Any]
     _bounded_state = validator("state", pre=True, allow_reuse=True)(bounded_object)
 
 
 class Complete(Mutation):
+    review_id: UUID | None = None
+    attempt_id: UUID | None = None
     action: Literal["complete", "skip"]
     answer: dict[str, Any] = Field(default_factory=dict)
     _bounded_answer = validator("answer", pre=True, allow_reuse=True)(bounded_object)
+
+
+class StartReview(Mutation):
+    pass

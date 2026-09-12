@@ -19,6 +19,9 @@ class RoomState(Base):
     status: Mapped[str] = Column(String(16), nullable=False)
     result: Mapped[dict[str, Any] | None] = Column(JSON, nullable=True)
     updated_at: Mapped[datetime] = Column(UTCDateTime, nullable=False)
+    review_id: Mapped[str | None] = Column(String(36), nullable=True)
+    review_status: Mapped[str | None] = Column(String(16), nullable=True)
+    review_started_at: Mapped[datetime | None] = Column(UTCDateTime, nullable=True)
 
 
 class RoomRequest(Base):
