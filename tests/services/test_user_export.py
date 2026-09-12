@@ -11,6 +11,8 @@ TIMESTAMP = datetime(2026, 9, 3, 12, 34, 56, tzinfo=timezone.utc)
 
 # maps every field of the export to the model it is read from
 EXPORTED_MODELS: dict[str, Any] = {
+    "room_states": models.RoomState,
+    "room_requests": models.RoomRequest,
     "purchases": models.CoursePurchase,
     "purchase_user": models.PurchaseUser,
     "retained_course_rights": models.RetainedCourseRight,

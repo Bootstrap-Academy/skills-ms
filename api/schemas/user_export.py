@@ -39,6 +39,8 @@ class UserDataExport(BaseModel):
     """
 
     purchases: list[dict[str, Any]] = Field(default_factory=list)
+    room_states: list[dict[str, Any]] = Field(default_factory=list)
+    room_requests: list[dict[str, Any]] = Field(default_factory=list)
     purchase_user: list[dict[str, Any]] = Field(default_factory=list)
     retained_course_rights: list[dict[str, Any]] = Field(default_factory=list)
     course_right_grants: list[dict[str, Any]] = Field(default_factory=list)

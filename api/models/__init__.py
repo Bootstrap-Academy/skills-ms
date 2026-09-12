@@ -4,6 +4,7 @@ from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
 from .purchase import CoursePurchase, PurchaseUser
 from .retained_right import CourseRightGrant, RetainedCourseRight
+from .room import RoomRequest, RoomState
 from .root_skill import RootSkill
 from .skill_course import SkillCourse
 from .sub_skill import SubSkill, SubSkillDependency
@@ -13,6 +14,8 @@ from .xp_operation import XPOperation
 
 
 __all__ = [
+    "RoomRequest",
+    "RoomState",
     "CoursePurchase",
     "PurchaseUser",
     "RetainedCourseRight",

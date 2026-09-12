@@ -1,0 +1,356 @@
+{
+  "paths": [
+    {
+      "id": "python-loops",
+      "title": {
+        "de": "Wiederholungen verstehen",
+        "en": "Understanding repetition"
+      },
+      "units": [
+        "loops-intro",
+        "loops-predict",
+        "loops-match",
+        "loops-code"
+      ]
+    },
+    {
+      "id": "everyday-math",
+      "title": {
+        "de": "Mathe im Alltag",
+        "en": "Everyday maths"
+      },
+      "units": [
+        "percentages-intro"
+      ]
+    }
+  ],
+  "units": [
+    {
+      "id": "loops-intro",
+      "path_id": "python-loops",
+      "title": {
+        "de": "Wiederholungen verstehen",
+        "en": "Understanding repetition"
+      },
+      "room": "loop-explorer",
+      "teaches": [
+        "instructions",
+        "counted-repetition",
+        "python-print",
+        "python-range"
+      ],
+      "practices": [],
+      "requires": [],
+      "retired": false,
+      "completion": {
+        "kind": "introduced",
+        "answer": {
+          "prediction": 6,
+          "repetitions": 4
+        },
+        "allow_skip": true
+      },
+      "content": {
+        "de": {
+          "steps": [
+            {
+              "id": "instruction",
+              "title": "Eine Anweisung. Ein Schritt.",
+              "body": "Eine Anweisung sagt genau, was passieren soll. Unsere Figur startet auf Feld 0. Lass sie ein Feld weitergehen."
+            },
+            {
+              "id": "repetition",
+              "title": "Einmal sagen, mehrmals machen.",
+              "body": "Die Anweisung bleibt gleich. Du bestimmst nur, wie oft sie ausgeführt wird. Das ist die Idee einer Schleife."
+            },
+            {
+              "id": "prediction",
+              "title": "Was passiert jetzt?",
+              "body": "Jetzt ändern wir die Anweisung: Die Figur geht bei jeder Wiederholung zwei Felder weiter. Sie startet wieder auf Feld 0."
+            },
+            {
+              "id": "practice",
+              "title": "Bring die Figur ans Ziel.",
+              "body": "Du bestimmst die Anzahl der Wiederholungen. Die Anweisung bleibt: zwei Felder weitergehen."
+            },
+            {
+              "id": "code",
+              "title": "Dasselbe Prinzip in Python.",
+              "body": "Eine Schleife kann auch Text ausgeben. Hier siehst du die wenigen Bausteine, die du für deine erste Codeaufgabe brauchst."
+            }
+          ],
+          "single": {
+            "instruction": "Geh ein Feld weiter.",
+            "result": "Einmal ausgeführt: Die Figur steht auf Feld 1.",
+            "start": "Die Figur startet auf Feld 0."
+          },
+          "repeat": {
+            "instruction": "Geh ein Feld weiter.",
+            "min": 1,
+            "max": 6,
+            "initial": 3,
+            "result": "{count} Wiederholungen: Die Figur steht auf Feld {position}."
+          },
+          "prediction": {
+            "instruction": "Geh zwei Felder weiter.",
+            "repetitions": 3,
+            "stride": 2,
+            "question": "Auf welchem Feld steht die Figur nach drei Wiederholungen?",
+            "correct": "Genau: 2 + 2 + 2 = 6. Drei Wiederholungen ergeben hier sechs Schritte.",
+            "tryAgain": "Jede der drei Wiederholungen geht zwei Felder weiter. Zähle von 0 aus: 2, dann 4 …"
+          },
+          "practice": {
+            "instruction": "Geh zwei Felder weiter.",
+            "target": 8,
+            "stride": 2,
+            "min": 1,
+            "max": 6,
+            "initial": 1,
+            "question": "Wie oft muss die Figur gehen, um Feld 8 zu erreichen?",
+            "hint": "Pro Wiederholung geht es zwei Felder weiter. Teile die acht Schritte durch zwei.",
+            "correct": "Passt: vier Wiederholungen mit je zwei Schritten erreichen Feld 8.",
+            "position": "{count} Wiederholungen bringen dich auf Feld {position}."
+          },
+          "code": {
+            "single": "print(\"Hallo\")",
+            "singleExplanation": "print gibt den Text in der Klammer aus. Die Anführungszeichen zeigen, wo der Text beginnt und endet. Sie werden nicht mit ausgegeben.",
+            "loop": "for schritt in range(3):\n    print(\"Hallo\")",
+            "loopExplanation": "range(3) liefert nacheinander die Zahlen 0, 1 und 2: drei Werte, also drei Wiederholungen. schritt ist der Name für den aktuellen Wert. Für unsere Textausgabe brauchen wir seinen Wert noch nicht.",
+            "notes": [
+              "Der Doppelpunkt am Ende der ersten Zeile eröffnet die Schleife.",
+              "Die vier Leerzeichen vor print rücken die Anweisung ein. So gehört sie zur Schleife und wird jedes Mal ausgeführt."
+            ],
+            "outputLine": "Hallo",
+            "repeatCount": 3,
+            "outputLabel": "So sieht die Ausgabe aus",
+            "next": "Jetzt kannst du das Beispiel erst vorhersagen und zuordnen. Danach schreibst du selbst eine Schleife und führst deinen Code aus."
+          }
+        },
+        "en": {
+          "steps": [
+            {
+              "id": "instruction",
+              "title": "One instruction. One step.",
+              "body": "An instruction says exactly what should happen. Our figure starts on space 0. Move it one space forward."
+            },
+            {
+              "id": "repetition",
+              "title": "Say it once. Do it again.",
+              "body": "The instruction stays the same. You only choose how many times it runs. That is the idea behind a loop."
+            },
+            {
+              "id": "prediction",
+              "title": "What happens next?",
+              "body": "Now the instruction changes: the figure moves two spaces forward each time. It starts on space 0 again."
+            },
+            {
+              "id": "practice",
+              "title": "Get the figure to the target.",
+              "body": "You choose the number of repetitions. The instruction stays the same: move two spaces forward."
+            },
+            {
+              "id": "code",
+              "title": "The same idea in Python.",
+              "body": "A loop can also display text. Here are the few building blocks you need for your first coding exercise."
+            }
+          ],
+          "single": {
+            "instruction": "Move one space forward.",
+            "result": "Run once: the figure is on space 1.",
+            "start": "The figure starts on space 0."
+          },
+          "repeat": {
+            "instruction": "Move one space forward.",
+            "min": 1,
+            "max": 6,
+            "initial": 3,
+            "result": "{count} repetitions: the figure is on space {position}."
+          },
+          "prediction": {
+            "instruction": "Move two spaces forward.",
+            "repetitions": 3,
+            "stride": 2,
+            "question": "Which space does the figure reach after three repetitions?",
+            "correct": "Exactly: 2 + 2 + 2 = 6. Three repetitions make six steps here.",
+            "tryAgain": "Each of the three repetitions moves two spaces forward. Count from 0: 2, then 4 …"
+          },
+          "practice": {
+            "instruction": "Move two spaces forward.",
+            "target": 8,
+            "stride": 2,
+            "min": 1,
+            "max": 6,
+            "initial": 1,
+            "question": "How many repetitions will get the figure to space 8?",
+            "hint": "Each repetition moves two spaces forward. Divide the eight steps by two.",
+            "correct": "That works: four repetitions of two steps reach space 8.",
+            "position": "{count} repetitions take you to space {position}."
+          },
+          "code": {
+            "single": "print(\"Hallo\")",
+            "singleExplanation": "print displays the text inside the parentheses. The quotation marks show where the text starts and ends. They are not included in the output.",
+            "loop": "for step in range(3):\n    print(\"Hallo\")",
+            "loopExplanation": "range(3) produces the numbers 0, 1 and 2: three values, so three repetitions. step is the name for the current value. We do not need its value for our text output yet.",
+            "notes": [
+              "The colon at the end of the first line starts the loop.",
+              "The four spaces before print indent the instruction. This puts it inside the loop, so it runs each time."
+            ],
+            "outputLine": "Hallo",
+            "repeatCount": 3,
+            "outputLabel": "This is what the output looks like",
+            "next": "Now you can predict what an example will do and match loops to their outputs. Then you will write and run a loop yourself."
+          }
+        }
+      }
+    },
+    {
+      "id": "percentages-intro",
+      "path_id": "everyday-math",
+      "title": {
+        "de": "Was kostet es mit Rabatt?",
+        "en": "What is the discounted price?"
+      },
+      "room": "percentage-explorer",
+      "teaches": [
+        "percentage-discount"
+      ],
+      "practices": [],
+      "requires": [],
+      "retired": false,
+      "completion": {
+        "kind": "introduced",
+        "answer": {
+          "answer": 60
+        },
+        "allow_skip": true
+      },
+      "content": {
+        "de": {
+          "title": "Ein Preis. Zwei Teile.",
+          "intro": "Ein Rucksack kostet 80 €. Ein Rabatt nimmt einen Teil dieses Preises weg. Verschiebe den Regler und schau, wie sich der Preis verändert.",
+          "price": 80,
+          "currency": "EUR",
+          "explore": {
+            "min": 0,
+            "max": 50,
+            "step": 5,
+            "initial": 10
+          },
+          "explanation": "Prozent bedeutet „von hundert“. 10 % Rabatt nehmen zehn von hundert gleich großen Teilen des Preises weg.",
+          "questionTitle": "Jetzt bist du dran.",
+          "discount": 25,
+          "question": "Der Rucksack kostet 80 €. Heute gibt es 25 % Rabatt. Wie viel bezahlst du?",
+          "hint": "25 % sind ein Viertel. Ein Viertel von 80 € sind 20 € Rabatt. Ziehe den Rabatt vom ursprünglichen Preis ab.",
+          "tryAgain": "Gesucht ist der Preis nach dem Rabatt. Der Rabatt allein ist noch nicht der Preis, den du bezahlst.",
+          "closing": "25 % Rabatt auf 80 €: 20 € weniger, 60 € bezahlen."
+        },
+        "en": {
+          "title": "One price. Two parts.",
+          "intro": "A backpack costs €80. A discount removes part of that price. Move the slider to see how the price changes.",
+          "price": 80,
+          "currency": "EUR",
+          "explore": {
+            "min": 0,
+            "max": 50,
+            "step": 5,
+            "initial": 10
+          },
+          "explanation": "Percent means ‘out of a hundred’. A 10% discount removes ten out of a hundred equal parts of the price.",
+          "questionTitle": "Your turn.",
+          "discount": 25,
+          "question": "The backpack costs €80. Today it has a 25% discount. How much do you pay?",
+          "hint": "25% is a quarter. A quarter of €80 is a €20 discount. Subtract the discount from the original price.",
+          "tryAgain": "You are looking for the price after the discount. The discount itself is not the amount you pay.",
+          "closing": "25% off €80: save €20 and pay €60."
+        }
+      }
+    },
+    {
+      "id": "loops-predict",
+      "path_id": "python-loops",
+      "title": {
+        "de": "Was gibt die Schleife aus?",
+        "en": "What does the loop print?"
+      },
+      "room": "exercise",
+      "content": {
+        "de": {
+          "introduction": "Schau dir die Schleife an und sage ihre Ausgabe voraus."
+        },
+        "en": {
+          "introduction": "Look at the loop and predict its output."
+        }
+      },
+      "teaches": [],
+      "practices": [
+        "counted-repetition",
+        "python-print",
+        "python-range"
+      ],
+      "requires": [
+        "counted-repetition",
+        "python-print",
+        "python-range"
+      ],
+      "retired": false
+    },
+    {
+      "id": "loops-match",
+      "path_id": "python-loops",
+      "title": {
+        "de": "Wie oft wird es ausgeführt?",
+        "en": "How many times does it run?"
+      },
+      "room": "exercise",
+      "content": {
+        "de": {
+          "introduction": "Ordne jeder Schleife die passende Anzahl an Ausgaben zu."
+        },
+        "en": {
+          "introduction": "Match each loop to the number of lines it prints."
+        }
+      },
+      "teaches": [],
+      "practices": [
+        "counted-repetition",
+        "python-print",
+        "python-range"
+      ],
+      "requires": [
+        "counted-repetition",
+        "python-print",
+        "python-range"
+      ],
+      "retired": false
+    },
+    {
+      "id": "loops-code",
+      "path_id": "python-loops",
+      "title": {
+        "de": "Deine erste Schleife",
+        "en": "Your first loop"
+      },
+      "room": "exercise",
+      "content": {
+        "de": {
+          "introduction": "Schreibe eine Schleife, die dreimal Hallo ausgibt. Jede Ausgabe steht in einer eigenen Zeile."
+        },
+        "en": {
+          "introduction": "Write a loop that prints Hallo three times, each time on a new line."
+        }
+      },
+      "teaches": [],
+      "practices": [
+        "counted-repetition",
+        "python-print",
+        "python-range"
+      ],
+      "requires": [
+        "counted-repetition",
+        "python-print",
+        "python-range"
+      ],
+      "retired": false
+    }
+  ]
+}
