@@ -18,10 +18,13 @@ from sqlalchemy.exc import IntegrityError
 from api.database import db, delete, filter_by
 from api.models import PurchaseUser
 from api.models.room import RoomRequest, RoomState
+from api.schemas.course import Course
 from api.schemas.rooms import (
     Catalogue,
     CatalogueUnit,
     Complete,
+    CourseLearning,
+    CourseLearningUnit,
     Exercise,
     LearningPath,
     Progress,
@@ -32,7 +35,9 @@ from api.schemas.rooms import (
     StartReview,
 )
 from api.schemas.user import User
+from api.services.courses import COURSES, get_owned_courses
 from api.services.purchases import lock_user
+from api.services.shop import has_premium
 from api.settings import settings
 from api.utils.utc import utcnow
 
@@ -116,6 +121,33 @@ def find_unit(content: Catalogue, unit_id: str, states: dict[str, RoomState]) ->
     return unit
 
 
+async def accessible_paths(content: Catalogue, user: User) -> set[str]:
+    """A course link never bypasses the existing paid-course admission rule."""
+    linked: dict[str, list[Course]] = {}
+    for course in COURSES.values():
+        if course.learning_path_id is not None:
+            linked.setdefault(course.learning_path_id, []).append(course)
+    accessible = {
+        path.id
+        for path in content.paths
+        if path.id not in linked or user.admin or any(course.free for course in linked[path.id])
+    }
+    restricted = {path.id for path in content.paths} - accessible
+    if not restricted:
+        return accessible
+    owned = await get_owned_courses(user.id)
+    accessible.update(pid for pid in restricted if any(course.id in owned for course in linked[pid]))
+    if restricted - accessible and await has_premium(user.id):
+        accessible.update(restricted)
+    return accessible
+
+
+async def require_path_access(content: Catalogue, path_id: str, user: User) -> None:
+    requested = content.copy(update={"paths": [path for path in content.paths if path.id == path_id]})
+    if path_id not in await accessible_paths(requested, user):
+        raise HTTPException(403, "Open the course to get access to these lessons")
+
+
 async def challenge_status(unit: CatalogueUnit, user: User, token: str) -> bool:
     """Read the existing challenge authority through one operator-configured service.
 
@@ -167,18 +199,32 @@ async def get_room(unit_id: str, user: User, token: str) -> RoomEnvelope:
     content = catalogue()
     states = await read_states(user.id)
     unit = find_unit(content, unit_id, states)
+    await require_path_access(content, unit.path_id, user)
     await challenge_status(unit, user, token)
     return RoomEnvelope(unit=unit.public(), progress=progress(states.get(unit.id)))
 
 
-async def next_room(user: User, token: str, path_id: str, after: str | None, continuous: bool = False) -> Rooms:
+async def next_room(
+    user: User, token: str, path_id: str, after: str | None, continuous: bool = False, direction: str | None = None
+) -> Rooms:
     content = catalogue()
     states = await read_states(user.id)
     path = next((path for path in content.paths if path.id == path_id), None)
     if path is None or (after is not None and after not in path.units):
         raise HTTPException(404, "This learning path is unavailable")
+    if direction is not None and path.direction_id != direction:
+        raise HTTPException(404, "This learning direction is unavailable")
+    # Unknown legacy directions retain their historical cross-path stream. An
+    # explicit direction stays in its own subject, including when it repeats.
+    scope = direction or (path.direction_id if continuous else None)
+    accessible = await accessible_paths(content, user)
+    if path.id not in accessible:
+        raise HTTPException(403, "Open the course to get access to these lessons")
+    content.paths = [candidate for candidate in content.paths if candidate.id in accessible]
+    choices = [LearningPath.parse_obj(candidate.dict(exclude={"units"})) for candidate in content.paths]
+    content.paths = [candidate for candidate in content.paths if scope is None or candidate.direction_id == scope]
     if continuous:
-        return await continuous_room(content, states, user, token, path_id, after)
+        return await continuous_room(content, states, user, token, path_id, after, choices)
     start = path.units.index(after) + 1 if after is not None else 0
     ids = path.units[start:]
     if after is None:
@@ -207,15 +253,80 @@ async def next_room(user: User, token: str, path_id: str, after: str | None, con
     if selected is None:
         reason = "completed" if finished else "prerequisites" if blocked_by_prerequisite else "unavailable"
     return Rooms(
-        paths=[LearningPath.parse_obj(path.dict(exclude={"units"})) for path in content.paths],
-        path=LearningPath.parse_obj(path.dict(exclude={"units"})),
-        next=selected,
-        empty_reason=reason,
+        paths=choices, path=LearningPath.parse_obj(path.dict(exclude={"units"})), next=selected, empty_reason=reason
+    )
+
+
+def path_completed(content: Catalogue, states: dict[str, RoomState], path_id: str) -> bool:
+    active = [unit for unit in content.units if unit.path_id == path_id and not unit.retired]
+    return bool(active) and all(
+        unit.id in states and states[unit.id].status in ("completed", "skipped") for unit in active
+    )
+
+
+async def course_completions(user: User | None) -> dict[str, bool]:
+    if user is None or not settings.rooms_enabled:
+        return {}
+    path_ids = {course.learning_path_id for course in COURSES.values() if course.learning_path_id is not None}
+    if not path_ids:
+        return {}
+    content = catalogue()
+    states = await read_states(user.id)
+    return {path.id: path_completed(content, states, path.id) for path in content.paths if path.id in path_ids}
+
+
+async def course_learning(course: Course, user: User, token: str) -> CourseLearning:
+    content = catalogue()
+    path = next((path for path in content.paths if path.id == course.learning_path_id), None)
+    if path is None:
+        raise HTTPException(404, "This course does not have a learning path yet")
+    await require_path_access(content, path.id, user)
+    states = await read_states(user.id)
+    units = {unit.id: unit for unit in content.units if not unit.retired}
+    outline = []
+    for uid in path.units:
+        if uid not in units:
+            continue
+        unit = units[uid]
+        try:
+            find_unit(content, uid, states)
+            available = True
+        except HTTPException as exc:
+            if exc.status_code not in (403, 404):
+                raise
+            available = False
+        row = states.get(uid)
+        outline.append(
+            CourseLearningUnit.parse_obj(
+                {
+                    "id": unit.id,
+                    "chapter_id": unit.chapter_id,
+                    "title": unit.title,
+                    "room": unit.room,
+                    "status": "new" if row is None else row.status,
+                    "result": None if row is None else row.result,
+                    "available": available,
+                }
+            )
+        )
+    selected = await next_room(user, token, path.id, None)
+    return CourseLearning(
+        path=selected.path,
+        units=outline,
+        next=selected.next,
+        completed=path_completed(content, states, path.id),
+        empty_reason=selected.empty_reason,
     )
 
 
 async def continuous_room(
-    content: Catalogue, states: dict[str, RoomState], user: User, token: str, path_id: str, after: str | None
+    content: Catalogue,
+    states: dict[str, RoomState],
+    user: User,
+    token: str,
+    path_id: str,
+    after: str | None,
+    choices: list[LearningPath],
 ) -> Rooms:
     paths = content.paths
     index = next(i for i, path in enumerate(paths) if path.id == path_id)
@@ -240,12 +351,22 @@ async def continuous_room(
     def response(unit: CatalogueUnit, start_review: bool = False) -> Rooms:
         selected_path = next(path for path in paths if path.id == unit.path_id)
         return Rooms(
-            paths=[LearningPath.parse_obj(path.dict(exclude={"units"})) for path in paths],
+            paths=choices,
             path=LearningPath.parse_obj(selected_path.dict(exclude={"units"})),
             next=RoomEnvelope(
                 unit=unit.public(), progress=progress(states.get(unit.id)), review_available=start_review
             ),
         )
+
+    # Returning to the character sheet must not discard unfinished work in a
+    # different chapter of the same direction. Review state is private work too.
+    for uid in all_ids:
+        row = states.get(uid)
+        if uid == after or row is None:
+            continue
+        if row.status == "in_progress" or (row.review_id is not None and row.review_status == "in_progress"):
+            if unit := await available(uid):
+                return response(unit)
 
     # Finish new learning before repeating completed material. A path boundary
     # never sends the learner out of the stream; old GET callers retain their API.
@@ -284,7 +405,7 @@ async def continuous_room(
             and row.review_status != "in_progress",
         )
     return Rooms(
-        paths=[LearningPath.parse_obj(path.dict(exclude={"units"})) for path in paths],
+        paths=choices,
         path=LearningPath.parse_obj(ordered_paths[0].dict(exclude={"units"})),
         next=None,
         empty_reason="prerequisites" if blocked else "unavailable",
@@ -381,6 +502,7 @@ async def mutate_room(unit_id: str, user: User, token: str, data: SaveState | Co
         raise HTTPException(401, "This account is no longer available")
     states = await read_states(user.id)
     unit = find_unit(content, unit_id, states)
+    await require_path_access(content, unit.path_id, user)
     receipt = await db.get(RoomRequest, user_id=user.id, request_id=str(data.request_id))
     if receipt is not None:
         if receipt.fingerprint != fingerprint:

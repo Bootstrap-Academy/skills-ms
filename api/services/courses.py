@@ -1,12 +1,32 @@
 import pydantic
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 from yaml import safe_load
 
+from api import models
+from api.database import db
 from api.logger import get_logger
 from api.schemas.course import Course
 from api.settings import settings
 
 
 logger = get_logger(__name__)
+
+
+async def get_owned_courses(user_id: str) -> set[str]:
+    """Read paid and historical access through the committed admission pool."""
+    # No cached negative or old request snapshot may hide a committed purchase.
+    query = (
+        select(models.CourseAccess.course_id)
+        .where(models.CourseAccess.user_id == user_id)
+        .union(select(models.LastWatch.course_id).where(models.LastWatch.user_id == user_id))
+    )
+    if db.admission_engine is None:
+        raise RuntimeError("Committed course admission pool is unavailable")
+    # This reserved pool performs only the short SELECT and never waits for a
+    # slot in the outer request pool retained by callers waiting for admission.
+    async with AsyncSession(db.admission_engine) as session:
+        return set((await session.execute(query)).scalars())
 
 
 def _load_courses() -> dict[str, Course]:

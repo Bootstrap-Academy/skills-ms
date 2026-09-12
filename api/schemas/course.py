@@ -70,6 +70,13 @@ class SectionSummary(BaseModel):
     completed: bool | None = Field(description="If the section is completed")
 
 
+class CourseTranslation(BaseModel):
+    title: str | None = None
+    description: str | None = None
+    learning_goals: list[str] | None = None
+    requirements: list[str] | None = None
+
+
 class BaseCourse(BaseModel):
     id: str = Field(description="ID of the course")
     title: str = Field(description="Title of the course")
@@ -82,6 +89,12 @@ class BaseCourse(BaseModel):
     learning_goals: list[str] = Field(description="Learning goals of the course")
     requirements: list[str] = Field(description="Requirements of the course")
     last_update: int = Field(description="Timestamp of last update of the course")
+    learning_path_id: str | None = Field(
+        default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$", description="Explicit shared learning path, when available"
+    )
+    translations: dict[str, CourseTranslation] = Field(
+        default_factory=dict, description="Optional localized metadata; base fields remain the fallback"
+    )
 
     Config = example(
         id="python",
@@ -103,11 +116,11 @@ class BaseCourse(BaseModel):
 
 
 class Course(BaseCourse):
-    sections: list[Section] = Field(description="Sections in the course")
+    sections: list[Section] = Field(default_factory=list, description="Optional video sections in the course")
 
     Config = example(**get_example(BaseCourse), sections=[get_example(Section)])
 
-    def summary(self, completed_lectures: set[str] | None) -> CourseSummary:
+    def summary(self, completed_lectures: set[str] | None, learning_completed: bool | None = None) -> CourseSummary:
         sections = []
         for section in self.sections:
             lectures = [
@@ -129,7 +142,11 @@ class Course(BaseCourse):
         return CourseSummary(
             **{key: value for key, value in self.dict().items() if key in BaseCourse.__fields__},
             sections=sections,
-            completed=None if completed_lectures is None else all(section.completed for section in sections),
+            completed=(
+                learning_completed
+                if self.learning_path_id is not None
+                else None if completed_lectures is None else bool(sections) and all(s.completed for s in sections)
+            ),
         )
 
     def to_user_course(self, completed_lectures: set[str]) -> UserCourse:

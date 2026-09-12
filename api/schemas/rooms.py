@@ -26,8 +26,19 @@ class Exercise(RoomModel):
 class Unit(RoomModel):
     id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
     path_id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    chapter_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
-    room: Literal["loop-explorer", "percentage-explorer", "exercise"]
+    room: Literal[
+        "loop-explorer",
+        "percentage-explorer",
+        "guided-lesson",
+        "io-machine",
+        "bit-lab",
+        "file-workspace",
+        "step-machine",
+        "network-lab",
+        "exercise",
+    ]
     content: dict[str, Any]
     teaches: list[str]
     practices: list[str]
@@ -58,9 +69,16 @@ class CatalogueUnit(Unit):
         return Unit.parse_obj(self.dict(exclude={"retired", "completion"}))
 
 
+class LearningChapter(RoomModel):
+    id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    title: LocalizedText
+
+
 class LearningPath(RoomModel):
     id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
+    direction_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    chapters: list[LearningChapter] = Field(default_factory=list)
 
 
 class CataloguePath(LearningPath):
@@ -80,9 +98,23 @@ class Catalogue(RoomModel):
             raise ValueError("Duplicate learning-room identifiers")
         seen: set[str] = set()
         for path in paths:
+            chapter_positions = {chapter.id: index for index, chapter in enumerate(path.chapters)}
+            if len(chapter_positions) != len(path.chapters):
+                raise ValueError("Duplicate learning-chapter identifiers in a path")
+            previous_chapter = -1
             for unit_id in path.units:
                 if unit_id in seen or unit_id not in by_id or by_id[unit_id].path_id != path.id:
                     raise ValueError("Invalid learning-path reference")
+                chapter_id = by_id[unit_id].chapter_id
+                if chapter_positions and chapter_id is None:
+                    raise ValueError("Every unit in a chaptered path must belong to a chapter")
+                if chapter_id is not None:
+                    if chapter_id not in chapter_positions:
+                        raise ValueError("Invalid learning-chapter reference")
+                    position = chapter_positions[chapter_id]
+                    if position < previous_chapter:
+                        raise ValueError("Learning units must follow contiguous chapters in declared order")
+                    previous_chapter = position
                 seen.add(unit_id)
         if seen != set(by_id):
             raise ValueError("Every unit must belong to exactly one path")
@@ -111,6 +143,24 @@ class Rooms(RoomModel):
     paths: list[LearningPath]
     path: LearningPath
     next: RoomEnvelope | None
+    empty_reason: Literal["completed", "unavailable", "prerequisites"] | None = None
+
+
+class CourseLearningUnit(RoomModel):
+    id: str
+    chapter_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    title: LocalizedText
+    room: str
+    status: Literal["new", "in_progress", "completed", "skipped"]
+    result: Result | None
+    available: bool
+
+
+class CourseLearning(RoomModel):
+    path: LearningPath
+    units: list[CourseLearningUnit]
+    next: RoomEnvelope | None
+    completed: bool
     empty_reason: Literal["completed", "unavailable", "prerequisites"] | None = None
 
 
