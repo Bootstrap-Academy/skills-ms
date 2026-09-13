@@ -1,10 +1,14 @@
 """Small shared learning-room contract, independent of legacy course rewards."""
 
 import json
+import re
 from typing import Any, Literal
+from urllib.parse import urlsplit
 from uuid import UUID
 
 from pydantic import BaseModel, Field, root_validator, validator
+
+from api.schemas.lesson_module import MODULE_ID_PATTERN, LessonModuleDescriptor
 
 
 class RoomModel(BaseModel):
@@ -38,12 +42,15 @@ class Unit(RoomModel):
         "step-machine",
         "network-lab",
         "exercise",
+        "custom",
+        "video",
     ]
     content: dict[str, Any]
     teaches: list[str]
     practices: list[str]
     requires: list[str]
     exercise: Exercise | None = None
+    module: LessonModuleDescriptor | None = None
 
 
 class IntroductionCompletion(RoomModel):
@@ -55,10 +62,50 @@ class IntroductionCompletion(RoomModel):
 class CatalogueUnit(Unit):
     retired: bool
     completion: IntroductionCompletion | None = None
+    module_id: str | None = Field(default=None, regex=MODULE_ID_PATTERN)
 
     @root_validator(skip_on_failure=True)
     @classmethod
     def completion_matches_room(cls, values: dict[str, Any]) -> dict[str, Any]:
+        if values.get("module") is not None:
+            raise ValueError("Module URLs come from the operator registry, not content")
+        if values["room"] != "custom" and values.get("module_id") is not None:
+            raise ValueError("Only a custom room references a module")
+        if values["room"] in ("custom", "video"):
+            if values.get("completion") is not None and values.get("exercise") is not None:
+                raise ValueError("An activity has one server-side completion authority")
+            if values["room"] == "custom" and values.get("module_id") is None:
+                raise ValueError("A custom activity requires a registered module ID")
+            if values["room"] == "video":
+                for language in ("de", "en"):
+                    localized = values["content"].get(language)
+                    video = localized.get("video") if isinstance(localized, dict) else None
+                    if not isinstance(video, dict):
+                        raise ValueError("A video requires a supported source in each language")
+                    if video.get("type") == "youtube":
+                        video_id = video.get("id")
+                        if not isinstance(video_id, str) or not re.fullmatch(r"[a-zA-Z0-9_-]{11}", video_id):
+                            raise ValueError("A video requires a valid YouTube ID")
+                    elif video.get("type") == "mp4":
+                        url = video.get("url")
+                        if not isinstance(url, str):
+                            raise ValueError("A video requires an absolute HTTPS media URL")
+                        parsed = urlsplit(url)
+                        if (
+                            parsed.scheme != "https"
+                            or not parsed.hostname
+                            or parsed.username is not None
+                            or parsed.password is not None
+                            or "\\" in url
+                            or any(ord(char) <= 32 for char in url)
+                        ):
+                            raise ValueError("A video requires an absolute HTTPS media URL")
+                    else:
+                        raise ValueError("A video requires a supported source in each language")
+                completion = values.get("completion")
+                if completion is not None and json.dumps(completion.answer, sort_keys=True) != '{"viewed": true}':
+                    raise ValueError("A video introduction records viewed, not mastery")
+            return values
         if (values["room"] != "exercise") != (values.get("completion") is not None):
             raise ValueError("Introductions require an internal completion check")
         if values["room"] != "exercise" and values.get("exercise") is not None:
@@ -66,7 +113,7 @@ class CatalogueUnit(Unit):
         return values
 
     def public(self) -> Unit:
-        return Unit.parse_obj(self.dict(exclude={"retired", "completion"}))
+        return Unit.parse_obj(self.dict(exclude={"retired", "completion", "module_id"}))
 
 
 class LearningChapter(RoomModel):

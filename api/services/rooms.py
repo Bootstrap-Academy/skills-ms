@@ -34,9 +34,11 @@ from api.schemas.rooms import (
     Rooms,
     SaveState,
     StartReview,
+    Unit,
 )
 from api.schemas.user import User
 from api.services.courses import COURSES, get_owned_courses
+from api.services.lesson_modules import resolve_module
 from api.services.purchases import lock_user
 from api.services.shop import has_premium
 from api.settings import settings
@@ -58,23 +60,25 @@ def catalogue() -> Catalogue:
     by_id = {unit.id: unit for unit in content.units}
     try:
         for unit_id, reference in settings.learning_rooms_exercise_refs.items():
-            if unit_id not in by_id or by_id[unit_id].room != "exercise":
+            if unit_id not in by_id or by_id[unit_id].room not in ("exercise", "custom", "video"):
                 raise ValueError("Unknown exercise mapping")
+            if by_id[unit_id].completion is not None:
+                raise ValueError("An activity cannot have two completion authorities")
             by_id[unit_id].exercise = Exercise.parse_obj(reference)
     except (ValueError, ValidationError):
         raise HTTPException(503, "Learning-room exercises are temporarily unavailable") from None
     return content
 
 
-async def read_states(user_id: str) -> dict[str, RoomState]:
+async def read_states(user_id: str, unit_ids: set[str] | None = None) -> dict[str, RoomState]:
     # Reads never create the durable user lock or a working-state row.
     guard = await db.get(PurchaseUser, user_id=user_id)
     if guard is not None and guard.deleted:
         raise HTTPException(401, "This account is no longer available")
-    return {
-        row.unit_id: row
-        for row in await db.all(filter_by(RoomState, user_id=user_id).execution_options(populate_existing=True))
-    }
+    query = filter_by(RoomState, user_id=user_id).execution_options(populate_existing=True)
+    if unit_ids is not None:
+        query = query.where(RoomState.unit_id.in_(unit_ids))
+    return {row.unit_id: row for row in await db.all(query)}
 
 
 def progress(row: RoomState | None) -> Progress:
@@ -117,11 +121,20 @@ def find_unit(
     content: Catalogue, unit_id: str, states: dict[str, RoomState], *, prerequisites: bool = True
 ) -> CatalogueUnit:
     unit = next((unit for unit in content.units if unit.id == unit_id and not unit.retired), None)
-    if unit is None or (unit.room == "exercise" and unit.exercise is None):
+    if unit is None or (unit.completion is None and unit.exercise is None):
         raise HTTPException(404, "This learning room is unavailable")
     if prerequisites and not set(unit.requires).issubset(introduced_concepts(content, states)):
         raise HTTPException(403, "Start with the introduction for this room")
     return unit
+
+
+async def public_unit(unit: CatalogueUnit) -> Unit:
+    public = unit.public()
+    if unit.room == "custom":
+        if unit.module_id is None:
+            raise HTTPException(503, "Diese Lektion kann gerade nicht geladen werden.")
+        public.module = await resolve_module(unit.module_id)
+    return public
 
 
 async def accessible_paths(content: Catalogue, user: User) -> set[str]:
@@ -207,13 +220,15 @@ async def challenge_status(unit: CatalogueUnit, user: User, token: str) -> bool:
 
 async def get_room(unit_id: str, user: User, token: str, course_id: str | None = None) -> RoomEnvelope:
     content = catalogue()
-    states = await read_states(user.id)
+    states = await read_states(user.id, {unit_id}) if course_id is not None else await read_states(user.id)
     unit = find_unit(content, unit_id, states, prerequisites=course_id is None)
     await require_path_access(content, unit.path_id, user, course_id)
     await challenge_status(unit, user, token)
     row = states.get(unit.id)
     return RoomEnvelope(
-        unit=unit.public(), progress=progress(row), review_available=course_id is not None and review_available(row)
+        unit=await public_unit(unit),
+        progress=progress(row),
+        review_available=course_id is not None and review_available(row),
     )
 
 
@@ -232,7 +247,6 @@ async def next_room(
     unit_id: str | None = None,
 ) -> Rooms:
     content = catalogue()
-    states = await read_states(user.id)
     path = next((path for path in content.paths if path.id == path_id), None)
     if path is None or (after is not None and after not in path.units):
         raise HTTPException(404, "This learning path is unavailable")
@@ -240,6 +254,11 @@ async def next_room(
         raise HTTPException(404, "This learning direction is unavailable")
     if unit_id is not None and (course_id is None or after is not None):
         raise HTTPException(422, "Choose a course lesson or continue after a lesson")
+    states = (
+        await read_states(user.id, {unit_id} if unit_id is not None else set(path.units))
+        if course_id is not None
+        else await read_states(user.id)
+    )
     if course_id is not None:
         await require_path_access(content, path.id, user, course_id)
     # Unknown legacy directions retain their historical cross-path stream. An
@@ -278,7 +297,7 @@ async def next_room(
                 blocked_by_prerequisite = blocked_by_prerequisite or exc.status_code == 403
                 continue
             raise
-        selected = RoomEnvelope(unit=unit.public(), progress=progress(states.get(unit.id)))
+        selected = RoomEnvelope(unit=await public_unit(unit), progress=progress(states.get(unit.id)))
         break
     active = [unit for unit in content.units if unit.path_id == path.id and not unit.retired]
     finished = bool(active) and all(
@@ -331,7 +350,9 @@ async def next_course_room(
             if exc.status_code == 404:
                 continue
             raise
-        selected = RoomEnvelope(unit=unit.public(), progress=progress(row), review_available=review_available(row))
+        selected = RoomEnvelope(
+            unit=await public_unit(unit), progress=progress(row), review_available=review_available(row)
+        )
         break
     return Rooms(
         paths=choices,
@@ -392,7 +413,7 @@ async def course_learning(course: Course, user: User, token: str) -> CourseLearn
                     "status": "new" if row is None else row.status,
                     "result": None if row is None else row.result,
                     "available": available,
-                    "selectable": unit.room != "exercise" or unit.exercise is not None,
+                    "selectable": unit.completion is not None or unit.exercise is not None,
                 }
             )
         )
@@ -435,13 +456,13 @@ async def continuous_room(
             blocked = blocked or exc.status_code == 403
             return None
 
-    def response(unit: CatalogueUnit, start_review: bool = False) -> Rooms:
+    async def response(unit: CatalogueUnit, start_review: bool = False) -> Rooms:
         selected_path = next(path for path in paths if path.id == unit.path_id)
         return Rooms(
             paths=choices,
             path=LearningPath.parse_obj(selected_path.dict(exclude={"units"})),
             next=RoomEnvelope(
-                unit=unit.public(), progress=progress(states.get(unit.id)), review_available=start_review
+                unit=await public_unit(unit), progress=progress(states.get(unit.id)), review_available=start_review
             ),
         )
 
@@ -453,7 +474,7 @@ async def continuous_room(
             continue
         if row.status == "in_progress" or (row.review_id is not None and row.review_status == "in_progress"):
             if unit := await available(uid):
-                return response(unit)
+                return await response(unit)
 
     # Finish new learning before repeating completed material. A path boundary
     # never sends the learner out of the stream; old GET callers retain their API.
@@ -469,7 +490,7 @@ async def continuous_room(
             if uid in states and states[uid].status in ("completed", "skipped"):
                 continue
             if unit := await available(uid):
-                return response(unit)
+                return await response(unit)
     # Resume private repeat work, then cycle through available completed rooms.
     # The cursor moves across paths and never implies a fixed type alternation.
     for resume in (True, False):
@@ -481,11 +502,11 @@ async def continuous_room(
             if active != resume or (active and uid == after):
                 continue
             if unit := await available(uid):
-                return response(unit, start_review=not active)
+                return await response(unit, start_review=not active)
     # A one-room stream can still resume its only skipped working state.
     if after is not None and (unit := await available(after)):
         row = states.get(after)
-        return response(
+        return await response(
             unit,
             start_review=row is not None
             and row.status in ("completed", "skipped")
@@ -591,14 +612,14 @@ async def mutate_room(
     guard = await lock_user(user.id)
     if guard.deleted:
         raise HTTPException(401, "This account is no longer available")
-    states = await read_states(user.id)
+    states = await read_states(user.id, {unit_id}) if course_id is not None else await read_states(user.id)
     unit = find_unit(content, unit_id, states, prerequisites=course_id is None)
     await require_path_access(content, unit.path_id, user, course_id)
     receipt = await db.get(RoomRequest, user_id=user.id, request_id=str(data.request_id))
     if receipt is not None:
         if receipt.fingerprint != fingerprint:
             raise HTTPException(409, "This request was already used for another change")
-        return RoomEnvelope(unit=unit.public(), progress=Progress.parse_obj(receipt.progress))
+        return RoomEnvelope(unit=await public_unit(unit), progress=Progress.parse_obj(receipt.progress))
     row = states.get(unit_id)
     current = progress(row)
     if current.revision != data.expected_revision:
@@ -671,4 +692,4 @@ async def mutate_room(
             RoomRequest.request_id.notin_([receipt.request_id for receipt in keep]),
         )
     )
-    return RoomEnvelope(unit=unit.public(), progress=current)
+    return RoomEnvelope(unit=await public_unit(unit), progress=current)

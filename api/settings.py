@@ -32,6 +32,9 @@ class Settings(BaseSettings):
     challenges_url: str = Field("http://127.0.0.1:8005", regex=r"^https?://[^?#@]+$")
     rooms_enabled: bool = False
     learning_rooms_exercise_refs: dict[str, dict[str, str]] = Field(default_factory=dict)
+    lesson_module_origins: list[str] = Field(default_factory=list)
+    lesson_module_local_development: bool = False
+    character_areas: Path = Path(__file__).parent / "content/character_areas.json"
 
     lecture_xp: int = 10
 

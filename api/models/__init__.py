@@ -2,6 +2,7 @@ from .bookmarks import SubSkillBookmark
 from .course_access import CourseAccess
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
+from .lesson_module import LessonModule
 from .purchase import CoursePurchase, PurchaseUser
 from .retained_right import CourseRightGrant, RetainedCourseRight
 from .room import RoomRequest, RoomState
@@ -14,6 +15,7 @@ from .xp_operation import XPOperation
 
 
 __all__ = [
+    "LessonModule",
     "RoomRequest",
     "RoomState",
     "CoursePurchase",

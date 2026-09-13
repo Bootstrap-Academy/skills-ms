@@ -48,6 +48,7 @@ ruff = "^0.4.2"
 [tool.poetry.scripts]
 api = "api.main:main"
 sweep-deleted-users = "api.sweep:main"
+register-lesson-module = "api.register_lesson_module:main"
 alembic = "alembic.config:main"
 
 [tool.poe.tasks]
