@@ -200,7 +200,8 @@ async def issue_grant(
         raise HTTPException(403, "Für diese Lektion brauchst du Zugang zum Kurs.")
     try:
         reference = private_reference(descriptor)
-        assert reference is not None
+        if reference is None:
+            raise ValueError("Module has no private package reference")
         artifact, entry = reference
         await run_in_threadpool(checked_asset, descriptor, entry)
     except (OSError, ValueError, KeyError, TypeError):
@@ -215,11 +216,8 @@ async def issue_grant(
     ).digest()
     token = base64.urlsafe_b64encode(digest).decode().rstrip("=")
     await redis.setex(grant_key(token), settings.private_lesson_module_grant_ttl, serialized)
-    return descriptor.copy(
-        update={
-            "entry_url": f"{settings.public_base_url.rstrip('/')}/lesson-assets/{token}/{artifact}/{quote(entry, safe='/')}"
-        }
-    )
+    entry_url = f"{settings.public_base_url.rstrip('/')}/lesson-assets/{token}/{artifact}/{quote(entry, safe='/')}"
+    return descriptor.copy(update={"entry_url": entry_url})
 
 
 async def asset_redirect(token: str, artifact: str, name: str) -> str:
