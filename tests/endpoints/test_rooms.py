@@ -684,3 +684,181 @@ async def test_guided_lesson_uses_exact_server_answers_without_claiming_solved_s
         "/rooms/intro/complete", json=payload(action="complete", answer=lesson.completion.answer)
     )
     assert response.status_code == 200 and response.json()["progress"]["result"] == {"kind": "introduced"}
+
+
+async def test_course_unit_choice_is_read_only_and_does_not_introduce_missing_concepts(
+    room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch
+) -> None:
+    course = linked_course(monkeypatch)
+    assert (await room_client.get("/rooms/exercise")).status_code == 403
+    response = await room_client.get(f"/rooms?course={course.id}&unit=exercise&continuous=true")
+    assert response.status_code == 200
+    assert response.headers["Cache-Control"] == "private, no-store"
+    assert response.json()["next"]["unit"]["id"] == "exercise"
+    assert response.json()["next"]["progress"]["status"] == "new"
+    outline = (await room_client.get(f"/courses/{course.id}/learning")).json()
+    assert outline["units"][1]["available"] is False and outline["units"][1]["selectable"] is True
+    assert all(unit["status"] == "new" for unit in outline["units"])
+    async with db_context():
+        assert await rooms.read_states(USER.id) == {}
+        assert rooms.introduced_concepts(rooms.catalogue(), {}) == set()
+        for model in (models.PurchaseUser, models.RoomRequest, models.XP, models.XPOperation):
+            assert await db.all(filter_by(model, user_id=USER.id)) == []
+
+
+async def test_course_drafts_and_request_retries_keep_exact_context_and_owner(
+    room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch
+) -> None:
+    course = linked_course(monkeypatch)
+    duplicate = course.copy(update={"id": "another-course"})
+    monkeypatch.setattr(rooms, "COURSES", {course.id: course, duplicate.id: duplicate})
+    query = f"?course={course.id}"
+    body = payload(state={"draft": "later lesson, private"})
+    response = await room_client.put(f"/rooms/exercise/state{query}", json=body)
+    assert response.status_code == 200
+    assert (await room_client.get(f"/rooms/exercise{query}")).json() == response.json()
+    assert (await room_client.put(f"/rooms/exercise/state{query}", json=body)).json() == response.json()
+    assert (await room_client.put(f"/rooms/exercise/state?course={duplicate.id}", json=body)).status_code == 409
+    assert (await room_client.get("/rooms/exercise")).status_code == 403
+    other = await room_client.get(f"/rooms/exercise{query}", headers={"Authorization": "Bearer subject-b"})
+    assert other.json()["progress"]["state"] == {}
+    outline = (await room_client.get(f"/courses/{course.id}/learning")).json()
+    assert outline["next"]["unit"]["id"] == "exercise" and outline["completed"] is False
+    assert outline["units"][0]["status"] == "new"
+    async with db_context():
+        states = await rooms.read_states(USER.id)
+        assert set(states) == {"exercise"} and rooms.introduced_concepts(rooms.catalogue(), states) == set()
+        assert len(await db.all(filter_by(models.RoomRequest, user_id=USER.id))) == 1
+
+
+async def test_course_completion_and_repeat_still_require_real_results(
+    room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch
+) -> None:
+    course = linked_course(monkeypatch)
+    query = f"?course={course.id}"
+    first = payload(action="complete", answer={"solved": True})
+    assert (await room_client.post(f"/rooms/exercise/complete{query}", json=first)).status_code == 409
+    assert (await room_client.post(f"/rooms/exercise/complete{query}", json=payload(action="skip"))).status_code == 403
+    monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=True))
+    finished = await room_client.post(f"/rooms/exercise/complete{query}", json=first)
+    assert finished.status_code == 200 and finished.json()["progress"]["result"] == {"kind": "solved"}
+    assert (await room_client.post(f"/rooms/exercise/complete{query}", json=first)).json() == finished.json()
+    selected = await room_client.get(f"/rooms?course={course.id}&unit=exercise")
+    assert selected.json()["next"]["review_available"] is True
+    review = payload(1)
+    started = await room_client.post(f"/rooms/exercise/review{query}", json=review)
+    assert started.status_code == 200
+    assert (await room_client.post(f"/rooms/exercise/review{query}", json=review)).json() == started.json()
+    current = started.json()["progress"]
+    complete = payload(2, review_id=current["review_id"], attempt_id=str(uuid4()), action="complete")
+    monkeypatch.setattr(rooms, "review_attempt_solved", AsyncMock(return_value=False))
+    assert (await room_client.post(f"/rooms/exercise/complete{query}", json=complete)).status_code == 409
+    monkeypatch.setattr(rooms, "review_attempt_solved", AsyncMock(return_value=True))
+    assert (await room_client.post(f"/rooms/exercise/complete{query}", json=complete)).status_code == 200
+    async with db_context():
+        states = await rooms.read_states(USER.id)
+        assert set(states) == {"exercise"} and states["exercise"].status == "completed"
+        assert not rooms.path_completed(rooms.catalogue(), states, "python-loops")
+        for model in (models.XP, models.XPOperation, models.LectureProgress, models.CourseAccess):
+            assert await db.all(filter_by(model, user_id=USER.id)) == []
+
+
+@pytest.mark.parametrize("admission", ["purchased", "historical", "premium"])
+async def test_course_navigation_requires_its_exact_paid_course_on_every_request_and_retry(
+    room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch, admission: str
+) -> None:
+    course = linked_course(monkeypatch, price=100)
+    # A free course on the same path does not authorize the requested paid course.
+    monkeypatch.setattr(
+        rooms, "COURSES", {course.id: course, "free-alias": course.copy(update={"id": "free-alias", "price": 0})}
+    )
+    premium = AsyncMock(return_value=False)
+    monkeypatch.setattr(rooms, "has_premium", premium)
+    requests = [
+        ("GET", f"/rooms?course={course.id}&unit=exercise", None),
+        ("GET", f"/rooms?course={course.id}&after=intro&continuous=true", None),
+        ("GET", f"/rooms/exercise?course={course.id}", None),
+        ("PUT", f"/rooms/exercise/state?course={course.id}", payload(state={})),
+        ("POST", f"/rooms/exercise/complete?course={course.id}", payload(action="complete")),
+        ("POST", f"/rooms/exercise/review?course={course.id}", payload()),
+    ]
+    for method, route, body in requests:
+        assert (await room_client.request(method, route, json=body)).status_code == 403
+    if admission == "premium":
+        premium.return_value = True
+    else:
+        async with db_context():
+            if admission == "purchased":
+                await db.add(models.CourseAccess(user_id=USER.id, course_id=course.id))
+            else:
+                await models.LastWatch.update(USER.id, course.id)
+    assert (await room_client.get(requests[0][1])).status_code == 200
+    saved = await room_client.put(requests[3][1], json=requests[3][2])
+    assert saved.status_code == 200
+    assert (await room_client.put(requests[3][1], json=requests[3][2])).json() == saved.json()
+    # Authority is checked before an exact receipt is replayed.
+    premium.return_value = False
+    monkeypatch.setattr(rooms, "get_owned_courses", AsyncMock(return_value=set()))
+    assert (await room_client.put(requests[3][1], json=requests[3][2])).status_code == 403
+    assert (await room_client.get(requests[0][1])).status_code == 403
+
+
+async def test_course_navigation_refuses_other_paths_retired_and_unconfigured_units(
+    room_client: httpx.AsyncClient, content: Catalogue, monkeypatch: MonkeyPatch
+) -> None:
+    course = linked_course(monkeypatch)
+    other = content.units[0].copy(deep=True, update={"id": "foreign", "path_id": "foreign"})
+    content.units.append(other)
+    content.paths.append(CataloguePath(id="foreign", title=other.title, units=["foreign"]))
+    for route, status in [
+        ("/rooms?unit=exercise", 422),
+        (f"/rooms?course={course.id}&unit=exercise&after=intro", 422),
+        ("/rooms?course=unknown&unit=exercise", 404),
+        (f"/rooms?course={course.id}&path=foreign&unit=foreign", 404),
+        (f"/rooms?course={course.id}&unit=foreign", 404),
+        (f"/rooms/foreign?course={course.id}", 404),
+        (f"/rooms?course={course.id}&unit=retired", 404),
+    ]:
+        assert (await room_client.get(route)).status_code == status
+    for method, suffix, body in [
+        ("PUT", "state", payload(state={})),
+        ("POST", "complete", payload(action="complete", answer={"answer": 6})),
+        ("POST", "review", payload()),
+    ]:
+        assert (
+            await room_client.request(method, f"/rooms/foreign/{suffix}?course={course.id}", json=body)
+        ).status_code == 404
+    monkeypatch.setattr(settings, "learning_rooms_exercise_refs", {})
+    assert (await room_client.get(f"/rooms?course={course.id}&unit=exercise")).status_code == 404
+    outline = (await room_client.get(f"/courses/{course.id}/learning")).json()
+    assert outline["units"][1]["selectable"] is False
+
+
+async def test_explicit_course_continuation_follows_order_and_resumes_latest_draft(
+    room_client: httpx.AsyncClient, content: Catalogue, monkeypatch: MonkeyPatch
+) -> None:
+    course = linked_course(monkeypatch)
+    content.units[2].requires = ["a-concept-not-yet-introduced"]
+    query = f"?course={course.id}"
+    await room_client.put("/rooms/intro/state", json=payload(state={"older": True}))
+    await room_client.put(f"/rooms/exercise/state{query}", json=payload(state={"newer": True}))
+    assert (await room_client.get(f"/rooms?course={course.id}&continuous=true")).json()["next"]["unit"][
+        "id"
+    ] == "exercise"
+    following = await room_client.get(f"/rooms?course={course.id}&after=exercise&continuous=true")
+    assert following.json()["next"]["unit"]["id"] == "later"
+    assert (await room_client.get(f"/rooms/later{query}")).status_code == 200
+    assert (await room_client.get("/rooms/later")).status_code == 403
+    # Merely opening a later unit does not alter the guided dashboard's knowledge.
+    assert (await room_client.get("/rooms?continuous=true")).json()["next"]["unit"]["id"] == "intro"
+    wrapped = await room_client.get(f"/rooms?course={course.id}&after=later&continuous=true")
+    assert wrapped.json()["next"]["unit"]["id"] == "intro"
+    await room_client.post(f"/rooms/later/complete{query}", json=payload(action="complete", answer={"answer": 6}))
+    # An explicit next follows even a completed lesson as a fresh review, instead
+    # of jumping back to an earlier unfinished lesson before the course boundary.
+    following = await room_client.get(f"/rooms?course={course.id}&after=exercise&continuous=true")
+    assert following.json()["next"]["unit"]["id"] == "later" and following.json()["next"]["review_available"]
+    async with db_context():
+        states = await rooms.read_states(USER.id)
+        assert states["intro"].status == states["exercise"].status == "in_progress"
+        assert "a-concept-not-yet-introduced" not in rooms.introduced_concepts(rooms.catalogue(), states)
