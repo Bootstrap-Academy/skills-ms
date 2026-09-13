@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from typing import Any
 
+from pydantic import BaseModel, Field, root_validator
+
+from api.schemas.curriculum import CurriculumDefinition
 from api.utils.docs import example, get_example
 
 
@@ -95,6 +98,9 @@ class BaseCourse(BaseModel):
     translations: dict[str, CourseTranslation] = Field(
         default_factory=dict, description="Optional localized metadata; base fields remain the fallback"
     )
+    has_explicit_curriculum: bool = Field(
+        default=False, description="Whether this course has explicitly composed lessons"
+    )
 
     Config = example(
         id="python",
@@ -117,6 +123,13 @@ class BaseCourse(BaseModel):
 
 class Course(BaseCourse):
     sections: list[Section] = Field(default_factory=list, description="Optional video sections in the course")
+    curriculum: CurriculumDefinition | None = Field(default=None, description="Optional explicitly ordered lessons")
+
+    @root_validator(skip_on_failure=True)
+    @classmethod
+    def explicit_curriculum_metadata(cls, values: dict[str, Any]) -> dict[str, Any]:
+        values["has_explicit_curriculum"] = values.get("curriculum") is not None
+        return values
 
     Config = example(**get_example(BaseCourse), sections=[get_example(Section)])
 
@@ -140,11 +153,11 @@ class Course(BaseCourse):
             )
 
         return CourseSummary(
-            **{key: value for key, value in self.dict().items() if key in BaseCourse.__fields__},
+            **self.dict(include=set(BaseCourse.__fields__)),
             sections=sections,
             completed=(
                 learning_completed
-                if self.learning_path_id is not None
+                if self.learning_path_id is not None or self.curriculum is not None
                 else None if completed_lectures is None else bool(sections) and all(s.completed for s in sections)
             ),
         )

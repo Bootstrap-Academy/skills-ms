@@ -23,7 +23,7 @@ from api.redis import redis
 from api.schemas.course import Course, CourseSummary, Lecture, NextUnseenResponse, UserCourse
 from api.schemas.rooms import CourseLearning
 from api.schemas.user import User
-from api.services import purchases, rooms
+from api.services import curriculum, purchases, rooms
 from api.services.courses import COURSES
 from api.services.courses import get_owned_courses as get_owned_courses
 from api.services.shop import has_premium
@@ -130,10 +130,12 @@ async def list_courses(
             completed_lectures.setdefault(lecture.course_id, set()).add(lecture.lecture_id)
 
     learning_completed = await rooms.course_completions(user)
+    out = list(out)
+    explicit_completed = await curriculum.completion_overrides(user, out)
     return [
         course.summary(
             None if completed_lectures is None else completed_lectures.get(course.id, set()),
-            learning_completed.get(course.learning_path_id or ""),
+            explicit_completed.get(course.id, learning_completed.get(course.learning_path_id or "")),
         )
         for course in out
     ]
@@ -144,9 +146,10 @@ async def get_course_summary(course: Course = get_course, user: User | None = pu
     """Return a summary of the course."""
 
     learning_completed = await rooms.course_completions(user)
+    explicit_completed = await curriculum.completion_overrides(user, [course])
     return course.summary(
         None if user is None else await models.LectureProgress.get_completed(user.id, course.id),
-        learning_completed.get(course.learning_path_id or ""),
+        explicit_completed.get(course.id, learning_completed.get(course.learning_path_id or "")),
     )
 
 
@@ -306,9 +309,11 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
     course_ids = {k for k, v in COURSES.items() if v.free}
     course_ids |= await get_unlocked_courses(user)
     learning_completed = await rooms.course_completions(user)
+    explicit_completed = await curriculum.completion_overrides(user, [COURSES[course_id] for course_id in course_ids])
     return [
         COURSES[course_id].summary(
-            completed_lectures.get(course_id, set()), learning_completed.get(COURSES[course_id].learning_path_id or "")
+            completed_lectures.get(course_id, set()),
+            explicit_completed.get(course_id, learning_completed.get(COURSES[course_id].learning_path_id or "")),
         )
         for course_id in course_ids
     ]
