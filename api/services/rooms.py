@@ -21,6 +21,7 @@ from api.models.room import RoomRequest, RoomState
 from api.schemas.course import Course
 from api.schemas.rooms import (
     Catalogue,
+    CataloguePath,
     CatalogueUnit,
     Complete,
     CourseLearning,
@@ -112,11 +113,13 @@ def introduced_concepts(content: Catalogue, states: dict[str, RoomState]) -> set
     return concepts
 
 
-def find_unit(content: Catalogue, unit_id: str, states: dict[str, RoomState]) -> CatalogueUnit:
+def find_unit(
+    content: Catalogue, unit_id: str, states: dict[str, RoomState], *, prerequisites: bool = True
+) -> CatalogueUnit:
     unit = next((unit for unit in content.units if unit.id == unit_id and not unit.retired), None)
     if unit is None or (unit.room == "exercise" and unit.exercise is None):
         raise HTTPException(404, "This learning room is unavailable")
-    if not set(unit.requires).issubset(introduced_concepts(content, states)):
+    if prerequisites and not set(unit.requires).issubset(introduced_concepts(content, states)):
         raise HTTPException(403, "Start with the introduction for this room")
     return unit
 
@@ -142,7 +145,14 @@ async def accessible_paths(content: Catalogue, user: User) -> set[str]:
     return accessible
 
 
-async def require_path_access(content: Catalogue, path_id: str, user: User) -> None:
+async def require_path_access(content: Catalogue, path_id: str, user: User, course_id: str | None = None) -> None:
+    if course_id is not None:
+        course = COURSES.get(course_id)
+        if course is None or course.learning_path_id != path_id:
+            raise HTTPException(404, "This lesson is not part of that course")
+        if course.free or user.admin or course.id in await get_owned_courses(user.id) or await has_premium(user.id):
+            return
+        raise HTTPException(403, "Open the course to get access to these lessons")
     requested = content.copy(update={"paths": [path for path in content.paths if path.id == path_id]})
     if path_id not in await accessible_paths(requested, user):
         raise HTTPException(403, "Open the course to get access to these lessons")
@@ -195,17 +205,31 @@ async def challenge_status(unit: CatalogueUnit, user: User, token: str) -> bool:
         raise HTTPException(503, "The exercise could not be checked") from None
 
 
-async def get_room(unit_id: str, user: User, token: str) -> RoomEnvelope:
+async def get_room(unit_id: str, user: User, token: str, course_id: str | None = None) -> RoomEnvelope:
     content = catalogue()
     states = await read_states(user.id)
-    unit = find_unit(content, unit_id, states)
-    await require_path_access(content, unit.path_id, user)
+    unit = find_unit(content, unit_id, states, prerequisites=course_id is None)
+    await require_path_access(content, unit.path_id, user, course_id)
     await challenge_status(unit, user, token)
-    return RoomEnvelope(unit=unit.public(), progress=progress(states.get(unit.id)))
+    row = states.get(unit.id)
+    return RoomEnvelope(
+        unit=unit.public(), progress=progress(row), review_available=course_id is not None and review_available(row)
+    )
+
+
+def review_available(row: RoomState | None) -> bool:
+    return row is not None and row.status in ("completed", "skipped") and row.review_status != "in_progress"
 
 
 async def next_room(
-    user: User, token: str, path_id: str, after: str | None, continuous: bool = False, direction: str | None = None
+    user: User,
+    token: str,
+    path_id: str,
+    after: str | None,
+    continuous: bool = False,
+    direction: str | None = None,
+    course_id: str | None = None,
+    unit_id: str | None = None,
 ) -> Rooms:
     content = catalogue()
     states = await read_states(user.id)
@@ -214,6 +238,10 @@ async def next_room(
         raise HTTPException(404, "This learning path is unavailable")
     if direction is not None and path.direction_id != direction:
         raise HTTPException(404, "This learning direction is unavailable")
+    if unit_id is not None and (course_id is None or after is not None):
+        raise HTTPException(422, "Choose a course lesson or continue after a lesson")
+    if course_id is not None:
+        await require_path_access(content, path.id, user, course_id)
     # Unknown legacy directions retain their historical cross-path stream. An
     # explicit direction stays in its own subject, including when it repeats.
     scope = direction or (path.direction_id if continuous else None)
@@ -222,6 +250,13 @@ async def next_room(
         raise HTTPException(403, "Open the course to get access to these lessons")
     content.paths = [candidate for candidate in content.paths if candidate.id in accessible]
     choices = [LearningPath.parse_obj(candidate.dict(exclude={"units"})) for candidate in content.paths]
+    if course_id is not None:
+        if unit_id is not None:
+            if unit_id not in path.units:
+                raise HTTPException(404, "This lesson is not part of that course")
+            chosen = await get_room(unit_id, user, token, course_id)
+            return Rooms(paths=choices, path=LearningPath.parse_obj(path.dict(exclude={"units"})), next=chosen)
+        return await next_course_room(content, states, user, token, path, after, continuous, choices)
     content.paths = [candidate for candidate in content.paths if scope is None or candidate.direction_id == scope]
     if continuous:
         return await continuous_room(content, states, user, token, path_id, after, choices)
@@ -254,6 +289,57 @@ async def next_room(
         reason = "completed" if finished else "prerequisites" if blocked_by_prerequisite else "unavailable"
     return Rooms(
         paths=choices, path=LearningPath.parse_obj(path.dict(exclude={"units"})), next=selected, empty_reason=reason
+    )
+
+
+async def next_course_room(
+    content: Catalogue,
+    states: dict[str, RoomState],
+    user: User,
+    token: str,
+    path: CataloguePath,
+    after: str | None,
+    continuous: bool,
+    choices: list[LearningPath],
+) -> Rooms:
+    """Follow an explicit course choice without inventing earlier achievements."""
+    ids = path.units
+    if after is not None:
+        cursor = ids.index(after) + 1
+        ids = ids[cursor:] + (ids[:cursor] if continuous else [])
+    else:
+        # Returning to a course resumes the latest own working state, including
+        # a repeat. An explicit next click instead follows the declared order.
+        def position(uid: str) -> tuple[int, float]:
+            row = states.get(uid)
+            if row is not None and (
+                row.status == "in_progress" or (row.review_id is not None and row.review_status == "in_progress")
+            ):
+                return (0, -row.updated_at.timestamp())
+            return (2 if row is not None and row.status in ("completed", "skipped") else 1, ids.index(uid))
+
+        ids = sorted(ids, key=position)
+    selected = None
+    for uid in ids:
+        row = states.get(uid)
+        if not continuous and review_available(row):
+            continue
+        try:
+            unit = find_unit(content, uid, states, prerequisites=False)
+            await challenge_status(unit, user, token)
+        except HTTPException as exc:
+            if exc.status_code == 404:
+                continue
+            raise
+        selected = RoomEnvelope(unit=unit.public(), progress=progress(row), review_available=review_available(row))
+        break
+    return Rooms(
+        paths=choices,
+        path=LearningPath.parse_obj(path.dict(exclude={"units"})),
+        next=selected,
+        empty_reason=(
+            None if selected is not None else "completed" if path_completed(content, states, path.id) else "unavailable"
+        ),
     )
 
 
@@ -306,10 +392,11 @@ async def course_learning(course: Course, user: User, token: str) -> CourseLearn
                     "status": "new" if row is None else row.status,
                     "result": None if row is None else row.result,
                     "available": available,
+                    "selectable": unit.room != "exercise" or unit.exercise is not None,
                 }
             )
         )
-    selected = await next_room(user, token, path.id, None)
+    selected = await next_room(user, token, path.id, None, course_id=course.id)
     return CourseLearning(
         path=selected.path,
         units=outline,
@@ -463,9 +550,11 @@ async def review_attempt_solved(unit: CatalogueUnit, user: User, token: str, row
         raise HTTPException(503, "The attempt could not be checked") from None
 
 
-def request_fingerprint(unit_id: str, data: SaveState | Complete | StartReview) -> str:
+def request_fingerprint(unit_id: str, data: SaveState | Complete | StartReview, course_id: str | None = None) -> str:
     operation = "save" if isinstance(data, SaveState) else "review" if isinstance(data, StartReview) else "complete"
     payload = {"unit_id": unit_id, "operation": operation}
+    if course_id is not None:
+        payload["course_id"] = course_id
     return sha256(
         json.dumps(
             {**payload, **json.loads(data.json(exclude_none=True))}, sort_keys=True, separators=(",", ":")
@@ -492,17 +581,19 @@ def completed_progress(unit: CatalogueUnit, current: Progress, data: Complete, s
     return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
 
 
-async def mutate_room(unit_id: str, user: User, token: str, data: SaveState | Complete | StartReview) -> RoomEnvelope:
+async def mutate_room(
+    unit_id: str, user: User, token: str, data: SaveState | Complete | StartReview, course_id: str | None = None
+) -> RoomEnvelope:
     content = catalogue()
-    fingerprint = request_fingerprint(unit_id, data)
+    fingerprint = request_fingerprint(unit_id, data, course_id)
     # This is also the erasure lock. A request admitted before erasure must not
     # recreate a state or replay receipt after the tombstone has committed.
     guard = await lock_user(user.id)
     if guard.deleted:
         raise HTTPException(401, "This account is no longer available")
     states = await read_states(user.id)
-    unit = find_unit(content, unit_id, states)
-    await require_path_access(content, unit.path_id, user)
+    unit = find_unit(content, unit_id, states, prerequisites=course_id is None)
+    await require_path_access(content, unit.path_id, user, course_id)
     receipt = await db.get(RoomRequest, user_id=user.id, request_id=str(data.request_id))
     if receipt is not None:
         if receipt.fingerprint != fingerprint:

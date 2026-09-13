@@ -34,29 +34,37 @@ async def next_room(
     after: str | None = None,
     continuous: bool = False,
     direction: str | None = None,
+    course: str | None = None,
+    unit: str | None = None,
     user: User = user_auth,
 ) -> Rooms:
-    return await rooms.next_room(user, get_token(request), path, after, continuous, direction)
+    return await rooms.next_room(user, get_token(request), path, after, continuous, direction, course, unit)
 
 
 @private.get("/{unit_id}", response_model=RoomEnvelope)
-async def get_room(unit_id: str, request: Request, user: User = user_auth) -> RoomEnvelope:
-    return await rooms.get_room(unit_id, user, get_token(request))
+async def get_room(unit_id: str, request: Request, course: str | None = None, user: User = user_auth) -> RoomEnvelope:
+    return await rooms.get_room(unit_id, user, get_token(request), course)
 
 
 @private.put("/{unit_id}/state", response_model=RoomEnvelope)
-async def save_state(unit_id: str, data: SaveState, request: Request, user: User = user_auth) -> RoomEnvelope:
-    return await rooms.mutate_room(unit_id, user, get_token(request), data)
+async def save_state(
+    unit_id: str, data: SaveState, request: Request, course: str | None = None, user: User = user_auth
+) -> RoomEnvelope:
+    return await rooms.mutate_room(unit_id, user, get_token(request), data, course)
 
 
 @private.post("/{unit_id}/complete", response_model=RoomEnvelope)
-async def complete(unit_id: str, data: Complete, request: Request, user: User = user_auth) -> RoomEnvelope:
-    return await rooms.mutate_room(unit_id, user, get_token(request), data)
+async def complete(
+    unit_id: str, data: Complete, request: Request, course: str | None = None, user: User = user_auth
+) -> RoomEnvelope:
+    return await rooms.mutate_room(unit_id, user, get_token(request), data, course)
 
 
 @private.post("/{unit_id}/review", response_model=RoomEnvelope)
-async def start_review(unit_id: str, data: StartReview, request: Request, user: User = user_auth) -> RoomEnvelope:
-    return await rooms.mutate_room(unit_id, user, get_token(request), data)
+async def start_review(
+    unit_id: str, data: StartReview, request: Request, course: str | None = None, user: User = user_auth
+) -> RoomEnvelope:
+    return await rooms.mutate_room(unit_id, user, get_token(request), data, course)
 
 
 router.include_router(private)

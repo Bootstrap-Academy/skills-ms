@@ -154,6 +154,7 @@ class CourseLearningUnit(RoomModel):
     status: Literal["new", "in_progress", "completed", "skipped"]
     result: Result | None
     available: bool
+    selectable: bool = False
 
 
 class CourseLearning(RoomModel):
