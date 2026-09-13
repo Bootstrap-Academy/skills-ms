@@ -240,7 +240,7 @@ async def get_lesson(course: Course, lesson_id: str, user: User, token: str) -> 
             if unit.completion is None and unit.exercise is None:
                 raise HTTPException(404, "Diese Aufgabe ist gerade nicht verfügbar.")
             await rooms.challenge_status(unit, user, token)
-            public = await rooms.public_unit(unit)
+            public = await rooms.public_unit(unit, user, course.id)
             activities.append(
                 Activity(
                     id=ref.id,

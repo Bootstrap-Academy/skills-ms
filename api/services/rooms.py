@@ -48,7 +48,12 @@ from api.utils.utc import utcnow
 @lru_cache(maxsize=1)
 def load_catalogue() -> Catalogue:
     try:
-        return Catalogue.parse_raw(Path(__file__).parents[1].joinpath("content/learning_rooms.json").read_text())
+        path = settings.learning_rooms_content or Path(__file__).parents[1].joinpath("content/learning_rooms.json")
+        if settings.learning_rooms_content is not None and (
+            not path.is_absolute() or not path.is_file() or path.is_symlink()
+        ):
+            raise ValueError("Private catalogue must be an absolute regular file")
+        return Catalogue.parse_raw(path.read_text())
     except (OSError, ValueError, ValidationError):
         raise HTTPException(503, "Learning rooms are temporarily unavailable") from None
 
@@ -128,12 +133,12 @@ def find_unit(
     return unit
 
 
-async def public_unit(unit: CatalogueUnit) -> Unit:
+async def public_unit(unit: CatalogueUnit, user: User | None = None, course_id: str | None = None) -> Unit:
     public = unit.public()
     if unit.room == "custom":
         if unit.module_id is None:
             raise HTTPException(503, "Diese Lektion kann gerade nicht geladen werden.")
-        public.module = await resolve_module(unit.module_id)
+        public.module = await resolve_module(unit.module_id, user=user, unit_id=unit.id, course_id=course_id)
     return public
 
 
@@ -226,7 +231,7 @@ async def get_room(unit_id: str, user: User, token: str, course_id: str | None =
     await challenge_status(unit, user, token)
     row = states.get(unit.id)
     return RoomEnvelope(
-        unit=await public_unit(unit),
+        unit=await public_unit(unit, user, course_id),
         progress=progress(row),
         review_available=course_id is not None and review_available(row),
     )
@@ -275,7 +280,7 @@ async def next_room(
                 raise HTTPException(404, "This lesson is not part of that course")
             chosen = await get_room(unit_id, user, token, course_id)
             return Rooms(paths=choices, path=LearningPath.parse_obj(path.dict(exclude={"units"})), next=chosen)
-        return await next_course_room(content, states, user, token, path, after, continuous, choices)
+        return await next_course_room(content, states, user, token, path, after, continuous, choices, course_id)
     content.paths = [candidate for candidate in content.paths if scope is None or candidate.direction_id == scope]
     if continuous:
         return await continuous_room(content, states, user, token, path_id, after, choices)
@@ -297,7 +302,7 @@ async def next_room(
                 blocked_by_prerequisite = blocked_by_prerequisite or exc.status_code == 403
                 continue
             raise
-        selected = RoomEnvelope(unit=await public_unit(unit), progress=progress(states.get(unit.id)))
+        selected = RoomEnvelope(unit=await public_unit(unit, user), progress=progress(states.get(unit.id)))
         break
     active = [unit for unit in content.units if unit.path_id == path.id and not unit.retired]
     finished = bool(active) and all(
@@ -320,6 +325,7 @@ async def next_course_room(
     after: str | None,
     continuous: bool,
     choices: list[LearningPath],
+    course_id: str | None = None,
 ) -> Rooms:
     """Follow an explicit course choice without inventing earlier achievements."""
     ids = path.units
@@ -351,7 +357,9 @@ async def next_course_room(
                 continue
             raise
         selected = RoomEnvelope(
-            unit=await public_unit(unit), progress=progress(row), review_available=review_available(row)
+            unit=await public_unit(unit, user, course_id),
+            progress=progress(row),
+            review_available=review_available(row),
         )
         break
     return Rooms(
@@ -462,7 +470,9 @@ async def continuous_room(
             paths=choices,
             path=LearningPath.parse_obj(selected_path.dict(exclude={"units"})),
             next=RoomEnvelope(
-                unit=await public_unit(unit), progress=progress(states.get(unit.id)), review_available=start_review
+                unit=await public_unit(unit, user),
+                progress=progress(states.get(unit.id)),
+                review_available=start_review,
             ),
         )
 
@@ -619,7 +629,9 @@ async def mutate_room(
     if receipt is not None:
         if receipt.fingerprint != fingerprint:
             raise HTTPException(409, "This request was already used for another change")
-        return RoomEnvelope(unit=await public_unit(unit), progress=Progress.parse_obj(receipt.progress))
+        return RoomEnvelope(
+            unit=await public_unit(unit, user, course_id), progress=Progress.parse_obj(receipt.progress)
+        )
     row = states.get(unit_id)
     current = progress(row)
     if current.revision != data.expected_revision:
@@ -692,4 +704,4 @@ async def mutate_room(
             RoomRequest.request_id.notin_([receipt.request_id for receipt in keep]),
         )
     )
-    return RoomEnvelope(unit=await public_unit(unit), progress=current)
+    return RoomEnvelope(unit=await public_unit(unit, user, course_id), progress=current)

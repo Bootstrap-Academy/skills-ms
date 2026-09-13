@@ -67,6 +67,12 @@ async def rollback_on_exception(request: Request, exc: HTTPException) -> Respons
 
 @app.on_event("startup")
 async def on_startup() -> None:
+    if settings.learning_rooms_content is not None:
+        from api.services.rooms import load_catalogue
+
+        # A configured private catalogue never silently falls back to public
+        # teaching content when missing or invalid.
+        load_catalogue()
     await clear_cache("courses")
     app.state.purchase_recovery = asyncio.create_task(purchase_recovery())
 
