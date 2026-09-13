@@ -1,6 +1,11 @@
 name: Start
 dependencies: []
 skills:
+  it_grundlagen:
+    name: IT-Grundlagen
+    dependencies: []
+    courses:
+      - it-foundations
   medienkompetenz:
     name: Medienkompetenz
     dependencies: []

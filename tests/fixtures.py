@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import AsyncIterator
 from unittest.mock import AsyncMock
 
@@ -12,9 +13,22 @@ from api.database import db
 
 
 @pytest.fixture(autouse=True)
-async def database(monkeypatch: MonkeyPatch) -> None:
-    monkeypatch.setattr(db, "engine", create_async_engine("sqlite+aiosqlite:///:memory:"))
-    await db.create_tables()
+async def database(monkeypatch: MonkeyPatch, tmp_path: Path) -> AsyncIterator[None]:
+    # Independent connections to one disposable file avoid both separate
+    # :memory: databases and accidental sharing of uncommitted transactions.
+    url = "sqlite+aiosqlite:///" + str(tmp_path / "skills.sqlite")
+    engine = create_async_engine(url)
+    admission_engine = create_async_engine(url)
+    monkeypatch.setattr(db, "engine", engine)
+    monkeypatch.setattr(db, "admission_engine", admission_engine)
+    try:
+        await db.create_tables()
+        yield
+    finally:
+        try:
+            await engine.dispose()
+        finally:
+            await admission_engine.dispose()
 
 
 @pytest.fixture

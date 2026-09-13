@@ -4,10 +4,10 @@ from pathlib import Path
 from secrets import token_urlsafe
 from typing import Any, Iterable
 
-from fastapi import APIRouter, Depends, Header, Query, Response
+from fastapi import APIRouter, Depends, Header, Query, Request, Response
 
 from api import models
-from api.auth import public_auth, require_verified_email, user_auth
+from api.auth import get_token, public_auth, require_verified_email, user_auth
 from api.database import db, filter_by
 from api.exceptions.auth import user_responses, verified_responses
 from api.exceptions.course import (
@@ -21,14 +21,15 @@ from api.exceptions.course import (
 )
 from api.redis import redis
 from api.schemas.course import Course, CourseSummary, Lecture, NextUnseenResponse, UserCourse
+from api.schemas.rooms import CourseLearning
 from api.schemas.user import User
-from api.services.auth import get_email
+from api.services import curriculum, purchases, rooms
 from api.services.courses import COURSES
-from api.services.shop import has_premium, spend_coins
+from api.services.courses import get_owned_courses as get_owned_courses
+from api.services.shop import has_premium
 from api.settings import settings
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
-from api.utils.email import BOUGHT_COURSE
 
 
 router = APIRouter()
@@ -64,13 +65,6 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
         return
 
     raise NoCourseAccessException
-
-
-@redis_cached("course_access", "user_id")
-async def get_owned_courses(user_id: str) -> set[str]:
-    return {ca.course_id async for ca in await db.stream(filter_by(models.CourseAccess, user_id=user_id))} | {
-        lw.course_id async for lw in await db.stream(filter_by(models.LastWatch, user_id=user_id))
-    }
 
 
 async def get_unlocked_courses(user: User) -> set[str]:
@@ -135,8 +129,14 @@ async def list_courses(
         async for lecture in await db.stream(filter_by(models.LectureProgress, user_id=user.id)):
             completed_lectures.setdefault(lecture.course_id, set()).add(lecture.lecture_id)
 
+    learning_completed = await rooms.course_completions(user)
+    out = list(out)
+    explicit_completed = await curriculum.completion_overrides(user, out)
     return [
-        course.summary(None if completed_lectures is None else completed_lectures.get(course.id, set()))
+        course.summary(
+            None if completed_lectures is None else completed_lectures.get(course.id, set()),
+            explicit_completed.get(course.id, learning_completed.get(course.learning_path_id or "")),
+        )
         for course in out
     ]
 
@@ -145,7 +145,25 @@ async def list_courses(
 async def get_course_summary(course: Course = get_course, user: User | None = public_auth) -> Any:
     """Return a summary of the course."""
 
-    return course.summary(None if user is None else await models.LectureProgress.get_completed(user.id, course.id))
+    learning_completed = await rooms.course_completions(user)
+    explicit_completed = await curriculum.completion_overrides(user, [course])
+    return course.summary(
+        None if user is None else await models.LectureProgress.get_completed(user.id, course.id),
+        explicit_completed.get(course.id, learning_completed.get(course.learning_path_id or "")),
+    )
+
+
+@router.get(
+    "/courses/{course_id}/learning",
+    dependencies=[require_verified_email, has_course_access],
+    response_model=CourseLearning,
+)
+async def get_course_learning(
+    request: Request, response: Response, course: Course = get_course, user: User = user_auth
+) -> CourseLearning:
+    """One course outline backed by the same private state as the learning stream."""
+    response.headers["Cache-Control"] = "private, no-store"
+    return await rooms.course_learning(course, user, get_token(request))
 
 
 @router.post(
@@ -237,9 +255,10 @@ async def next_unseen_lecture(course: Course = get_course, user: User = user_aut
             if lecture.id not in already_watched:
                 return NextUnseenResponse(section=section, lecture=lecture)
 
-    section = course.sections[0]
-    lecture = section.lectures[0]
-    return NextUnseenResponse(section=section, lecture=lecture)
+    for section in course.sections:
+        if section.lectures:
+            return NextUnseenResponse(section=section, lecture=section.lectures[0])
+    raise LectureNotFoundException
 
 
 @router.put(
@@ -289,34 +308,29 @@ async def get_accessible_courses(user: User = user_auth) -> Any:
 
     course_ids = {k for k, v in COURSES.items() if v.free}
     course_ids |= await get_unlocked_courses(user)
-    return [COURSES[course_id].summary(completed_lectures.get(course_id, set())) for course_id in course_ids]
+    learning_completed = await rooms.course_completions(user)
+    explicit_completed = await curriculum.completion_overrides(user, [COURSES[course_id] for course_id in course_ids])
+    return [
+        COURSES[course_id].summary(
+            completed_lectures.get(course_id, set()),
+            explicit_completed.get(course_id, learning_completed.get(COURSES[course_id].learning_path_id or "")),
+        )
+        for course_id in course_ids
+    ]
 
 
 @router.post(
     "/course_access/{course_id}",
     dependencies=[require_verified_email],
-    responses=verified_responses(bool, CourseIsFreeException, AlreadyPurchasedCourseException, NotEnoughCoinsError),
+    responses=verified_responses(
+        dict[str, Any], CourseIsFreeException, AlreadyPurchasedCourseException, NotEnoughCoinsError
+    ),
 )
-async def buy_course(user: User = user_auth, course: Course = get_course) -> Any:
-    """
-    Buy access to a course for a user.
+async def buy_course(data: purchases.Acceptance, user: User = user_auth, course: Course = get_course) -> Any:
+    """Accept the exact authenticated course offer; uncertain commands recover by order ID."""
+    return await purchases.buy(user.id, course, data)
 
-    *Requirements:* **VERIFIED**
-    """
 
-    if course.free:
-        raise CourseIsFreeException
-
-    if await db.exists(filter_by(models.CourseAccess, user_id=user.id, course_id=course.id)):
-        raise AlreadyPurchasedCourseException
-
-    if not await spend_coins(user.id, course.price, f"Course '{course.title}'"):
-        raise NotEnoughCoinsError
-
-    await models.CourseAccess.create(user.id, course.id)
-    if email := await get_email(user.id):
-        await BOUGHT_COURSE.send(email, title=course.title)
-
-    await clear_cache("course_access")
-
-    return True
+@router.post("/course_access/{course_id}/offer", dependencies=[require_verified_email])
+async def course_offer(user: User = user_auth, course: Course = get_course) -> Any:
+    return await purchases.offer(user.id, course)

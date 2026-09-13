@@ -38,7 +38,26 @@ If you would like to submit a bug report or feature request, or are looking for 
 7. Run `poe migrate` to run the database migrations.
 8. Run `poe api` to start the microservice. You can find the automatically generated swagger documentation on http://localhost:8001/docs.
 
+## Database connection budget
+
+Public course admission uses a separate, short committed read so that older
+request snapshots and Redis entries cannot hide or restore paid rights. One
+connection is reserved from `POOL_SIZE + MAX_OVERFLOW` for these reads; request
+transactions cannot consume that reserve. With the defaults (20 and 20), the
+normal pool retains 19 connections with 20 overflow slots and admission retains
+one without overflow. The combined retained and maximum capacities remain 20
+and 40. With `POOL_SIZE=1` and overflow available, the maximum is still preserved
+but the two pools can retain two idle connections instead of one.
+
+The service requires a finite pool: `POOL_SIZE >= 1`, `MAX_OVERFLOW >= 0`, and a
+combined capacity of at least two. Zero-sized or unlimited pools and caller-supplied
+pool objects/classes are rejected instead of weakening the reservation. The
+committed-read integration checks cover PostgreSQL and MariaDB; ordinary unit
+fixtures use independent connections to disposable SQLite files and do not
+establish the same MVCC behavior. Both service pools close after recovery stops.
+
 ## Poetry Scripts
+
 ```bash
 poe setup           # setup dependencies, .env file and pre-commit hook
 poe api             # start api locally

@@ -4,7 +4,7 @@ from _pytest.monkeypatch import MonkeyPatch
 from pytest_mock import MockerFixture
 
 from api import models, sweep
-from api.database import db, db_context
+from api.database import db, db_context, select
 from api.services.internal import InternalServiceError
 from api.settings import settings
 from api.utils.utc import utcnow
@@ -68,3 +68,23 @@ async def test__main(mocker: MockerFixture) -> None:
     sweep.main()
 
     run_patch.assert_called_once_with(sweep_patch.return_value)
+
+
+async def test__one_cache_failure_rolls_back_and_does_not_starve_next_user(
+    mocker: MockerFixture, monkeypatch: MonkeyPatch
+) -> None:
+    monkeypatch.setattr(settings, "deleted_user_sweep_rate_limit", 0)
+    monkeypatch.setattr(settings, "deleted_user_sweep_batch_size", 1)
+    async with db_context():
+        await db.add(models.CourseAccess(user_id="a", course_id="course"))
+        await db.add(models.CourseAccess(user_id="z", course_id="course"))
+    mocker.patch("api.sweep.get_user_status", AsyncMock(return_value=404))
+    cache = mocker.patch("api.services.user_deletion.clear_cache", AsyncMock())
+    cache.side_effect = [RuntimeError("synthetic cache outage"), *[None] * 5]
+    await sweep.sweep_deleted_users()
+    async with db_context():
+        assert [row.user_id for row in await db.all(select(models.CourseAccess))] == ["a"]
+    cache.side_effect = None
+    await sweep.sweep_deleted_users()
+    async with db_context():
+        assert await db.all(select(models.CourseAccess)) == []

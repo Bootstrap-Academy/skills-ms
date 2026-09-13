@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -26,7 +27,9 @@ class SubSkillBookmark(BaseModel):
 class XP(BaseModel):
     skill_id: str = Field(description="ID of the sub skill")
     xp: int = Field(description="Amount of XP the user has collected in this skill")
-    last_update: datetime = Field(description="Point in time at which the XP were last updated")
+    last_update: datetime | None = Field(
+        ..., description="Point in time at which the XP were last updated; null if no timestamp was recorded"
+    )
 
 
 class UserDataExport(BaseModel):
@@ -35,6 +38,13 @@ class UserDataExport(BaseModel):
     All points in time are ISO 8601 timestamps in UTC.
     """
 
+    purchases: list[dict[str, Any]] = Field(default_factory=list)
+    room_states: list[dict[str, Any]] = Field(default_factory=list)
+    room_requests: list[dict[str, Any]] = Field(default_factory=list)
+    purchase_user: list[dict[str, Any]] = Field(default_factory=list)
+    retained_course_rights: list[dict[str, Any]] = Field(default_factory=list)
+    course_right_grants: list[dict[str, Any]] = Field(default_factory=list)
+    xp_operations: list[dict[str, Any]] = Field(default_factory=list)
     course_access: list[CourseAccess] = Field(description="Courses the user has unlocked")
     last_watch: list[LastWatch] = Field(description="When the user last watched each course")
     lecture_progress: list[LectureProgress] = Field(description="Lectures the user has completed")
