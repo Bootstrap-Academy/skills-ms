@@ -7,6 +7,7 @@ from pathlib import Path
 from api.database import db, db_context
 from api.schemas.lesson_module import LessonModuleDescriptor
 from api.services.lesson_modules import checked_descriptor, register_module
+from api.services.private_lesson_modules import checked_asset, private_reference
 
 
 async def register(descriptor: LessonModuleDescriptor, replace: bool) -> None:
@@ -29,6 +30,8 @@ def main() -> None:
     args = parser.parse_args()
     try:
         descriptor = checked_descriptor(LessonModuleDescriptor.parse_raw(args.manifest.read_text()))
+        if reference := private_reference(descriptor):
+            checked_asset(descriptor, reference[1])
         if not args.check:
             asyncio.run(register(descriptor, args.replace))
     except (OSError, ValueError) as exc:

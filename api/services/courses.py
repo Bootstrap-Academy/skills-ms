@@ -1,7 +1,7 @@
 import pydantic
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from yaml import safe_load
+from yaml import YAMLError, safe_load
 
 from api import models
 from api.database import db
@@ -31,11 +31,26 @@ async def get_owned_courses(user_id: str) -> set[str]:
 
 def _load_courses() -> dict[str, Course]:
     courses = {}
-    for file in sorted(settings.courses.glob("*.yml")):
-        with file.open() as f:
-            _id = file.name.removesuffix(".yml")
-            logger.debug(f"loading course {_id}")
-            courses[_id] = pydantic.parse_obj_as(Course, {"id": _id} | safe_load(f))
+    directories = [settings.courses]
+    if private := settings.private_courses_directory:
+        if not private.is_absolute() or not private.is_dir() or private.is_symlink():
+            raise ValueError("The configured private course directory is unavailable")
+        directories.append(private)
+    for directory in directories:
+        for file in sorted(directory.glob("*.yml")):
+            if directory == settings.private_courses_directory and (not file.is_file() or file.is_symlink()):
+                raise ValueError("Private course definitions must be regular files")
+            with file.open() as f:
+                _id = file.name.removesuffix(".yml")
+                logger.debug(f"loading course {_id}")
+                try:
+                    definition = safe_load(f)
+                    if not isinstance(definition, dict) or ("id" in definition and definition["id"] != _id):
+                        raise ValueError("Course ID must match its filename")
+                    courses[_id] = pydantic.parse_obj_as(Course, {**definition, "id": _id})
+                except (ValueError, TypeError, YAMLError):
+                    # Pydantic/YAML errors may contain private teaching text.
+                    raise ValueError(f"Invalid course definition: {_id}") from None
     return courses
 
 

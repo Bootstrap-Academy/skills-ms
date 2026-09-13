@@ -101,6 +101,114 @@ existing deployment exercise mappings). A native video stores each locale as
 `{viewed: true}`; it does not prove mastery or award lecture XP. Original lecture
 activities keep their original video completion and XP behavior.
 
+## Private course content and module assets
+
+Private teaching files must stay outside public source repositories, Nix source
+closures and public static directories. No new database migration is needed.
+Optional settings:
+
+- `PRIVATE_COURSES_DIRECTORY`: an absolute directory containing reviewed
+  `<course-id>.yml` files. These override only their matching IDs in the pinned
+  `COURSES` catalogue, or add new IDs. Unspecified courses stay pinned. The
+  directory and its YAML files must not be symlinks; invalid configuration or
+  definitions fail startup. Do not change IDs, prices or existing access rights
+  as a side effect of moving content.
+- `LEARNING_ROOMS_CONTENT`: an absolute regular JSON file with the complete
+  existing `Catalogue` schema. It replaces the packaged room catalogue, and is
+  checked at startup. Missing, symlinked or invalid configured files fail closed;
+  there is no fallback to public teaching material. Preserve unchanged paths,
+  unit IDs and exercise bindings. Loaders cache at process startup; an operator
+  validates and atomically publishes a complete bundle, then restarts Skills.
+- `PRIVATE_LESSON_MODULES_ROOT`: private immutable packages at
+  `<root>/<artifact-sha256>/`, readable by Skills and Nginx. Every component of
+  this absolute filesystem path must be a real directory, not a symlink. Bind
+  mounts are supported. Verify the actual host path before enabling it.
+- `PRIVATE_LESSON_MODULE_GRANT_TTL`: seconds of asset access after a freshly
+  authorized lesson/room response; default 3600, allowed 60–28800.
+
+The pinned `COURSES` package remains in the system closure. A deployment can use
+`/var/lib/academy-content/catalog/courses`,
+`/var/lib/academy-content/catalog/learning_rooms.json` and
+`/var/lib/academy-content/modules` for the private settings above. Persist these
+directories and publish them privately; do not import their contents into Nix.
+
+Public course list/summary responses still contain promotional metadata (course
+description and translations, goals, prerequisites, titles, price and images).
+Keep teaching material out of those metadata fields. Summaries exclude the
+curriculum, section/lecture descriptions, video IDs/URLs and activity content.
+Detailed courses, learning outlines, curricula and lessons require the existing
+course admission. The full internal catalogue requires service authentication.
+Previously published video IDs and teaching material remain in public Git
+history; moving new content privately cannot retract those historical copies or
+make externally hosted YouTube videos private.
+
+Use the existing module descriptor/manifest and register through the same CLI.
+A private registry `entry_url` is exactly the approved Skills public origin plus
+`/private-lesson-modules/<artifact-sha256>/<encoded-entry.js-or-mjs>`. This reserved
+URL is a reference, never a public file route. The immutable package contains
+the matching `module.json`, `manifest.json` (`artifact_sha256`, original
+`definition`, and `files` with `path`, `bytes`, `sha256`) and inventoried assets.
+The private publisher verifies the complete package and content-address hash.
+Private CLI checks also verify the local descriptor, inventory and entry bytes;
+each asset request verifies its own exact inventory size/hash before serving.
+Manifest metadata is limited to 1 MiB and individual assets to 512 MiB. Metadata,
+unlisted/hidden files, symlinks and path traversal are never served. Keep package
+files immutable and unwritable by the API/Nginx users, including between Skills'
+check and Nginx's separate file open.
+
+After verifying the current account and existing course admission, Skills
+returns the same three-field descriptor with a runtime URL:
+`PUBLIC_BASE_URL/lesson-assets/<grant>/<artifact-sha256>/<encoded-entry>`.
+Relative ES imports and assets preserve the grant prefix. Native browser import
+does not need an Authorization header or cross-origin credentials. The grant is
+bound to user, course, unit and package; a module must belong to a real linked
+course. Public modules retain their original behavior.
+
+The opaque value is a domain-separated HMAC using the configured server secret;
+only its expiring Redis record grants access. Authorized GET/save responses
+renew that record while preserving the URL, including after Redis loss or a
+long pause, so an assessment checkpoint does not remount the player. A previously
+shared URL becomes usable again when its owner later opens the same content and
+renews the grant: this is not permanent one-time expiration. Logout does not
+immediately invalidate an issued grant. Without another authorized response,
+late lazy assets can fail after expiry; reopening the lesson renews access.
+Registry replacement preserves already issued old-package grants until their
+existing expiry, so keep old immutable files. New responses issue only the new
+package. Registry deletion or a local account-erasure tombstone denies existing
+grants. Downloaded browser code remains copyable; this is access control, not DRM.
+
+Required reverse-proxy contract (Skills does not serve raw bytes itself):
+
+```nginx
+# Never serve the canonical private registry references directly.
+location ^~ /private-lesson-modules/ { return 404; }
+location ^~ /_private-lesson-modules/ {
+    internal;
+    alias /var/lib/academy-content/modules/;
+    disable_symlinks on;
+    autoindex off;
+    # Ensure application/javascript for both js and mjs, and correct asset MIME.
+    # Preserve Cache-Control: private, no-store and Referrer-Policy: no-referrer.
+    # Permit the Academy frontend's credential-free cross-origin module GET.
+}
+```
+
+Proxy external `/skills/lesson-assets/` to the ordinary Skills router with GET
+and HEAD support and no cache. Its successful response contains
+`X-Accel-Redirect: /_private-lesson-modules/<hash>/<encoded-inventory-path>`.
+Both external and internal asset locations must suppress access/error logs that
+could include the capability URL; avoid tracing full grant paths at any CDN.
+Skills redacts asset grant values from its Uvicorn/application logs and Sentry
+events. Keep CORS/CSP and security headers in the actual evaluated Nginx config;
+an API-only test of the redirect header does not prove byte delivery or CORS.
+Disable public caching on success and failure, and reject direct internal URLs.
+
+This feature changes neither prices nor native assessment authorization. The
+existing Challenges APIs require a verified account and enabled task, but do
+not universally enforce paid-course ownership. Before publishing new paid
+native assessments, add the corresponding entitlement check at their own
+list/detail/submission boundaries; a protected lesson URL alone cannot do it.
+
 ## Character areas
 
 `GET /character-areas` returns configured areas with actual root skill IDs.

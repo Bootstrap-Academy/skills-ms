@@ -31,14 +31,18 @@ class Settings(BaseSettings):
     # Operator-owned service origin; room content and client requests supply only IDs.
     challenges_url: str = Field("http://127.0.0.1:8005", regex=r"^https?://[^?#@]+$")
     rooms_enabled: bool = False
+    learning_rooms_content: Path | None = None
     learning_rooms_exercise_refs: dict[str, dict[str, str]] = Field(default_factory=dict)
     lesson_module_origins: list[str] = Field(default_factory=list)
     lesson_module_local_development: bool = False
+    private_lesson_modules_root: Path | None = None
+    private_lesson_module_grant_ttl: int = Field(3600, ge=60, le=8 * 60 * 60)
     character_areas: Path = Path(__file__).parent / "content/character_areas.json"
 
     lecture_xp: int = 10
 
     courses: Path = Path("config/courses")
+    private_courses_directory: Path | None = None
 
     public_base_url: str = "http://localhost:8000"
     mp4_lectures: Path = Path("lectures")
