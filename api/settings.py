@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     internal_jwt_secret_auth: str = ""
     internal_jwt_secret_shop: str = ""
     internal_jwt_secret_skills: str = ""
+    internal_jwt_secret_challenges: str = ""
 
     auth_url: str = ""
     shop_url: str = ""
@@ -94,6 +95,7 @@ class Settings(BaseSettings):
             "auth": self.internal_jwt_secret_auth,
             "shop": self.internal_jwt_secret_shop,
             "skills": self.internal_jwt_secret_skills,
+            "challenges": self.internal_jwt_secret_challenges,
         }
         return secrets_by_audience.get(audience, "") or self.jwt_secret
 

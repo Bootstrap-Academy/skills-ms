@@ -15,6 +15,8 @@ from api.schemas.lesson_module import MODULE_ID_PATTERN, LessonModuleDescriptor
 # Same shape as llm-ms profile IDs (`academy_llm/src/profiles.rs`, `valid_id`).
 LLM_PROFILE_ID_PATTERN = r"^[a-z0-9][a-z0-9-]{0,79}$"
 MAX_LLM_PROFILES = 16
+# Same default cap as challenges-ms (`challenges.lesson_milestones.max_xp`).
+MAX_MILESTONE_XP = 50
 
 
 class RoomModel(BaseModel):
@@ -78,12 +80,32 @@ class LlmVerdictCompletion(RoomModel):
     allow_skip: Literal[True] = True
 
 
+class LessonMilestone(RoomModel):
+    """XP that challenges-ms books once per learner when this unit is first completed by its server check.
+
+    XP stay on the sub-skill node (`skills_xp`); challenges-ms deduplicates per learner and unit and caps the
+    amount (`challenges.lesson_milestones.max_xp`, default 50).
+    """
+
+    skill_id: str = Field(regex=r"^[a-z0-9][a-z0-9_-]{0,255}$")
+    xp: int = Field(ge=1, le=MAX_MILESTONE_XP)
+
+    @validator("xp", pre=True)
+    @classmethod
+    def strict_xp(cls, value: Any) -> int:
+        if not isinstance(value, int) or isinstance(value, bool):
+            raise ValueError("Milestone XP must be an integer")
+        return value
+
+
 class CatalogueUnit(Unit):
     retired: bool
     completion: IntroductionCompletion | LlmVerdictCompletion | None = None
     module_id: str | None = Field(default=None, regex=MODULE_ID_PATTERN)
     # Server-side only: the llm-ms profiles a lesson grant for this unit covers.
     llm_profiles: list[str] = Field(default_factory=list, max_items=MAX_LLM_PROFILES)
+    # Server-side only: lesson milestone XP (XP-02), booked in challenges-ms after a checked completion.
+    milestone: LessonMilestone | None = None
 
     @validator("llm_profiles", each_item=True)
     @classmethod
@@ -105,6 +127,11 @@ class CatalogueUnit(Unit):
                 raise ValueError("A graded answer belongs to a lesson room")
             if values["completion"].profile not in profiles:
                 raise ValueError("The grading profile must be one of the unit's LLM profiles")
+        if values.get("milestone") is not None and (
+            values.get("completion") is None or values["room"] in ("exercise", "video")
+        ):
+            # Exercises earn XP through their subtask; a video records viewing, not mastery.
+            raise ValueError("A lesson milestone needs a lesson with a server-side completion check")
         if values["room"] != "custom" and values.get("module_id") is not None:
             raise ValueError("Only a custom room references a module")
         if values["room"] in ("custom", "video"):
@@ -149,7 +176,7 @@ class CatalogueUnit(Unit):
         return values
 
     def public(self) -> Unit:
-        return Unit.parse_obj(self.dict(exclude={"retired", "completion", "module_id", "llm_profiles"}))
+        return Unit.parse_obj(self.dict(exclude={"retired", "completion", "module_id", "llm_profiles", "milestone"}))
 
 
 class LearningChapter(RoomModel):

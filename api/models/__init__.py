@@ -3,6 +3,7 @@ from .course_access import CourseAccess
 from .course_project import CourseProject, CourseProjectRequest
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
+from .lesson_milestone import LessonMilestoneDelivery
 from .lesson_module import LessonModule
 from .llm_verdict import LlmVerdict
 from .purchase import CoursePurchase, PurchaseUser
@@ -19,6 +20,7 @@ from .xp_operation import XPOperation
 __all__ = [
     "CourseProject",
     "CourseProjectRequest",
+    "LessonMilestoneDelivery",
     "LessonModule",
     "LlmVerdict",
     "RoomRequest",

@@ -48,6 +48,19 @@ async def _add_user_data(user_id: str) -> None:
         )
     )
     await db.add(
+        models.LessonMilestoneDelivery(
+            user_id=user_id,
+            unit_id="intro",
+            skill_id="sub",
+            xp=20,
+            completion="llm_verdict",
+            state="pending",
+            attempts=0,
+            next_attempt_at=utcnow(),
+            created_at=utcnow(),
+        )
+    )
+    await db.add(
         models.CourseProject(
             user_id=user_id, course_id="course", revision=1, state={"bot": {"name": "Klingel"}}, updated_at=utcnow()
         )

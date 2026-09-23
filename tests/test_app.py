@@ -72,9 +72,10 @@ async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> N
 
     db_patch.create_tables.assert_not_called()  # use alembic migrations instead
     clear_cache_patch.assert_called_once_with("courses")
-    task = module.app.state.purchase_recovery
-    task.cancel()
-    await asyncio.gather(task, return_exceptions=True)
+    tasks = [module.app.state.purchase_recovery, module.app.state.milestone_recovery]
+    for task in tasks:
+        task.cancel()
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 
 async def test__on_shutdown(mocker: MockerFixture) -> None:
@@ -85,9 +86,11 @@ async def test__on_shutdown(mocker: MockerFixture) -> None:
     module, on_shutdown = get_decorated_function(fastapi_patch, "on_event", "shutdown")
     task = asyncio.create_task(asyncio.Event().wait())
     module.app.state.purchase_recovery = task
+    milestones = asyncio.create_task(asyncio.Event().wait())
+    module.app.state.milestone_recovery = milestones
 
     await on_shutdown()
-    assert task.cancelled()
+    assert task.cancelled() and milestones.cancelled()
     db_patch.dispose.assert_awaited_once_with()
 
 

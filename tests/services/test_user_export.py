@@ -14,6 +14,7 @@ EXPORTED_MODELS: dict[str, Any] = {
     "room_states": models.RoomState,
     "room_requests": models.RoomRequest,
     "llm_verdicts": models.LlmVerdict,
+    "lesson_milestones": models.LessonMilestoneDelivery,
     "course_projects": models.CourseProject,
     "course_project_requests": models.CourseProjectRequest,
     "purchases": models.CoursePurchase,

@@ -1,7 +1,8 @@
-"""Curated learning flow with private state; never awards XP or changes courses.
+"""Curated learning flow with private state; never awards XP itself or changes courses.
 
-An LLM-graded room completes only with a verdict that llm-ms signed for this learner, unit and answer.
-It records no XP either (XP come only from challenges-ms), and a failing verdict changes nothing.
+An LLM-graded room completes only with a verdict that llm-ms signed for this learner, unit and answer,
+and a failing verdict changes nothing. XP come only from challenges-ms: a unit with a lesson milestone
+queues it on its first checked completion (`lesson_milestones`), delivered after the commit.
 """
 
 import json
@@ -43,7 +44,7 @@ from api.schemas.rooms import (
     Unit,
 )
 from api.schemas.user import User
-from api.services import llm
+from api.services import lesson_milestones, llm
 from api.services.courses import COURSES, get_owned_courses
 from api.services.lesson_modules import resolve_module
 from api.services.purchases import lock_user
@@ -724,6 +725,10 @@ async def mutate_room(
             )
         verdict = await graded_verdict(unit, user, data, course_id, current, row)
         current = completed_progress(unit, current, data, solved, verdict)
+        # Only a first completion outside a repeat can earn the lesson milestone; skips never do.
+        if current.review_id is None and current.status == "completed":
+            if checked := lesson_milestones.checked_completion(unit, data, verdict):
+                await lesson_milestones.enqueue(user.id, unit, checked)
     current.revision += 1
     values: dict[str, Any] = {**json.loads(current.json()), "updated_at": utcnow()}
     if current.review_id is not None and row is not None:

@@ -3,9 +3,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from api.auth import get_token, require_verified_email, user_auth
+from api.database import db
 from api.schemas.rooms import Complete, LlmGrant, RoomEnvelope, Rooms, SaveState, StartReview
 from api.schemas.user import User
-from api.services import rooms
+from api.services import lesson_milestones, rooms
 from api.settings import settings
 
 
@@ -57,7 +58,13 @@ async def save_state(
 async def complete(
     unit_id: str, data: Complete, request: Request, course: str | None = None, user: User = user_auth
 ) -> RoomEnvelope:
-    return await rooms.mutate_room(unit_id, user, get_token(request), data, course)
+    lesson_milestones.take_queued()
+    envelope = await rooms.mutate_room(unit_id, user, get_token(request), data, course)
+    if queued := lesson_milestones.take_queued():
+        # The completion and its lesson milestone are durable before challenges-ms is called.
+        await db.commit()
+        lesson_milestones.deliver_soon(*queued)
+    return envelope
 
 
 @private.post("/{unit_id}/review", response_model=RoomEnvelope)

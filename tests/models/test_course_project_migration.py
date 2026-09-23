@@ -21,7 +21,10 @@ ROOT = Path(__file__).parents[2]
 def test_course_project_migration_is_additive_head_and_matches_models() -> None:
     config = Config(str(ROOT / "alembic.ini"))
     config.set_main_option("script_location", str(ROOT / "alembic"))
-    assert ScriptDirectory.from_config(config).get_heads() == ["courseproject001"]
+    # Later migrations build on it; the current head is checked with the newest migration.
+    script = ScriptDirectory.from_config(config)
+    assert len(script.get_heads()) == 1
+    assert "courseproject001" in {revision.revision for revision in script.walk_revisions()}
     path = ROOT / "alembic/versions/2026_09_24_0900-courseproject001_course_project_state.py"
     spec = spec_from_file_location("course_project_migration", path)
     assert spec is not None and spec.loader is not None

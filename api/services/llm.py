@@ -105,7 +105,13 @@ def _key(name: str, value: str, file: Path | None, others: list[bytes]) -> bytes
 
 
 def _service_keys() -> list[bytes]:
-    names = ("jwt_secret", "internal_jwt_secret_auth", "internal_jwt_secret_shop", "internal_jwt_secret_skills")
+    names = (
+        "jwt_secret",
+        "internal_jwt_secret_auth",
+        "internal_jwt_secret_shop",
+        "internal_jwt_secret_skills",
+        "internal_jwt_secret_challenges",
+    )
     return [value.encode("utf-8") for value in (getattr(settings, name) for name in names) if value]
 
 

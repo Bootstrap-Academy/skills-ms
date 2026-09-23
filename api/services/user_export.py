@@ -26,6 +26,10 @@ async def export_user_data(user_id: str) -> UserDataExport:
             {column.name: getattr(row, column.name) for column in row.__table__.columns}
             for row in await db.all(filter_by(models.LlmVerdict, user_id=user_id))
         ],
+        lesson_milestones=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in await db.all(filter_by(models.LessonMilestoneDelivery, user_id=user_id))
+        ],
         course_projects=[
             {column.name: getattr(row, column.name) for column in row.__table__.columns}
             for row in await db.all(filter_by(models.CourseProject, user_id=user_id))
