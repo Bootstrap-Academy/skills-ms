@@ -20,7 +20,10 @@ ROOT = Path(__file__).parents[2]
 def test_llm_verdict_migration_is_additive_head_and_matches_model() -> None:
     config = Config(str(ROOT / "alembic.ini"))
     config.set_main_option("script_location", str(ROOT / "alembic"))
-    assert ScriptDirectory.from_config(config).get_heads() == ["llmverdicts001"]
+    # Later migrations build on it; the current head is checked with the newest migration.
+    script = ScriptDirectory.from_config(config)
+    assert len(script.get_heads()) == 1
+    assert "llmverdicts001" in {revision.revision for revision in script.walk_revisions()}
     path = ROOT / "alembic/versions/2026_09_23_2300-llmverdicts001_graded_completion.py"
     spec = spec_from_file_location("llm_verdict_migration", path)
     assert spec is not None and spec.loader is not None
