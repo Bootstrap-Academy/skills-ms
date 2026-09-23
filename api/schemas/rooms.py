@@ -2,6 +2,7 @@
 
 import json
 import re
+from datetime import datetime
 from typing import Any, Literal
 from urllib.parse import urlsplit
 from uuid import UUID
@@ -9,6 +10,11 @@ from uuid import UUID
 from pydantic import BaseModel, Field, root_validator, validator
 
 from api.schemas.lesson_module import MODULE_ID_PATTERN, LessonModuleDescriptor
+
+
+# Same shape as llm-ms profile IDs (`academy_llm/src/profiles.rs`, `valid_id`).
+LLM_PROFILE_ID_PATTERN = r"^[a-z0-9][a-z0-9-]{0,79}$"
+MAX_LLM_PROFILES = 16
 
 
 class RoomModel(BaseModel):
@@ -59,16 +65,46 @@ class IntroductionCompletion(RoomModel):
     allow_skip: bool = False
 
 
+class LlmVerdictCompletion(RoomModel):
+    """Completion by a passing grading verdict that llm-ms signed for exactly this learner, unit and answer.
+
+    `profile_sha256` pins the grading profile version (SHA-256 of its file, as llm-ms hashes it), so a
+    verdict from a changed rubric does not count. The grader can be wrong, so skipping always stays open.
+    """
+
+    kind: Literal["llm-verdict"]
+    profile: str = Field(regex=LLM_PROFILE_ID_PATTERN)
+    profile_sha256: str = Field(regex=r"^[0-9a-f]{64}$")
+    allow_skip: Literal[True] = True
+
+
 class CatalogueUnit(Unit):
     retired: bool
-    completion: IntroductionCompletion | None = None
+    completion: IntroductionCompletion | LlmVerdictCompletion | None = None
     module_id: str | None = Field(default=None, regex=MODULE_ID_PATTERN)
+    # Server-side only: the llm-ms profiles a lesson grant for this unit covers.
+    llm_profiles: list[str] = Field(default_factory=list, max_items=MAX_LLM_PROFILES)
+
+    @validator("llm_profiles", each_item=True)
+    @classmethod
+    def llm_profile_id(cls, value: str) -> str:
+        if not re.fullmatch(LLM_PROFILE_ID_PATTERN, value):
+            raise ValueError("Invalid LLM profile ID")
+        return value
 
     @root_validator(skip_on_failure=True)
     @classmethod
     def completion_matches_room(cls, values: dict[str, Any]) -> dict[str, Any]:
         if values.get("module") is not None:
             raise ValueError("Module URLs come from the operator registry, not content")
+        profiles = values["llm_profiles"]
+        if len(set(profiles)) != len(profiles):
+            raise ValueError("Duplicate LLM profile")
+        if isinstance(values.get("completion"), LlmVerdictCompletion):
+            if values["room"] in ("exercise", "video"):
+                raise ValueError("A graded answer belongs to a lesson room")
+            if values["completion"].profile not in profiles:
+                raise ValueError("The grading profile must be one of the unit's LLM profiles")
         if values["room"] != "custom" and values.get("module_id") is not None:
             raise ValueError("Only a custom room references a module")
         if values["room"] in ("custom", "video"):
@@ -113,7 +149,7 @@ class CatalogueUnit(Unit):
         return values
 
     def public(self) -> Unit:
-        return Unit.parse_obj(self.dict(exclude={"retired", "completion", "module_id"}))
+        return Unit.parse_obj(self.dict(exclude={"retired", "completion", "module_id", "llm_profiles"}))
 
 
 class LearningChapter(RoomModel):
@@ -247,8 +283,20 @@ class Complete(Mutation):
     attempt_id: UUID | None = None
     action: Literal["complete", "skip"]
     answer: dict[str, Any] = Field(default_factory=dict)
+    # The signed grading verdict from llm-ms (`outputs[0].grading.receipt`) for `answer.text`.
+    verdict: str | None = Field(
+        default=None, max_length=8192, regex=r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$"
+    )
     _bounded_answer = validator("answer", pre=True, allow_reuse=True)(bounded_object)
 
 
 class StartReview(Mutation):
     pass
+
+
+class LlmGrant(RoomModel):
+    """A short-lived lesson grant for llm-ms; the host sends it with every call for this unit."""
+
+    grant: str
+    profiles: list[str]
+    expires_at: datetime

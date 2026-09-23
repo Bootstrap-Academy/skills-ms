@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
 
 from api.auth import get_token, require_verified_email, user_auth
-from api.schemas.rooms import Complete, RoomEnvelope, Rooms, SaveState, StartReview
+from api.schemas.rooms import Complete, LlmGrant, RoomEnvelope, Rooms, SaveState, StartReview
 from api.schemas.user import User
 from api.services import rooms
 from api.settings import settings
@@ -65,6 +65,12 @@ async def start_review(
     unit_id: str, data: StartReview, request: Request, course: str | None = None, user: User = user_auth
 ) -> RoomEnvelope:
     return await rooms.mutate_room(unit_id, user, get_token(request), data, course)
+
+
+@private.post("/{unit_id}/llm-grant", response_model=LlmGrant)
+async def llm_grant(unit_id: str, course: str | None = None, user: User = user_auth) -> LlmGrant:
+    """A short-lived grant for the unit's LLM profiles at llm-ms, after the course and path access check."""
+    return await rooms.issue_llm_grant(unit_id, user, course)
 
 
 router.include_router(private)

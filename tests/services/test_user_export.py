@@ -13,6 +13,7 @@ TIMESTAMP = datetime(2026, 9, 3, 12, 34, 56, tzinfo=timezone.utc)
 EXPORTED_MODELS: dict[str, Any] = {
     "room_states": models.RoomState,
     "room_requests": models.RoomRequest,
+    "llm_verdicts": models.LlmVerdict,
     "purchases": models.CoursePurchase,
     "purchase_user": models.PurchaseUser,
     "retained_course_rights": models.RetainedCourseRight,

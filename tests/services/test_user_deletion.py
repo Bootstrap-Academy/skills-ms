@@ -31,6 +31,21 @@ async def _add_user_data(user_id: str) -> None:
             created_at=utcnow(),
         )
     )
+    await db.add(
+        models.LlmVerdict(
+            user_id=user_id,
+            request_id="request",
+            unit_id="intro",
+            profile="grader",
+            profile_sha256="a" * 64,
+            answer_sha256="b" * 64,
+            score=3,
+            max_score=4,
+            model="gpt-6-sol",
+            graded_at=utcnow(),
+            used_at=utcnow(),
+        )
+    )
     await db.add(models.CourseAccess(user_id=user_id, course_id="course"))
     await db.add(models.LastWatch(user_id=user_id, course_id="course", timestamp=utcnow()))
     await db.add(models.LectureProgress(user_id=user_id, course_id="course", lecture_id="lecture", completed=utcnow()))

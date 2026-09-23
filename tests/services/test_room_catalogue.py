@@ -1,6 +1,6 @@
 """Validate the shipped catalogue independently of synthetic route fixtures."""
 
-from api.schemas.rooms import Unit
+from api.schemas.rooms import IntroductionCompletion, Unit
 from api.services.rooms import load_catalogue
 
 
@@ -17,4 +17,4 @@ def test_shipped_paths_have_reachable_prerequisites_and_private_checks() -> None
             assert isinstance(public, Unit)
             assert "completion" not in public.dict() and "retired" not in public.dict()
             if unit.room != "exercise":
-                assert unit.completion is not None and unit.completion.answer
+                assert isinstance(unit.completion, IntroductionCompletion) and unit.completion.answer

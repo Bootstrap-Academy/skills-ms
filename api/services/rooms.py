@@ -1,4 +1,8 @@
-"""Curated learning flow with private state; never awards XP or changes courses."""
+"""Curated learning flow with private state; never awards XP or changes courses.
+
+An LLM-graded room completes only with a verdict that llm-ms signed for this learner, unit and answer.
+It records no XP either (XP come only from challenges-ms), and a failing verdict changes nothing.
+"""
 
 import json
 from datetime import datetime, timezone
@@ -16,7 +20,7 @@ from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, delete, filter_by
-from api.models import PurchaseUser
+from api.models import LlmVerdict, PurchaseUser
 from api.models.room import RoomRequest, RoomState
 from api.schemas.course import Course
 from api.schemas.rooms import (
@@ -28,6 +32,8 @@ from api.schemas.rooms import (
     CourseLearningUnit,
     Exercise,
     LearningPath,
+    LlmGrant,
+    LlmVerdictCompletion,
     Progress,
     Result,
     RoomEnvelope,
@@ -37,6 +43,7 @@ from api.schemas.rooms import (
     Unit,
 )
 from api.schemas.user import User
+from api.services import llm
 from api.services.courses import COURSES, get_owned_courses
 from api.services.lesson_modules import resolve_module
 from api.services.purchases import lock_user
@@ -593,7 +600,9 @@ def request_fingerprint(unit_id: str, data: SaveState | Complete | StartReview, 
     ).hexdigest()
 
 
-def completed_progress(unit: CatalogueUnit, current: Progress, data: Complete, solved: bool) -> Progress:
+def completed_progress(
+    unit: CatalogueUnit, current: Progress, data: Complete, solved: bool, verdict: llm.VerdictClaims | None = None
+) -> Progress:
     if current.status in ("completed", "skipped"):
         raise HTTPException(409, "This room has already been finished")
     if data.action == "skip":
@@ -604,12 +613,57 @@ def completed_progress(unit: CatalogueUnit, current: Progress, data: Complete, s
         if not solved:
             raise HTTPException(409, "The exercise has not been solved yet")
         return current.copy(update={"status": "completed", "result": Result(kind="solved")})
+    if isinstance(unit.completion, LlmVerdictCompletion):
+        # Only a checked, passing verdict completes. A failing one keeps the room open at no cost.
+        if verdict is None or not verdict.passed:
+            raise HTTPException(422, "Check your answer and try again")
+        return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
     # Canonical JSON distinguishes true from 1; the client cannot assert mastery.
     if unit.completion is None or json.dumps(data.answer, sort_keys=True) != json.dumps(
         unit.completion.answer, sort_keys=True
     ):
         raise HTTPException(422, "Check your answer and try again")
     return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
+
+
+async def graded_verdict(
+    unit: CatalogueUnit, user: User, data: Complete, course_id: str | None, current: Progress, row: RoomState | None
+) -> llm.VerdictClaims | None:
+    """The checked verdict for completing an LLM-graded room, or None when none is needed."""
+    completion = unit.completion
+    if not isinstance(completion, LlmVerdictCompletion):
+        if data.verdict is not None:
+            raise HTTPException(422, "This room is not graded by the AI")
+        return None
+    if data.action != "complete" or current.status in ("completed", "skipped"):
+        return None
+    text = data.answer.get("text")
+    if data.verdict is None or set(data.answer) != {"text"} or not isinstance(text, str):
+        raise HTTPException(422, "Send your answer together with its grading")
+    claims = llm.verify_verdict(
+        data.verdict,
+        user_id=user.id,
+        unit_id=unit.id,
+        completion=completion,
+        course_id=course_id,
+        answer=text,
+        # A repeat needs a grading made during that repeat, like an exercise needs a new attempt.
+        not_before=row.review_started_at if row is not None and current.review_id is not None else None,
+    )
+    if await db.get(LlmVerdict, user_id=user.id, request_id=str(claims.request_id)) is not None:
+        raise HTTPException(409, "This grading was already used. Check your answer again.")
+    return claims
+
+
+async def issue_llm_grant(unit_id: str, user: User, course_id: str | None = None) -> LlmGrant:
+    """A lesson grant for the unit's LLM profiles, after the same access checks as opening the room."""
+    content = catalogue()
+    states = await read_states(user.id, {unit_id}) if course_id is not None else await read_states(user.id)
+    unit = find_unit(content, unit_id, states, prerequisites=course_id is None)
+    await require_path_access(content, unit.path_id, user, course_id)
+    if not unit.llm_profiles:
+        raise HTTPException(404, "This learning room does not use the AI")
+    return llm.issue_grant(user.id, unit, course_id)
 
 
 async def mutate_room(
@@ -639,6 +693,7 @@ async def mutate_room(
     if not isinstance(data, StartReview) and data.review_id != current.review_id:
         raise HTTPException(409, "Your practice round has changed in another session")
     solved = await challenge_status(unit, user, token)
+    verdict: llm.VerdictClaims | None = None
     if isinstance(data, StartReview):
         if row is None or row.status not in ("completed", "skipped") or row.review_status == "in_progress":
             raise HTTPException(409, "This room is already in progress")
@@ -654,7 +709,8 @@ async def mutate_room(
                 and data.attempt_id is not None
                 and await review_attempt_solved(unit, user, token, row, data.attempt_id)
             )
-        current = completed_progress(unit, current, data, solved)
+        verdict = await graded_verdict(unit, user, data, course_id, current, row)
+        current = completed_progress(unit, current, data, solved, verdict)
     current.revision += 1
     values: dict[str, Any] = {**json.loads(current.json()), "updated_at": utcnow()}
     if current.review_id is not None and row is not None:
@@ -674,6 +730,23 @@ async def mutate_room(
         )
         if cast(CursorResult, result).rowcount != 1:
             raise HTTPException(409, "Your room has changed in another session")
+    if verdict is not None:
+        # Single use, and the link to llm-ms' grading receipt (same user and request ID).
+        await db.add(
+            LlmVerdict(
+                user_id=user.id,
+                request_id=str(verdict.request_id),
+                unit_id=unit_id,
+                profile=verdict.profile,
+                profile_sha256=verdict.profile_hash,
+                answer_sha256=verdict.answer_sha256,
+                score=verdict.score,
+                max_score=verdict.max_score,
+                model=verdict.model,
+                graded_at=datetime.fromtimestamp(verdict.iat, timezone.utc),
+                used_at=utcnow(),
+            )
+        )
     await db.add(
         RoomRequest(
             user_id=user.id,
