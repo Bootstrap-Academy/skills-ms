@@ -1,15 +1,16 @@
 """Lesson grants for the LLM gateway (llm-ms) and checks of its signed grading verdicts.
 
 Both are HS256 JWTs in llm-ms' shape (`academy_llm/src/jwt.rs`): the payload is `{exp, ...claims}` with
-an integer `exp`. Grant claims follow `GrantClaims` (`academy_llm/src/grant.rs`), verdict claims
-`VerdictClaims` (`academy_llm/src/grading.rs`, llm-ms 8cfc33f). Keys are the exact UTF-8 bytes llm-ms uses:
-a plain value as given, a credential file without its trailing CR/LF. The gateway never calls this
-service; a grant carries the access decision that was made here.
+an integer `exp`. Grant claims follow `GrantClaims` (`academy_llm/src/grant.rs`). Verdicts follow
+"Verdict-Format (verbindlich)" in `internal-operations/tasks/LLM-GATEWAY-2026-09-23.md` (llm-ms 157d2e6,
+`VerdictClaims` in `academy_llm/src/grading.rs`). Keys are the exact UTF-8 bytes llm-ms uses: a plain
+value as given, a credential file without its trailing CR/LF. The gateway never calls this service; a
+grant carries the access decision that was made here.
 
-A verdict counts only with its own verdict key. There is deliberately no fallback to the grant key, a
-verdict key equal to the grant key is refused, and a verdict marked as coming from a fake or test mode
-never completes a room. The verdict format is still being finalised in llm-ms; the claim model and the
-practice markers below are the two places to adapt.
+A verdict counts only with its own verdict key: no fallback to the grant key, and like in llm-ms every
+key is at least 32 bytes and differs from the others. llm-ms signs nothing in fake mode (`receipt: null`),
+which the room treats as "no verdict". Unknown extra claims are ignored as the binding format recommends;
+every claim that carries a binding is required and checked.
 """
 
 from datetime import datetime, timezone
@@ -36,19 +37,17 @@ UNAVAILABLE = "The AI is not available right now"
 FOREIGN_VERDICT = "This grading does not belong to this answer"
 PRACTICE_VERDICT = "This grading comes from a test mode and does not count"
 STALE_VERDICT = "This grading is out of date. Check your answer again."
+MIN_KEY_BYTES = 32
 
 logger = get_logger(__name__)
 
 
 class VerdictClaims(BaseModel):
-    """What llm-ms signs after grading (`VerdictClaims` in `academy_llm/src/grading.rs`).
-
-    Unknown claims are refused, not ignored: a claim this service does not check (a new binding, a mode)
-    must never be dropped silently.
-    """
+    """The binding verdict payload; all claims are always present (llm-ms 157d2e6)."""
 
     class Config:
-        extra = "forbid"
+        # The binding format asks to ignore unknown claims so that an extension does not break the check.
+        extra = "ignore"
 
     aud: Literal["llm-verdict"]
     exp: StrictInt
@@ -60,6 +59,8 @@ class VerdictClaims(BaseModel):
     profile_hash: str = Field(regex=HEX_SHA256)
     request_id: UUID
     answer_sha256: str = Field(regex=HEX_SHA256)
+    # Language of the grader prompt; the client chooses it, so it is recorded, not bound (see the room).
+    locale: Literal["de", "en"]
     score: StrictInt
     max_score: StrictInt
     pass_score: StrictInt
@@ -74,34 +75,60 @@ class VerdictClaims(BaseModel):
         return value
 
 
-def _key(value: str, file: Path | None, name: str) -> bytes | None:
+def _secret(value: str, file: Path | None) -> bytes | None:
+    """The configured bytes (None if unset); ValueError if the configuration cannot be used."""
     if value and file is not None:
-        logger.error("%s is configured both as a value and as a file", name)
-        return None
+        raise ValueError("is configured both as a value and as a file")
     if file is not None:
         try:
             value = file.read_bytes().decode("utf-8").rstrip("\r\n")
         except (OSError, UnicodeDecodeError):
-            logger.error("%s file cannot be read", name)
-            return None
+            raise ValueError("file cannot be read") from None
     return value.encode("utf-8") or None
 
 
-def grant_key() -> bytes | None:
-    return _key(settings.llm_grant_secret, settings.llm_grant_secret_file, "LLM_GRANT_SECRET")
-
-
-def verdict_key() -> bytes | None:
-    """The verdict key. Never the grant key: whoever holds a grant key must not be able to sign a pass."""
-    key = _key(settings.llm_verdict_secret, settings.llm_verdict_secret_file, "LLM_VERDICT_SECRET")
-    if key is not None and key == grant_key():
-        logger.error("LLM_VERDICT_SECRET equals the grant key; graded completions stay off")
+def _key(name: str, value: str, file: Path | None, others: list[bytes]) -> bytes | None:
+    try:
+        key = _secret(value, file)
+    except ValueError as err:
+        logger.error("%s %s", name, err)
+        return None
+    if key is None:
+        return None
+    if len(key) < MIN_KEY_BYTES:
+        logger.error("%s is shorter than %d bytes", name, MIN_KEY_BYTES)
+        return None
+    if key in others:
+        logger.error("%s must differ from every other key", name)
         return None
     return key
 
 
+def _service_keys() -> list[bytes]:
+    names = ("jwt_secret", "internal_jwt_secret_auth", "internal_jwt_secret_shop", "internal_jwt_secret_skills")
+    return [value.encode("utf-8") for value in (getattr(settings, name) for name in names) if value]
+
+
+def grant_key() -> bytes | None:
+    return _key("LLM_GRANT_SECRET", settings.llm_grant_secret, settings.llm_grant_secret_file, _service_keys())
+
+
+def verdict_key() -> bytes | None:
+    """The verdict key. Never the grant key: whoever holds a grant key must not be able to sign a pass."""
+    try:
+        grant = _secret(settings.llm_grant_secret, settings.llm_grant_secret_file)
+    except ValueError:
+        grant = None
+    others = [*_service_keys(), *([grant] if grant else [])]
+    return _key("LLM_VERDICT_SECRET", settings.llm_verdict_secret, settings.llm_verdict_secret_file, others)
+
+
 def marked_as_practice(payload: dict[str, Any]) -> bool:
-    """Whether llm-ms marked a verdict as coming from its fake provider or a test mode."""
+    """Whether a verdict says it comes from a fake provider or a test mode.
+
+    llm-ms 157d2e6 signs nothing in fake mode, so this only guards against a future format or a
+    misconfigured gateway; such markers are the one exception to ignoring unknown claims.
+    """
     return (
         any(payload.get(name) not in (None, False) for name in ("fake", "test"))
         or payload.get("mode") not in (None, "live")

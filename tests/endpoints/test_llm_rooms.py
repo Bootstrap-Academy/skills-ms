@@ -1,7 +1,7 @@
 """LLM lesson grants and LLM-graded completion on a disposable real SQL database, without network.
 
-Verdicts are signed here the way llm-ms signs them (`academy_llm/src/grading.rs`: header `{"alg":"HS256"}`,
-payload `{exp, ...claims}`); the end-to-end proof against the real gateway is in `tests/contract`.
+Verdicts are signed here in the binding format (llm-ms 157d2e6: header `{"alg":"HS256"}`, payload
+`{exp, ...claims}` with `locale`); the end-to-end proof against the real gateway is in `tests/contract`.
 """
 
 from base64 import urlsafe_b64decode, urlsafe_b64encode
@@ -56,6 +56,7 @@ def verdict_claims(**overrides: Any) -> dict[str, Any]:
         "profile_hash": PROFILE_SHA256,
         "request_id": str(uuid4()),
         "answer_sha256": sha256(ANSWER.encode()).hexdigest(),
+        "locale": "de",
         "score": 4,
         "max_score": 4,
         "pass_score": 3,
@@ -241,7 +242,7 @@ async def test_passing_verdict_completes_once_without_xp_or_answer_text(
         row = rows[0]
         assert (row.request_id, row.unit_id, row.profile) == (claims["request_id"], "graded", PROFILE)
         assert (row.profile_sha256, row.answer_sha256) == (PROFILE_SHA256, claims["answer_sha256"])
-        assert (row.score, row.max_score, row.model) == (4, 4, "gpt-6-sol")
+        assert (row.score, row.max_score, row.model, row.locale) == (4, 4, "gpt-6-sol", "de")
         assert int(row.graded_at.timestamp()) == claims["iat"]
         for model in (models.XP, models.XPOperation, models.CourseAccess, models.LectureProgress):
             assert await db.all(filter_by(model, user_id=USER_A)) == []
@@ -286,7 +287,9 @@ def _passed(claims: dict[str, Any]) -> None:
         (lambda: sign(verdict_claims(test=True)), 403),
         (lambda: sign(verdict_claims(mode="fake")), 403),
         (lambda: sign(verdict_claims(provider="fake")), 403),
-        (lambda: sign(verdict_claims(locale="de")), 403),  # unknown claims are refused, not ignored
+        (lambda: sign(verdict_claims(locale="fr")), 403),
+        (lambda: sign({key: value for key, value in verdict_claims().items() if key != "locale"}), 403),
+        (lambda: sign({key: value for key, value in verdict_claims().items() if key != "profile_hash"}), 403),
         (lambda: sign(verdict_claims(uid=USER_B)), 403),
         (lambda: sign(verdict_claims(unit_id="plain")), 403),
         (lambda: sign(verdict_claims(course_id="prompting-course")), 403),
@@ -329,6 +332,7 @@ async def test_verdict_belongs_to_its_user_and_answer(llm_client: httpx.AsyncCli
         {"action": "complete", "answer": {"text": 7}, "verdict": "a.b.c"},
         {"action": "complete", "answer": {}, "verdict": "a.b.c"},
         {"action": "complete", "answer": {"text": ANSWER}, "verdict": "not a token"},
+        {"action": "complete", "answer": {"text": ANSWER}, "verdict": None},  # llm-ms `receipt: null`
     ],
 )
 async def test_graded_completion_needs_answer_text_and_verdict(
@@ -406,3 +410,37 @@ async def test_keys_from_credential_files_match_llm_ms_and_fail_closed(
     assert llm.grant_key() is None
     monkeypatch.setenv("LLM_GRANT_SECRET_FILE", "")
     assert Settings().llm_grant_secret_file is None  # type: ignore[call-arg]
+
+
+@pytest.mark.parametrize("locale", ["de", "en"])
+async def test_grader_language_is_recorded_and_unknown_claims_are_ignored(
+    llm_client: httpx.AsyncClient, locale: str
+) -> None:
+    # Units are bilingual and the client chooses the grader language, so either one counts and is kept.
+    token = sign(verdict_claims(locale=locale, rubric_note="a later extension", version=2))
+    assert (await llm_client.post("/rooms/graded/complete", json=graded(token))).status_code == 200
+    async with db_context():
+        rows = await db.all(filter_by(models.LlmVerdict, user_id=USER_A))
+        assert [row.locale for row in rows] == [locale]
+
+
+@pytest.mark.parametrize("name", ["jwt_secret", "internal_jwt_secret_auth", "internal_jwt_secret_skills"])
+async def test_llm_keys_are_long_and_differ_from_every_other_key(
+    llm_client: httpx.AsyncClient, monkeypatch: MonkeyPatch, name: str
+) -> None:
+    assert (llm.grant_key(), llm.verdict_key()) == (GRANT_KEY.encode(), VERDICT_KEY.encode())
+    monkeypatch.setattr(settings, "llm_verdict_secret", "v" * 31)
+    assert llm.verdict_key() is None
+    monkeypatch.setattr(settings, "llm_verdict_secret", "v" * 32)
+    assert llm.verdict_key() == b"v" * 32
+    monkeypatch.setattr(settings, "llm_grant_secret", "g" * 31)
+    assert llm.grant_key() is None
+    assert (await llm_client.post("/rooms/graded/llm-grant")).status_code == 503
+    monkeypatch.setattr(settings, "llm_grant_secret", GRANT_KEY)
+    monkeypatch.setattr(settings, "llm_verdict_secret", VERDICT_KEY)
+    monkeypatch.setattr(settings, name, VERDICT_KEY)
+    assert llm.verdict_key() is None
+    assert (await llm_client.post("/rooms/graded/complete", json=graded(sign(verdict_claims())))).status_code == 503
+    monkeypatch.setattr(settings, name, GRANT_KEY)
+    assert llm.grant_key() is None
+    assert (await llm_client.post("/rooms/graded/llm-grant")).status_code == 503

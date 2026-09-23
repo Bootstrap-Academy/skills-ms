@@ -22,6 +22,7 @@ class LlmVerdict(Base):
     profile: Mapped[str] = Column(String(80), nullable=False)
     profile_sha256: Mapped[str] = Column(String(64), nullable=False)
     answer_sha256: Mapped[str] = Column(String(64), nullable=False)
+    locale: Mapped[str] = Column(String(2), nullable=False)
     score: Mapped[int] = Column(Integer, nullable=False)
     max_score: Mapped[int] = Column(Integer, nullable=False)
     model: Mapped[str] = Column(String(128), nullable=False)

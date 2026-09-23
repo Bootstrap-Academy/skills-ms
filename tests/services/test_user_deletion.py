@@ -39,6 +39,7 @@ async def _add_user_data(user_id: str) -> None:
             profile="grader",
             profile_sha256="a" * 64,
             answer_sha256="b" * 64,
+            locale="de",
             score=3,
             max_score=4,
             model="gpt-6-sol",

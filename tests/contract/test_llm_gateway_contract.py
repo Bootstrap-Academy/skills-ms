@@ -1,15 +1,15 @@
-"""Contract with a running llm-ms in fake provider mode: its grants come from here, its verdicts end here.
+"""Contract with a running llm-ms (157d2e6 or later): its grants come from here, its verdicts end here.
 
 Skipped unless `LLM_CONTRACT_URL` names a local llm-ms (`http://127.0.0.1:<port>`). It also needs
 `LLM_CONTRACT_JWT_SECRET_FILE` (llm-ms `auth.jwt_secret`, to mint access tokens like the backend does),
 `LLM_CONTRACT_GRANT_SECRET_FILE` (the grant key file both services read),
-`LLM_CONTRACT_VERDICT_SECRET_FILE` (the verdict key file this service reads) and
+`LLM_CONTRACT_VERDICT_SECRET_FILE` (the verdict key file both services read) and
 `LLM_CONTRACT_GRADING_PROFILE` (the grading profile file llm-ms loaded, pinned by its SHA-256 here).
 
-`LLM_CONTRACT_GATEWAY_VERDICT_KEY` says how the gateway signs verdicts: `separate` (default; llm-ms
-`grading.verdict_secret` is the same file) or `grant` (llm-ms without `verdict_secret`, falling back to
-the grant key as llm-ms 8cfc33f does). With `grant`, every such verdict must be refused here.
-The gateway runs with `providers.mode = "fake"`; nothing here can reach a paid API.
+The gateway's `/health` says its provider mode. In `fake` mode llm-ms signs no verdict (`receipt: null`);
+only the grant direction and the null receipt are checked. Signed verdicts need `live` mode pointed at
+llm-ms' own fake OpenAI server (`academy-llm-testing --control-tokens` on a local port), exactly as the
+llm-ms integration tests do. Nothing here can reach a paid API: the test only talks to 127.0.0.1.
 """
 
 import os
@@ -20,7 +20,7 @@ from pathlib import Path
 from time import time
 from typing import Any, AsyncIterator, Callable
 from unittest.mock import AsyncMock
-from uuid import uuid4
+from uuid import UUID, uuid4
 
 import httpx
 import jwt
@@ -44,19 +44,19 @@ OTHER_PROFILE = os.environ.get("LLM_CONTRACT_OTHER_PROFILE", "llmb-temperature-f
 ANSWER = "Du bist Reiseleiter. Plane mir drei Tage in Rom. Antworte als Tabelle mit Uhrzeiten."
 FAILING_ANSWER = "Rom? [[fake:fail]]"
 
-GATEWAY_VERDICT_KEY = os.environ.get("LLM_CONTRACT_GATEWAY_VERDICT_KEY", "separate")
-
 pytestmark = pytest.mark.skipif(not URL, reason="LLM_CONTRACT_URL is not set (no local llm-ms)")
-separate_verdict_key = pytest.mark.skipif(
-    GATEWAY_VERDICT_KEY != "separate", reason="the gateway signs verdicts with the grant key"
-)
 
 
 class Gateway:
-    def __init__(self, client: httpx.AsyncClient, jwt_secret: bytes, profile: str) -> None:
+    def __init__(self, client: httpx.AsyncClient, jwt_secret: bytes, profile: str, mode: str) -> None:
         self.client = client
         self.jwt_secret = jwt_secret
         self.profile = profile
+        self.mode = mode
+
+    def require(self, mode: str) -> None:
+        if self.mode != mode:
+            pytest.skip(f"needs llm-ms in {mode} mode, this one runs {self.mode}")
 
     def token(self, user_id: str) -> str:
         # The backend's access-token shape, as llm-ms and this service verify it.
@@ -75,7 +75,7 @@ class Gateway:
             headers={"Authorization": f"Bearer {self.token(user_id)}", "X-LLM-Grant": grant},
         )
 
-    async def grade(self, user_id: str, grant: str, answer: str) -> dict[str, Any]:
+    async def grade(self, user_id: str, grant: str, answer: str, locale: str = "de") -> dict[str, Any]:
         request_id = str(uuid4())
         response = await self.client.post(
             "/v1/respond",
@@ -83,6 +83,7 @@ class Gateway:
                 "request_id": request_id,
                 "grant": grant,
                 "profile": self.profile,
+                "locale": locale,
                 "input": [{"role": "user", "content": answer}],
             },
             headers={"Authorization": f"Bearer {self.token(user_id)}", "Accept": "application/json"},
@@ -121,8 +122,11 @@ async def gateway() -> AsyncIterator[Gateway]:
     jwt_secret = env_file("LLM_CONTRACT_JWT_SECRET_FILE").read_bytes().rstrip(b"\r\n")
     profile = loads(env_file("LLM_CONTRACT_GRADING_PROFILE").read_bytes())["id"]
     async with httpx.AsyncClient(base_url=URL, timeout=20, trust_env=False) as client:
-        assert (await client.get("/health")).status_code == 200
-        yield Gateway(client, jwt_secret, profile)
+        health = await client.get("/health")
+        assert health.status_code == 200, health.text
+        mode = health.json()["provider_mode"]
+        assert mode in ("fake", "live"), health.text
+        yield Gateway(client, jwt_secret, profile, mode)
 
 
 @pytest.fixture
@@ -211,7 +215,7 @@ async def grant_for(skills: httpx.AsyncClient, unit: str = "graded", **kwargs: A
     return str(response.json()["grant"])
 
 
-def completion(verdict: str, answer: str = ANSWER, revision: int = 0, **values: Any) -> dict[str, Any]:
+def completion(verdict: str | None, answer: str = ANSWER, revision: int = 0, **values: Any) -> dict[str, Any]:
     return {
         "request_id": str(uuid4()),
         "expected_revision": revision,
@@ -256,10 +260,22 @@ async def test_llm_ms_accepts_grants_from_skills_ms_and_refuses_tampered_ones(
     refused(await gateway.profile_info(user, await grant_for(skills)), "grant_expired")
 
 
-@separate_verdict_key
+async def test_fake_mode_signs_nothing_and_completes_nothing(
+    gateway: Gateway, skills: httpx.AsyncClient, users: dict[str, str]
+) -> None:
+    gateway.require("fake")
+    graded = await gateway.grade(users["Bearer a"], await grant_for(skills), ANSWER)
+    assert graded["verdict"] == "pass" and graded["receipt"] is None
+    # The host sends what it got; `verdict: null` never completes.
+    response = await skills.post("/rooms/graded/complete", json=completion(graded["receipt"]))
+    assert response.status_code == 422, response.text
+    assert (await skills.get("/rooms/graded")).json()["progress"]["status"] == "new"
+
+
 async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
     gateway: Gateway, skills: httpx.AsyncClient, users: dict[str, str]
 ) -> None:
+    gateway.require("live")
     user = users["Bearer a"]
     grant = await grant_for(skills)
 
@@ -277,8 +293,20 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
     passed = await gateway.grade(user, grant, ANSWER)
     assert passed["verdict"] == "pass" and passed["score"] >= passed["pass_score"]
     receipt = passed["receipt"]
-    claims = llm.VerdictClaims.parse_obj(jwt.decode(receipt, options={"verify_signature": False}))
+    assert isinstance(receipt, str)
+    # The binding format: header `{"alg":"HS256"}`, all claims present, signed with the verdict key only.
+    assert jwt.get_unverified_header(receipt) == {"alg": "HS256"}
+    payload = jwt.decode(receipt, options={"verify_signature": False})
+    assert set(payload) == {
+        "exp", "aud", "uid", "unit_id", "course_id", "profile", "profile_hash", "request_id",
+        "answer_sha256", "locale", "score", "max_score", "pass_score", "passed", "model", "iat",
+    }  # fmt: skip
+    claims = llm.VerdictClaims.parse_obj(payload)
     assert str(claims.request_id) == passed["request_id"] and claims.answer_sha256 == llm.answer_sha256(ANSWER)
+    assert claims.locale == "de" and claims.uid == UUID(user)
+    grant_key = env_file("LLM_CONTRACT_GRANT_SECRET_FILE").read_bytes().rstrip(b"\r\n")
+    with pytest.raises(jwt.InvalidSignatureError):
+        jwt.decode(receipt, grant_key, algorithms=["HS256"], audience="llm-verdict")
 
     for status, body, headers in [
         (403, completion(flip_signature(receipt)), {}),
@@ -300,8 +328,8 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
     assert result.json()["progress"]["result"] == {"kind": "introduced"}
     async with db_context():
         rows = await db.all(filter_by(models.LlmVerdict, user_id=user))
-        assert [(row.request_id, row.unit_id, row.score) for row in rows] == [
-            (passed["request_id"], "graded", passed["score"])
+        assert [(row.request_id, row.unit_id, row.score, row.locale) for row in rows] == [
+            (passed["request_id"], "graded", passed["score"], "de")
         ]
 
     # Single use: a repeat needs a new grading.
@@ -310,35 +338,21 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
     review: dict[str, Any] = {"review_id": start["request_id"]}
     replay = await skills.post("/rooms/graded/complete", json=completion(receipt, revision=2, **review))
     assert replay.status_code == 409, replay.text
-    again = await gateway.grade(user, grant, ANSWER)
+    # The grader language is the learner's choice and recorded with the verdict.
+    again = await gateway.grade(user, grant, ANSWER, locale="en")
     repeat = await skills.post("/rooms/graded/complete", json=completion(again["receipt"], revision=2, **review))
     assert repeat.status_code == 200, repeat.text
+    async with db_context():
+        rows = await db.all(filter_by(models.LlmVerdict, user_id=user, request_id=again["request_id"]))
+        assert [row.locale for row in rows] == ["en"]
 
 
-@separate_verdict_key
 async def test_course_context_travels_from_grant_to_verdict(
     gateway: Gateway, skills: httpx.AsyncClient, users: dict[str, str]
 ) -> None:
+    gateway.require("live")
     grant = await grant_for(skills, params={"course": "prompting-course"})
     passed = await gateway.grade(users["Bearer a"], grant, ANSWER)
     assert (await skills.post("/rooms/graded/complete", json=completion(passed["receipt"]))).status_code == 403
     result = await skills.post("/rooms/graded/complete?course=prompting-course", json=completion(passed["receipt"]))
     assert result.status_code == 200, result.text
-
-
-@pytest.mark.skipif(GATEWAY_VERDICT_KEY != "grant", reason="the gateway has its own verdict key")
-async def test_verdicts_signed_with_the_grant_key_never_complete(
-    gateway: Gateway, skills: httpx.AsyncClient, users: dict[str, str], monkeypatch: MonkeyPatch
-) -> None:
-    grant = await grant_for(skills)
-    passed = await gateway.grade(users["Bearer a"], grant, ANSWER)
-    assert passed["verdict"] == "pass"
-    grant_key = env_file("LLM_CONTRACT_GRANT_SECRET_FILE").read_bytes().rstrip(b"\r\n")
-    assert jwt.decode(passed["receipt"], grant_key, algorithms=["HS256"], audience="llm-verdict")["passed"] is True
-    refused = await skills.post("/rooms/graded/complete", json=completion(passed["receipt"]))
-    assert refused.status_code == 403, refused.text
-    # Configuring the grant key as verdict key does not help either: it is refused as a verdict key.
-    monkeypatch.setattr(settings, "llm_verdict_secret_file", env_file("LLM_CONTRACT_GRANT_SECRET_FILE"))
-    unavailable = await skills.post("/rooms/graded/complete", json=completion(passed["receipt"]))
-    assert unavailable.status_code == 503, unavailable.text
-    assert (await skills.get("/rooms/graded")).json()["progress"]["status"] == "new"

@@ -49,6 +49,7 @@ def test_llm_verdict_migration_is_additive_head_and_matches_model() -> None:
                     profile="grader",
                     profile_sha256="a" * 64,
                     answer_sha256="b" * 64,
+                    locale="en",
                     score=3,
                     max_score=4,
                     model="gpt-6-sol",

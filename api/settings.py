@@ -38,10 +38,10 @@ class Settings(BaseSettings):
     private_lesson_modules_root: Path | None = None
     private_lesson_module_grant_ttl: int = Field(3600, ge=60, le=8 * 60 * 60)
     # LLM gateway (llm-ms). The grant key is shared only with llm-ms and signs lesson grants. Grading
-    # verdicts from llm-ms are checked with their own verdict key; there is no fallback to the grant key,
-    # and a verdict key equal to it is refused. Give each key either as a value or as a credential file
-    # (`*_FILE`, trailing CR/LF removed as llm-ms does), never both. Without a key, grants or graded
-    # completions are unavailable.
+    # verdicts from llm-ms are checked with their own verdict key; there is no fallback to the grant key.
+    # Like in llm-ms, each key is at least 32 bytes and differs from every other key (also JWT_SECRET and
+    # INTERNAL_JWT_SECRET_*). Give each key either as a value or as a credential file (`*_FILE`, trailing
+    # CR/LF removed as llm-ms does), never both. Without a usable key, grants or graded completions are off.
     llm_grant_secret: str = ""
     llm_grant_secret_file: Path | None = None
     llm_verdict_secret: str = ""

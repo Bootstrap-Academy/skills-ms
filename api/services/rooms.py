@@ -638,8 +638,11 @@ async def graded_verdict(
     if data.action != "complete" or current.status in ("completed", "skipped"):
         return None
     text = data.answer.get("text")
+    # `verdict` is missing or null also when llm-ms signed nothing (`receipt: null`, e.g. fake mode).
     if data.verdict is None or set(data.answer) != {"text"} or not isinstance(text, str):
         raise HTTPException(422, "Send your answer together with its grading")
+    # The grader language is recorded with the verdict but not bound: units are bilingual and the client
+    # picks the language for both calls, so comparing it with a client value would prove nothing.
     claims = llm.verify_verdict(
         data.verdict,
         user_id=user.id,
@@ -740,6 +743,7 @@ async def mutate_room(
                 profile=verdict.profile,
                 profile_sha256=verdict.profile_hash,
                 answer_sha256=verdict.answer_sha256,
+                locale=verdict.locale,
                 score=verdict.score,
                 max_score=verdict.max_score,
                 model=verdict.model,

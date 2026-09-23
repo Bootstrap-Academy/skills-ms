@@ -20,6 +20,7 @@ def upgrade() -> None:
         sa.Column("profile", sa.String(80), nullable=False),
         sa.Column("profile_sha256", sa.String(64), nullable=False),
         sa.Column("answer_sha256", sa.String(64), nullable=False),
+        sa.Column("locale", sa.String(2), nullable=False),
         sa.Column("score", sa.Integer(), nullable=False),
         sa.Column("max_score", sa.Integer(), nullable=False),
         sa.Column("model", sa.String(128), nullable=False),
