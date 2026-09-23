@@ -46,6 +46,21 @@ async def _add_user_data(user_id: str) -> None:
             used_at=utcnow(),
         )
     )
+    await db.add(
+        models.CourseProject(
+            user_id=user_id, course_id="course", revision=1, state={"bot": {"name": "Klingel"}}, updated_at=utcnow()
+        )
+    )
+    await db.add(
+        models.CourseProjectRequest(
+            user_id=user_id,
+            request_id="request",
+            course_id="course",
+            revision=1,
+            fingerprint="f" * 64,
+            updated_at=utcnow(),
+        )
+    )
     await db.add(models.CourseAccess(user_id=user_id, course_id="course"))
     await db.add(models.LastWatch(user_id=user_id, course_id="course", timestamp=utcnow()))
     await db.add(models.LectureProgress(user_id=user_id, course_id="course", lecture_id="lecture", completed=utcnow()))

@@ -1,5 +1,6 @@
 from .bookmarks import SubSkillBookmark
 from .course_access import CourseAccess
+from .course_project import CourseProject, CourseProjectRequest
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
 from .lesson_module import LessonModule
@@ -16,6 +17,8 @@ from .xp_operation import XPOperation
 
 
 __all__ = [
+    "CourseProject",
+    "CourseProjectRequest",
     "LessonModule",
     "LlmVerdict",
     "RoomRequest",

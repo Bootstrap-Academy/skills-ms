@@ -183,6 +183,16 @@ async def require_path_access(content: Catalogue, path_id: str, user: User, cour
         raise HTTPException(403, "Open the course to get access to these lessons")
 
 
+async def require_course_lessons(course_id: str, user: User) -> None:
+    """The admission of a lesson opened in this course (`?course=`), for course-wide lesson data."""
+    content = catalogue()
+    course = COURSES.get(course_id)
+    path_id = None if course is None else course.learning_path_id
+    if path_id is None or all(path.id != path_id for path in content.paths):
+        raise HTTPException(404, "This course has no lessons")
+    await require_path_access(content, path_id, user, course_id)
+
+
 async def challenge_status(unit: CatalogueUnit, user: User, token: str) -> bool:
     """Read the existing challenge authority through one operator-configured service.
 
