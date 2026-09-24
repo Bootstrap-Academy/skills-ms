@@ -24,6 +24,7 @@ import jwt
 from fastapi import HTTPException
 from pydantic import BaseModel, Field, StrictBool, StrictInt, ValidationError, validator
 
+from api.exceptions.verdict import ForeignVerdictError, PracticeVerdictError, StaleVerdictError, VerdictUnavailableError
 from api.logger import get_logger
 from api.schemas.rooms import LLM_PROFILE_ID_PATTERN, CatalogueUnit, LlmGrant, LlmVerdictCompletion
 from api.settings import settings
@@ -34,9 +35,6 @@ VERDICT_AUDIENCE = "llm-verdict"
 HEX_SHA256 = r"^[0-9a-f]{64}$"
 
 UNAVAILABLE = "The AI is not available right now"
-FOREIGN_VERDICT = "This grading does not belong to this answer"
-PRACTICE_VERDICT = "This grading comes from a test mode and does not count"
-STALE_VERDICT = "This grading is out of date. Check your answer again."
 MIN_KEY_BYTES = 32
 
 logger = get_logger(__name__)
@@ -193,28 +191,28 @@ def verify_verdict(
     """
     key = verdict_key()
     if key is None:
-        raise HTTPException(503, UNAVAILABLE)
+        raise VerdictUnavailableError
     try:
         payload = jwt.decode(
             token, key, algorithms=["HS256"], audience=VERDICT_AUDIENCE, options={"require": ["exp", "iat", "aud"]}
         )
         if marked_as_practice(payload):
-            raise HTTPException(403, PRACTICE_VERDICT)
+            raise PracticeVerdictError
         claims = VerdictClaims.parse_obj(payload)
     except jwt.ExpiredSignatureError:
-        raise HTTPException(409, STALE_VERDICT) from None
+        raise StaleVerdictError from None
     except (jwt.InvalidTokenError, ValidationError):
-        raise HTTPException(403, FOREIGN_VERDICT) from None
+        raise ForeignVerdictError from None
     try:
         own = claims.uid == UUID(user_id) and claims.answer_sha256 == answer_sha256(answer)
     except ValueError:  # includes UnicodeEncodeError (lone surrogates)
         own = False
     if not own or (claims.unit_id, claims.course_id, claims.profile) != (unit_id, course_id, completion.profile):
-        raise HTTPException(403, FOREIGN_VERDICT)
+        raise ForeignVerdictError
     if claims.profile_hash != completion.profile_sha256:
-        raise HTTPException(409, STALE_VERDICT)
+        raise StaleVerdictError
     if not_before is not None:
         started = not_before if not_before.tzinfo is not None else not_before.replace(tzinfo=timezone.utc)
         if claims.iat < int(started.timestamp()):
-            raise HTTPException(409, STALE_VERDICT)
+            raise StaleVerdictError
     return claims

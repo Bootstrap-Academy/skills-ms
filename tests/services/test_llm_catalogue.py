@@ -43,9 +43,15 @@ def test_graded_unit_keeps_profiles_and_grading_server_side() -> None:
     )
     assert isinstance(parsed.completion, LlmVerdictCompletion)
     assert parsed.completion.allow_skip is True  # the grader can be wrong, skipping stays open
+    assert parsed.completion.allow_fallback is True  # and without the model it completes as `introduced`
     assert parsed.llm_profiles == ["llmb-grade-prompt", "llmb-temperature-fan"]
     public = parsed.public().dict()
     assert "llm_profiles" not in public and "completion" not in public
+    # Only the kind of the check is public: no profile, rubric hash or answer.
+    assert public["completion_kind"] == "llm-verdict"
+    assert "llmb-grade-prompt" not in str(public) and GRADING["profile_sha256"] not in str(public)
+    assert CatalogueUnit.parse_obj(unit()).public().completion_kind == "introduced"
+    assert "answer" not in str(CatalogueUnit.parse_obj(unit()).public().dict())
     # A plain LLM unit (no grading) keeps its normal completion.
     assert CatalogueUnit.parse_obj(unit(llm_profiles=["llmb-temperature-fan"])).llm_profiles == ["llmb-temperature-fan"]
 
@@ -62,6 +68,10 @@ def test_graded_unit_keeps_profiles_and_grading_server_side() -> None:
         {"llm_profiles": ["other"], "completion": GRADING},
         {"completion": GRADING},
         {"llm_profiles": ["llmb-grade-prompt"], "completion": {**GRADING, "allow_skip": False}},
+        {"llm_profiles": ["llmb-grade-prompt"], "completion": {**GRADING, "allow_fallback": False}},
+        # The public completion kind is derived, never authored.
+        {"llm_profiles": ["llmb-grade-prompt"], "completion": GRADING, "completion_kind": "llm-verdict"},
+        {"completion_kind": "introduced"},
         {"llm_profiles": ["llmb-grade-prompt"], "completion": {**GRADING, "profile_sha256": "AB" * 32}},
         {"llm_profiles": ["llmb-grade-prompt"], "completion": {**GRADING, "rubric": "x"}},
         {"llm_profiles": ["llmb-grade-prompt"], "completion": {**GRADING, "answer": {"text": "x"}}},

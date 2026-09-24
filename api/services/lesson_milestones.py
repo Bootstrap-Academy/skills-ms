@@ -2,7 +2,8 @@
 
 Only two completions count: an exact server-side answer check (`deterministic`) and a passing verdict that
 llm-ms signed and this service verified (`llm_verdict`). Skips, repeats and every completion without such a
-check (for example a future fallback without the model) never book anything.
+check (such as the fallback without the model, which completes an LLM-graded unit without a verdict) never
+book anything.
 
 The completion commits first with an outbox row; delivery runs afterwards and is retried with backoff until
 challenges-ms answers for good. challenges-ms books once per learner and unit, so resending is harmless.
@@ -46,7 +47,7 @@ def checked_completion(
     if unit.milestone is None or data.action != "complete" or unit.exercise is not None:
         return None
     if isinstance(unit.completion, LlmVerdictCompletion):
-        # Only the verified, passing verdict counts; a completion without the model never does.
+        # Only the verified, passing verdict counts; the fallback without the model (no verdict) never does.
         return "llm_verdict" if verdict is not None and verdict.passed else None
     if isinstance(unit.completion, IntroductionCompletion):
         return "deterministic"

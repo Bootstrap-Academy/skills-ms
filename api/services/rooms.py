@@ -1,8 +1,9 @@
 """Curated learning flow with private state; never awards XP itself or changes courses.
 
-An LLM-graded room completes only with a verdict that llm-ms signed for this learner, unit and answer,
-and a failing verdict changes nothing. XP come only from challenges-ms: a unit with a lesson milestone
-queues it on its first checked completion (`lesson_milestones`), delivered after the commit.
+An LLM-graded room completes as a pass only with a verdict that llm-ms signed for this learner, unit and
+answer, and a failing verdict changes nothing. Without the model it completes through the fallback answer
+as `introduced`, like a skip, without a verdict. XP come only from challenges-ms: a unit with a lesson
+milestone queues it on its first checked completion (`lesson_milestones`), delivered after the commit.
 """
 
 import json
@@ -21,10 +22,12 @@ from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, delete, filter_by
+from api.exceptions.verdict import UsedVerdictError, VerdictFailedError, VerdictRequiredError, VerdictUnexpectedError
 from api.models import LlmVerdict, PurchaseUser
 from api.models.room import RoomRequest, RoomState
 from api.schemas.course import Course
 from api.schemas.rooms import (
+    LLM_FALLBACK_ANSWER,
     Catalogue,
     CataloguePath,
     CatalogueUnit,
@@ -611,6 +614,18 @@ def request_fingerprint(unit_id: str, data: SaveState | Complete | StartReview, 
     ).hexdigest()
 
 
+def fallback_completion(unit: CatalogueUnit, data: Complete) -> bool:
+    """Whether this completes an LLM-graded room without the model (PO 24.09.): exactly the fixed fallback
+    answer and no verdict. It records no verdict, so it stays distinguishable from a graded pass."""
+    return (
+        isinstance(unit.completion, LlmVerdictCompletion)
+        and unit.completion.allow_fallback
+        and data.action == "complete"
+        and data.verdict is None
+        and json.dumps(data.answer, sort_keys=True) == LLM_FALLBACK_ANSWER
+    )
+
+
 def completed_progress(
     unit: CatalogueUnit, current: Progress, data: Complete, solved: bool, verdict: llm.VerdictClaims | None = None
 ) -> Progress:
@@ -625,9 +640,14 @@ def completed_progress(
             raise HTTPException(409, "The exercise has not been solved yet")
         return current.copy(update={"status": "completed", "result": Result(kind="solved")})
     if isinstance(unit.completion, LlmVerdictCompletion):
-        # Only a checked, passing verdict completes. A failing one keeps the room open at no cost.
-        if verdict is None or not verdict.passed:
-            raise HTTPException(422, "Check your answer and try again")
+        if verdict is None:
+            if not fallback_completion(unit, data):
+                raise VerdictRequiredError
+            # The learner compared their answer with the labelled model answer: introduced, like a skip.
+            return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
+        # Otherwise only a checked, passing verdict completes. A failing one keeps the room open at no cost.
+        if not verdict.passed:
+            raise VerdictFailedError
         return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
     # Canonical JSON distinguishes true from 1; the client cannot assert mastery.
     if unit.completion is None or json.dumps(data.answer, sort_keys=True) != json.dumps(
@@ -644,14 +664,14 @@ async def graded_verdict(
     completion = unit.completion
     if not isinstance(completion, LlmVerdictCompletion):
         if data.verdict is not None:
-            raise HTTPException(422, "This room is not graded by the AI")
+            raise VerdictUnexpectedError
         return None
-    if data.action != "complete" or current.status in ("completed", "skipped"):
+    if data.action != "complete" or current.status in ("completed", "skipped") or fallback_completion(unit, data):
         return None
     text = data.answer.get("text")
     # `verdict` is missing or null also when llm-ms signed nothing (`receipt: null`, e.g. fake mode).
     if data.verdict is None or set(data.answer) != {"text"} or not isinstance(text, str):
-        raise HTTPException(422, "Send your answer together with its grading")
+        raise VerdictRequiredError
     # The grader language is recorded with the verdict but not bound: units are bilingual and the client
     # picks the language for both calls, so comparing it with a client value would prove nothing.
     claims = llm.verify_verdict(
@@ -665,7 +685,7 @@ async def graded_verdict(
         not_before=row.review_started_at if row is not None and current.review_id is not None else None,
     )
     if await db.get(LlmVerdict, user_id=user.id, request_id=str(claims.request_id)) is not None:
-        raise HTTPException(409, "This grading was already used. Check your answer again.")
+        raise UsedVerdictError
     return claims
 
 
@@ -725,7 +745,7 @@ async def mutate_room(
             )
         verdict = await graded_verdict(unit, user, data, course_id, current, row)
         current = completed_progress(unit, current, data, solved, verdict)
-        # Only a first completion outside a repeat can earn the lesson milestone; skips never do.
+        # Only a first completion outside a repeat can earn the lesson milestone; skips and the fallback never do.
         if current.review_id is None and current.status == "completed":
             if checked := lesson_milestones.checked_completion(unit, data, verdict):
                 await lesson_milestones.enqueue(user.id, unit, checked)

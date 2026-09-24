@@ -15,6 +15,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from . import __version__
 from .database import db, db_context
 from .endpoints import ROUTER, TAGS
+from .exceptions.api_exception import CodedAPIException
 from .logger import get_logger, setup_sentry
 from .settings import settings
 from .utils.cache import clear_cache
@@ -62,6 +63,8 @@ async def db_session(request: Request, call_next: Callable[..., Awaitable[T]]) -
 @app.exception_handler(StarletteHTTPException)
 async def rollback_on_exception(request: Request, exc: HTTPException) -> Response:
     await db.session.rollback()
+    if isinstance(exc, CodedAPIException):
+        return exc.response()
     return await http_exception_handler(request, exc)
 
 

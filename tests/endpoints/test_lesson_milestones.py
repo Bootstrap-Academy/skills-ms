@@ -23,7 +23,7 @@ from api import models
 from api.auth import user_auth
 from api.database import db, db_context, filter_by
 from api.endpoints.rooms import router
-from api.schemas.rooms import Catalogue, CatalogueUnit, Complete, Progress, Result
+from api.schemas.rooms import Catalogue, CatalogueUnit, Complete
 from api.schemas.user import User
 from api.services import lesson_milestones, llm, rooms
 from api.services.user_deletion import delete_user_data
@@ -32,6 +32,7 @@ from api.settings import settings
 from api.utils.utc import utcnow
 from tests.endpoints.test_llm_rooms import (
     ANSWER,
+    FALLBACK,
     PROFILE,
     PROFILE_SHA256,
     USER_A,
@@ -226,7 +227,7 @@ async def test_skips_failures_and_units_without_milestone_book_nothing(
 
 
 async def test_a_completion_without_a_verified_verdict_never_books(
-    client: httpx.AsyncClient, challenges: Challenges, content: Catalogue, monkeypatch: MonkeyPatch
+    client: httpx.AsyncClient, challenges: Challenges, content: Catalogue
 ) -> None:
     unit = next(unit for unit in content.units if unit.id == "graded")
     passed = llm.VerdictClaims.parse_obj({**verdict_claims(), "request_id": str(uuid4())})
@@ -236,20 +237,36 @@ async def test_a_completion_without_a_verified_verdict_never_books(
     assert lesson_milestones.checked_completion(unit, complete, passed.copy(update={"passed": False})) is None
     skip = Complete.parse_obj(payload(action="skip"))
     assert lesson_milestones.checked_completion(unit, skip, passed) is None
+    fallback = Complete.parse_obj(payload(action="complete", answer=FALLBACK))
+    assert rooms.fallback_completion(unit, fallback)
+    assert lesson_milestones.checked_completion(unit, fallback, None) is None
 
-    # A future completion path without the model (e.g. the planned fallback) completes the room, not the XP.
-    def fallback(unit: CatalogueUnit, current: Progress, *_: Any) -> Progress:
-        return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
-
-    monkeypatch.setattr(rooms, "completed_progress", fallback)
+    # An answer without its grading completes nothing.
     response = await client.post("/rooms/graded/complete", json=payload(action="complete", answer={"text": ANSWER}))
-    assert response.status_code == 422  # today the request is refused before any completion
-    monkeypatch.setattr(rooms, "graded_verdict", AsyncMock(return_value=None))
-    response = await client.post("/rooms/graded/complete", json=payload(action="complete", answer={"text": ANSWER}))
-    assert response.status_code == 200 and response.json()["progress"]["status"] == "completed"
+    assert response.status_code == 422
+    # The fallback without the model completes the milestone unit as `introduced`, and books nothing,
+    # also when the same request is replayed.
+    body = payload(action="complete", answer=FALLBACK)
+    response = await client.post("/rooms/graded/complete", json=body)
+    assert response.status_code == 200
+    progress = response.json()["progress"]
+    assert (progress["status"], progress["result"]) == ("completed", {"kind": "introduced"})
+    assert (await client.post("/rooms/graded/complete", json=body)).json() == response.json()
+    # A graded pass in a later repeat round does not book it either (no milestone for repeats).
+    review = await client.post("/rooms/graded/review", json=payload(1))
+    assert review.status_code == 200
+    review_id = review.json()["progress"]["review_id"]
+    repeated = await client.post("/rooms/graded/complete", json=graded(sign(verdict_claims()), 2, review_id=review_id))
+    assert repeated.status_code == 200 and repeated.json()["progress"]["status"] == "completed"
+    # At the deterministic unit the fallback answer is simply wrong.
+    wrong = await client.post("/rooms/checked/complete", json=payload(action="complete", answer=FALLBACK))
+    assert wrong.status_code == 422
     await lesson_milestones.recover()
     await lesson_milestones.settle()
     assert challenges.calls == [] and await outbox() == []
+    async with db_context():
+        for model in (models.XP, models.XPOperation):
+            assert await db.all(filter_by(model, user_id=USER_A)) == []
 
 
 async def test_challenges_down_keeps_the_completion_and_delivers_later(

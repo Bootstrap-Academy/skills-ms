@@ -59,6 +59,9 @@ class Unit(RoomModel):
     requires: list[str]
     exercise: Exercise | None = None
     module: LessonModuleDescriptor | None = None
+    # Public, derived by `CatalogueUnit.public()` and never authored: how the server checks a completion
+    # (not the answer, profile or rubric). A host offers the completion without the model only at "llm-verdict".
+    completion_kind: Literal["introduced", "llm-verdict"] | None = None
 
 
 class IntroductionCompletion(RoomModel):
@@ -72,12 +75,23 @@ class LlmVerdictCompletion(RoomModel):
 
     `profile_sha256` pins the grading profile version (SHA-256 of its file, as llm-ms hashes it), so a
     verdict from a changed rubric does not count. The grader can be wrong, so skipping always stays open.
+
+    Without the model the learner compares their answer with the labelled model answer and confirms; the
+    host then sends exactly `LLM_FALLBACK_ANSWER` and no verdict (PO decision 24.09., G4). That completes
+    as `introduced` like a skip does: no verdict row, no lesson milestone, no XP, never a pass.
     """
 
     kind: Literal["llm-verdict"]
     profile: str = Field(regex=LLM_PROFILE_ID_PATTERN)
     profile_sha256: str = Field(regex=r"^[0-9a-f]{64}$")
     allow_skip: Literal[True] = True
+    # Every graded activity stays completable without the model (G4), so this cannot be switched off.
+    allow_fallback: Literal[True] = True
+
+
+# The answer of the completion without the model (the host's `LLM_FALLBACK_ANSWER`), as canonical JSON
+# (`json.dumps(answer, sort_keys=True)`, the form every fixed answer is compared in).
+LLM_FALLBACK_ANSWER = '{"fallback": "example"}'
 
 
 class LessonMilestone(RoomModel):
@@ -119,6 +133,8 @@ class CatalogueUnit(Unit):
     def completion_matches_room(cls, values: dict[str, Any]) -> dict[str, Any]:
         if values.get("module") is not None:
             raise ValueError("Module URLs come from the operator registry, not content")
+        if values.get("completion_kind") is not None:
+            raise ValueError("The completion kind is derived from the completion, not content")
         profiles = values["llm_profiles"]
         if len(set(profiles)) != len(profiles):
             raise ValueError("Duplicate LLM profile")
@@ -176,7 +192,8 @@ class CatalogueUnit(Unit):
         return values
 
     def public(self) -> Unit:
-        return Unit.parse_obj(self.dict(exclude={"retired", "completion", "module_id", "llm_profiles", "milestone"}))
+        values = self.dict(exclude={"retired", "completion", "module_id", "llm_profiles", "milestone"})
+        return Unit.parse_obj({**values, "completion_kind": None if self.completion is None else self.completion.kind})
 
 
 class LearningChapter(RoomModel):
