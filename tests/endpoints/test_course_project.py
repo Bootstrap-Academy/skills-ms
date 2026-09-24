@@ -258,6 +258,26 @@ async def test_non_finite_numbers_are_422(client: httpx.AsyncClient) -> None:
     assert response.status_code == 422
 
 
+@pytest.mark.parametrize("state", [r'{"s": "\ud800"}', r'{"\udfff": 1}', r'{"deep": {"list": ["ok", "a\ud83d"]}}'])
+async def test_lone_surrogate_is_422_not_500(client: httpx.AsyncClient, state: str) -> None:
+    # Valid JSON escapes, but not UTF-8: no byte size, no storage. Other clients than ours can send them.
+    raw = '{"request_id": "%s", "expected_revision": 0, "state": %s}' % (uuid4(), state)
+    response = await client.put(PROJECT, content=raw, headers={"Content-Type": "application/json"})
+    assert response.status_code == 422
+    assert await rows(models.CourseProject) == [] and await rows(models.CourseProjectRequest) == []
+    # A room state already refuses it the same way.
+    room = '{"request_id": "%s", "expected_revision": 0, "state": %s}' % (uuid4(), state)
+    response = await client.put("/rooms/intro/state", content=room, headers={"Content-Type": "application/json"})
+    assert response.status_code == 422
+
+
+async def test_surrogate_pairs_and_escaped_text_are_fine(client: httpx.AsyncClient) -> None:
+    raw = r'{"request_id": "%s", "expected_revision": 0, "state": {"emoji": "\ud83d\ude00", "text": "\\ud800"}}'
+    response = await client.put(PROJECT, content=raw % uuid4(), headers={"Content-Type": "application/json"})
+    assert response.status_code == 200
+    assert response.json()["state"] == {"emoji": "\U0001f600", "text": "\\ud800"}
+
+
 async def test_state_is_private_per_user(client: httpx.AsyncClient) -> None:
     request = body(0)
     assert (await client.put(PROJECT, json=request)).status_code == 200

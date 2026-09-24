@@ -15,8 +15,9 @@ def json_object(value: Any) -> dict[str, Any]:
     if not isinstance(value, dict):
         raise ValueError("A JSON object is required")
     try:
-        json.dumps(value, allow_nan=False)
-    except (ValueError, TypeError, RecursionError):
+        # Encoding too: a lone surrogate (valid JSON escape, not UTF-8) is a 422 here, not a 500 later.
+        json.dumps(value, allow_nan=False, ensure_ascii=False).encode("utf-8")
+    except (ValueError, TypeError, RecursionError):  # UnicodeEncodeError is a ValueError
         raise ValueError("Invalid JSON state") from None
     return value
 
