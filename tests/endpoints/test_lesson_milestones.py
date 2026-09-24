@@ -36,6 +36,7 @@ from tests.endpoints.test_llm_rooms import (
     PROFILE,
     PROFILE_SHA256,
     USER_A,
+    VERDICT_ENV,
     VERDICT_KEY,
     graded,
     payload,
@@ -121,6 +122,7 @@ def content(monkeypatch: MonkeyPatch) -> Catalogue:
     monkeypatch.setattr(settings, "learning_rooms_exercise_refs", {})
     monkeypatch.setattr(settings, "llm_verdict_secret", VERDICT_KEY)
     monkeypatch.setattr(settings, "llm_verdict_secret_file", None)
+    monkeypatch.setattr(settings, "llm_verdict_env", VERDICT_ENV)
     monkeypatch.setattr(rooms, "load_catalogue", lambda: value)
     monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=False))
     return value

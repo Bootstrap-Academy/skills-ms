@@ -1,4 +1,4 @@
-"""Contract with a running llm-ms (157d2e6 or later): its grants come from here, its verdicts end here.
+"""Contract with a running llm-ms (28d8ee9 or later): its grants come from here, its verdicts end here.
 
 Skipped unless `LLM_CONTRACT_URL` names a local llm-ms (`http://127.0.0.1:<port>`). It also needs
 `LLM_CONTRACT_JWT_SECRET_FILE` (llm-ms `auth.jwt_secret`, to mint access tokens like the backend does),
@@ -6,9 +6,11 @@ Skipped unless `LLM_CONTRACT_URL` names a local llm-ms (`http://127.0.0.1:<port>
 `LLM_CONTRACT_VERDICT_SECRET_FILE` (the verdict key file both services read) and
 `LLM_CONTRACT_GRADING_PROFILE` (the grading profile file llm-ms loaded, pinned by its SHA-256 here).
 
-The gateway's `/health` says its provider mode. In `fake` mode llm-ms signs no verdict (`receipt: null`);
-only the grant direction and the null receipt are checked. Signed verdicts need `live` mode pointed at
-llm-ms' own fake OpenAI server (`academy-llm-testing --control-tokens` on a local port), exactly as the
+The gateway's `/health` says its provider mode and the environment its verdicts name (`env`); this service
+is configured with that environment. In `fake` mode llm-ms signs no verdict (`receipt: null`); only the
+grant direction, the null receipt and the fallback without the model are checked. Signed verdicts need
+`live` mode pointed at llm-ms' own fake OpenAI server (`academy-llm-testing --control-tokens` on a local
+port, `providers.openai.allow_unofficial_base_url`, an environment other than `prod`), exactly as the
 llm-ms integration tests do. Nothing here can reach a paid API: the test only talks to 127.0.0.1.
 """
 
@@ -32,6 +34,7 @@ from api import models
 from api.auth import user_auth
 from api.database import db, db_context, filter_by
 from api.endpoints.rooms import router
+from api.exceptions.api_exception import CodedAPIException
 from api.schemas.course import Course
 from api.schemas.rooms import Catalogue
 from api.schemas.user import User
@@ -48,11 +51,14 @@ pytestmark = pytest.mark.skipif(not URL, reason="LLM_CONTRACT_URL is not set (no
 
 
 class Gateway:
-    def __init__(self, client: httpx.AsyncClient, jwt_secret: bytes, profile: str, mode: str) -> None:
+    def __init__(
+        self, client: httpx.AsyncClient, jwt_secret: bytes, profile: str, mode: str, environment: str | None
+    ) -> None:
         self.client = client
         self.jwt_secret = jwt_secret
         self.profile = profile
         self.mode = mode
+        self.environment = environment
 
     def require(self, mode: str) -> None:
         if self.mode != mode:
@@ -126,7 +132,10 @@ async def gateway() -> AsyncIterator[Gateway]:
         assert health.status_code == 200, health.text
         mode = health.json()["provider_mode"]
         assert mode in ("fake", "live"), health.text
-        yield Gateway(client, jwt_secret, profile, mode)
+        environment = health.json()["environment"]
+        # Live verdicts always name their environment; a local fake endpoint can never sign for `prod`.
+        assert mode == "fake" or (isinstance(environment, str) and environment != "prod"), health.text
+        yield Gateway(client, jwt_secret, profile, mode, environment)
 
 
 @pytest.fixture
@@ -135,7 +144,7 @@ def users() -> dict[str, str]:
 
 
 @pytest.fixture
-async def skills(monkeypatch: MonkeyPatch, users: dict[str, str]) -> AsyncIterator[httpx.AsyncClient]:
+async def skills(monkeypatch: MonkeyPatch, users: dict[str, str], gateway: Gateway) -> AsyncIterator[httpx.AsyncClient]:
     profile_file = env_file("LLM_CONTRACT_GRADING_PROFILE")
     profile = loads(profile_file.read_bytes())["id"]
     grading = {
@@ -186,6 +195,8 @@ async def skills(monkeypatch: MonkeyPatch, users: dict[str, str]) -> AsyncIterat
     monkeypatch.setattr(settings, "llm_grant_secret_file", env_file("LLM_CONTRACT_GRANT_SECRET_FILE"))
     monkeypatch.setattr(settings, "llm_verdict_secret", "")
     monkeypatch.setattr(settings, "llm_verdict_secret_file", env_file("LLM_CONTRACT_VERDICT_SECRET_FILE"))
+    # This host's environment is the one the gateway grades for (fake mode names none).
+    monkeypatch.setattr(settings, "llm_verdict_env", gateway.environment or "test")
     monkeypatch.setattr(rooms, "load_catalogue", lambda: catalogue)
     monkeypatch.setattr(rooms, "COURSES", {course.id: course})
     monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=False))
@@ -202,6 +213,7 @@ async def skills(monkeypatch: MonkeyPatch, users: dict[str, str]) -> AsyncIterat
 
     app = FastAPI()
     app.dependency_overrides[user_auth.dependency] = identity
+    app.add_exception_handler(CodedAPIException, lambda _, exc: exc.response())
     app.include_router(router, dependencies=[Depends(session)])
     async with httpx.AsyncClient(
         app=app, base_url="http://skills.synthetic", headers={"Authorization": "Bearer a"}
@@ -269,11 +281,19 @@ async def test_fake_mode_signs_nothing_and_completes_nothing(
     # The host sends what it got; `verdict: null` never completes.
     response = await skills.post("/rooms/graded/complete", json=completion(graded["receipt"]))
     assert response.status_code == 422, response.text
+    assert response.json()["code"] == "verdict_required"
     assert (await skills.get("/rooms/graded")).json()["progress"]["status"] == "new"
+    # An unsigned grading opens the host's way on without the model: `introduced`, no verdict recorded.
+    fallback = completion(None) | {"answer": {"fallback": "example"}}
+    response = await skills.post("/rooms/graded/complete", json=fallback)
+    assert response.status_code == 200, response.text
+    assert response.json()["progress"]["result"] == {"kind": "introduced"}
+    async with db_context():
+        assert await db.all(filter_by(models.LlmVerdict, user_id=users["Bearer a"])) == []
 
 
 async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
-    gateway: Gateway, skills: httpx.AsyncClient, users: dict[str, str]
+    gateway: Gateway, skills: httpx.AsyncClient, users: dict[str, str], monkeypatch: MonkeyPatch
 ) -> None:
     gateway.require("live")
     user = users["Bearer a"]
@@ -284,6 +304,7 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
     assert failed["verdict"] == "fail" and failed["score"] < failed["pass_score"]
     response = await skills.post("/rooms/graded/complete", json=completion(failed["receipt"], FAILING_ANSWER))
     assert response.status_code == 422, response.text
+    assert response.json()["code"] == "verdict_failed"
     assert (await skills.get("/rooms/graded")).json()["progress"]["status"] == "new"
     forged_pass = tamper(failed["receipt"], lambda c: c.update(passed=True, score=c["max_score"]))
     assert (
@@ -292,6 +313,8 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
 
     passed = await gateway.grade(user, grant, ANSWER)
     assert passed["verdict"] == "pass" and passed["score"] >= passed["pass_score"]
+    # Host-only details of the grade (llm-ms 28d8ee9): `flags` and per-criterion `claimed`/`rejected`.
+    assert passed["flags"] == [] and all(item["met"] and item["claimed"] for item in passed["criteria"])
     receipt = passed["receipt"]
     assert isinstance(receipt, str)
     # The binding format: header `{"alg":"HS256"}`, all claims present, signed with the verdict key only.
@@ -299,11 +322,11 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
     payload = jwt.decode(receipt, options={"verify_signature": False})
     assert set(payload) == {
         "exp", "aud", "uid", "unit_id", "course_id", "profile", "profile_hash", "request_id",
-        "answer_sha256", "locale", "score", "max_score", "pass_score", "passed", "model", "iat",
+        "answer_sha256", "locale", "env", "score", "max_score", "pass_score", "passed", "model", "iat",
     }  # fmt: skip
     claims = llm.VerdictClaims.parse_obj(payload)
     assert str(claims.request_id) == passed["request_id"] and claims.answer_sha256 == llm.answer_sha256(ANSWER)
-    assert claims.locale == "de" and claims.uid == UUID(user)
+    assert claims.locale == "de" and claims.uid == UUID(user) and claims.env == gateway.environment
     grant_key = env_file("LLM_CONTRACT_GRANT_SECRET_FILE").read_bytes().rstrip(b"\r\n")
     with pytest.raises(jwt.InvalidSignatureError):
         jwt.decode(receipt, grant_key, algorithms=["HS256"], audience="llm-verdict")
@@ -321,6 +344,14 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
     # ... and to the course context of its grant.
     wrong_course = await skills.post("/rooms/graded/complete?course=prompting-course", json=completion(receipt))
     assert wrong_course.status_code == 403
+    # ... and to the environment that graded it; without an own environment graded completion is off.
+    monkeypatch.setattr(settings, "llm_verdict_env", "prod")
+    other_env = await skills.post("/rooms/graded/complete", json=completion(receipt))
+    assert (other_env.status_code, other_env.json()["code"]) == (403, "verdict_foreign"), other_env.text
+    monkeypatch.setattr(settings, "llm_verdict_env", "")
+    no_env = await skills.post("/rooms/graded/complete", json=completion(receipt))
+    assert (no_env.status_code, no_env.json()["code"]) == (503, "verdict_unavailable"), no_env.text
+    monkeypatch.setattr(settings, "llm_verdict_env", gateway.environment)
 
     result = await skills.post("/rooms/graded/complete", json=completion(receipt))
     assert result.status_code == 200, result.text
@@ -337,7 +368,7 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
     assert (await skills.post("/rooms/graded/review", json=start)).status_code == 200
     review: dict[str, Any] = {"review_id": start["request_id"]}
     replay = await skills.post("/rooms/graded/complete", json=completion(receipt, revision=2, **review))
-    assert replay.status_code == 409, replay.text
+    assert (replay.status_code, replay.json()["code"]) == (409, "verdict_used"), replay.text
     # The grader language is the learner's choice and recorded with the verdict.
     again = await gateway.grade(user, grant, ANSWER, locale="en")
     repeat = await skills.post("/rooms/graded/complete", json=completion(again["receipt"], revision=2, **review))

@@ -1,7 +1,7 @@
 """LLM lesson grants and LLM-graded completion on a disposable real SQL database, without network.
 
-Verdicts are signed here in the binding format (llm-ms 157d2e6: header `{"alg":"HS256"}`, payload
-`{exp, ...claims}` with `locale`); the end-to-end proof against the real gateway is in `tests/contract`.
+Verdicts are signed here in the binding format (llm-ms 28d8ee9: header `{"alg":"HS256"}`, payload
+`{exp, ...claims}` with `locale` and `env`); the end-to-end proof against the real gateway is in `tests/contract`.
 """
 
 from base64 import urlsafe_b64decode, urlsafe_b64encode
@@ -40,6 +40,7 @@ PROFILE_SHA256 = sha256(b"synthetic grading profile file").hexdigest()
 USER_A = "3f0c9a52-6a4e-4c1b-9d3e-5b8f2a7c1d01"
 USER_B = "8a2d4e61-0b7f-4d9c-a1e3-7c6b5d4f3e02"
 ANSWER = "Du bist Reiseleiter. Plane mir drei Tage in Rom. Antworte als Tabelle."
+VERDICT_ENV = "test"
 # The host's `LLM_FALLBACK_ANSWER`: completion without the model after comparing with the model answer.
 FALLBACK = {"fallback": "example"}
 
@@ -60,6 +61,7 @@ def verdict_claims(**overrides: Any) -> dict[str, Any]:
         "request_id": str(uuid4()),
         "answer_sha256": sha256(ANSWER.encode()).hexdigest(),
         "locale": "de",
+        "env": VERDICT_ENV,
         "score": 4,
         "max_score": 4,
         "pass_score": 3,
@@ -124,6 +126,7 @@ def content(monkeypatch: MonkeyPatch) -> Catalogue:
     monkeypatch.setattr(settings, "llm_grant_secret_file", None)
     monkeypatch.setattr(settings, "llm_verdict_secret", VERDICT_KEY)
     monkeypatch.setattr(settings, "llm_verdict_secret_file", None)
+    monkeypatch.setattr(settings, "llm_verdict_env", VERDICT_ENV)
     monkeypatch.setattr(rooms, "load_catalogue", lambda: value)
     monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=False))
     return value
@@ -325,6 +328,12 @@ def _without(name: str) -> Callable[[], str]:
         (lambda: sign(verdict_claims(locale="fr")), FOREIGN),
         (_without("locale"), FOREIGN),
         (_without("profile_hash"), FOREIGN),
+        # A verdict counts only in the environment that graded it.
+        (_without("env"), FOREIGN),
+        (lambda: sign(verdict_claims(env="prod")), FOREIGN),
+        (lambda: sign(verdict_claims(env="Test")), FOREIGN),
+        (lambda: sign(verdict_claims(env="")), FOREIGN),
+        (lambda: sign(verdict_claims(env=None)), FOREIGN),
         (lambda: sign(verdict_claims(uid=USER_B)), FOREIGN),
         (lambda: sign(verdict_claims(unit_id="plain")), FOREIGN),
         (lambda: sign(verdict_claims(course_id="prompting-course")), FOREIGN),
@@ -479,6 +488,30 @@ async def test_llm_keys_are_long_and_differ_from_every_other_key(
     monkeypatch.setattr(settings, name, GRANT_KEY)
     assert llm.grant_key() is None
     assert (await llm_client.post("/rooms/graded/llm-grant")).status_code == 503
+
+
+async def test_a_verdict_counts_only_in_the_environment_that_graded_it(
+    llm_client: httpx.AsyncClient, monkeypatch: MonkeyPatch
+) -> None:
+    token = sign(verdict_claims(env="test"))
+    monkeypatch.setattr(settings, "llm_verdict_env", "prod")
+    assert refused(await llm_client.post("/rooms/graded/complete", json=graded(token))) == FOREIGN
+    monkeypatch.setattr(settings, "llm_verdict_env", "test")
+    assert (await llm_client.post("/rooms/graded/complete", json=graded(token))).status_code == 200
+
+
+@pytest.mark.parametrize("configured", ["", "Prod", "prod!", "-test", "p" * 33])
+async def test_graded_completion_is_off_without_a_valid_own_environment_but_the_fallback_works(
+    llm_client: httpx.AsyncClient, monkeypatch: MonkeyPatch, configured: str
+) -> None:
+    monkeypatch.setattr(settings, "llm_verdict_env", configured)
+    assert llm.verdict_env() is None
+    assert refused(await llm_client.post("/rooms/graded/complete", json=graded(sign(verdict_claims())))) == UNAVAILABLE
+    # The completion without the model needs no verdict check, so it stays open when the AI is off.
+    fallback = await llm_client.post("/rooms/graded/complete", json=payload(action="complete", answer=FALLBACK))
+    assert fallback.status_code == 200 and fallback.json()["progress"]["status"] == "completed"
+    monkeypatch.setattr(settings, "llm_verdict_env", "p" * 32)
+    assert llm.verdict_env() == "p" * 32
 
 
 async def test_fallback_without_the_model_completes_as_introduced_without_a_verdict(

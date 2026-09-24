@@ -2,10 +2,11 @@
 
 Both are HS256 JWTs in llm-ms' shape (`academy_llm/src/jwt.rs`): the payload is `{exp, ...claims}` with
 an integer `exp`. Grant claims follow `GrantClaims` (`academy_llm/src/grant.rs`). Verdicts follow
-"Verdict-Format (verbindlich)" in `internal-operations/tasks/LLM-GATEWAY-2026-09-23.md` (llm-ms 157d2e6,
-`VerdictClaims` in `academy_llm/src/grading.rs`). Keys are the exact UTF-8 bytes llm-ms uses: a plain
-value as given, a credential file without its trailing CR/LF. The gateway never calls this service; a
-grant carries the access decision that was made here.
+"Verdict-Format (verbindlich)" in `internal-operations/tasks/LLM-GATEWAY-2026-09-23.md` (llm-ms 28d8ee9,
+`VerdictClaims` in `academy_llm/src/grading.rs`), including `env`: a verdict counts only in the environment
+that graded it (`LLM_VERDICT_ENV` here, `grading.environment` in llm-ms). Keys are the exact UTF-8 bytes
+llm-ms uses: a plain value as given, a credential file without its trailing CR/LF. The gateway never calls
+this service; a grant carries the access decision that was made here.
 
 A verdict counts only with its own verdict key: no fallback to the grant key, and like in llm-ms every
 key is at least 32 bytes and differs from the others. llm-ms signs nothing in fake mode (`receipt: null`),
@@ -13,6 +14,7 @@ which the room treats as "no verdict". Unknown extra claims are ignored as the b
 every claim that carries a binding is required and checked.
 """
 
+import re
 from datetime import datetime, timezone
 from hashlib import sha256
 from pathlib import Path
@@ -34,6 +36,9 @@ GRANT_AUDIENCE = "llm-grant"
 VERDICT_AUDIENCE = "llm-verdict"
 HEX_SHA256 = r"^[0-9a-f]{64}$"
 
+# Same shape as llm-ms `grading.environment` (`academy_llm/src/app.rs`).
+ENVIRONMENT_PATTERN = r"^[a-z][a-z0-9-]{0,31}$"
+
 UNAVAILABLE = "The AI is not available right now"
 MIN_KEY_BYTES = 32
 
@@ -41,7 +46,7 @@ logger = get_logger(__name__)
 
 
 class VerdictClaims(BaseModel):
-    """The binding verdict payload; all claims are always present (llm-ms 157d2e6)."""
+    """The binding verdict payload; all claims are always present (llm-ms 28d8ee9)."""
 
     class Config:
         # The binding format asks to ignore unknown claims so that an extension does not break the check.
@@ -59,6 +64,8 @@ class VerdictClaims(BaseModel):
     answer_sha256: str = Field(regex=HEX_SHA256)
     # Language of the grader prompt; the client chooses it, so it is recorded, not bound (see the room).
     locale: Literal["de", "en"]
+    # The environment that graded; only this service's own environment counts.
+    env: str = Field(regex=ENVIRONMENT_PATTERN)
     score: StrictInt
     max_score: StrictInt
     pass_score: StrictInt
@@ -127,6 +134,17 @@ def verdict_key() -> bytes | None:
     return _key("LLM_VERDICT_SECRET", settings.llm_verdict_secret, settings.llm_verdict_secret_file, others)
 
 
+def verdict_env() -> str | None:
+    """The environment whose verdicts count here (`LLM_VERDICT_ENV`); None if unset or unusable."""
+    env = settings.llm_verdict_env
+    if not env:
+        return None
+    if not re.fullmatch(ENVIRONMENT_PATTERN, env):
+        logger.error("LLM_VERDICT_ENV must be 1 to 32 characters a-z, 0-9 and -, starting with a letter")
+        return None
+    return env
+
+
 def marked_as_practice(payload: dict[str, Any]) -> bool:
     """Whether a verdict says it comes from a fake provider or a test mode.
 
@@ -185,12 +203,13 @@ def verify_verdict(
 ) -> VerdictClaims:
     """Check signature, audience, expiry and every binding of a verdict; raise if anything differs.
 
-    A forged or foreign verdict is a 403. An expired one, one from another rubric version or one that is
-    older than the running repeat is a 409: grading the answer again fixes it. Whether it passed is left
-    to the caller, so a failing verdict can keep the room open without any cost.
+    A forged or foreign verdict is a 403, and so is one from another environment. An expired one, one from
+    another rubric version or one that is older than the running repeat is a 409: grading the answer again
+    fixes it. Whether it passed is left to the caller, so a failing verdict can keep the room open without
+    any cost. Without a usable key or environment, graded completion is off (503).
     """
-    key = verdict_key()
-    if key is None:
+    key, env = verdict_key(), verdict_env()
+    if key is None or env is None:
         raise VerdictUnavailableError
     try:
         payload = jwt.decode(
@@ -203,6 +222,10 @@ def verify_verdict(
         raise StaleVerdictError from None
     except (jwt.InvalidTokenError, ValidationError):
         raise ForeignVerdictError from None
+    if claims.env != env:
+        # Signed with our key, so either the environments share a verdict key or one is misconfigured.
+        logger.error("LLM verdict from environment %s refused, this is %s", claims.env, env)
+        raise ForeignVerdictError
     try:
         own = claims.uid == UUID(user_id) and claims.answer_sha256 == answer_sha256(answer)
     except ValueError:  # includes UnicodeEncodeError (lone surrogates)

@@ -47,6 +47,10 @@ class Settings(BaseSettings):
     llm_grant_secret_file: Path | None = None
     llm_verdict_secret: str = ""
     llm_verdict_secret_file: Path | None = None
+    # The environment whose verdicts count here (llm-ms `grading.environment`, claim `env`), e.g. "prod" on
+    # the production host and "test" on the test host; 1 to 32 characters a-z, 0-9 and -, starting with a
+    # letter. Empty or invalid: graded completions are off, like without a verdict key.
+    llm_verdict_env: str = ""
     llm_grant_ttl: int = Field(2 * 60 * 60, ge=60, le=8 * 60 * 60)
     character_areas: Path = Path(__file__).parent / "content/character_areas.json"
 
