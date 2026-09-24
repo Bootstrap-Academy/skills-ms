@@ -1,9 +1,14 @@
-"""Lesson milestones (XP-02): the first checked completion of a unit books XP in challenges-ms, eventually.
+"""Lesson milestones (XP-02): a unit's milestone books XP in challenges-ms once per learner, eventually.
 
-Only two completions count: an exact server-side answer check (`deterministic`) and a passing verdict that
-llm-ms signed and this service verified (`llm_verdict`). Skips, repeats and every completion without such a
-check (such as the fallback without the model, which completes an LLM-graded unit without a verdict) never
-book anything.
+Only two completions count: an exact server-side answer check (`deterministic`, first round only) and a passing
+verdict that llm-ms signed and this service verified (`llm_verdict`, also in a repeat round). Skips and every
+completion without such a check (such as the fallback without the model, which completes an LLM-graded unit
+without a verdict) never book anything themselves.
+
+The outbox row is the record that a learner's milestone was queued: it is written in the completing
+transaction and kept until the account is erased, so a unit books at most once. A learner who finished an
+LLM-graded unit through the fallback or a skip therefore earns its milestone with the first verified pass in a
+later repeat round, and a second verified pass finds the row and books nothing (PO 24.09.).
 
 The completion commits first with an outbox row; delivery runs afterwards and is retried with backoff until
 challenges-ms answers for good. challenges-ms books once per learner and unit, so resending is harmless.
@@ -41,21 +46,29 @@ _queued: ContextVar[tuple[str, str] | None] = ContextVar("lesson_milestone_queue
 
 
 def checked_completion(
-    unit: CatalogueUnit, data: Complete, verdict: llm.VerdictClaims | None
+    unit: CatalogueUnit, data: Complete, verdict: llm.VerdictClaims | None, *, repeat: bool
 ) -> MilestoneCompletion | None:
-    """How a completion of this unit was checked, if it may earn the unit's milestone at all."""
+    """How a completion of this unit was checked, if it may earn the unit's milestone at all.
+
+    `enqueue` then books it only if this learner has no outbox row for the unit yet.
+    """
     if unit.milestone is None or data.action != "complete" or unit.exercise is not None:
         return None
     if isinstance(unit.completion, LlmVerdictCompletion):
         # Only the verified, passing verdict counts; the fallback without the model (no verdict) never does.
+        # It counts in a repeat round too: an outage or a skip in the first round must not cost the milestone
+        # for good (PO 24.09.).
         return "llm_verdict" if verdict is not None and verdict.passed else None
-    if isinstance(unit.completion, IntroductionCompletion):
+    if isinstance(unit.completion, IntroductionCompletion) and not repeat:
         return "deterministic"
     return None
 
 
 async def enqueue(user_id: str, unit: CatalogueUnit, completion: MilestoneCompletion) -> None:
-    """Add the outbox row in the caller's transaction, next to the completed room state."""
+    """Add the outbox row in the caller's transaction, next to the completed room state; once per learner and unit.
+
+    An existing row in any state (also `rejected`) means the milestone was queued before, so nothing is added.
+    """
     if unit.milestone is None or await db.get(LessonMilestoneDelivery, user_id=user_id, unit_id=unit.id) is not None:
         return
     now = utcnow()

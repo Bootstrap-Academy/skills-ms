@@ -3,7 +3,7 @@
 An LLM-graded room completes as a pass only with a verdict that llm-ms signed for this learner, unit and
 answer, and a failing verdict changes nothing. Without the model it completes through the fallback answer
 as `introduced`, like a skip, without a verdict. XP come only from challenges-ms: a unit with a lesson
-milestone queues it on its first checked completion (`lesson_milestones`), delivered after the commit.
+milestone queues it once per learner on a checked completion (`lesson_milestones`), delivered after the commit.
 """
 
 import json
@@ -745,9 +745,11 @@ async def mutate_room(
             )
         verdict = await graded_verdict(unit, user, data, course_id, current, row)
         current = completed_progress(unit, current, data, solved, verdict)
-        # Only a first completion outside a repeat can earn the lesson milestone; skips and the fallback never do.
-        if current.review_id is None and current.status == "completed":
-            if checked := lesson_milestones.checked_completion(unit, data, verdict):
+        # A checked completion can earn the lesson milestone once per learner and unit; skips and the fallback
+        # never do. A verified pass counts in a repeat round too, if the milestone was never queued (PO 24.09.).
+        if current.status == "completed":
+            repeat = current.review_id is not None
+            if checked := lesson_milestones.checked_completion(unit, data, verdict, repeat=repeat):
                 await lesson_milestones.enqueue(user.id, unit, checked)
     current.revision += 1
     values: dict[str, Any] = {**json.loads(current.json()), "updated_at": utcnow()}

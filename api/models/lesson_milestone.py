@@ -1,7 +1,8 @@
 """Outbox of lesson milestones (XP-02) for challenges-ms; erased with the account.
 
-One row per learner and unit, written in the transaction that first completes the unit through its server
-check. Delivery happens after that commit and is retried until challenges-ms answers for good, so a
+One row per learner and unit, written in the transaction of the completion that earns the milestone (see
+`api.services.lesson_milestones`); its presence is the record that the milestone was queued, so it is never
+queued twice. Delivery happens after that commit and is retried until challenges-ms answers for good, so a
 completion never waits for or depends on challenges-ms. Resending is safe: challenges-ms books once per
 learner and unit.
 """

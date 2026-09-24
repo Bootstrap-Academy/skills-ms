@@ -1,4 +1,4 @@
-"""Lesson milestones (XP-02): a checked first completion books XP in challenges-ms, once and eventually.
+"""Lesson milestones (XP-02): a checked completion books XP in challenges-ms, once per learner and eventually.
 
 Runs on a disposable real SQL database; challenges-ms is a synthetic HTTP double with the response shapes of
 challenges-ms `d981e3f` (`PUT /_internal/lesson-milestones/{user_id}/{unit_id}`).
@@ -216,7 +216,8 @@ async def test_skips_failures_and_units_without_milestone_book_nothing(
     assert (await client.post("/rooms/checked/complete", json=payload(action="skip"))).status_code == 200
     plain = await client.post("/rooms/plain/complete", json=payload(action="complete", answer={"answer": 6}))
     assert plain.status_code == 200 and plain.json()["progress"]["status"] == "completed"
-    # Completing the review of a skipped lesson introduces it, but is not a first completion.
+    # Completing the review of a skipped lesson introduces it, but an exact answer check books only in the first
+    # round; only a verified LLM pass counts in a repeat (see the round tests below).
     review = await client.post("/rooms/checked/review", json=payload(1))
     review_id = review.json()["progress"]["review_id"]
     finished = await client.post(
@@ -234,14 +235,21 @@ async def test_a_completion_without_a_verified_verdict_never_books(
     unit = next(unit for unit in content.units if unit.id == "graded")
     passed = llm.VerdictClaims.parse_obj({**verdict_claims(), "request_id": str(uuid4())})
     complete = Complete.parse_obj(payload(action="complete", answer={"text": ANSWER}))
-    assert lesson_milestones.checked_completion(unit, complete, passed) == "llm_verdict"
-    assert lesson_milestones.checked_completion(unit, complete, None) is None
-    assert lesson_milestones.checked_completion(unit, complete, passed.copy(update={"passed": False})) is None
     skip = Complete.parse_obj(payload(action="skip"))
-    assert lesson_milestones.checked_completion(unit, skip, passed) is None
     fallback = Complete.parse_obj(payload(action="complete", answer=FALLBACK))
     assert rooms.fallback_completion(unit, fallback)
-    assert lesson_milestones.checked_completion(unit, fallback, None) is None
+    for repeat in (False, True):
+        assert lesson_milestones.checked_completion(unit, complete, passed, repeat=repeat) == "llm_verdict"
+        assert lesson_milestones.checked_completion(unit, complete, None, repeat=repeat) is None
+        failed = passed.copy(update={"passed": False})
+        assert lesson_milestones.checked_completion(unit, complete, failed, repeat=repeat) is None
+        assert lesson_milestones.checked_completion(unit, skip, passed, repeat=repeat) is None
+        assert lesson_milestones.checked_completion(unit, fallback, None, repeat=repeat) is None
+    # An exact answer check counts only in the first round.
+    checked = next(unit for unit in content.units if unit.id == "checked")
+    right = Complete.parse_obj(payload(action="complete", answer={"answer": 6}))
+    assert lesson_milestones.checked_completion(checked, right, None, repeat=False) == "deterministic"
+    assert lesson_milestones.checked_completion(checked, right, None, repeat=True) is None
 
     # An answer without its grading completes nothing.
     response = await client.post("/rooms/graded/complete", json=payload(action="complete", answer={"text": ANSWER}))
@@ -254,11 +262,13 @@ async def test_a_completion_without_a_verified_verdict_never_books(
     progress = response.json()["progress"]
     assert (progress["status"], progress["result"]) == ("completed", {"kind": "introduced"})
     assert (await client.post("/rooms/graded/complete", json=body)).json() == response.json()
-    # A graded pass in a later repeat round does not book it either (no milestone for repeats).
+    # The fallback in a repeat round books nothing either (a later verified pass would, see the round tests).
     review = await client.post("/rooms/graded/review", json=payload(1))
     assert review.status_code == 200
     review_id = review.json()["progress"]["review_id"]
-    repeated = await client.post("/rooms/graded/complete", json=graded(sign(verdict_claims()), 2, review_id=review_id))
+    repeated = await client.post(
+        "/rooms/graded/complete", json=payload(2, action="complete", answer=FALLBACK, review_id=review_id)
+    )
     assert repeated.status_code == 200 and repeated.json()["progress"]["status"] == "completed"
     # At the deterministic unit the fallback answer is simply wrong.
     wrong = await client.post("/rooms/checked/complete", json=payload(action="complete", answer=FALLBACK))
@@ -269,6 +279,87 @@ async def test_a_completion_without_a_verified_verdict_never_books(
     async with db_context():
         for model in (models.XP, models.XPOperation):
             assert await db.all(filter_by(model, user_id=USER_A)) == []
+
+
+async def finish_round(client: httpx.AsyncClient, number: int, how: str) -> None:
+    """Round 0 is the first run through the graded unit; every later round is a repeat started for it."""
+    values: dict[str, Any] = {}
+    revision = 0
+    if number > 0:
+        review = await client.post("/rooms/graded/review", json=payload(2 * number - 1))
+        assert review.status_code == 200
+        values["review_id"] = review.json()["progress"]["review_id"]
+        revision = 2 * number
+    if how == "graded":
+        body = graded(sign(verdict_claims()), revision, **values)
+    elif how == "fallback":
+        body = payload(revision, action="complete", answer=FALLBACK, **values)
+    else:
+        body = payload(revision, action="skip", **values)
+    response = await client.post("/rooms/graded/complete", json=body)
+    assert response.status_code == 200
+    assert response.json()["progress"]["status"] == ("skipped" if how == "skip" else "completed")
+
+
+@pytest.mark.parametrize(
+    "rounds,booked",
+    [
+        # PO 24.09.: the first verified pass books the milestone if it was never booked, also in a repeat.
+        (["fallback", "graded"], True),
+        (["fallback", "fallback", "graded"], True),
+        # A skip never books, so it does not use the milestone up either: a later verified pass books it.
+        (["skip", "graded"], True),
+        # Once booked, a second verified pass books nothing more.
+        (["graded", "graded"], True),
+        (["fallback", "graded", "graded"], True),
+        (["skip", "graded", "fallback", "graded"], True),
+        # Without a verified pass nothing is ever booked.
+        (["fallback", "fallback"], False),
+        (["skip", "skip"], False),
+        (["skip", "fallback"], False),
+    ],
+)
+async def test_the_first_verified_pass_books_the_milestone_once_also_in_a_repeat(
+    client: httpx.AsyncClient, challenges: Challenges, rounds: list[str], booked: bool
+) -> None:
+    for number, how in enumerate(rounds):
+        await finish_round(client, number, how)
+        await lesson_milestones.settle()
+    await lesson_milestones.recover()
+    await lesson_milestones.settle()
+    if not booked:
+        assert challenges.calls == [] and await outbox() == []
+        return
+    # Exactly one delivery, booked in challenges-ms as new, right after the pass that earned it.
+    assert [loads(call.content) for call in challenges.calls] == [
+        {"skill_id": SKILL, "xp": 20, "completion": "llm_verdict"}
+    ]
+    assert str(challenges.calls[0].url) == f"{CHALLENGES}/_internal/lesson-milestones/{USER_A}/graded"
+    assert challenges.booked == {(USER_A, "graded")}
+    [row] = await outbox()
+    assert (row.unit_id, row.completion, row.state, row.attempts) == ("graded", "llm_verdict", "delivered", 1)
+    # Every verified pass is still recorded as a used verdict; only the first one booked.
+    async with db_context():
+        verdicts = await db.all(filter_by(models.LlmVerdict, user_id=USER_A))
+    assert len(verdicts) == rounds.count("graded")
+
+
+async def test_a_pass_in_a_repeat_while_the_first_booking_is_pending_books_nothing_more(
+    client: httpx.AsyncClient, challenges: Challenges
+) -> None:
+    challenges.reply = down
+    await finish_round(client, 0, "graded")
+    await lesson_milestones.settle()
+    await finish_round(client, 1, "graded")
+    await lesson_milestones.settle()
+    [row] = await outbox()
+    assert (row.state, row.attempts) == ("pending", 1)
+    challenges.reply = challenges.book
+    await make_due()
+    await lesson_milestones.recover()
+    [row] = await outbox()
+    assert (row.state, row.attempts) == ("delivered", 2)
+    assert len(challenges.calls) == 2 and challenges.booked == {(USER_A, "graded")}
 
 
 async def test_challenges_down_keeps_the_completion_and_delivers_later(
