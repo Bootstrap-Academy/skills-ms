@@ -18,6 +18,7 @@ async def _add_user_data(user_id: str) -> None:
             local_day=utcnow().date(),
             charged=True,
             reason="daily",
+            policy_mode="daily",
         )
     )
     await db.add(

@@ -18,6 +18,7 @@ class LessonStart(Base):
     local_day: Mapped[date] = Column(Date, nullable=False)
     charged: Mapped[bool] = Column(Boolean, nullable=False)
     reason: Mapped[str] = Column(String(32), nullable=False)
+    policy_mode: Mapped[str | None] = Column(String(16), nullable=True)
     __table_args__ = (
         Index("ix_lesson_starts_day", "user_id", "local_day", "charged"),
         {"mysql_collate": "utf8mb4_bin"},

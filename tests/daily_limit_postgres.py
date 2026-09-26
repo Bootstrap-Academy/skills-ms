@@ -7,6 +7,7 @@ Run: nix develop --command python tests/daily_limit_postgres.py
 import asyncio
 import json
 import os
+from datetime import date, datetime
 from typing import Any
 from uuid import UUID, uuid4
 
@@ -22,6 +23,25 @@ from api.schemas.daily_limit import LearningHistory, LearningPolicy, LimitConfig
 from api.schemas.user import User
 from api.services import courses, daily_limit
 from api.settings import settings
+
+
+async def seed_pre_policy_starts() -> None:
+    async with db_context():
+        for reason in ("daily", "premium", "shadow", "off", "historical"):
+            await db.exec(
+                text(
+                    "INSERT INTO skills_lesson_starts "
+                    "(user_id, course_id, lesson_id, started_at, local_day, charged, reason) "
+                    "VALUES (:user, 'old-course', :reason, :started, :day, :charged, :reason)"
+                ).bindparams(
+                    user="migration",
+                    reason=reason,
+                    started=datetime(2026, 9, 25, 12),
+                    day=date(2026, 9, 25),
+                    charged=reason == "daily",
+                )
+            )
+    await db.dispose()
 
 
 async def main() -> None:
@@ -72,7 +92,24 @@ async def main() -> None:
 
     daily_limit.read_history_batch = history
     async with db_context():
-        assert (await db.exec(text("select version_num from skills_alembic_version"))).scalar() == "dailystarts001"
+        assert (await db.exec(text("select version_num from skills_alembic_version"))).scalar() == "dailypolicy001"
+        old = await db.all(filter_by(models.LessonStart, user_id="migration"))
+        assert len(old) == 5
+        assert {row.reason: row.policy_mode for row in old} == {
+            "daily": "daily",
+            "premium": None,
+            "shadow": None,
+            "off": None,
+            "historical": None,
+        }
+        assert all(
+            row.course_id == "old-course"
+            and row.lesson_id == row.reason
+            and row.local_day == date(2026, 9, 25)
+            and row.started_at.replace(tzinfo=None) == datetime(2026, 9, 25, 12)
+            and row.charged == (row.reason == "daily")
+            for row in old
+        )
         assert await daily_limit.configuration() == ("off", 3)
         await daily_limit.configure(
             LimitConfiguration(mode="enforce", limit=3, updated_by="native-test", note="Disposable DB")
@@ -103,6 +140,8 @@ async def main() -> None:
     async with db_context():
         assert await db.count(filter_by(models.LessonStart, user_id="retry")) == 1
         assert await db.count(filter_by(models.LessonStartRequest, user_id="retry")) == 1
+        row = await db.first(filter_by(models.LessonStart, user_id="retry"))
+        assert row is not None and row.policy_mode == "daily"
     assert await begin("retry", 1, request) == 409
     # A transaction failing after admission does not consume a slot.
     try:
@@ -118,7 +157,9 @@ async def main() -> None:
     print(
         json.dumps(
             {
-                "migration": "dailystarts001",
+                "migration": "dailypolicy001",
+                "existing_starts_preserved": 5,
+                "only_proven_daily_migrated": True,
                 "last_slot": outcomes,
                 "concurrent_retries": len(retries),
                 "rollback": "passed",
@@ -128,5 +169,7 @@ async def main() -> None:
 
 
 if __name__ == "__main__":
+    command.upgrade(Config("alembic.ini"), "dailystarts001")
+    asyncio.run(seed_pre_policy_starts())
     command.upgrade(Config("alembic.ini"), "head")
     asyncio.run(main())

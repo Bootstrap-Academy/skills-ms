@@ -401,6 +401,36 @@ async def for_unit(user: User, unit_id: str, course_id: str | None = None) -> Da
     return daily
 
 
+async def confirmed_policy_mode(user: User) -> str | None:
+    try:
+        return (await policy(user.id)).mode
+    except AccessError:
+        return None
+
+
+async def heart_policy(user: User, pair: tuple[Course, LessonDefinition] | None) -> Literal["daily", "legacy"] | None:
+    """Access alone never proves free billing under an unavailable policy."""
+    current = await confirmed_policy_mode(user)
+    if current is not None:
+        return "daily" if current == "daily" else "legacy"
+    if pair is None:
+        return None
+    course, lesson = pair
+    ids = {lesson.id} | {
+        activity.source.unit_id for activity in lesson.activities if isinstance(activity.source, RoomSource)
+    }
+    rows = [
+        row
+        for (course_id, lesson_id), row in (await snapshot(user)).starts.items()
+        if course_id == course.id and lesson_id in ids
+    ]
+    if any(row.policy_mode == "daily" or (row.policy_mode is None and row.reason == "daily") for row in rows):
+        return "daily"
+    if any(row.policy_mode in ("legacy", "shadow") for row in rows):
+        return "legacy"
+    return None
+
+
 async def start(
     user: User, course: Course, lesson: LessonDefinition, request_id: UUID | None = None, *, locked: bool = False
 ) -> DailyStatus | None:
@@ -421,6 +451,9 @@ async def start(
         if receipt is not None:
             if (receipt.course_id, receipt.lesson_id) != (course.id, lesson.id):
                 raise AccessError(409, "request_id_conflict", "Diese Anfrage gehört zu einer anderen Lektion.")
+            row = (await snapshot(user)).starts.get((course.id, lesson.id))
+            if row is not None and (confirmed := await confirmed_policy_mode(user)) is not None:
+                row.policy_mode = confirmed
             return await optional_status(user, course, lesson)
     daily = await optional_status(user, course, lesson)
     if daily is None and not (course.free or user.admin):
@@ -437,6 +470,7 @@ async def start(
         if daily.mode == "legacy" and mode == "off":
             return daily
     row = (await snapshot(user)).starts.get((course.id, lesson.id))
+    confirmed = await confirmed_policy_mode(user)
     if row is None:
         try:
             old = await historical_progress(user, course, lesson, with_history=not (daily and daily.unlimited))
@@ -470,8 +504,11 @@ async def start(
                 local_day=day_window(now)[0],
                 charged=charge,
                 reason=reason,
+                policy_mode=confirmed,
             )
         )
+    elif confirmed is not None:
+        row.policy_mode = confirmed
     if request_id is not None:
         await db.add(
             models.LessonStartRequest(
@@ -560,7 +597,7 @@ async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bo
         else:
             broad_courses.append(course)
     if not candidates and not broad_courses:
-        return {"allowed": True, "lesson": None, "daily": None}
+        return {"allowed": True, "lesson": None, "daily": None, "heart_policy": await heart_policy(user, None)}
 
     async def admitted(course: Course, lesson: LessonDefinition | None = None) -> bool:
         return (
@@ -586,9 +623,14 @@ async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bo
         # The course admission still applies; they remain free practice rather
         # than inventing one quota unit per quiz or blocking the learner.
         daily = await optional_status(user)
-        return {"allowed": True, "lesson": None, "daily": daily}
+        return {"allowed": True, "lesson": None, "daily": daily, "heart_policy": await heart_policy(user, None)}
     daily = await start(user, *pair, data.request_id) if mutate else await optional_status(user, *pair)
-    return {"allowed": True, "lesson": {"course_id": pair[0].id, "lesson_id": pair[1].id}, "daily": daily}
+    return {
+        "allowed": True,
+        "lesson": {"course_id": pair[0].id, "lesson_id": pair[1].id},
+        "daily": daily,
+        "heart_policy": await heart_policy(user, pair),
+    }
 
 
 async def backfill_user(user_id: str) -> int:

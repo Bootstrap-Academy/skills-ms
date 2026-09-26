@@ -275,6 +275,7 @@ async def test_old_progress_and_account_erasure(
     async with db_context():
         data = await export_user_data(USER.id)
         assert len(data.lesson_starts) == 4 and len(data.lesson_start_requests) == 4
+        assert all(row["policy_mode"] == "daily" for row in data.lesson_starts)
         assert next(row for row in data.lesson_starts if row["lesson_id"] == "lesson-0")["reason"] == "historical"
     monkeypatch.setattr("api.services.user_deletion.clear_cache", AsyncMock())
     monkeypatch.setattr("api.services.retained_rights.preserve_before_erasure", AsyncMock())
@@ -770,3 +771,96 @@ async def test_non_enforcing_mode_does_not_block_on_history_outage(
     async with db_context():
         row = await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
         assert row is not None and not row.charged
+
+
+@pytest.mark.parametrize(
+    "policy_mode,technical,premium,expected",
+    [
+        ("daily", "enforce", True, "daily"),
+        ("daily", "off", False, "daily"),
+        ("daily", "shadow", False, "daily"),
+        ("shadow", "shadow", False, "legacy"),
+        ("legacy", "enforce", False, "legacy"),
+    ],
+)
+async def test_heart_policy_outage_requires_confirmed_lesson_contract(
+    daily_client: httpx.AsyncClient,
+    catalog: Course,
+    monkeypatch: MonkeyPatch,
+    policy_mode: str,
+    technical: str,
+    premium: bool,
+    expected: str,
+) -> None:
+    known = LearningPolicy.parse_obj(
+        {"mode": policy_mode, "premium": premium, "single_course_sales": False, "heart_sales": False}
+    )
+    monkeypatch.setattr(daily_limit, "policy", AsyncMock(return_value=known))
+    async with db_context():
+        await daily_limit.configure(
+            LimitConfiguration.parse_obj({"mode": technical, "limit": 3, "updated_by": "test", "note": "Synthetic"})
+        )
+    assert (await begin(daily_client, 0)).status_code == 200
+    task, subtask = uuid4(), uuid4()
+    monkeypatch.setattr(
+        settings,
+        "learning_rooms_exercise_refs",
+        {"unit-0": {"type": "coding", "task_id": str(task), "subtask_id": str(subtask)}},
+    )
+    rooms.load_catalogue().units[0].completion = None
+    rooms.load_catalogue().units[0].room = "exercise"
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(side_effect=daily_limit.AccessError(503, "learning_access_unavailable", "Unavailable")),
+    )
+    async with db_context():
+        result = await daily_limit.challenge_admission(
+            USER.id, ChallengeAdmission(task_id=task, subtask_id=subtask), False
+        )
+        assert result["allowed"] and result["daily"] is None and result["heart_policy"] == expected
+        row = await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
+        assert row is not None and row.policy_mode == policy_mode
+        assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 1
+        assert (await daily_limit.challenge_admission(USER.id, ChallengeAdmission(), False))["heart_policy"] is None
+        broad = ChallengeAdmission(
+            lecture_bindings=[LectureBinding(course_id=catalog.id, lecture_id=None, section_id=None)]
+        )
+        assert (await daily_limit.challenge_admission(USER.id, broad, False))["heart_policy"] is None
+
+
+async def test_unknown_old_start_is_not_a_daily_billing_claim(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    assert (await begin(daily_client, 0)).status_code == 200
+    async with db_context():
+        row = await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
+        assert row is not None
+        row.reason = "premium"
+        row.policy_mode = None
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(side_effect=daily_limit.AccessError(503, "learning_access_unavailable", "Unavailable")),
+    )
+    async with db_context():
+        pair = catalog, daily_limit.lesson_definition(catalog, "lesson-0")
+        assert await daily_limit.begun(USER, *pair)
+        assert await daily_limit.heart_policy(USER, pair) is None
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(
+            return_value=LearningPolicy(mode="daily", premium=False, single_course_sales=False, heart_sales=False)
+        ),
+    )
+    # Read-only status cannot manufacture persistent evidence; a subsequent
+    # deliberate admitted start can remember the freshly verified contract.
+    assert (await daily_client.get("/courses/daily-course/lessons/lesson-0")).status_code == 200
+    async with db_context():
+        row = await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
+        assert row is not None and row.policy_mode is None
+    assert (await begin(daily_client, 0)).status_code == 200
+    async with db_context():
+        row = await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
+        assert row is not None and row.policy_mode == "daily"

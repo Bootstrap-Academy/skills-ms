@@ -79,6 +79,17 @@ Enforced admission requires that evidence; disabled and shadow operation retain
 their existing access and leave the uncertain start uncharged. Known Premium,
 purchases and local continuation do not need remote historical evidence.
 
+Internal check/start also returns `heart_policy: daily|legacy|null`. A current
+Backend policy establishes it directly. During a policy outage, only the
+concrete lesson's persisted `policy_mode=daily` (or its old unequivocal
+`reason=daily`) proves Daily billing freedom. A plain allowed response, broad
+free practice or an ambiguous historic Premium/off/shadow reason does not.
+Challenges must still obtain normal start admission; unknown fallback is503.
+The additive `dailypolicy001` migration preserves all start data and initializes
+only proven old Daily rows. Actual admitted starts/retries remember freshly
+confirmed policy; GET and check never write this evidence. Export/deletion cover
+the new field with its existing row.
+
 Local verification:
 
 ```
