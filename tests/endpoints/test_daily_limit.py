@@ -289,6 +289,13 @@ async def test_entitlement_outage_preserves_work_without_charging(
     assert (await begin(daily_client, 0)).status_code == 200
     assert (await daily_client.get("/daily-limit")).status_code == 503
     async with db_context():
+        broad = ChallengeAdmission(
+            lecture_bindings=[LectureBinding(course_id="daily-course", lecture_id=None, section_id=None)],
+            request_id=uuid4(),
+        )
+        free_practice = await daily_limit.challenge_admission(USER.id, broad, True)
+        assert free_practice["allowed"] and free_practice["daily"] is None
+    async with db_context():
         rows = await db.all(filter_by(models.LessonStart, user_id=USER.id))
         assert len(rows) == 2 and sum(row.charged for row in rows) == 1
         assert any(row.reason == "service_unavailable" for row in rows)

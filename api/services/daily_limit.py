@@ -256,7 +256,9 @@ def require_available(daily: DailyStatus) -> None:
         )
 
 
-async def optional_status(user: User, course: Course, lesson: LessonDefinition) -> DailyStatus | None:
+async def optional_status(
+    user: User, course: Course | None = None, lesson: LessonDefinition | None = None
+) -> DailyStatus | None:
     if not settings.daily_limit_policy_enabled:
         return None
     try:
@@ -429,7 +431,7 @@ async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bo
         # Course-/section-wide historical exercises have no defined lesson.
         # The course admission still applies; they remain free practice rather
         # than inventing one quota unit per quiz or blocking the learner.
-        daily = await status(user) if settings.daily_limit_policy_enabled else None
+        daily = await optional_status(user)
         return {"allowed": True, "lesson": None, "daily": daily}
     daily = await start(user, *pair, data.request_id) if mutate else await optional_status(user, *pair)
     return {"allowed": True, "lesson": {"course_id": pair[0].id, "lesson_id": pair[1].id}, "daily": daily}
