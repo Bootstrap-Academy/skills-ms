@@ -18,7 +18,7 @@ from api.database import db, filter_by
 from api.logger import get_logger
 from api.schemas.course import Course
 from api.schemas.curriculum import LectureSource, LessonDefinition, RoomSource
-from api.schemas.daily_limit import ChallengeAdmission, DailyStatus, LearningPolicy, LimitConfiguration
+from api.schemas.daily_limit import ChallengeAdmission, DailyStatus, LearningHistory, LearningPolicy, LimitConfiguration
 from api.schemas.user import User
 from api.services.internal import InternalService, InternalServiceError
 from api.services.purchases import lock_user
@@ -187,13 +187,92 @@ async def purchased(user: User, course: Course) -> bool:
     return course.id in (await snapshot(user)).purchases
 
 
-async def historical_progress(user: User, course: Course, lesson: LessonDefinition) -> bool:
+async def read_history_batch(user_id: str, payload: dict[str, Any]) -> LearningHistory:
+    """Trusted read-only CH database evidence; never call its public Skills-gated API."""
+    try:
+        async with InternalService.CHALLENGES.client as client:
+            response = await client.post(f"/users/{user_id}/learning-history", json=payload, timeout=5)
+        if response.status_code != 200:
+            raise ValueError("Unexpected history response")
+        result = LearningHistory.parse_obj(response.json())
+        requested = set(payload["subtask_ids"])
+        lectures = {(item["course_id"], item["lecture_id"]) for item in payload["lecture_bindings"]}
+        if not {str(value) for value in result.attempted_subtask_ids}.issubset(requested) or not {
+            (item.course_id, item.lecture_id) for item in result.attempted_lecture_bindings
+        }.issubset(lectures):
+            raise ValueError("Unrequested historical evidence")
+        return result
+    except (httpx.HTTPError, InternalServiceError, ValueError, ValidationError):
+        raise AccessError(
+            503, "learning_history_unavailable", "Deine bisherigen Lernschritte sind gerade nicht erreichbar."
+        ) from None
+
+
+async def challenge_history(user: User) -> tuple[set[UUID], set[tuple[str, str]]]:
+    from api.services import rooms
+    from api.services.courses import COURSES
+
+    key = ("challenge_history", user.id)
+    cached = db.session.info.get(key)
+    if isinstance(cached, AccessError):
+        raise cached
+    if cached is not None:
+        return cached  # type: ignore[no-any-return]
+    subtasks = (
+        sorted(
+            {str(unit.exercise.subtask_id) for unit in rooms.catalogue().units if not unit.retired and unit.exercise}
+        )
+        if settings.rooms_enabled
+        else []
+    )
+    lectures = sorted(
+        {
+            (course.id, lecture.id)
+            for course in COURSES.values()
+            for section in course.sections
+            for lecture in section.lectures
+        }
+    )
+    entries: list[tuple[str, Any]] = [("subtask", item) for item in subtasks] + [("lecture", item) for item in lectures]
+    attempted: set[UUID] = set()
+    attempted_lectures: set[tuple[str, str]] = set()
+    try:
+        for offset in range(0, len(entries), 500):
+            end = offset + 500
+            batch = entries[offset:end]
+            result = await read_history_batch(
+                user.id,
+                {
+                    "subtask_ids": [value for kind, value in batch if kind == "subtask"],
+                    "lecture_bindings": [
+                        {"course_id": value[0], "lecture_id": value[1]} for kind, value in batch if kind == "lecture"
+                    ],
+                },
+            )
+            attempted.update(result.attempted_subtask_ids)
+            attempted_lectures.update((item.course_id, item.lecture_id) for item in result.attempted_lecture_bindings)
+    except AccessError as exc:
+        db.session.info[key] = exc
+        raise
+    value = attempted, attempted_lectures
+    db.session.info[key] = value
+    return value
+
+
+async def historical_progress(
+    user: User, course: Course, lesson: LessonDefinition, *, with_history: bool = True
+) -> bool:
+    from api.services import rooms
+
     data = await snapshot(user)
+    exercise_ids: set[UUID] = set()
+    lecture_ids: set[tuple[str, str]] = set()
     for activity in lesson.activities:
         source = activity.source
         if isinstance(source, LectureSource):
             if (course.id, source.lecture_id) in data.lectures:
                 return True
+            lecture_ids.add((course.id, source.lecture_id))
         elif isinstance(source, RoomSource):
             # Pre-grouping lesson IDs were unit IDs. A begin without a saved
             # draft still preserves the new containing lesson after grouping.
@@ -206,6 +285,13 @@ async def historical_progress(user: User, course: Course, lesson: LessonDefiniti
                 or (row.review_id is not None and row.review_status == "in_progress")
             ):
                 return True
+            if settings.rooms_enabled:
+                unit = next((item for item in rooms.catalogue().units if item.id == source.unit_id), None)
+                if unit is not None and unit.exercise is not None:
+                    exercise_ids.add(unit.exercise.subtask_id)
+    if with_history and (exercise_ids or lecture_ids):
+        attempted, lectures = await challenge_history(user)
+        return bool(exercise_ids & attempted or lecture_ids & lectures)
     return False
 
 
@@ -221,13 +307,20 @@ async def status(user: User, course: Course | None = None, lesson: LessonDefinit
     mode, limit = await configuration()
     day, reset = day_window(utcnow())
     used = sum(row.charged and row.local_day == day for row in (await snapshot(user)).starts.values())
-    started = course is not None and lesson is not None and await begun(user, course, lesson)
     exempt: Literal["admin", "premium", "purchase", "started"] | None = (
         "admin" if user.admin else "premium" if current.premium else None
     )
     if exempt is None and course is not None and await purchased(user, course):
         exempt = "purchase"
     unlimited = exempt is not None
+    started = (
+        course is not None
+        and lesson is not None
+        and (
+            (course.id, lesson.id) in (await snapshot(user)).starts
+            or await historical_progress(user, course, lesson, with_history=not unlimited)
+        )
+    )
     if exempt is None and started:
         exempt = "started"
     enforced = current.mode == "daily" and mode == "enforce"
@@ -273,9 +366,22 @@ async def optional_status(
 async def choose(
     user: User, candidates: list[tuple[Course, LessonDefinition]]
 ) -> tuple[Course, LessonDefinition] | None:
+    data = await snapshot(user)
     for course, lesson in candidates:
-        if await begun(user, course, lesson) or await purchased(user, course):
+        if (
+            (course.id, lesson.id) in data.starts
+            or course.id in data.purchases
+            or await historical_progress(user, course, lesson, with_history=False)
+        ):
             return course, lesson
+    for course, lesson in candidates:
+        try:
+            if await begun(user, course, lesson):
+                return course, lesson
+        except AccessError:
+            # Selection grants no entitlement. Status/start keeps the unknown
+            # state and decides whether evidence is required for enforcement.
+            continue
     return candidates[0] if candidates else None
 
 
@@ -283,7 +389,16 @@ async def for_unit(user: User, unit_id: str, course_id: str | None = None) -> Da
     if not settings.daily_limit_policy_enabled:
         return None
     pair = await choose(user, unit_lessons(unit_id, course_id))
-    return None if pair is None else await optional_status(user, *pair)
+    if pair is None:
+        return None
+    daily = await optional_status(user, *pair)
+    if daily is None:
+        from api.services.courses import get_owned_courses
+
+        course, lesson = pair
+        if not (course.free or user.admin or course.id in await get_owned_courses(user.id)):
+            await course_daily_access(user, course, lesson)
+    return daily
 
 
 async def start(
@@ -308,6 +423,13 @@ async def start(
                 raise AccessError(409, "request_id_conflict", "Diese Anfrage gehört zu einer anderen Lektion.")
             return await optional_status(user, course, lesson)
     daily = await optional_status(user, course, lesson)
+    if daily is None and not (course.free or user.admin):
+        # A course-level browse permission must not open unrelated new work
+        # while policy is unknown. Keep only separately proven access.
+        from api.services.courses import get_owned_courses
+
+        if course.id not in await get_owned_courses(user.id) and not await begun(user, course, lesson):
+            raise AccessError(503, "learning_access_unavailable", "Dein Lernzugang ist gerade nicht erreichbar.")
     mode, _ = await configuration()
     if daily is not None:
         require_available(daily)
@@ -316,7 +438,18 @@ async def start(
             return daily
     row = (await snapshot(user)).starts.get((course.id, lesson.id))
     if row is None:
-        old = await historical_progress(user, course, lesson)
+        try:
+            old = await historical_progress(user, course, lesson, with_history=not (daily and daily.unlimited))
+        except AccessError:
+            try:
+                enforcing = mode == "enforce" and (await policy(user.id)).mode == "daily"
+            except AccessError:
+                enforcing = False
+            if enforcing:
+                raise
+            # Disabled/measurement/legacy admission must not become a new
+            # historical-service dependency. Unknown starts are uncharged.
+            old = False
         charge = daily is not None and not old and not daily.unlimited and mode != "off"
         reason = (
             "historical"
@@ -364,10 +497,31 @@ async def start_unit(user: User, unit_id: str, course_id: str | None, *, locked:
 async def daily_course_access(user: User) -> bool:
     if not settings.daily_limit_policy_enabled:
         return False
+    return (await policy(user.id)).mode == "daily"
+
+
+async def course_daily_access(user: User, course: Course, lesson: LessonDefinition | None = None) -> bool:
+    """Keep unknown policy distinct from denial, with scoped continuation rights."""
     try:
-        return (await policy(user.id)).mode == "daily"
+        return await daily_course_access(user)
     except AccessError:
-        return False
+        if lesson is not None:
+            if await begun(user, course, lesson):
+                return True
+        else:
+            from api.services.curriculum import definitions
+
+            lessons = definitions(course)[0].lessons
+            data = await snapshot(user)
+            for item in lessons:
+                if (course.id, item.id) in data.starts or await historical_progress(
+                    user, course, item, with_history=False
+                ):
+                    return True
+            for item in lessons:
+                if await begun(user, course, item):
+                    return True
+        raise
 
 
 async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bool) -> dict[str, Any]:
@@ -408,18 +562,18 @@ async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bo
     if not candidates and not broad_courses:
         return {"allowed": True, "lesson": None, "daily": None}
 
-    async def admitted(course: Course) -> bool:
+    async def admitted(course: Course, lesson: LessonDefinition | None = None) -> bool:
         return (
             course.free
             or user.admin
-            or await daily_course_access(user)
             or course.id in await get_owned_courses(user.id)
+            or await course_daily_access(user, course, lesson)
             or await has_premium(user.id)
         )
 
     pairs = []
     for course, lesson in candidates:
-        if await admitted(course):
+        if await admitted(course, lesson):
             pairs.append((course, lesson))
     broad_access = False
     for course in broad_courses:

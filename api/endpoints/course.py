@@ -52,7 +52,7 @@ async def get_lecture(lecture_id: str, course: Course = get_course) -> Lecture:
 
 
 @Depends
-async def has_course_access(course: Course = get_course, user: User = user_auth) -> None:
+async def has_course_access(request: Request, course: Course = get_course, user: User = user_auth) -> None:
     """Check if the user has access to the course"""
 
     if course.free or user.admin:
@@ -61,7 +61,13 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
     if course.id in await get_owned_courses(user.id):
         return
 
-    if await daily_limit.daily_course_access(user) or await has_premium(user.id):
+    lesson = None
+    if settings.daily_limit_policy_enabled:
+        if lesson_id := request.path_params.get("lesson_id"):
+            lesson = daily_limit.lesson_definition(course, lesson_id)
+        elif lecture_id := request.path_params.get("lecture_id"):
+            lesson = daily_limit.lecture_lesson(course, lecture_id)
+    if await daily_limit.course_daily_access(user, course, lesson) or await has_premium(user.id):
         return
 
     raise NoCourseAccessException
@@ -76,8 +82,18 @@ async def get_unlocked_courses(user: User) -> set[str]:
     a course being free are two different things for the callers.
     """
 
-    if user.admin or await daily_limit.daily_course_access(user) or await has_premium(user.id):
-        return set(COURSES)
+    try:
+        if user.admin or await daily_limit.daily_course_access(user) or await has_premium(user.id):
+            return set(COURSES)
+    except daily_limit.AccessError:
+        known = await get_owned_courses(user.id) & set(COURSES)
+        for course in COURSES.values():
+            try:
+                if await daily_limit.course_daily_access(user, course):
+                    known.add(course.id)
+            except daily_limit.AccessError:
+                pass
+        return known
 
     return await get_owned_courses(user.id) & set(COURSES)
 

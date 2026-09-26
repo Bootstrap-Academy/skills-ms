@@ -21,7 +21,13 @@ from api.endpoints.daily_limit import router as daily_router
 from api.endpoints.rooms import router as room_router
 from api.redis import redis
 from api.schemas.course import Course
-from api.schemas.daily_limit import ChallengeAdmission, LearningPolicy, LectureBinding, LimitConfiguration
+from api.schemas.daily_limit import (
+    ChallengeAdmission,
+    LearningHistory,
+    LearningPolicy,
+    LectureBinding,
+    LimitConfiguration,
+)
 from api.schemas.rooms import Catalogue
 from api.schemas.user import User
 from api.services import courses, daily_limit, rooms
@@ -91,6 +97,11 @@ def catalog(monkeypatch: MonkeyPatch) -> Course:
     for module in (courses, rooms, course_endpoints):
         monkeypatch.setattr(module, "COURSES", {course.id: course})
     monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=False))
+    monkeypatch.setattr(
+        daily_limit,
+        "read_history_batch",
+        AsyncMock(return_value=LearningHistory(attempted_subtask_ids=[], attempted_lecture_bindings=[])),
+    )
     monkeypatch.setattr(
         daily_limit,
         "policy",
@@ -514,3 +525,248 @@ async def test_disabled_feature_does_not_require_curriculum_for_legacy_video(
     async with db_context():
         assert "/lectures/" in await course_endpoints.get_mp4_lecture_link(catalog, lecture, USER)
         assert await course_endpoints.complecte_lecture(course=catalog, lecture=lecture, user=USER) is True
+
+
+@pytest.mark.parametrize("entrypoint", ["start", "direct", "complete", "backfill"])
+async def test_historical_challenge_attempt_preserves_canonical_lesson(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch, entrypoint: str
+) -> None:
+    task, subtask = uuid4(), uuid4()
+    monkeypatch.setattr(
+        settings,
+        "learning_rooms_exercise_refs",
+        {"unit-0": {"type": "coding", "task_id": str(task), "subtask_id": str(subtask)}},
+    )
+    rooms.load_catalogue().units[0].completion = None
+    rooms.load_catalogue().units[0].room = "exercise"
+    history = AsyncMock(return_value=LearningHistory(attempted_subtask_ids=[subtask], attempted_lecture_bindings=[]))
+    monkeypatch.setattr(daily_limit, "read_history_batch", history)
+    # The trusted participation evidence applies even when the earlier attempt
+    # failed; it grants continuation, never completion or XP.
+    monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=False))
+    for i in [1, 2, 3]:
+        assert (await begin(daily_client, i)).status_code == 200
+    response = await daily_client.get("/courses/daily-course/lessons/lesson-0")
+    assert response.status_code == 200 and response.json()["daily"]["started"]
+    queue = await daily_client.get("/rooms?path=daily-path&continuous=true")
+    assert queue.status_code == 200 and queue.json()["next"]["unit"]["id"] == "unit-0"
+    async with db_context():
+        assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 3
+    if entrypoint == "start":
+        assert (await begin(daily_client, 0)).status_code == 200
+    elif entrypoint == "direct":
+        async with db_context():
+            result = await daily_limit.challenge_admission(
+                USER.id, ChallengeAdmission(task_id=task, subtask_id=subtask, request_id=uuid4()), True
+            )
+            assert result["allowed"] and result["daily"].used == 3
+    elif entrypoint == "complete":
+        monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=True))
+        completed_response = await daily_client.post(
+            "/rooms/unit-0/complete?course=daily-course",
+            json={"request_id": str(uuid4()), "expected_revision": 0, "action": "complete"},
+        )
+        assert completed_response.status_code == 200, completed_response.text
+    else:
+        async with db_context():
+            assert await daily_limit.backfill_user(USER.id) == 1
+            assert await daily_limit.backfill_user(USER.id) == 0
+    async with db_context():
+        row = await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
+        assert row is not None and row.reason == "historical" and not row.charged
+
+
+async def test_policy_outage_preserves_only_proven_paid_course_work(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    catalog.price = 1000
+    for module in (course_endpoints, rooms):
+        monkeypatch.setattr(module, "has_premium", AsyncMock(return_value=False))
+    assert (await begin(daily_client, 0)).status_code == 200
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(side_effect=daily_limit.AccessError(503, "learning_access_unavailable", "Unavailable")),
+    )
+    for path in ["/courses/daily-course/lessons/lesson-0", "/rooms/unit-0?course=daily-course"]:
+        result = await daily_client.get(path)
+        assert result.status_code == 200 and result.json()["daily"] is None, result.text
+    assert (await begin(daily_client, 0)).status_code == 200
+    for path in ["/courses/daily-course/lessons/lesson-1", "/rooms/unit-1?course=daily-course"]:
+        assert (await daily_client.get(path)).status_code == 503
+    assert (await begin(daily_client, 1)).status_code == 503
+    queue = await daily_client.get("/rooms?path=daily-path&course=daily-course&after=unit-0&continuous=true")
+    assert queue.status_code == 200 and queue.json()["next"]["unit"]["id"] == "unit-0", queue.text
+    task, subtask = uuid4(), uuid4()
+    monkeypatch.setattr(
+        settings,
+        "learning_rooms_exercise_refs",
+        {"unit-0": {"type": "coding", "task_id": str(task), "subtask_id": str(subtask)}},
+    )
+    rooms.load_catalogue().units[0].completion = None
+    rooms.load_catalogue().units[0].room = "exercise"
+    async with db_context():
+        admission = await daily_limit.challenge_admission(
+            USER.id, ChallengeAdmission(task_id=task, subtask_id=subtask, request_id=uuid4()), True
+        )
+        assert admission["allowed"] and admission["daily"] is None
+        assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 1
+
+
+async def test_historical_attempts_follow_grouping_and_legacy_lectures(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    from api.schemas.course import Section
+    from api.schemas.daily_limit import HistoryLecture
+
+    task, subtask = uuid4(), uuid4()
+    monkeypatch.setattr(
+        settings,
+        "learning_rooms_exercise_refs",
+        {"unit-4": {"type": "coding", "task_id": str(task), "subtask_id": str(subtask)}},
+    )
+    rooms.load_catalogue().units[4].completion = None
+    rooms.load_catalogue().units[4].room = "exercise"
+    assert catalog.curriculum is not None
+    catalog.curriculum.lessons[0].activities += catalog.curriculum.lessons[4].activities
+    catalog.curriculum.lessons.pop(4)
+    history = AsyncMock(
+        return_value=LearningHistory(
+            attempted_subtask_ids=[subtask],
+            attempted_lecture_bindings=[HistoryLecture(course_id=catalog.id, lecture_id="old-video")],
+        )
+    )
+    monkeypatch.setattr(daily_limit, "read_history_batch", history)
+    alias = await daily_client.get("/courses/daily-course/lessons/unit-4")
+    assert alias.status_code == 200 and alias.json()["id"] == "lesson-0"
+    assert alias.json()["initial_activity_id"] == "unit-4" and alias.json()["daily"]["started"]
+    async with db_context():
+        assert await daily_limit.backfill_user(USER.id) == 1
+        assert await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
+        assert not await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="unit-4")
+    catalog.curriculum = None
+    catalog.learning_path_id = None
+    catalog.sections = [
+        Section.parse_obj(
+            {
+                "id": "old-section",
+                "title": "Old",
+                "lectures": [
+                    {
+                        "id": "old-video",
+                        "type": "youtube",
+                        "title": "Old",
+                        "description": None,
+                        "duration": 60,
+                        "video_id": "abcdefghijk",
+                    }
+                ],
+            }
+        )
+    ]
+    async with db_context():
+        lesson = daily_limit.lecture_lesson(catalog, "old-video")
+        assert await daily_limit.begun(USER, catalog, lesson)
+        payload = history.call_args.args[1]
+        assert {"course_id": catalog.id, "lecture_id": "old-video"} in payload["lecture_bindings"]
+
+
+@pytest.mark.parametrize("reply", ["valid", "unrequested", "unavailable", "malformed"])
+async def test_history_decoder_requires_trusted_requested_evidence(monkeypatch: MonkeyPatch, reply: str) -> None:
+    from types import SimpleNamespace
+
+    subtask = uuid4()
+    payload = {"subtask_ids": [str(subtask)], "lecture_bindings": [{"course_id": "course", "lecture_id": "lecture"}]}
+    body = {
+        "attempted_subtask_ids": [str(subtask if reply != "unrequested" else uuid4())],
+        "attempted_lecture_bindings": payload["lecture_bindings"],
+    }
+    if reply == "malformed":
+        body = {}
+
+    def response(request: httpx.Request) -> httpx.Response:
+        assert request.method == "POST" and request.url.path == "/users/daily-user/learning-history"
+        return httpx.Response(500 if reply == "unavailable" else 200, json=body)
+
+    monkeypatch.setattr(
+        daily_limit,
+        "InternalService",
+        SimpleNamespace(
+            CHALLENGES=SimpleNamespace(
+                client=httpx.AsyncClient(base_url="http://history.synthetic", transport=httpx.MockTransport(response))
+            )
+        ),
+    )
+    if reply == "valid":
+        result = await daily_limit.read_history_batch(USER.id, payload)
+        assert result.attempted_subtask_ids == [subtask]
+    else:
+        with pytest.raises(daily_limit.AccessError) as failure:
+            await daily_limit.read_history_batch(USER.id, payload)
+        assert failure.value.status_code == 503
+
+
+async def test_history_outage_keeps_known_continuation_and_premium_without_guessing(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    assert (await begin(daily_client, 3)).status_code == 200
+    task, subtask = uuid4(), uuid4()
+    monkeypatch.setattr(
+        settings,
+        "learning_rooms_exercise_refs",
+        {"unit-0": {"type": "coding", "task_id": str(task), "subtask_id": str(subtask)}},
+    )
+    rooms.load_catalogue().units[0].completion = None
+    rooms.load_catalogue().units[0].room = "exercise"
+    history = AsyncMock(side_effect=daily_limit.AccessError(503, "learning_history_unavailable", "Unavailable"))
+    monkeypatch.setattr(daily_limit, "read_history_batch", history)
+    assert (await begin(daily_client, 0)).status_code == 503
+    catalog.price = 1000
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(side_effect=daily_limit.AccessError(503, "learning_access_unavailable", "Unavailable")),
+    )
+    # Course browsing finds the locally known later lesson before consulting
+    # unavailable history for the first exercise in the curriculum.
+    assert (await daily_client.get("/courses/daily-course/curriculum")).status_code == 200
+    assert (await begin(daily_client, 3)).status_code == 200
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(
+            return_value=LearningPolicy(mode="daily", premium=True, single_course_sales=False, heart_sales=False)
+        ),
+    )
+    assert (await begin(daily_client, 0)).status_code == 200
+    async with db_context():
+        row = await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
+        assert row is not None and not row.charged and row.reason == "premium"
+
+
+@pytest.mark.parametrize("mode", ["off", "shadow"])
+async def test_non_enforcing_mode_does_not_block_on_history_outage(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch, mode: str
+) -> None:
+    task, subtask = uuid4(), uuid4()
+    monkeypatch.setattr(
+        settings,
+        "learning_rooms_exercise_refs",
+        {"unit-0": {"type": "coding", "task_id": str(task), "subtask_id": str(subtask)}},
+    )
+    rooms.load_catalogue().units[0].completion = None
+    rooms.load_catalogue().units[0].room = "exercise"
+    monkeypatch.setattr(
+        daily_limit,
+        "read_history_batch",
+        AsyncMock(side_effect=daily_limit.AccessError(503, "learning_history_unavailable", "Unavailable")),
+    )
+    async with db_context():
+        await daily_limit.configure(
+            LimitConfiguration.parse_obj({"mode": mode, "limit": 3, "updated_by": "test", "note": "No enforcement"})
+        )
+    result = await begin(daily_client, 0)
+    assert result.status_code == 200 and result.json()["daily"]["started"], result.text
+    async with db_context():
+        row = await db.get(models.LessonStart, user_id=USER.id, course_id=catalog.id, lesson_id="lesson-0")
+        assert row is not None and not row.charged

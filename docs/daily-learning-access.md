@@ -60,6 +60,25 @@ an already begun or purchased lesson. Reads remain browsable at the limit. A
 course/section-wide task with no concrete lesson stays free practice after course
 admission, per the product decision; an unknown supplied ID fails closed.
 
+Historical exercise participation is read in batches from authenticated
+`POST /challenges/_internal/users/{user_id}/learning-history`; the body contains
+`subtask_ids` and exact `{course_id, lecture_id}` bindings, at most 500 combined.
+The response contains only requested `attempted_subtask_ids` and
+`attempted_lecture_bindings`, verified by Challenges from its own database,
+including incorrect attempts. No public client claim or recursive public
+Challenges request is used. Configure `INTERNAL_JWT_SECRET_CHALLENGES` for this
+audience (empty retains the existing shared-key fallback). Deploy that read-only
+endpoint before enabling Skills daily measurement/enforcement. Responses are
+cached only for the current request; GETs do not materialize history. The
+operator backfill and actual first mutation store the canonical grouped lesson.
+
+An unavailable policy remains unknown/503 for unrelated new paid-course work;
+known purchased, historical course and begun-lesson rights remain usable with
+`daily:null`. A history failure never becomes evidence of a new quota charge.
+Enforced admission requires that evidence; disabled and shadow operation retain
+their existing access and leave the uncertain start uncharged. Known Premium,
+purchases and local continuation do not need remote historical evidence.
+
 Local verification:
 
 ```

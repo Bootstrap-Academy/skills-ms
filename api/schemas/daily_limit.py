@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, StrictBool
+from pydantic import BaseModel, Field, StrictBool, StrictStr
 
 
 class LearningPolicy(BaseModel):
@@ -56,3 +56,13 @@ class ChallengeAdmission(BaseModel):
     lecture_bindings: list[LectureBinding] = Field(default_factory=list, max_items=100)
     user_admin: StrictBool = False
     request_id: UUID | None = None
+
+
+class HistoryLecture(BaseModel):
+    course_id: StrictStr
+    lecture_id: StrictStr
+
+
+class LearningHistory(BaseModel):
+    attempted_subtask_ids: list[UUID]
+    attempted_lecture_bindings: list[HistoryLecture]

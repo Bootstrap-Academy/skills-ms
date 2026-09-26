@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from pytest_mock import MockerFixture
 
 from api import models
@@ -62,7 +62,9 @@ async def test__same_right_delivery_is_usable_and_replay_does_not_resurrect(mock
     )
     async with db_context():
         await course_routes.has_course_access.dependency(
-            course=COURSES["course"], user=User(id="fresh", email_verified=True, admin=False)
+            request=Request({"type": "http", "path_params": {}}),
+            course=COURSES["course"],
+            user=User(id="fresh", email_verified=True, admin=False),
         )
     premium.assert_not_called()
     async with db_context():
@@ -83,7 +85,9 @@ async def test__same_right_delivery_is_usable_and_replay_does_not_resurrect(mock
         assert resumed["state"] == "granted"
     async with db_context():
         await course_routes.has_course_access.dependency(
-            course=COURSES["course"], user=User(id="next-fresh", email_verified=True, admin=False)
+            request=Request({"type": "http", "path_params": {}}),
+            course=COURSES["course"],
+            user=User(id="next-fresh", email_verified=True, admin=False),
         )
         assert await db.all(filter_by(models.CoursePurchase, user_id="next-fresh")) == []
         assert not await db.exists(filter_by(models.CourseAccess, user_id="fresh"))

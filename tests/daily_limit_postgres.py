@@ -7,6 +7,7 @@ Run: nix develop --command python tests/daily_limit_postgres.py
 import asyncio
 import json
 import os
+from typing import Any
 from uuid import UUID, uuid4
 
 from alembic import command
@@ -17,7 +18,7 @@ from sqlalchemy import text
 from api import models
 from api.database import db, db_context, filter_by
 from api.schemas.course import Course
-from api.schemas.daily_limit import LearningPolicy, LimitConfiguration
+from api.schemas.daily_limit import LearningHistory, LearningPolicy, LimitConfiguration
 from api.schemas.user import User
 from api.services import courses, daily_limit
 from api.settings import settings
@@ -65,6 +66,11 @@ async def main() -> None:
         return LearningPolicy(mode="daily", premium=False, single_course_sales=False, heart_sales=False)
 
     daily_limit.policy = policy
+
+    async def history(user_id: str, payload: dict[str, Any]) -> LearningHistory:
+        return LearningHistory(attempted_subtask_ids=[], attempted_lecture_bindings=[])
+
+    daily_limit.read_history_batch = history
     async with db_context():
         assert (await db.exec(text("select version_num from skills_alembic_version"))).scalar() == "dailystarts001"
         assert await daily_limit.configuration() == ("off", 3)

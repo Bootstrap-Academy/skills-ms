@@ -146,8 +146,12 @@ async def public_unit(unit: CatalogueUnit, user: User | None = None, course_id: 
 
 async def accessible_paths(content: Catalogue, user: User) -> set[str]:
     """A course link never bypasses the existing paid-course admission rule."""
-    if await daily_limit.daily_course_access(user):
-        return {path.id for path in content.paths}
+    unavailable = False
+    try:
+        if await daily_limit.daily_course_access(user):
+            return {path.id for path in content.paths}
+    except daily_limit.AccessError:
+        unavailable = True
     linked: dict[str, list[Course]] = {}
     for course in COURSES.values():
         if course.learning_path_id is not None:
@@ -162,28 +166,49 @@ async def accessible_paths(content: Catalogue, user: User) -> set[str]:
         return accessible
     owned = await get_owned_courses(user.id)
     accessible.update(pid for pid in restricted if any(course.id in owned for course in linked[pid]))
-    if restricted - accessible and await has_premium(user.id):
+    if unavailable:
+        for pid in restricted - accessible:
+            for course in linked[pid]:
+                try:
+                    if await daily_limit.course_daily_access(user, course):
+                        accessible.add(pid)
+                        break
+                except daily_limit.AccessError:
+                    pass
+    elif restricted - accessible and await has_premium(user.id):
         accessible.update(restricted)
     return accessible
 
 
-async def require_path_access(content: Catalogue, path_id: str, user: User, course_id: str | None = None) -> None:
+async def require_path_access(
+    content: Catalogue, path_id: str, user: User, course_id: str | None = None, unit_id: str | None = None
+) -> None:
     if course_id is not None:
         course = COURSES.get(course_id)
         if course is None or course.learning_path_id != path_id:
             raise HTTPException(404, "This lesson is not part of that course")
-        if (
-            course.free
-            or user.admin
-            or course.id in await get_owned_courses(user.id)
-            or await daily_limit.daily_course_access(user)
-            or await has_premium(user.id)
-        ):
+    linked = [
+        course
+        for course in COURSES.values()
+        if course.learning_path_id == path_id and (course_id is None or course.id == course_id)
+    ]
+    if not linked:
+        return
+    owned = await get_owned_courses(user.id)
+    failure = None
+    for course in linked:
+        if course.free or user.admin or course.id in owned:
             return
-        raise HTTPException(403, "Open the course to get access to these lessons")
-    requested = content.copy(update={"paths": [path for path in content.paths if path.id == path_id]})
-    if path_id not in await accessible_paths(requested, user):
-        raise HTTPException(403, "Open the course to get access to these lessons")
+        pairs = daily_limit.unit_lessons(unit_id, course.id) if unit_id is not None else []
+        lesson = pairs[0][1] if pairs else None
+        try:
+            if await daily_limit.course_daily_access(user, course, lesson) or await has_premium(user.id):
+                return
+        except daily_limit.AccessError as exc:
+            failure = exc
+    if failure is not None:
+        raise failure
+    raise HTTPException(403, "Open the course to get access to these lessons")
 
 
 async def challenge_status(unit: CatalogueUnit, user: User, token: str) -> bool:
@@ -262,7 +287,7 @@ async def get_room(unit_id: str, user: User, token: str, course_id: str | None =
     content = catalogue()
     states = await read_states(user.id, {unit_id}) if course_id is not None else await read_states(user.id)
     unit = find_unit(content, unit_id, states, prerequisites=course_id is None)
-    await require_path_access(content, unit.path_id, user, course_id)
+    await require_path_access(content, unit.path_id, user, course_id, unit.id)
     await challenge_status(unit, user, token)
     row = states.get(unit.id)
     return await room_envelope(
@@ -312,7 +337,7 @@ async def next_room(
     scope = direction or (path.direction_id if continuous else None)
     accessible = await accessible_paths(content, user)
     if path.id not in accessible:
-        raise HTTPException(403, "Open the course to get access to these lessons")
+        await require_path_access(content, path.id, user, course_id, unit_id)
     content.paths = [candidate for candidate in content.paths if candidate.id in accessible]
     choices = [LearningPath.parse_obj(candidate.dict(exclude={"units"})) for candidate in content.paths]
     if course_id is not None:
@@ -391,6 +416,7 @@ async def next_course_room(
         ids = sorted(ids, key=position)
     selected = None
     limited = False
+    unavailable = None
     daily = await queue_status(user, course_id)
     for uid in ids:
         row = states.get(uid)
@@ -406,6 +432,9 @@ async def next_course_room(
         except HTTPException as exc:
             if exc.status_code == 404:
                 continue
+            if isinstance(exc, daily_limit.AccessError) and exc.status_code == 503:
+                unavailable = exc
+                continue
             raise
         selected = await room_envelope(
             user,
@@ -415,6 +444,8 @@ async def next_course_room(
             review_available=review_available(row),
         )
         break
+    if selected is None and unavailable is not None:
+        raise unavailable
     return Rooms(
         paths=choices,
         path=LearningPath.parse_obj(path.dict(exclude={"units"})),
@@ -512,10 +543,11 @@ async def continuous_room(
     review_ids = all_ids[cursor:] + all_ids[:cursor]
     blocked = False
     limited = False
+    unavailable = None
     daily = await queue_status(user)
 
     async def available(uid: str) -> CatalogueUnit | None:
-        nonlocal blocked, limited
+        nonlocal blocked, limited, unavailable
         try:
             unit = find_unit(content, uid, states)
             access = await daily_limit.for_unit(user, uid)
@@ -525,6 +557,9 @@ async def continuous_room(
             await challenge_status(unit, user, token)
             return unit
         except HTTPException as exc:
+            if isinstance(exc, daily_limit.AccessError) and exc.status_code == 503:
+                unavailable = exc
+                return None
             if exc.status_code not in (403, 404):
                 raise
             blocked = blocked or exc.status_code == 403
@@ -591,6 +626,8 @@ async def continuous_room(
             and row.status in ("completed", "skipped")
             and row.review_status != "in_progress",
         )
+    if unavailable is not None:
+        raise unavailable
     return Rooms(
         paths=choices,
         path=LearningPath.parse_obj(ordered_paths[0].dict(exclude={"units"})),
@@ -694,7 +731,7 @@ async def mutate_room(
         raise HTTPException(401, "This account is no longer available")
     states = await read_states(user.id, {unit_id}) if course_id is not None else await read_states(user.id)
     unit = find_unit(content, unit_id, states, prerequisites=course_id is None)
-    await require_path_access(content, unit.path_id, user, course_id)
+    await require_path_access(content, unit.path_id, user, course_id, unit.id)
     receipt = await db.get(RoomRequest, user_id=user.id, request_id=str(data.request_id))
     if receipt is not None:
         if receipt.fingerprint != fingerprint:
