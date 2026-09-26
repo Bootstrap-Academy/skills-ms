@@ -70,8 +70,10 @@ async def learning_auth(request: Request) -> User:
 
 
 @Depends
-async def learning_course_access(course: Course = courses.get_course, user: User = learning_auth) -> None:
-    await courses.has_course_access.dependency(course=course, user=user)
+async def learning_course_access(
+    request: Request, course: Course = courses.get_course, user: User = learning_auth
+) -> None:
+    await courses.has_course_access.dependency(request=request, course=course, user=user)
 
 
 @router.get("/courses")
@@ -147,7 +149,9 @@ async def lecture_link(
 
 
 @router.get("/lectures/{token}/{file}", include_in_schema=False)
-async def stream(token: str, file: str, range: str = Header("bytes=0-", regex=r"^bytes=\d{1,16}-(\d{1,16})?$")) -> Any:
+async def stream(
+    request: Request, token: str, file: str, range: str = Header("bytes=0-", regex=r"^bytes=\d{1,16}-(\d{1,16})?$")
+) -> Any:
     raw = await redis.get(f"learning_mp4:{token}:{file}")
     if raw is None:
         raise HTTPException(404, "Lecture link unavailable")
@@ -155,7 +159,7 @@ async def stream(token: str, file: str, range: str = Header("bytes=0-", regex=r"
     user = await learning_subject(record["authority"])
     if user.id != record["subject"] or record["course"] not in COURSES:
         raise HTTPException(404, "Lecture link unavailable")
-    await courses.has_course_access.dependency(course=COURSES[record["course"]], user=user)
+    await courses.has_course_access.dependency(request=request, course=COURSES[record["course"]], user=user)
     path = Path(record["path"])
     if not path.is_file():
         raise HTTPException(404, "Lecture unavailable")

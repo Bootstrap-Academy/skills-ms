@@ -7,7 +7,7 @@ separately establishes CP1 with real personal/learning/course admission.
 import json
 from pathlib import Path
 from typing import Any, AsyncIterator
-from unittest.mock import AsyncMock
+from unittest.mock import ANY, AsyncMock
 
 import pytest
 from fastapi import FastAPI, HTTPException
@@ -88,7 +88,7 @@ async def test_stream_valid_range(
     assert response.headers["Accept-Ranges"] == "bytes"
     f["redis"].assert_awaited_once_with("learning_mp4:synthetic-token:course_lecture.mp4")
     f["authority"].assert_awaited_once_with("synthetic-digest")
-    f["admission"].assert_awaited_once_with(course=f["course"], user=f["user"])
+    f["admission"].assert_awaited_once_with(request=ANY, course=f["course"], user=f["user"])
 
 
 @pytest.mark.parametrize(
@@ -118,7 +118,7 @@ async def test_stream_rejects_unsatisfiable_or_reversed_range(
     assert response.headers["Referrer-Policy"] == "no-referrer"
     assert response.headers["Accept-Ranges"] == "bytes"
     f["authority"].assert_awaited_once_with("synthetic-digest")
-    f["admission"].assert_awaited_once_with(course=f["course"], user=f["user"])
+    f["admission"].assert_awaited_once_with(request=ANY, course=f["course"], user=f["user"])
 
 
 @pytest.mark.parametrize(
