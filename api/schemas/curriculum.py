@@ -4,6 +4,7 @@ from typing import Any, Literal
 
 from pydantic import Field, root_validator
 
+from api.schemas.daily_limit import DailyStatus
 from api.schemas.lesson_module import LessonModuleDescriptor
 from api.schemas.rooms import Exercise, LocalizedText, Progress, RoomModel
 
@@ -97,6 +98,7 @@ class CurriculumDefinition(RoomModel):
 
 
 class LessonSummary(RoomModel):
+    daily: DailyStatus | None = None
     id: str
     title: LocalizedText
     chapter_id: str | None = None
@@ -133,6 +135,8 @@ class LegacyPractice(RoomModel):
 
 
 class Lesson(RoomModel):
+    initial_activity_id: str | None = None
+    daily: DailyStatus | None = None
     course_id: str
     explicit: bool
     id: str

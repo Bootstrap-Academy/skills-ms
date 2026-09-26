@@ -10,6 +10,22 @@ from api.utils.utc import utcnow
 
 async def _add_user_data(user_id: str) -> None:
     await db.add(
+        models.LessonStart(
+            user_id=user_id,
+            course_id="course",
+            lesson_id="lesson",
+            started_at=utcnow(),
+            local_day=utcnow().date(),
+            charged=True,
+            reason="daily",
+        )
+    )
+    await db.add(
+        models.LessonStartRequest(
+            user_id=user_id, request_id="daily-request", course_id="course", lesson_id="lesson", created_at=utcnow()
+        )
+    )
+    await db.add(
         models.RoomState(
             user_id=user_id,
             unit_id="intro",

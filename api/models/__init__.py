@@ -1,5 +1,6 @@
 from .bookmarks import SubSkillBookmark
 from .course_access import CourseAccess
+from .daily_limit import DailyLimitSettings, LessonStart, LessonStartRequest
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
 from .lesson_module import LessonModule
@@ -15,6 +16,9 @@ from .xp_operation import XPOperation
 
 
 __all__ = [
+    "DailyLimitSettings",
+    "LessonStart",
+    "LessonStartRequest",
     "LessonModule",
     "RoomRequest",
     "RoomState",

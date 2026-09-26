@@ -8,6 +8,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field, root_validator, validator
 
+from api.schemas.daily_limit import DailyStatus
 from api.schemas.lesson_module import MODULE_ID_PATTERN, LessonModuleDescriptor
 
 
@@ -181,16 +182,20 @@ class Progress(RoomModel):
 
 
 class RoomEnvelope(RoomModel):
+    course_id: str | None = None
+    lesson_id: str | None = None
+    daily: DailyStatus | None = None
     unit: Unit
     progress: Progress
     review_available: bool = False
 
 
 class Rooms(RoomModel):
+    daily: DailyStatus | None = None
     paths: list[LearningPath]
     path: LearningPath
     next: RoomEnvelope | None
-    empty_reason: Literal["completed", "unavailable", "prerequisites"] | None = None
+    empty_reason: Literal["completed", "unavailable", "prerequisites", "limit_reached"] | None = None
 
 
 class CourseLearningUnit(RoomModel):
@@ -209,7 +214,7 @@ class CourseLearning(RoomModel):
     units: list[CourseLearningUnit]
     next: RoomEnvelope | None
     completed: bool
-    empty_reason: Literal["completed", "unavailable", "prerequisites"] | None = None
+    empty_reason: Literal["completed", "unavailable", "prerequisites", "limit_reached"] | None = None
 
 
 def bounded_object(value: Any) -> dict[str, Any]:

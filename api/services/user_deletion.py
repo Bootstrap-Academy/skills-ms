@@ -7,6 +7,8 @@ from api.utils.cache import clear_cache
 
 # Live service data removed on account erasure. Purchase evidence is retained separately.
 USER_MODELS: list[Any] = [
+    models.LessonStartRequest,
+    models.LessonStart,
     models.RoomRequest,
     models.RoomState,
     models.CourseAccess,

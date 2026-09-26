@@ -38,6 +38,8 @@ class UserDataExport(BaseModel):
     All points in time are ISO 8601 timestamps in UTC.
     """
 
+    lesson_starts: list[dict[str, Any]] = Field(default_factory=list)
+    lesson_start_requests: list[dict[str, Any]] = Field(default_factory=list)
     purchases: list[dict[str, Any]] = Field(default_factory=list)
     room_states: list[dict[str, Any]] = Field(default_factory=list)
     room_requests: list[dict[str, Any]] = Field(default_factory=list)

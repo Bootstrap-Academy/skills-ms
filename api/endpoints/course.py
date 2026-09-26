@@ -23,7 +23,7 @@ from api.redis import redis
 from api.schemas.course import Course, CourseSummary, Lecture, NextUnseenResponse, UserCourse
 from api.schemas.rooms import CourseLearning
 from api.schemas.user import User
-from api.services import curriculum, purchases, rooms
+from api.services import curriculum, daily_limit, purchases, rooms
 from api.services.courses import COURSES
 from api.services.courses import get_owned_courses as get_owned_courses
 from api.services.shop import has_premium
@@ -61,7 +61,7 @@ async def has_course_access(course: Course = get_course, user: User = user_auth)
     if course.id in await get_owned_courses(user.id):
         return
 
-    if await has_premium(user.id):
+    if await daily_limit.daily_course_access(user) or await has_premium(user.id):
         return
 
     raise NoCourseAccessException
@@ -76,7 +76,7 @@ async def get_unlocked_courses(user: User) -> set[str]:
     a course being free are two different things for the callers.
     """
 
-    if user.admin or await has_premium(user.id):
+    if user.admin or await daily_limit.daily_course_access(user) or await has_premium(user.id):
         return set(COURSES)
 
     return await get_owned_courses(user.id) & set(COURSES)
@@ -201,7 +201,9 @@ async def get_course_details(course: Course = get_course, user: User = user_auth
     dependencies=[require_verified_email, has_course_access],
     responses=verified_responses(str, NoCourseAccessException, CourseNotFoundException, LectureNotFoundException),
 )
-async def get_mp4_lecture_link(course: Course = get_course, lecture: Lecture = get_lecture) -> Any:
+async def get_mp4_lecture_link(
+    course: Course = get_course, lecture: Lecture = get_lecture, user: User = user_auth
+) -> Any:
     """
     Return the download link of an mp4 lecture.
 
@@ -214,6 +216,15 @@ async def get_mp4_lecture_link(course: Course = get_course, lecture: Lecture = g
     path = settings.mp4_lectures.joinpath(course.id, lecture.id + ".mp4")
     if not path.is_file():
         raise LectureNotFoundException
+
+    if settings.daily_limit_policy_enabled:
+        lesson = daily_limit.lecture_lesson(course, lecture.id)
+        daily = await daily_limit.optional_status(user, course, lesson)
+        if daily is not None and daily.mode == "daily" and not daily.started:
+            daily_limit.require_available(daily)
+            raise daily_limit.AccessError(
+                409, "lesson_start_required", "Starte die Lektion, um das Video anzusehen.", daily
+            )
 
     token = token_urlsafe(64)
     name = f"{course.id}_{lecture.id}.mp4"
@@ -281,9 +292,10 @@ async def complecte_lecture(
     *Requirements:* **VERIFIED**
     """
 
+    if settings.daily_limit_policy_enabled:
+        await daily_limit.start(user, course, daily_limit.lecture_lesson(course, lecture.id))
     if await models.LectureProgress.is_completed(user.id, course.id, lecture.id):
         raise AlreadyCompletedLectureException
-
     await models.LectureProgress.set_completed(user.id, course.id, lecture.id)
     async for skill_course in await db.stream(filter_by(models.SkillCourse, course_id=course.id)):
         await models.XP.add_xp(user.id, skill_course.skill_id, settings.lecture_xp)

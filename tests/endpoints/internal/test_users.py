@@ -87,6 +87,8 @@ async def test__export_user__unknown_user(auth_client: AsyncClient) -> None:
 
     assert response.status_code == 200
     assert response.json() == {
+        "lesson_starts": [],
+        "lesson_start_requests": [],
         "room_states": [],
         "room_requests": [],
         "purchases": [],

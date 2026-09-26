@@ -14,6 +14,14 @@ async def export_user_data(user_id: str) -> UserDataExport:
     """
 
     return UserDataExport(
+        lesson_starts=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in await db.all(filter_by(models.LessonStart, user_id=user_id))
+        ],
+        lesson_start_requests=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in await db.all(filter_by(models.LessonStartRequest, user_id=user_id))
+        ],
         room_states=[
             {column.name: getattr(row, column.name) for column in row.__table__.columns}
             for row in await db.all(filter_by(models.RoomState, user_id=user_id))

@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     # Operator-owned service origin; room content and client requests supply only IDs.
     challenges_url: str = Field("http://127.0.0.1:8005", regex=r"^https?://[^?#@]+$")
     rooms_enabled: bool = False
+    # Disabled until the backend policy API is deployed. Never activates new terms.
+    daily_limit_policy_enabled: bool = False
     learning_rooms_content: Path | None = None
     learning_rooms_exercise_refs: dict[str, dict[str, str]] = Field(default_factory=dict)
     lesson_module_origins: list[str] = Field(default_factory=list)

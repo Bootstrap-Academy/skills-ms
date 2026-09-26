@@ -19,6 +19,7 @@ from api.database import db, delete, filter_by
 from api.models import PurchaseUser
 from api.models.room import RoomRequest, RoomState
 from api.schemas.course import Course
+from api.schemas.daily_limit import DailyStatus
 from api.schemas.rooms import (
     Catalogue,
     CataloguePath,
@@ -37,6 +38,7 @@ from api.schemas.rooms import (
     Unit,
 )
 from api.schemas.user import User
+from api.services import daily_limit
 from api.services.courses import COURSES, get_owned_courses
 from api.services.lesson_modules import resolve_module
 from api.services.purchases import lock_user
@@ -144,6 +146,8 @@ async def public_unit(unit: CatalogueUnit, user: User | None = None, course_id: 
 
 async def accessible_paths(content: Catalogue, user: User) -> set[str]:
     """A course link never bypasses the existing paid-course admission rule."""
+    if await daily_limit.daily_course_access(user):
+        return {path.id for path in content.paths}
     linked: dict[str, list[Course]] = {}
     for course in COURSES.values():
         if course.learning_path_id is not None:
@@ -168,7 +172,13 @@ async def require_path_access(content: Catalogue, path_id: str, user: User, cour
         course = COURSES.get(course_id)
         if course is None or course.learning_path_id != path_id:
             raise HTTPException(404, "This lesson is not part of that course")
-        if course.free or user.admin or course.id in await get_owned_courses(user.id) or await has_premium(user.id):
+        if (
+            course.free
+            or user.admin
+            or course.id in await get_owned_courses(user.id)
+            or await daily_limit.daily_course_access(user)
+            or await has_premium(user.id)
+        ):
             return
         raise HTTPException(403, "Open the course to get access to these lessons")
     requested = content.copy(update={"paths": [path for path in content.paths if path.id == path_id]})
@@ -223,6 +233,31 @@ async def challenge_status(unit: CatalogueUnit, user: User, token: str) -> bool:
         raise HTTPException(503, "The exercise could not be checked") from None
 
 
+async def room_envelope(
+    user: User, course_id: str | None, *, unit: Unit, progress: Progress, review_available: bool = False
+) -> RoomEnvelope:
+    if not settings.daily_limit_policy_enabled:
+        return RoomEnvelope(unit=unit, progress=progress, review_available=review_available)
+    pair = await daily_limit.choose(user, daily_limit.unit_lessons(unit.id, course_id))
+    return RoomEnvelope(
+        unit=unit,
+        progress=progress,
+        review_available=review_available,
+        course_id=None if pair is None else pair[0].id,
+        lesson_id=None if pair is None else pair[1].id,
+        daily=None if pair is None else await daily_limit.optional_status(user, *pair),
+    )
+
+
+async def queue_status(user: User, course_id: str | None = None) -> DailyStatus | None:
+    if not settings.daily_limit_policy_enabled:
+        return None
+    try:
+        return await daily_limit.status(user, COURSES.get(course_id) if course_id is not None else None)
+    except daily_limit.AccessError:
+        return None
+
+
 async def get_room(unit_id: str, user: User, token: str, course_id: str | None = None) -> RoomEnvelope:
     content = catalogue()
     states = await read_states(user.id, {unit_id}) if course_id is not None else await read_states(user.id)
@@ -230,7 +265,9 @@ async def get_room(unit_id: str, user: User, token: str, course_id: str | None =
     await require_path_access(content, unit.path_id, user, course_id)
     await challenge_status(unit, user, token)
     row = states.get(unit.id)
-    return RoomEnvelope(
+    return await room_envelope(
+        user,
+        course_id,
         unit=await public_unit(unit, user, course_id),
         progress=progress(row),
         review_available=course_id is not None and review_available(row),
@@ -252,6 +289,10 @@ async def next_room(
     unit_id: str | None = None,
 ) -> Rooms:
     content = catalogue()
+    daily = await queue_status(user, course_id)
+    at_limit = daily is not None and daily.enforced and not daily.can_start
+    if at_limit:
+        continuous = True
     path = next((path for path in content.paths if path.id == path_id), None)
     if path is None or (after is not None and after not in path.units):
         raise HTTPException(404, "This learning path is unavailable")
@@ -279,7 +320,9 @@ async def next_room(
             if unit_id not in path.units:
                 raise HTTPException(404, "This lesson is not part of that course")
             chosen = await get_room(unit_id, user, token, course_id)
-            return Rooms(paths=choices, path=LearningPath.parse_obj(path.dict(exclude={"units"})), next=chosen)
+            return Rooms(
+                paths=choices, path=LearningPath.parse_obj(path.dict(exclude={"units"})), next=chosen, daily=daily
+            )
         return await next_course_room(content, states, user, token, path, after, continuous, choices, course_id)
     content.paths = [candidate for candidate in content.paths if scope is None or candidate.direction_id == scope]
     if continuous:
@@ -302,7 +345,9 @@ async def next_room(
                 blocked_by_prerequisite = blocked_by_prerequisite or exc.status_code == 403
                 continue
             raise
-        selected = RoomEnvelope(unit=await public_unit(unit, user), progress=progress(states.get(unit.id)))
+        selected = await room_envelope(
+            user, None, unit=await public_unit(unit, user), progress=progress(states.get(unit.id))
+        )
         break
     active = [unit for unit in content.units if unit.path_id == path.id and not unit.retired]
     finished = bool(active) and all(
@@ -345,18 +390,26 @@ async def next_course_room(
 
         ids = sorted(ids, key=position)
     selected = None
+    limited = False
+    daily = await queue_status(user, course_id)
     for uid in ids:
         row = states.get(uid)
         if not continuous and review_available(row):
             continue
         try:
             unit = find_unit(content, uid, states, prerequisites=False)
+            access = await daily_limit.for_unit(user, uid, course_id)
+            if access is not None and not access.can_start:
+                limited = True
+                continue
             await challenge_status(unit, user, token)
         except HTTPException as exc:
             if exc.status_code == 404:
                 continue
             raise
-        selected = RoomEnvelope(
+        selected = await room_envelope(
+            user,
+            course_id,
             unit=await public_unit(unit, user, course_id),
             progress=progress(row),
             review_available=review_available(row),
@@ -366,8 +419,15 @@ async def next_course_room(
         paths=choices,
         path=LearningPath.parse_obj(path.dict(exclude={"units"})),
         next=selected,
+        daily=daily,
         empty_reason=(
-            None if selected is not None else "completed" if path_completed(content, states, path.id) else "unavailable"
+            None
+            if selected is not None
+            else (
+                "limit_reached"
+                if limited
+                else "completed" if path_completed(content, states, path.id) else "unavailable"
+            )
         ),
     )
 
@@ -451,11 +511,17 @@ async def continuous_room(
     cursor = all_ids.index(after) + 1 if after is not None else 0
     review_ids = all_ids[cursor:] + all_ids[:cursor]
     blocked = False
+    limited = False
+    daily = await queue_status(user)
 
     async def available(uid: str) -> CatalogueUnit | None:
-        nonlocal blocked
+        nonlocal blocked, limited
         try:
             unit = find_unit(content, uid, states)
+            access = await daily_limit.for_unit(user, uid)
+            if access is not None and not access.can_start:
+                limited = True
+                return None
             await challenge_status(unit, user, token)
             return unit
         except HTTPException as exc:
@@ -468,8 +534,11 @@ async def continuous_room(
         selected_path = next(path for path in paths if path.id == unit.path_id)
         return Rooms(
             paths=choices,
+            daily=daily,
             path=LearningPath.parse_obj(selected_path.dict(exclude={"units"})),
-            next=RoomEnvelope(
+            next=await room_envelope(
+                user,
+                None,
                 unit=await public_unit(unit, user),
                 progress=progress(states.get(unit.id)),
                 review_available=start_review,
@@ -526,7 +595,8 @@ async def continuous_room(
         paths=choices,
         path=LearningPath.parse_obj(ordered_paths[0].dict(exclude={"units"})),
         next=None,
-        empty_reason="prerequisites" if blocked else "unavailable",
+        daily=daily,
+        empty_reason="limit_reached" if limited else "prerequisites" if blocked else "unavailable",
     )
 
 
@@ -629,8 +699,11 @@ async def mutate_room(
     if receipt is not None:
         if receipt.fingerprint != fingerprint:
             raise HTTPException(409, "This request was already used for another change")
-        return RoomEnvelope(
-            unit=await public_unit(unit, user, course_id), progress=Progress.parse_obj(receipt.progress)
+        return await room_envelope(
+            user,
+            course_id,
+            unit=await public_unit(unit, user, course_id),
+            progress=Progress.parse_obj(receipt.progress),
         )
     row = states.get(unit_id)
     current = progress(row)
@@ -655,6 +728,8 @@ async def mutate_room(
                 and await review_attempt_solved(unit, user, token, row, data.attempt_id)
             )
         current = completed_progress(unit, current, data, solved)
+    if not isinstance(data, Complete) or data.action != "skip":
+        await daily_limit.start_unit(user, unit_id, course_id, locked=True)
     current.revision += 1
     values: dict[str, Any] = {**json.loads(current.json()), "updated_at": utcnow()}
     if current.review_id is not None and row is not None:
@@ -704,4 +779,4 @@ async def mutate_room(
             RoomRequest.request_id.notin_([receipt.request_id for receipt in keep]),
         )
     )
-    return RoomEnvelope(unit=await public_unit(unit, user, course_id), progress=current)
+    return await room_envelope(user, course_id, unit=await public_unit(unit, user, course_id), progress=current)

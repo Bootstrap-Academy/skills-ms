@@ -11,6 +11,7 @@ from httpx import HTTPError
 from pydantic import ValidationError
 
 from . import course as courses
+from api.database import db
 from api.redis import redis
 from api.schemas.course import Course, Lecture
 from api.schemas.user import User
@@ -64,6 +65,7 @@ async def learning_auth(request: Request) -> User:
     current = await learning_subject(digest)
     if current.id != user.id:
         raise HTTPException(503, "Scoped subject changed during admission")
+    db.session.info.setdefault("retained_learning_subjects", set()).add(current.id)
     return current
 
 

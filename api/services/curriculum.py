@@ -26,7 +26,7 @@ from api.schemas.curriculum import (
 )
 from api.schemas.rooms import Catalogue, CatalogueUnit, LocalizedText
 from api.schemas.user import User
-from api.services import rooms
+from api.services import daily_limit, rooms
 
 
 def localized(value: str) -> LocalizedText:
@@ -152,6 +152,7 @@ async def get_curriculum(course: Course, user: User) -> Curriculum:
         lessons=[
             LessonSummary(
                 id=lesson.id,
+                daily=await daily_limit.optional_status(user, course, lesson),
                 title=lesson.title,
                 chapter_id=lesson.chapter_id,
                 activity_ids=[activity.id for activity in lesson.activities],
@@ -225,9 +226,7 @@ def room_kind(unit: CatalogueUnit) -> ActivityKind:
 
 async def get_lesson(course: Course, lesson_id: str, user: User, token: str) -> Lesson:
     definition, content = definitions(course)
-    lesson = next((item for item in definition.lessons if item.id == lesson_id), None)
-    if lesson is None:
-        raise HTTPException(404, "Diese Lektion gibt es nicht.")
+    lesson = daily_limit.lesson_definition(course, lesson_id)
     states = await room_states(user, lesson.activities)
     lecture_ids = await LectureProgress.get_completed(user.id, course.id)
     units = {} if content is None else {unit.id: unit for unit in content.units}
@@ -278,7 +277,9 @@ async def get_lesson(course: Course, lesson_id: str, user: User, token: str) -> 
                 course_id=course.id, section_id=legacy_source.section_id, lecture_id=legacy_source.lecture_id
             )
     return Lesson(
+        initial_activity_id=lesson_id if lesson_id != lesson.id else None,
         course_id=course.id,
+        daily=await daily_limit.optional_status(user, course, lesson),
         explicit=course.curriculum is not None,
         id=lesson.id,
         title=lesson.title,
