@@ -58,6 +58,17 @@ class ChallengeAdmission(BaseModel):
     request_id: UUID | None = None
 
 
+class ChallengeRead(ChallengeAdmission):
+    """A concrete, read-only decision; a batch cannot start lessons."""
+
+    lecture_bindings: list[LectureBinding] = Field(default_factory=list, max_items=1)
+    request_id: None = None
+
+
+class ChallengeReadBatch(BaseModel):
+    requests: list[ChallengeRead] = Field(min_items=1, max_items=250)
+
+
 class HistoryLecture(BaseModel):
     course_id: StrictStr
     lecture_id: StrictStr
