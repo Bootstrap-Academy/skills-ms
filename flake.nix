@@ -25,7 +25,13 @@
   in {
     packages = eachDefaultSystem (system: let
       pkgs = import nixpkgs {inherit system;};
-      inherit (poetry2nix.lib.mkPoetry2Nix {inherit pkgs;}) mkPoetryApplication defaultPoetryOverrides;
+      # New wheel architectures are incompatible, rather than an evaluation error.
+      poetry2nixSource = pkgs.applyPatches {
+        name = "poetry2nix-wheel-compat";
+        src = poetry2nix;
+        patches = [./nix/poetry2nix-wheel-arches.patch];
+      };
+      inherit (import poetry2nixSource {inherit pkgs;}) mkPoetryApplication defaultPoetryOverrides;
     in {
       default = mkPoetryApplication {
         projectDir = ./.;

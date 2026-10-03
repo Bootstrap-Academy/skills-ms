@@ -85,3 +85,10 @@ async def test__jwt_decode__explicit_secret(monkeypatch: MonkeyPatch) -> None:
 
     assert jwt.decode_jwt(token, audience=["skills"], secret="the skills secret") is not None
     assert jwt.decode_jwt(token, audience=["skills"]) is None
+
+
+@pytest.mark.parametrize("expiration", [None, [], {}, "not-a-timestamp"])
+async def test__jwt_decode__malformed_expiration(expiration: Any) -> None:
+    token = _jwt.encode({"exp": expiration}, settings.jwt_secret, "HS256")
+
+    assert jwt.decode_jwt(token) is None
