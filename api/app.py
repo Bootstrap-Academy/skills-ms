@@ -58,7 +58,17 @@ if settings.debug:
 @app.middleware("http")
 async def db_session(request: Request, call_next: Callable[..., Awaitable[T]]) -> T:
     async with db_context():
-        return await call_next(request)
+        response = await call_next(request)
+        path = request.scope["path"].removeprefix(request.scope.get("root_path", ""))
+        if settings.profile_publications_enabled and path.startswith(
+            ("/_internal/leaderboard", "/_internal/published-leaderboard")
+        ):
+            from api.services.publications import HEADERS
+
+            # Cover dependency/validation errors as well as successful replies.
+            if isinstance(response, Response):
+                response.headers.update(HEADERS)
+        return response
 
 
 @app.exception_handler(StarletteHTTPException)
