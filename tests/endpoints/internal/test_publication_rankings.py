@@ -9,7 +9,7 @@ from uuid import UUID, uuid4
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from fastapi import HTTPException, Response
+from fastapi import HTTPException, Request, Response
 from httpx import AsyncClient
 from sqlalchemy import func
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -20,6 +20,7 @@ from sqlalchemy.sql.base import Executable
 from sqlalchemy.sql.compiler import SQLCompiler
 
 from api import models
+from api.app import db_session
 from api.database import db, db_context
 from api.endpoints.internal import skills
 from api.services import publications
@@ -189,6 +190,28 @@ async def test_old_page_epoch_is_a_conflict(monkeypatch: MonkeyPatch) -> None:
     with pytest.raises(HTTPException) as error:
         await skills.published_leaderboard(10, 0, uuid4(), publications.SCOPE_VERSION)
     assert error.value.status_code == 409
+
+
+@pytest.mark.parametrize(
+    "root_path,path",
+    [
+        ("", "/_internal/published-leaderboard"),
+        ("/skills", "/_internal/published-leaderboard"),
+        ("/skills", "/skills/_internal/published-leaderboard"),
+    ],
+)
+@pytest.mark.parametrize("status", [401, 422])
+async def test_mounted_auth_and_parameter_errors_never_cache(
+    monkeypatch: MonkeyPatch, root_path: str, path: str, status: int
+) -> None:
+    monkeypatch.setattr(settings, "profile_publications_enabled", True)
+    request = Request(
+        {"type": "http", "path": path, "root_path": root_path, "headers": [], "scheme": "http", "query_string": b""}
+    )
+    response = await db_session(request, AsyncMock(return_value=Response(status_code=status)))
+    assert response.status_code == status
+    assert response.headers["Cache-Control"] == "private, no-store"
+    assert response.headers["Vary"] == "Authorization"
 
 
 @pytest.mark.parametrize(

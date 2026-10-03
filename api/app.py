@@ -59,7 +59,8 @@ if settings.debug:
 async def db_session(request: Request, call_next: Callable[..., Awaitable[T]]) -> T:
     async with db_context():
         response = await call_next(request)
-        if settings.profile_publications_enabled and request.url.path.startswith(
+        path = request.scope["path"].removeprefix(request.scope.get("root_path", ""))
+        if settings.profile_publications_enabled and path.startswith(
             ("/_internal/leaderboard", "/_internal/published-leaderboard")
         ):
             from api.services.publications import HEADERS
