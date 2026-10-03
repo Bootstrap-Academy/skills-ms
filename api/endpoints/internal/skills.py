@@ -2,11 +2,11 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Body, Query
-from pydantic import BaseModel
 
 from api import models
 from api.database import db, filter_by, select
 from api.exceptions.skill import SkillNotFoundException
+from api.schemas import BaseModel
 from api.schemas.skill import SubSkill
 from api.services.benefits import XPAward, apply_xp
 from api.utils.cache import clear_cache, redis_cached

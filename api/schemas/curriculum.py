@@ -1,8 +1,8 @@
 """Ordered lesson activities with explicit adapters to the existing authorities."""
 
-from typing import Any, Literal
+from typing import Any, Literal, Self
 
-from pydantic import Field, root_validator
+from pydantic import Field, model_validator
 
 from api.schemas.daily_limit import DailyStatus
 from api.schemas.lesson_module import LessonModuleDescriptor
@@ -34,11 +34,13 @@ class ActivityReference(RoomModel):
     id: str = Field(min_length=1, max_length=256)
     source: RoomSource | LectureSource = Field(discriminator="kind")
     title: LocalizedText | None = None
-    roles: list[ActivityRole] | None = Field(default=None, min_items=1)
+    roles: list[ActivityRole] | None = Field(default=None, min_length=1)
 
-    @root_validator(pre=True)
+    @model_validator(mode="before")
     @classmethod
-    def require_persistent_assessment(cls, values: dict[str, Any]) -> dict[str, Any]:
+    def require_persistent_assessment(cls, values: Any) -> Any:
+        if not isinstance(values, dict):
+            return values
         source = values.get("source")
         if isinstance(source, dict) and source.get("kind") == "challenge":
             raise ValueError(
@@ -46,28 +48,25 @@ class ActivityReference(RoomModel):
             )
         return values
 
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def stable_identity(cls, values: dict[str, Any]) -> dict[str, Any]:
-        source = values["source"]
-        if isinstance(source, RoomSource) and values["id"] != source.unit_id:
+    @model_validator(mode="after")
+    def stable_identity(self) -> Self:
+        if isinstance(self.source, RoomSource) and self.id != self.source.unit_id:
             raise ValueError("A room activity keeps its existing unit ID")
-        return values
+        return self
 
 
 class LessonDefinition(RoomModel):
     id: str = Field(min_length=1, max_length=256)
     title: LocalizedText
     chapter_id: str | None = None
-    activities: list[ActivityReference] = Field(min_items=1)
+    activities: list[ActivityReference] = Field(min_length=1)
 
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def unique_activities(cls, values: dict[str, Any]) -> dict[str, Any]:
-        ids = [activity.id for activity in values["activities"]]
+    @model_validator(mode="after")
+    def unique_activities(self) -> Self:
+        ids = [activity.id for activity in self.activities]
         if len(ids) != len(set(ids)):
             raise ValueError("A lesson cannot contain the same activity twice")
-        return values
+        return self
 
 
 class CurriculumChapter(RoomModel):
@@ -77,12 +76,11 @@ class CurriculumChapter(RoomModel):
 
 class CurriculumDefinition(RoomModel):
     chapters: list[CurriculumChapter] = Field(default_factory=list)
-    lessons: list[LessonDefinition] = Field(min_items=1)
+    lessons: list[LessonDefinition] = Field(min_length=1)
 
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def valid_structure(cls, values: dict[str, Any]) -> dict[str, Any]:
-        chapters, lessons = values["chapters"], values["lessons"]
+    @model_validator(mode="after")
+    def valid_structure(self) -> Self:
+        chapters, lessons = self.chapters, self.lessons
         chapter_ids = {chapter.id for chapter in chapters}
         if len(chapter_ids) != len(chapters) or len({lesson.id for lesson in lessons}) != len(lessons):
             raise ValueError("Duplicate chapter or lesson IDs")
@@ -94,7 +92,7 @@ class CurriculumDefinition(RoomModel):
                 if activity.id in identities and identities[activity.id] != activity.source:
                     raise ValueError("One activity ID cannot refer to different work")
                 identities[activity.id] = activity.source
-        return values
+        return self
 
 
 class LessonSummary(RoomModel):

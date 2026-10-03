@@ -2,19 +2,19 @@
 
 import json
 import re
-from typing import Any, Literal
+from typing import Any, Literal, Self
 from urllib.parse import urlsplit
 from uuid import UUID
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import Field, field_validator, model_validator
 
+from api.schemas import BaseModel
 from api.schemas.daily_limit import DailyStatus
 from api.schemas.lesson_module import MODULE_ID_PATTERN, LessonModuleDescriptor
 
 
 class RoomModel(BaseModel):
-    class Config:
-        extra = "forbid"
+    pass
 
 
 class LocalizedText(RoomModel):
@@ -29,9 +29,9 @@ class Exercise(RoomModel):
 
 
 class Unit(RoomModel):
-    id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
-    path_id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
-    chapter_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    path_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    chapter_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
     room: Literal[
         "loop-explorer",
@@ -63,23 +63,22 @@ class IntroductionCompletion(RoomModel):
 class CatalogueUnit(Unit):
     retired: bool
     completion: IntroductionCompletion | None = None
-    module_id: str | None = Field(default=None, regex=MODULE_ID_PATTERN)
+    module_id: str | None = Field(default=None, pattern=MODULE_ID_PATTERN)
 
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def completion_matches_room(cls, values: dict[str, Any]) -> dict[str, Any]:
-        if values.get("module") is not None:
+    @model_validator(mode="after")
+    def completion_matches_room(self) -> Self:
+        if self.module is not None:
             raise ValueError("Module URLs come from the operator registry, not content")
-        if values["room"] != "custom" and values.get("module_id") is not None:
+        if self.room != "custom" and self.module_id is not None:
             raise ValueError("Only a custom room references a module")
-        if values["room"] in ("custom", "video"):
-            if values.get("completion") is not None and values.get("exercise") is not None:
+        if self.room in ("custom", "video"):
+            if self.completion is not None and self.exercise is not None:
                 raise ValueError("An activity has one server-side completion authority")
-            if values["room"] == "custom" and values.get("module_id") is None:
+            if self.room == "custom" and self.module_id is None:
                 raise ValueError("A custom activity requires a registered module ID")
-            if values["room"] == "video":
+            if self.room == "video":
                 for language in ("de", "en"):
-                    localized = values["content"].get(language)
+                    localized = self.content.get(language)
                     video = localized.get("video") if isinstance(localized, dict) else None
                     if not isinstance(video, dict):
                         raise ValueError("A video requires a supported source in each language")
@@ -103,29 +102,29 @@ class CatalogueUnit(Unit):
                             raise ValueError("A video requires an absolute HTTPS media URL")
                     else:
                         raise ValueError("A video requires a supported source in each language")
-                completion = values.get("completion")
+                completion = self.completion
                 if completion is not None and json.dumps(completion.answer, sort_keys=True) != '{"viewed": true}':
                     raise ValueError("A video introduction records viewed, not mastery")
-            return values
-        if (values["room"] != "exercise") != (values.get("completion") is not None):
+            return self
+        if (self.room != "exercise") != (self.completion is not None):
             raise ValueError("Introductions require an internal completion check")
-        if values["room"] != "exercise" and values.get("exercise") is not None:
+        if self.room != "exercise" and self.exercise is not None:
             raise ValueError("Exercise references require the exercise room")
-        return values
+        return self
 
     def public(self) -> Unit:
-        return Unit.parse_obj(self.dict(exclude={"retired", "completion", "module_id"}))
+        return Unit.model_validate(self.model_dump(exclude={"retired", "completion", "module_id"}))
 
 
 class LearningChapter(RoomModel):
-    id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
 
 
 class LearningPath(RoomModel):
-    id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
-    direction_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    direction_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     chapters: list[LearningChapter] = Field(default_factory=list)
 
 
@@ -137,10 +136,9 @@ class Catalogue(RoomModel):
     paths: list[CataloguePath]
     units: list[CatalogueUnit]
 
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def references_are_consistent(cls, values: dict[str, Any]) -> dict[str, Any]:
-        paths, units = values["paths"], values["units"]
+    @model_validator(mode="after")
+    def references_are_consistent(self) -> Self:
+        paths, units = self.paths, self.units
         by_id = {unit.id: unit for unit in units}
         if len(by_id) != len(units) or len({path.id for path in paths}) != len(paths):
             raise ValueError("Duplicate learning-room identifiers")
@@ -166,7 +164,7 @@ class Catalogue(RoomModel):
                 seen.add(unit_id)
         if seen != set(by_id):
             raise ValueError("Every unit must belong to exactly one path")
-        return values
+        return self
 
 
 class Result(RoomModel):
@@ -194,17 +192,17 @@ class Rooms(RoomModel):
     daily: DailyStatus | None = None
     paths: list[LearningPath]
     path: LearningPath
-    next: RoomEnvelope | None
+    next: RoomEnvelope | None = None
     empty_reason: Literal["completed", "unavailable", "prerequisites", "limit_reached"] | None = None
 
 
 class CourseLearningUnit(RoomModel):
     id: str
-    chapter_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    chapter_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
     room: str
     status: Literal["new", "in_progress", "completed", "skipped"]
-    result: Result | None
+    result: Result | None = None
     available: bool
     selectable: bool = False
 
@@ -212,7 +210,7 @@ class CourseLearningUnit(RoomModel):
 class CourseLearning(RoomModel):
     path: LearningPath
     units: list[CourseLearningUnit]
-    next: RoomEnvelope | None
+    next: RoomEnvelope | None = None
     completed: bool
     empty_reason: Literal["completed", "unavailable", "prerequisites", "limit_reached"] | None = None
 
@@ -233,7 +231,7 @@ class Mutation(RoomModel):
     request_id: UUID
     expected_revision: int = Field(ge=0, le=2147483646)
 
-    @validator("expected_revision", pre=True)
+    @field_validator("expected_revision", mode="before")
     @classmethod
     def strict_revision(cls, value: Any) -> int:
         if not isinstance(value, int) or isinstance(value, bool):
@@ -244,7 +242,7 @@ class Mutation(RoomModel):
 class SaveState(Mutation):
     review_id: UUID | None = None
     state: dict[str, Any]
-    _bounded_state = validator("state", pre=True, allow_reuse=True)(bounded_object)
+    _bounded_state = field_validator("state", mode="before")(bounded_object)
 
 
 class Complete(Mutation):
@@ -252,7 +250,7 @@ class Complete(Mutation):
     attempt_id: UUID | None = None
     action: Literal["complete", "skip"]
     answer: dict[str, Any] = Field(default_factory=dict)
-    _bounded_answer = validator("answer", pre=True, allow_reuse=True)(bounded_object)
+    _bounded_answer = field_validator("answer", mode="before")(bounded_object)
 
 
 class StartReview(Mutation):

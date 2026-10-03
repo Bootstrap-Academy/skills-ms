@@ -22,10 +22,10 @@ def test_private_course_overlay_preserves_other_courses_and_rejects_invalid_inpu
     assert len(baseline) == 87
     private = tmp_path / "courses"
     private.mkdir()
-    changed = baseline["it-foundations"].dict(exclude={"id"})
+    changed = baseline["it-foundations"].model_dump(exclude={"id"})
     changed["title"] = "Synthetic private title"
     (private / "it-foundations.yml").write_text(safe_dump(changed))
-    (private / "synthetic-added.yml").write_text(safe_dump(course_definition(id="synthetic-added").dict()))
+    (private / "synthetic-added.yml").write_text(safe_dump(course_definition(id="synthetic-added").model_dump()))
     monkeypatch.setattr(settings, "private_courses_directory", private)
     merged = courses._load_courses()
     assert len(merged) == 88 and merged["it-foundations"].price == baseline["it-foundations"].price == 0
@@ -54,7 +54,7 @@ def test_private_course_overlay_preserves_other_courses_and_rejects_invalid_inpu
             ],
         )
         .summary(None)
-        .json()
+        .model_dump_json()
     )
     assert "Public course description" in metadata
     assert not any(
@@ -84,7 +84,7 @@ def test_optional_private_room_catalogue_never_falls_back_on_error(tmp_path: Pat
     rooms.load_catalogue.cache_clear()
     baseline = rooms.load_catalogue()
     private = tmp_path / "learning_rooms.json"
-    private.write_text(baseline.json())
+    private.write_text(baseline.model_dump_json())
     monkeypatch.setattr(settings, "learning_rooms_content", private)
     try:
         rooms.load_catalogue.cache_clear()
@@ -100,7 +100,7 @@ def test_optional_private_room_catalogue_never_falls_back_on_error(tmp_path: Pat
         with pytest.raises(HTTPException):
             rooms.load_catalogue()
         target = tmp_path / "real.json"
-        target.write_text(baseline.json())
+        target.write_text(baseline.model_dump_json())
         private.symlink_to(target)
         with pytest.raises(HTTPException):
             rooms.load_catalogue()

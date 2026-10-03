@@ -65,7 +65,7 @@ async def test_read_batch_keeps_catalogue_and_standalone_subtasks_distinct(
             return_value=LearningPolicy(mode="legacy", premium=False, single_course_sales=True, heart_sales=True)
         ),
     )
-    data = ChallengeReadBatch.parse_obj(
+    data = ChallengeReadBatch.model_validate(
         {"requests": [{"task_id": task, "subtask_id": locked}, {"task_id": task, "subtask_id": standalone}]}
     )
     async with db_context():
@@ -91,13 +91,13 @@ def catalog(monkeypatch: MonkeyPatch) -> Course:
         }
         for i in range(6)
     ]
-    content = Catalogue.parse_obj(
+    content = Catalogue.model_validate(
         {
             "paths": [{"id": "daily-path", "title": {"de": "Pfad", "en": "Path"}, "units": [u["id"] for u in units]}],
             "units": units,
         }
     )
-    course = Course.parse_obj(
+    course = Course.model_validate(
         {
             "id": "daily-course",
             "title": "Beispiel",
@@ -169,7 +169,9 @@ async def daily_client(catalog: Course) -> AsyncIterator[httpx.AsyncClient]:
             LimitConfiguration(mode="enforce", limit=3, updated_by="test", note="Synthetic test")
         )
     async with httpx.AsyncClient(
-        app=app, base_url="http://synthetic", headers={"Authorization": "Bearer synthetic"}
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://synthetic",
+        headers={"Authorization": "Bearer synthetic"},
     ) as client:
         yield client
 
@@ -251,7 +253,7 @@ async def test_disabled_concrete_admission_preserves_course_rights_without_histo
     monkeypatch.setattr(shop, "has_premium", premium)
     catalog.curriculum = None
     catalog.sections = [
-        Section.parse_obj(
+        Section.model_validate(
             {
                 "id": "legacy-section",
                 "title": "Synthetic section",
@@ -802,7 +804,7 @@ async def test_historical_attempts_follow_grouping_and_legacy_lectures(
     catalog.curriculum = None
     catalog.learning_path_id = None
     catalog.sections = [
-        Section.parse_obj(
+        Section.model_validate(
             {
                 "id": "old-section",
                 "title": "Old",
@@ -918,7 +920,9 @@ async def test_non_enforcing_mode_does_not_block_on_history_outage(
     )
     async with db_context():
         await daily_limit.configure(
-            LimitConfiguration.parse_obj({"mode": mode, "limit": 3, "updated_by": "test", "note": "No enforcement"})
+            LimitConfiguration.model_validate(
+                {"mode": mode, "limit": 3, "updated_by": "test", "note": "No enforcement"}
+            )
         )
     result = await begin(daily_client, 0)
     assert result.status_code == 200 and result.json()["daily"]["started"], result.text
@@ -946,13 +950,15 @@ async def test_heart_policy_outage_requires_confirmed_lesson_contract(
     premium: bool,
     expected: str,
 ) -> None:
-    known = LearningPolicy.parse_obj(
+    known = LearningPolicy.model_validate(
         {"mode": policy_mode, "premium": premium, "single_course_sales": False, "heart_sales": False}
     )
     monkeypatch.setattr(daily_limit, "policy", AsyncMock(return_value=known))
     async with db_context():
         await daily_limit.configure(
-            LimitConfiguration.parse_obj({"mode": technical, "limit": 3, "updated_by": "test", "note": "Synthetic"})
+            LimitConfiguration.model_validate(
+                {"mode": technical, "limit": 3, "updated_by": "test", "note": "Synthetic"}
+            )
         )
     assert (await begin(daily_client, 0)).status_code == 200
     task, subtask = uuid4(), uuid4()

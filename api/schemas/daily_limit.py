@@ -1,10 +1,11 @@
 """Shared learning access wire contract."""
 
-from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field, StrictBool, StrictStr
+from pydantic import Field, StrictBool, StrictStr
+
+from api.schemas import BaseModel, Timestamp
 
 
 class LearningPolicy(BaseModel):
@@ -18,8 +19,8 @@ class DailyStatus(BaseModel):
     mode: Literal["legacy", "shadow", "daily"]
     limit: int
     used: int
-    remaining: int | None
-    resets_at: datetime
+    remaining: int | None = None
+    resets_at: Timestamp
     timezone: Literal["Europe/Berlin"] = "Europe/Berlin"
     unlimited: bool = False
     enforced: bool = False
@@ -34,26 +35,26 @@ class StartLesson(BaseModel):
 
 class StartResult(BaseModel):
     started: bool
-    daily: DailyStatus | None
+    daily: DailyStatus | None = None
 
 
 class LimitConfiguration(BaseModel):
     mode: Literal["off", "shadow", "enforce"]
-    limit: int = Field(3, ge=1, le=100)
+    limit: int = Field(default=3, ge=1, le=100)
     updated_by: str = Field(min_length=1, max_length=100)
     note: str = Field(min_length=1, max_length=512)
 
 
 class LectureBinding(BaseModel):
     course_id: str = Field(min_length=1, max_length=256)
-    lecture_id: str | None = Field(None, min_length=1, max_length=256)
-    section_id: str | None = Field(None, min_length=1, max_length=256)
+    lecture_id: str | None = Field(default=None, min_length=1, max_length=256)
+    section_id: str | None = Field(default=None, min_length=1, max_length=256)
 
 
 class ChallengeAdmission(BaseModel):
     task_id: UUID | None = None
     subtask_id: UUID | None = None
-    lecture_bindings: list[LectureBinding] = Field(default_factory=list, max_items=100)
+    lecture_bindings: list[LectureBinding] = Field(default_factory=list, max_length=100)
     user_admin: StrictBool = False
     request_id: UUID | None = None
 
@@ -61,12 +62,12 @@ class ChallengeAdmission(BaseModel):
 class ChallengeRead(ChallengeAdmission):
     """A concrete, read-only decision; a batch cannot start lessons."""
 
-    lecture_bindings: list[LectureBinding] = Field(default_factory=list, max_items=1)
+    lecture_bindings: list[LectureBinding] = Field(default_factory=list, max_length=1)
     request_id: None = None
 
 
 class ChallengeReadBatch(BaseModel):
-    requests: list[ChallengeRead] = Field(min_items=1, max_items=250)
+    requests: list[ChallengeRead] = Field(min_length=1, max_length=250)
 
 
 class HistoryLecture(BaseModel):

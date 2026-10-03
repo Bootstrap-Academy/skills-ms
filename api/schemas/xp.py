@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
+
+from api.schemas import BaseModel
 
 
 class SubSkillXP(BaseModel):
@@ -24,7 +26,7 @@ class XPResponse(BaseModel):
 
 
 class UpdateXP(BaseModel):
-    xp: int | None = Field(ge=0, description="Amount of XP the user has in this skill")
+    xp: int | None = Field(default=None, ge=0, description="Amount of XP the user has in this skill")
 
 
 class CertificateUser(BaseModel):

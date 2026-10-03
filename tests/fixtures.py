@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 from _pytest.monkeypatch import MonkeyPatch
-from httpx import AsyncClient
+from httpx import ASGITransport, AsyncClient
 from pytest_mock import MockerFixture
 from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -33,7 +33,7 @@ async def database(monkeypatch: MonkeyPatch, tmp_path: Path) -> AsyncIterator[No
 
 @pytest.fixture
 async def client() -> AsyncIterator[AsyncClient]:
-    async with AsyncClient(app=app, base_url="http://test") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
         yield client
 
 

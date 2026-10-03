@@ -1,4 +1,3 @@
-import pydantic
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from yaml import YAMLError, safe_load
@@ -47,7 +46,7 @@ def _load_courses() -> dict[str, Course]:
                     definition = safe_load(f)
                     if not isinstance(definition, dict) or ("id" in definition and definition["id"] != _id):
                         raise ValueError("Course ID must match its filename")
-                    courses[_id] = pydantic.parse_obj_as(Course, {**definition, "id": _id})
+                    courses[_id] = Course.model_validate({**definition, "id": _id})
                 except (ValueError, TypeError, YAMLError):
                     # Pydantic/YAML errors may contain private teaching text.
                     raise ValueError(f"Invalid course definition: {_id}") from None

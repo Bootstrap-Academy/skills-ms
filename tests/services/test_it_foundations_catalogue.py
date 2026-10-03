@@ -60,9 +60,9 @@ def test_all_it_labs_keep_localized_checks_consistent_without_claiming_solved() 
         check_id = next(iter(expected))
         wrong = {**expected, check_id: "not-an-answer"}
         with pytest.raises(HTTPException) as error:
-            completed_progress(unit, Progress(), completion.copy(update={"answer": wrong}), solved=True)
+            completed_progress(unit, Progress(), completion.model_copy(update={"answer": wrong}), solved=True)
         assert error.value.status_code == 422
-        skip = completion.copy(update={"action": "skip", "answer": {}})
+        skip = completion.model_copy(update={"action": "skip", "answer": {}})
         if unit.completion.allow_skip:
             skipped = completed_progress(unit, Progress(), skip, solved=False)
             assert skipped.status == "skipped" and skipped.result is None

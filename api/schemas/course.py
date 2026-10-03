@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from typing import Any
+from typing import Literal, Self
 
-from pydantic import BaseModel, Field, root_validator
+from pydantic import Field, model_validator
 
+from api.schemas import BaseModel
 from api.schemas.curriculum import CurriculumDefinition
 from api.utils.docs import example, get_example
 
@@ -11,12 +12,12 @@ from api.utils.docs import example, get_example
 class YoutubeLecture(BaseModel):
     id: str = Field(description="ID of the lecture")
     title: str = Field(description="Title of the lecture")
-    description: str | None = Field(description="Description of the lecture")
-    type = Field("youtube", const=True, description="Type of the lecture")
+    description: str | None = Field(default=None, description="Description of the lecture")
+    type: Literal["youtube"] = Field(default="youtube", description="Type of the lecture")
     video_id: str = Field(description="Youtube Video ID of the lecture")
     duration: int = Field(description="Duration of the lecture in seconds")
 
-    Config = example(
+    model_config = example(
         id="intro",
         title="Introduction",
         description="Introduction to the course",
@@ -26,22 +27,22 @@ class YoutubeLecture(BaseModel):
     )
 
     def to_user_lecture(self, completed: bool) -> UserLecture:
-        return UserYoutubeLecture(**self.dict(), completed=completed)
+        return UserYoutubeLecture(**self.model_dump(), completed=completed)
 
 
 class Mp4Lecture(BaseModel):
     id: str = Field(description="ID of the lecture")
     title: str = Field(description="Title of the lecture")
-    description: str | None = Field(description="Description of the lecture")
-    type = Field("mp4", const=True, description="Type of the lecture")
+    description: str | None = Field(default=None, description="Description of the lecture")
+    type: Literal["mp4"] = Field(default="mp4", description="Type of the lecture")
     duration: int = Field(description="Duration of the lecture in seconds")
 
-    Config = example(
+    model_config = example(
         id="intro", title="Introduction", description="Introduction to the course", type="mp4", duration=100
     )
 
     def to_user_lecture(self, completed: bool) -> UserLecture:
-        return UserMp4Lecture(**self.dict(), completed=completed)
+        return UserMp4Lecture(**self.model_dump(), completed=completed)
 
 
 Lecture = YoutubeLecture | Mp4Lecture
@@ -50,16 +51,16 @@ Lecture = YoutubeLecture | Mp4Lecture
 class LectureSummary(BaseModel):
     title: str = Field(description="Title of the lecture")
     duration: int = Field(description="Duration of the lecture in seconds")
-    completed: bool | None = Field(description="If the lecture is completed")
+    completed: bool | None = Field(default=None, description="If the lecture is completed")
 
 
 class Section(BaseModel):
     id: str = Field(description="ID of the section")
     title: str = Field(description="Title of the section")
-    description: str | None = Field(description="Description of the section")
+    description: str | None = Field(default=None, description="Description of the section")
     lectures: list[Lecture] = Field(description="Lectures in the section")
 
-    Config = example(
+    model_config = example(
         id="intro",
         title="Introduction",
         description="Introduction to the course",
@@ -70,7 +71,7 @@ class Section(BaseModel):
 class SectionSummary(BaseModel):
     title: str = Field(description="Title of the section")
     lectures: list[LectureSummary] = Field(description="Lectures in the section")
-    completed: bool | None = Field(description="If the section is completed")
+    completed: bool | None = Field(default=None, description="If the section is completed")
 
 
 class CourseTranslation(BaseModel):
@@ -83,17 +84,17 @@ class CourseTranslation(BaseModel):
 class BaseCourse(BaseModel):
     id: str = Field(description="ID of the course")
     title: str = Field(description="Title of the course")
-    description: str | None = Field(description="Description of the course")
-    category: str | None = Field(description="Category of the course")
-    language: str | None = Field(description="Language of the course")
-    image: str | None = Field(description="Image URL of the course")
+    description: str | None = Field(default=None, description="Description of the course")
+    category: str | None = Field(default=None, description="Category of the course")
+    language: str | None = Field(default=None, description="Language of the course")
+    image: str | None = Field(default=None, description="Image URL of the course")
     authors: list[dict[str, str]] = Field(description="Authors of the course")
-    price: int = Field(min=0, description="Price of the course in morphcoins")
+    price: int = Field(json_schema_extra={"min": 0}, description="Price of the course in morphcoins")
     learning_goals: list[str] = Field(description="Learning goals of the course")
     requirements: list[str] = Field(description="Requirements of the course")
     last_update: int = Field(description="Timestamp of last update of the course")
     learning_path_id: str | None = Field(
-        default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$", description="Explicit shared learning path, when available"
+        default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,79}$", description="Explicit shared learning path, when available"
     )
     translations: dict[str, CourseTranslation] = Field(
         default_factory=dict, description="Optional localized metadata; base fields remain the fallback"
@@ -102,7 +103,7 @@ class BaseCourse(BaseModel):
         default=False, description="Whether this course has explicitly composed lessons"
     )
 
-    Config = example(
+    model_config = example(
         id="python",
         title="Python",
         description="Course description",
@@ -125,13 +126,12 @@ class Course(BaseCourse):
     sections: list[Section] = Field(default_factory=list, description="Optional video sections in the course")
     curriculum: CurriculumDefinition | None = Field(default=None, description="Optional explicitly ordered lessons")
 
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def explicit_curriculum_metadata(cls, values: dict[str, Any]) -> dict[str, Any]:
-        values["has_explicit_curriculum"] = values.get("curriculum") is not None
-        return values
+    @model_validator(mode="after")
+    def explicit_curriculum_metadata(self) -> Self:
+        self.has_explicit_curriculum = self.curriculum is not None
+        return self
 
-    Config = example(**get_example(BaseCourse), sections=[get_example(Section)])
+    model_config = example(**get_example(BaseCourse), sections=[get_example(Section)])
 
     def summary(self, completed_lectures: set[str] | None, learning_completed: bool | None = None) -> CourseSummary:
         sections = []
@@ -153,7 +153,7 @@ class Course(BaseCourse):
             )
 
         return CourseSummary(
-            **self.dict(include=set(BaseCourse.__fields__)),
+            **self.model_dump(include=set(BaseCourse.model_fields)),
             sections=sections,
             completed=(
                 learning_completed
@@ -165,11 +165,11 @@ class Course(BaseCourse):
     def to_user_course(self, completed_lectures: set[str]) -> UserCourse:
         return UserCourse(
             **{
-                **self.dict(),
+                **self.model_dump(),
                 "sections": [
                     UserSection(
                         **{
-                            **section.dict(),
+                            **section.model_dump(),
                             "lectures": [
                                 lecture.to_user_lecture(lecture.id in completed_lectures)
                                 for lecture in section.lectures
@@ -184,19 +184,19 @@ class Course(BaseCourse):
 
 class CourseSummary(BaseCourse):
     sections: list[SectionSummary] = Field(description="Lectures of the course")
-    completed: bool | None = Field(description="If the course is completed")
+    completed: bool | None = Field(default=None, description="If the course is completed")
 
 
 class UserYoutubeLecture(YoutubeLecture):
     completed: bool = Field(description="If the lecture is completed")
 
-    Config = example(**get_example(YoutubeLecture), completed=True)
+    model_config = example(**get_example(YoutubeLecture), completed=True)
 
 
 class UserMp4Lecture(Mp4Lecture):
     completed: bool = Field(description="If the lecture is completed")
 
-    Config = example(**get_example(Mp4Lecture), completed=True)
+    model_config = example(**get_example(Mp4Lecture), completed=True)
 
 
 UserLecture = UserYoutubeLecture | UserMp4Lecture
@@ -205,7 +205,7 @@ UserLecture = UserYoutubeLecture | UserMp4Lecture
 class UserSection(Section):
     lectures: list[UserLecture] = Field(description="Lectures in the section")  # type: ignore
 
-    Config = example(
+    model_config = example(
         **{**get_example(Section), "lectures": [get_example(UserYoutubeLecture), get_example(UserMp4Lecture)]}
     )
 
@@ -213,7 +213,7 @@ class UserSection(Section):
 class UserCourse(Course):
     sections: list[UserSection] = Field(description="Sections in the course")  # type: ignore
 
-    Config = example(**{**get_example(Course), "sections": [get_example(UserSection)]})
+    model_config = example(**{**get_example(Course), "sections": [get_example(UserSection)]})
 
 
 class NextUnseenResponse(BaseModel):

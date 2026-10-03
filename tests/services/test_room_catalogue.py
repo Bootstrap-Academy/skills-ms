@@ -15,6 +15,6 @@ def test_shipped_paths_have_reachable_prerequisites_and_private_checks() -> None
             concepts.update([*unit.teaches, *unit.practices])
             public = unit.public()
             assert isinstance(public, Unit)
-            assert "completion" not in public.dict() and "retired" not in public.dict()
+            assert "completion" not in public.model_dump() and "retired" not in public.model_dump()
             if unit.room != "exercise":
                 assert unit.completion is not None and unit.completion.answer

@@ -26,7 +26,7 @@ async def test_retained_course_and_media_use_real_course_guard(
     monkeypatch: MonkeyPatch, tmp_path: Path, enabled: bool
 ) -> None:
     user = User(id="retained-subject", email_verified=True, admin=False)
-    course = Course.parse_obj(
+    course = Course.model_validate(
         {
             "id": "retained-course",
             "title": "Synthetic",

@@ -2,10 +2,13 @@ import secrets
 from pathlib import Path
 from typing import Literal
 
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(case_sensitive=False, extra="forbid", coerce_numbers_to_str=True)
+
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
     host: str = "0.0.0.0"  # noqa: S104
@@ -30,7 +33,7 @@ class Settings(BaseSettings):
     auth_url: str = ""
     shop_url: str = ""
     # Operator-owned service origin; room content and client requests supply only IDs.
-    challenges_url: str = Field("http://127.0.0.1:8005", regex=r"^https?://[^?#@]+$")
+    challenges_url: str = Field(default="http://127.0.0.1:8005", pattern=r"^https?://[^?#@]+$")
     rooms_enabled: bool = False
     # Disabled until the backend policy API is deployed. Never activates new terms.
     daily_limit_policy_enabled: bool = False
@@ -39,7 +42,7 @@ class Settings(BaseSettings):
     lesson_module_origins: list[str] = Field(default_factory=list)
     lesson_module_local_development: bool = False
     private_lesson_modules_root: Path | None = None
-    private_lesson_module_grant_ttl: int = Field(3600, ge=60, le=8 * 60 * 60)
+    private_lesson_module_grant_ttl: int = Field(default=3600, ge=60, le=8 * 60 * 60)
     character_areas: Path = Path(__file__).parent / "content/character_areas.json"
 
     lecture_xp: int = 10
@@ -66,16 +69,16 @@ class Settings(BaseSettings):
     smtp_starttls: bool = True
 
     database_url: str = Field(
-        "mysql+aiomysql://fastapi:fastapi@mariadb:3306/fastapi",
-        regex=r"^(mysql\+aiomysql|postgresql\+asyncpg|sqlite\+aiosqlite)://.*$",
+        default="mysql+aiomysql://fastapi:fastapi@mariadb:3306/fastapi",
+        pattern=r"^(mysql\+aiomysql|postgresql\+asyncpg|sqlite\+aiosqlite)://.*$",
     )
     pool_recycle: int = 300
     pool_size: int = 20
     max_overflow: int = 20
     sql_show_statements: bool = False
 
-    redis_url: str = Field("redis://redis:6379/1", regex=r"^redis://.*$")
-    auth_redis_url: str = Field("redis://redis:6379/0", regex=r"^redis://.*$")
+    redis_url: str = Field(default="redis://redis:6379/1", pattern=r"^redis://.*$")
+    auth_redis_url: str = Field(default="redis://redis:6379/0", pattern=r"^redis://.*$")
 
     sentry_dsn: str | None = None
     sentry_environment: str = "test"
@@ -92,4 +95,4 @@ class Settings(BaseSettings):
         return secrets_by_audience.get(audience, "") or self.jwt_secret
 
 
-settings = Settings()  # type: ignore
+settings = Settings()

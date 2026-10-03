@@ -75,7 +75,7 @@ def package(tmp_path: Path, monkeypatch: MonkeyPatch, revision: int = 1) -> tupl
     (directory / "manifest.json").write_text(
         json.dumps({"artifact_sha256": artifact, "definition": definition, "files": inventory})
     )
-    (directory / "module.json").write_text(descriptor.json())
+    (directory / "module.json").write_text(descriptor.model_dump_json())
     monkeypatch.setattr(settings, "private_lesson_modules_root", root)
     monkeypatch.setattr(settings, "public_base_url", "https://api.example/skills")
     monkeypatch.setattr(settings, "lesson_module_origins", ["https://api.example"])
@@ -87,8 +87,8 @@ async def setup_private(
     content: Catalogue, tmp_path: Path, monkeypatch: MonkeyPatch
 ) -> AsyncIterator[tuple[httpx.AsyncClient, IsolatedRedis, Path]]:
     descriptor, directory = package(tmp_path, monkeypatch)
-    content.units[0] = CatalogueUnit.parse_obj(
-        {**content.units[0].dict(), "room": "custom", "module_id": descriptor.id}
+    content.units[0] = CatalogueUnit.model_validate(
+        {**content.units[0].model_dump(), "room": "custom", "module_id": descriptor.id}
     )
     course = course_definition(price=100, curriculum=composed("intro"))
     monkeypatch.setitem(COURSES, course.id, course)
@@ -114,7 +114,7 @@ async def setup_private(
     app.dependency_overrides[user_auth.dependency] = identity
     for router in (curriculum_router, rooms_router, asset_router):
         app.include_router(router, dependencies=[Depends(session)])
-    async with httpx.AsyncClient(app=app, base_url="https://api.example") as client:
+    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="https://api.example") as client:
         yield client, cache, directory
 
 
