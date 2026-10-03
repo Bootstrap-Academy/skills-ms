@@ -61,7 +61,7 @@ def definitions(course: Course, content: Catalogue | None = None) -> tuple[Curri
             path = next((item for item in content.paths if item.id == course.learning_path_id), None)
             if path is None:
                 raise HTTPException(404, "Dieser Kurs ist gerade nicht verfügbar.")
-            chapters.extend(CurriculumChapter.parse_obj(chapter.dict()) for chapter in path.chapters)
+            chapters.extend(CurriculumChapter.model_validate(chapter.model_dump()) for chapter in path.chapters)
             lessons.extend(
                 LessonDefinition(
                     id=uid,
@@ -94,7 +94,7 @@ def definitions(course: Course, content: Catalogue | None = None) -> tuple[Curri
                 )
         # Legacy drafts may contain no lessons; the public adapter keeps them readable.
         if not lessons:
-            curriculum = CurriculumDefinition.construct(chapters=chapters, lessons=[])
+            curriculum = CurriculumDefinition.model_construct(chapters=chapters, lessons=[])
         else:
             try:
                 curriculum = CurriculumDefinition(chapters=chapters, lessons=lessons)
@@ -265,7 +265,7 @@ async def get_lesson(course: Course, lesson_id: str, user: User, token: str) -> 
                     roles=ref.roles or ["explanation"],
                     title=ref.title or localized(lecture.title),
                     source=source,
-                    content=lecture.dict(),
+                    content=lecture.model_dump(),
                     completed=source.lecture_id in lecture_ids,
                 )
             )

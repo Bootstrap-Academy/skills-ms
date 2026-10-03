@@ -150,7 +150,7 @@ async def lecture_link(
 
 @router.get("/lectures/{token}/{file}", include_in_schema=False)
 async def stream(
-    request: Request, token: str, file: str, range: str = Header("bytes=0-", regex=r"^bytes=\d{1,16}-(\d{1,16})?$")
+    request: Request, token: str, file: str, range: str = Header("bytes=0-", pattern=r"^bytes=\d{1,16}-(\d{1,16})?$")
 ) -> Any:
     raw = await redis.get(f"learning_mp4:{token}:{file}")
     if raw is None:

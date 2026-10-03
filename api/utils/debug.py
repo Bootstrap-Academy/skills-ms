@@ -1,11 +1,10 @@
 import json
 from typing import Awaitable, Callable, Type
 
-import pydantic
 from fastapi import Request
 from fastapi.responses import StreamingResponse
 from fastapi.routing import APIRoute
-from pydantic import BaseModel
+from pydantic import BaseModel, TypeAdapter
 from starlette.concurrency import iterate_in_threadpool
 
 from api.logger import get_logger
@@ -28,7 +27,7 @@ def _check_response_schema(method: str, route: APIRoute, status_code: int, body:
     if "model" in response:
         response_schema: Type[BaseModel] = response["model"]
         try:
-            pydantic.parse_raw_as(response_schema, body)
+            TypeAdapter(response_schema).validate_json(body)
         except Exception as e:
             logger.error(f"[{method} {route.path}] response schema validation failed ({status_code}):\n{e}")
     elif json.loads(body) not in (

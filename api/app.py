@@ -4,7 +4,8 @@ See [Auth Microservice](/auth/docs).
 """
 
 import asyncio
-from typing import Awaitable, Callable, TypeVar
+from contextlib import asynccontextmanager
+from typing import AsyncIterator, Awaitable, Callable, TypeVar
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
@@ -28,6 +29,16 @@ T = TypeVar("T")
 
 logger = get_logger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    await on_startup()
+    try:
+        yield
+    finally:
+        await on_shutdown()
+
+
 app = FastAPI(
     title="Bootstrap Academy Backend: Skills Microservice",
     description=__doc__,
@@ -36,6 +47,7 @@ app = FastAPI(
     root_path_in_servers=False,
     servers=[{"url": settings.root_path}] if settings.root_path else None,
     openapi_tags=TAGS,
+    lifespan=lifespan,
 )
 app.include_router(ROUTER)
 
@@ -73,7 +85,6 @@ async def rollback_on_exception(request: Request, exc: HTTPException) -> Respons
     return await http_exception_handler(request, exc)
 
 
-@app.on_event("startup")
 async def on_startup() -> None:
     if settings.learning_rooms_content is not None:
         from api.services.rooms import load_catalogue
@@ -85,7 +96,6 @@ async def on_startup() -> None:
     app.state.purchase_recovery = asyncio.create_task(purchase_recovery())
 
 
-@app.on_event("shutdown")
 async def on_shutdown() -> None:
     try:
         if task := getattr(app.state, "purchase_recovery", None):

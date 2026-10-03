@@ -36,11 +36,11 @@ def test_registry_and_content_reject_ids_the_browser_loader_cannot_load(module_i
         "module_id": descriptor["id"],
     }
     # The same maximum-length hyphenated ID survives publication and content loading.
-    assert LessonModuleDescriptor.parse_obj(descriptor).id == CatalogueUnit.parse_obj(unit).module_id
+    assert LessonModuleDescriptor.model_validate(descriptor).id == CatalogueUnit.model_validate(unit).module_id
     with pytest.raises(ValidationError):
-        LessonModuleDescriptor.parse_obj({**descriptor, "id": module_id})
+        LessonModuleDescriptor.model_validate({**descriptor, "id": module_id})
     with pytest.raises(ValidationError):
-        CatalogueUnit.parse_obj({**unit, "module_id": module_id})
+        CatalogueUnit.model_validate({**unit, "module_id": module_id})
 
 
 @pytest.mark.parametrize(
@@ -66,10 +66,10 @@ def test_origin_and_api_version_are_explicit(monkeypatch: MonkeyPatch) -> None:
     monkeypatch.setattr(settings, "lesson_module_origins", ["https://modules.example"])
     assert checked_descriptor(descriptor) == descriptor
     with pytest.raises(ValueError, match="origin"):
-        checked_descriptor(descriptor.copy(update={"entry_url": "https://elsewhere.example/main.mjs"}))
+        checked_descriptor(descriptor.model_copy(update={"entry_url": "https://elsewhere.example/main.mjs"}))
     for version in (True, 1.0, "1", 2):
         with pytest.raises(ValidationError):
-            LessonModuleDescriptor.parse_obj({**descriptor.dict(), "api_version": version})
+            LessonModuleDescriptor.model_validate({**descriptor.model_dump(), "api_version": version})
     local = LessonModuleDescriptor(id="local", api_version=1, entry_url="http://127.0.0.1:9123/main.mjs")
     monkeypatch.setattr(settings, "lesson_module_origins", ["http://127.0.0.1:9123"])
     with pytest.raises(ValueError, match="HTTPS"):

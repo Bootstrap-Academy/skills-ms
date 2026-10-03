@@ -1,6 +1,7 @@
-from pydantic import BaseModel, Extra
+from pydantic import ConfigDict
 
 from api.redis import auth_redis
+from api.schemas import BaseModel
 
 
 class User(BaseModel):
@@ -13,8 +14,7 @@ class UserAccessTokenData(BaseModel):
     email_verified: bool
     admin: bool
 
-    class Config:
-        extra = Extra.ignore
+    model_config = ConfigDict(extra="ignore")
 
 
 class UserAccessToken(BaseModel):
@@ -22,11 +22,10 @@ class UserAccessToken(BaseModel):
     rt: str
     data: UserAccessTokenData
 
-    class Config:
-        extra = Extra.ignore
+    model_config = ConfigDict(extra="ignore")
 
     def to_user(self) -> User:
-        return User(id=self.uid, **self.data.dict())
+        return User(id=self.uid, **self.data.model_dump())
 
     async def is_revoked(self) -> bool:
         return bool(await auth_redis.exists(f"access_token_invalidated:{self.rt}"))

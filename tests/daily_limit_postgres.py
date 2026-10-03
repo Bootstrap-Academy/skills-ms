@@ -47,7 +47,7 @@ async def seed_pre_policy_starts() -> None:
 async def main() -> None:
     assert os.environ["DATABASE_URL"].startswith("postgresql+asyncpg://")
     settings.daily_limit_policy_enabled = True
-    course = Course.parse_obj(
+    course = Course.model_validate(
         {
             "id": "native",
             "title": "Synthetic",

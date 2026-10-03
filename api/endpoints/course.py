@@ -251,7 +251,7 @@ async def get_mp4_lecture_link(
 
 @router.get("/lectures/{token}/{file}", include_in_schema=False)
 async def download_mp4_lecture(
-    token: str, file: str, range: str = Header("bytes=0-", regex=r"^bytes=\d{1,16}-(\d{1,16})?$")
+    token: str, file: str, range: str = Header("bytes=0-", pattern=r"^bytes=\d{1,16}-(\d{1,16})?$")
 ) -> Any:
     path = await redis.get(f"mp4_lecture:{token}:{file}")
     if not path:

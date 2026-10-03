@@ -1,28 +1,24 @@
 import argparse
 import hashlib
-import re
 from graphlib import TopologicalSorter
 from pathlib import Path
+from typing import Annotated
 
-import pydantic
 import yaml
 from httpx import Client
-from pydantic import BaseModel, ConstrainedStr
+from pydantic import StringConstraints
 from rich import print
 
 from api.logger import get_logger
+from api.schemas import BaseModel
 from api.services.courses import COURSES
 
 
 logger = get_logger(__name__)
 
 
-class ID(ConstrainedStr):
-    regex = re.compile("^[a-z0-9_]+$")
-
-
-class CourseID(ConstrainedStr):
-    regex = re.compile("^[a-z0-9][a-z0-9_-]*$")
+ID = Annotated[str, StringConstraints(pattern="^[a-z0-9_]+$")]
+CourseID = Annotated[str, StringConstraints(pattern="^[a-z0-9][a-z0-9_-]*$")]
 
 
 class SubSkillDescription(BaseModel):
@@ -43,7 +39,7 @@ def _load_skills(path: Path) -> dict[str, RootSkillDescription]:
         name = file.name.removesuffix(".yml")
         logger.debug(f"loading root skill {name} from {file}")
         with file.open() as f:
-            skills[name] = pydantic.parse_obj_as(RootSkillDescription, yaml.safe_load(f))
+            skills[name] = RootSkillDescription.model_validate(yaml.safe_load(f))
     return skills
 
 

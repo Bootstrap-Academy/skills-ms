@@ -66,7 +66,7 @@ async def ordinary_authority(access_token: str, expected_user_id: str) -> User |
         if response.status_code != 200:
             raise HTTPException(503, "Account authority temporarily unavailable")
         payload = response.json()
-        user = User.parse_obj({key: payload[key] for key in ("id", "email_verified", "admin")})
+        user = User.model_validate({key: payload[key] for key in ("id", "email_verified", "admin")})
         if user.id != expected_user_id:
             raise HTTPException(503, "Invalid authority response")
         return user

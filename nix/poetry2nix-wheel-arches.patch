@@ -20,3 +20,14 @@
      else true;
  
  }
+--- a/vendor/pyproject.nix/lib/pypa.nix
++++ b/vendor/pyproject.nix/lib/pypa.nix
+@@ -86,7 +86,7 @@
+   parseABITag =
+     tag:
+     let
+-      m = match "([a-z]+)([0-9]*)_?([a-z0-9]*)" tag;
++      m = match "([a-z]+)([0-9]*)_?([a-z0-9_]*)" tag;
+       mAt = elemAt m;
+     in
+     assert m != null; {

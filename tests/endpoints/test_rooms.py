@@ -56,7 +56,7 @@ def content(monkeypatch: MonkeyPatch) -> Catalogue:
             **values,
         }
 
-    value = Catalogue.parse_obj(
+    value = Catalogue.model_validate(
         {
             "paths": [
                 {
@@ -97,7 +97,9 @@ async def room_client(content: Catalogue) -> AsyncIterator[httpx.AsyncClient]:
     app.include_router(router, dependencies=[Depends(session)])
     app.include_router(course_endpoints.router, dependencies=[Depends(session)])
     async with httpx.AsyncClient(
-        app=app, base_url="http://rooms.synthetic", headers={"Authorization": "Bearer subject-a"}
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://rooms.synthetic",
+        headers={"Authorization": "Bearer subject-a"},
     ) as client:
         yield client
 
@@ -147,7 +149,7 @@ async def test_owner_bound_resume_retry_and_conflict(room_client: httpx.AsyncCli
         assert len(await db.all(filter_by(models.RoomRequest, user_id=USER.id))) == 1
         export = await export_user_data(USER.id)
         assert len(export.room_states) == len(export.room_requests) == 1
-        assert "subject-b" not in export.json()
+        assert "subject-b" not in export.model_dump_json()
 
 
 async def test_intro_prerequisite_server_answer_and_neutral_skip(room_client: httpx.AsyncClient) -> None:
@@ -242,7 +244,7 @@ async def test_erasure_removes_private_data_and_late_retry_cannot_recreate(
 async def test_transaction_rollback_removes_both_state_and_retry_receipt(content: Catalogue) -> None:
     async with db_context():
         await db.add(models.PurchaseUser(user_id=USER.id, deleted=False))
-    data = SaveState.parse_obj(payload(state={"draft": "pending"}))
+    data = SaveState.model_validate(payload(state={"draft": "pending"}))
     with pytest.raises(RuntimeError):
         async with db_context():
             await rooms.mutate_room("intro", USER, USER.id, data)
@@ -357,7 +359,7 @@ async def test_concurrent_stale_writes_keep_one_revision(content: Catalogue, ini
         try:
             async with db_context():
                 result = await rooms.mutate_room(
-                    "intro", USER, USER.id, SaveState.parse_obj(payload(initial_revision, state={"value": value}))
+                    "intro", USER, USER.id, SaveState.model_validate(payload(initial_revision, state={"value": value}))
                 )
                 return result.progress.revision
         except HTTPException as exc:
@@ -411,10 +413,10 @@ async def finish_pilot(client: httpx.AsyncClient, monkeypatch: MonkeyPatch) -> N
 async def test_continuous_paths_then_repeat_without_get_writes(
     room_client: httpx.AsyncClient, content: Catalogue, monkeypatch: MonkeyPatch
 ) -> None:
-    other = content.units[0].copy(deep=True, update={"id": "other", "path_id": "math"})
+    other = content.units[0].model_copy(deep=True, update={"id": "other", "path_id": "math"})
     content.units.append(other)
     content.paths.append(
-        CataloguePath.parse_obj({"id": "math", "title": {"de": "Mathe", "en": "Math"}, "units": ["other"]})
+        CataloguePath.model_validate({"id": "math", "title": {"de": "Mathe", "en": "Math"}, "units": ["other"]})
     )
     await finish_pilot(room_client, monkeypatch)
     assert (await room_client.get("/rooms?after=later")).json()["next"] is None
@@ -648,7 +650,7 @@ async def test_selected_direction_resumes_own_work_then_other_chapters_and_repea
 ) -> None:
     content.paths[0].direction_id = "python"
     for path_id, direction in (("math", "math"), ("python-next", "python")):
-        other = content.units[0].copy(deep=True, update={"id": path_id, "path_id": path_id})
+        other = content.units[0].model_copy(deep=True, update={"id": path_id, "path_id": path_id})
         content.units.append(other)
         content.paths.append(CataloguePath(id=path_id, title=other.title, units=[path_id], direction_id=direction))
     assert (await room_client.get("/rooms?continuous=true&direction=math")).status_code == 404
@@ -710,7 +712,7 @@ async def test_course_drafts_and_request_retries_keep_exact_context_and_owner(
     room_client: httpx.AsyncClient, monkeypatch: MonkeyPatch
 ) -> None:
     course = linked_course(monkeypatch)
-    duplicate = course.copy(update={"id": "another-course"})
+    duplicate = course.model_copy(update={"id": "another-course"})
     monkeypatch.setattr(rooms, "COURSES", {course.id: course, duplicate.id: duplicate})
     query = f"?course={course.id}"
     body = payload(state={"draft": "later lesson, private"})
@@ -770,7 +772,7 @@ async def test_course_navigation_requires_its_exact_paid_course_on_every_request
     course = linked_course(monkeypatch, price=100)
     # A free course on the same path does not authorize the requested paid course.
     monkeypatch.setattr(
-        rooms, "COURSES", {course.id: course, "free-alias": course.copy(update={"id": "free-alias", "price": 0})}
+        rooms, "COURSES", {course.id: course, "free-alias": course.model_copy(update={"id": "free-alias", "price": 0})}
     )
     premium = AsyncMock(return_value=False)
     monkeypatch.setattr(rooms, "has_premium", premium)
@@ -807,7 +809,7 @@ async def test_course_navigation_refuses_other_paths_retired_and_unconfigured_un
     room_client: httpx.AsyncClient, content: Catalogue, monkeypatch: MonkeyPatch
 ) -> None:
     course = linked_course(monkeypatch)
-    other = content.units[0].copy(deep=True, update={"id": "foreign", "path_id": "foreign"})
+    other = content.units[0].model_copy(deep=True, update={"id": "foreign", "path_id": "foreign"})
     content.units.append(other)
     content.paths.append(CataloguePath(id="foreign", title=other.title, units=["foreign"]))
     for route, status in [

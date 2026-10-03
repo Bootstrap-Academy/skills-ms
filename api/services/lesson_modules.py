@@ -34,7 +34,9 @@ async def resolve_module(
         raise HTTPException(503, "Diese Lektion kann gerade nicht geladen werden. Versuch es bitte noch einmal.")
     try:
         descriptor = checked_descriptor(
-            LessonModuleDescriptor.parse_obj({"id": row.id, "api_version": row.api_version, "entry_url": row.entry_url})
+            LessonModuleDescriptor.model_validate(
+                {"id": row.id, "api_version": row.api_version, "entry_url": row.entry_url}
+            )
         )
     except ValueError:
         raise HTTPException(
@@ -53,7 +55,7 @@ async def register_module(descriptor: LessonModuleDescriptor, *, replace: bool =
         await run_in_threadpool(checked_asset, descriptor, reference[1])
     row = await db.get(LessonModule, id=descriptor.id)
     if row is None:
-        await db.add(LessonModule(**descriptor.dict()))
+        await db.add(LessonModule(**descriptor.model_dump()))
     elif (row.api_version, row.entry_url) != (descriptor.api_version, descriptor.entry_url):
         if not replace:
             raise ValueError("This module ID is already registered; use --replace for a reviewed publication")
