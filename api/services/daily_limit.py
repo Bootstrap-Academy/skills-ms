@@ -209,6 +209,9 @@ async def read_history_batch(user_id: str, payload: dict[str, Any]) -> LearningH
 
 
 async def challenge_history(user: User) -> tuple[set[UUID], set[tuple[str, str]]]:
+    if not settings.daily_limit_policy_enabled:
+        return set(), set()
+
     from api.services import rooms
     from api.services.courses import COURSES
 
@@ -635,6 +638,9 @@ async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bo
 
 async def backfill_user(user_id: str) -> int:
     """Materialize known historical progress; never infer a start from a skip."""
+    if not settings.daily_limit_policy_enabled:
+        return 0
+
     from api.services.courses import COURSES
     from api.services.curriculum import definitions
 

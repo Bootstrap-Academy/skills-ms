@@ -20,7 +20,7 @@ from api.endpoints import curriculum as curriculum_endpoints
 from api.endpoints.daily_limit import router as daily_router
 from api.endpoints.rooms import router as room_router
 from api.redis import redis
-from api.schemas.course import Course
+from api.schemas.course import Course, Section
 from api.schemas.daily_limit import (
     ChallengeAdmission,
     LearningHistory,
@@ -30,7 +30,7 @@ from api.schemas.daily_limit import (
 )
 from api.schemas.rooms import Catalogue
 from api.schemas.user import User
-from api.services import courses, daily_limit, rooms
+from api.services import courses, daily_limit, rooms, shop
 from api.services.user_deletion import delete_user_data
 from api.services.user_export import export_user_data
 from api.settings import settings
@@ -197,9 +197,73 @@ async def test_legacy_off_preserves_progress_without_recording_starts(
             mutate=True,
         )
         assert admission["allowed"] is True and admission["heart_policy"] == "legacy"
+        if not policy_enabled:
+            assert await daily_limit.backfill_user(USER.id) == 0
         assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 0
         assert await db.count(filter_by(models.LessonStartRequest, user_id=USER.id)) == 0
         assert await db.count(filter_by(models.PurchaseUser, user_id=USER.id)) == 1
+    history.assert_not_awaited()
+
+
+async def test_disabled_concrete_admission_preserves_course_rights_without_history(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    monkeypatch.setattr(settings, "daily_limit_policy_enabled", False)
+    monkeypatch.setattr(daily_limit, "policy", REAL_POLICY)
+    history = AsyncMock(side_effect=AssertionError("Disabled admission must not depend on Challenges history"))
+    monkeypatch.setattr(daily_limit, "read_history_batch", history)
+    owned = AsyncMock(return_value=[])
+    premium = AsyncMock(return_value=False)
+    monkeypatch.setattr(courses, "get_owned_courses", owned)
+    monkeypatch.setattr(shop, "has_premium", premium)
+    catalog.curriculum = None
+    catalog.sections = [
+        Section.parse_obj(
+            {
+                "id": "legacy-section",
+                "title": "Synthetic section",
+                "description": None,
+                "lectures": [
+                    {
+                        "id": "legacy-video",
+                        "title": "Synthetic video",
+                        "description": None,
+                        "type": "youtube",
+                        "video_id": "synthetic",
+                        "duration": 60,
+                    }
+                ],
+            }
+        )
+    ]
+    data = ChallengeAdmission(
+        task_id=None,
+        lecture_bindings=[LectureBinding(course_id=catalog.id, section_id="legacy-section", lecture_id="legacy-video")],
+        request_id=uuid4(),
+    )
+
+    async def allowed() -> None:
+        for mutate in (False, True):
+            async with db_context():
+                result = await daily_limit.challenge_admission(USER.id, data, mutate)
+                assert result["allowed"] is True and result["heart_policy"] == "legacy"
+                assert result["lesson"]["course_id"] == catalog.id and result["daily"] is None
+
+    await allowed()
+    catalog.price = 1000
+    for mutate in (False, True):
+        async with db_context():
+            with pytest.raises(HTTPException) as error:
+                await daily_limit.challenge_admission(USER.id, data, mutate)
+            assert error.value.status_code == 403
+    owned.return_value = [catalog.id]
+    await allowed()
+    owned.return_value = []
+    premium.return_value = True
+    await allowed()
+    async with db_context():
+        assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 0
+        assert await db.count(filter_by(models.LessonStartRequest, user_id=USER.id)) == 0
     history.assert_not_awaited()
 
 
