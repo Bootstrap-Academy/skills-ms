@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     reload: bool = False
 
     cache_ttl: int = 300
+    # Prepare the readers without activating the durable backend privacy policy.
+    profile_publications_enabled: bool = False
 
     jwt_secret: str = secrets.token_urlsafe(64)
 
