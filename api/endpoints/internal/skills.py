@@ -1,13 +1,14 @@
 from typing import Any
 from uuid import UUID
 
-from fastapi import APIRouter, Body, Query
+from fastapi import APIRouter, Body, HTTPException, Query, Response
 from pydantic import BaseModel
 
 from api import models
 from api.database import db, filter_by, select
 from api.exceptions.skill import SkillNotFoundException
 from api.schemas.skill import SubSkill
+from api.services import publications
 from api.services.benefits import XPAward, apply_xp
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
@@ -90,8 +91,88 @@ class Leaderboard(BaseModel):
     total: int
 
 
+class PublishedLeaderboard(Leaderboard):
+    scope_version: str
+    publication_epoch: UUID
+    epoch_revision: int
+
+
+class PublishedRank(BaseModel):
+    xp: int
+    rank: int | None
+    public_rank: int | None
+    scope_version: str
+    publication_epoch: UUID
+    epoch_revision: int
+
+
+async def published_leaderboard(
+    limit: int, offset: int, publication_epoch: UUID | None = None, scope_version: str | None = None
+) -> PublishedLeaderboard:
+    for _ in range(2):
+        snapshot = await publications.current_snapshot()
+        if (publication_epoch is not None and publication_epoch != snapshot.publication_epoch) or (
+            scope_version is not None and scope_version != snapshot.scope_version
+        ):
+            raise HTTPException(409, "Publication changed; reload the leaderboard", headers=publications.HEADERS)
+        result = PublishedLeaderboard(
+            leaderboard=[
+                LeaderboardUser(user=user, xp=xp, rank=rank)
+                for user, xp, rank in await models.XP.get_leaderboard(limit, offset, snapshot.user_ids)
+            ],
+            total=await models.XP.count_users(snapshot.user_ids),
+            **snapshot.epoch.ranking_metadata,
+        )
+        if await publications.current_epoch() == snapshot.epoch:
+            return result
+    raise publications.unavailable()
+
+
+async def published_rank(
+    user_id: str, publication_epoch: UUID | None = None, scope_version: str | None = None
+) -> PublishedRank:
+    for _ in range(2):
+        snapshot = await publications.current_snapshot()
+        if (publication_epoch is not None and publication_epoch != snapshot.publication_epoch) or (
+            scope_version is not None and scope_version != snapshot.scope_version
+        ):
+            raise HTTPException(409, "Publication changed; reload the leaderboard", headers=publications.HEADERS)
+        xp = await models.XP.get_user_xp(user_id)
+        qualified = user_id in snapshot.user_ids and await db.exists(filter_by(models.XP, user_id=user_id))
+        rank = await models.XP.rank_of(xp, snapshot.user_ids) if qualified else None
+        result = PublishedRank(xp=xp, rank=rank, public_rank=rank, **snapshot.epoch.ranking_metadata)
+        if await publications.current_epoch() == snapshot.epoch:
+            return result
+    raise publications.unavailable()
+
+
+@router.get("/published-leaderboard", responses=responses(PublishedLeaderboard))
+async def get_published_leaderboard(
+    response: Response,
+    limit: int = Query(ge=0, le=100),
+    offset: int = Query(ge=0),
+    publication_epoch: UUID = Query(),
+    scope_version: str = Query(),
+) -> PublishedLeaderboard:
+    response.headers.update(publications.HEADERS)
+    return await published_leaderboard(limit, offset, publication_epoch, scope_version)
+
+
+@router.get("/published-leaderboard/{user_id}", responses=responses(PublishedRank))
+async def get_published_rank(
+    user_id: UUID, response: Response, publication_epoch: UUID = Query(), scope_version: str = Query()
+) -> PublishedRank:
+    # This internal score is available for the owner's private card. The
+    # caller must never expose it to another user when public_rank is null.
+    response.headers.update(publications.HEADERS)
+    return await published_rank(str(user_id), publication_epoch, scope_version)
+
+
 @router.get("/leaderboard", responses=responses(Leaderboard))
-async def get_leaderboard(limit: int, offset: int) -> Leaderboard:
+async def get_leaderboard(limit: int, offset: int, response: Response) -> PublishedLeaderboard | Leaderboard:
+    if await publications.use_shared_rankings():
+        response.headers.update(publications.HEADERS)
+        return await published_leaderboard(limit, offset)
     return Leaderboard(
         leaderboard=[
             LeaderboardUser(user=user, xp=xp, rank=rank)
@@ -102,6 +183,9 @@ async def get_leaderboard(limit: int, offset: int) -> Leaderboard:
 
 
 @router.get("/leaderboard/{user_id}", responses=responses(Rank))
-async def get_leaderboard_user(user_id: str) -> Rank:
+async def get_leaderboard_user(user_id: str, response: Response) -> PublishedRank | Rank:
+    if await publications.use_shared_rankings():
+        response.headers.update(publications.HEADERS)
+        return await published_rank(user_id)
     xp = await models.XP.get_user_xp(user_id)
     return Rank(xp=xp, rank=await models.XP.rank_of(xp))
