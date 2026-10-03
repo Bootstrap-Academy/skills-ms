@@ -18,6 +18,7 @@ class InternalServiceError(Exception):
 class InternalService(Enum):
     AUTH = settings.auth_url
     SHOP = settings.shop_url
+    CHALLENGES = settings.challenges_url
 
     def _get_token(self) -> str:
         audience = self.name.lower()
@@ -35,8 +36,9 @@ class InternalService(Enum):
 
     @property
     def client(self) -> AsyncClient:
+        token = self._get_token()
         return AsyncClient(
             base_url=self.value.rstrip("/") + "/_internal",
-            headers={"Authorization": self._get_token()},
+            headers={"Authorization": f"Bearer {token}" if self is InternalService.CHALLENGES else token},
             event_hooks={"response": [self._handle_error]},
         )

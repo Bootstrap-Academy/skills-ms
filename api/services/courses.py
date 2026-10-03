@@ -1,6 +1,10 @@
 import pydantic
-from yaml import safe_load
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+from yaml import YAMLError, safe_load
 
+from api import models
+from api.database import db
 from api.logger import get_logger
 from api.schemas.course import Course
 from api.settings import settings
@@ -9,13 +13,44 @@ from api.settings import settings
 logger = get_logger(__name__)
 
 
+async def get_owned_courses(user_id: str) -> set[str]:
+    """Read paid and historical access through the committed admission pool."""
+    # No cached negative or old request snapshot may hide a committed purchase.
+    query = (
+        select(models.CourseAccess.course_id)
+        .where(models.CourseAccess.user_id == user_id)
+        .union(select(models.LastWatch.course_id).where(models.LastWatch.user_id == user_id))
+    )
+    if db.admission_engine is None:
+        raise RuntimeError("Committed course admission pool is unavailable")
+    # This reserved pool performs only the short SELECT and never waits for a
+    # slot in the outer request pool retained by callers waiting for admission.
+    async with AsyncSession(db.admission_engine) as session:
+        return set((await session.execute(query)).scalars())
+
+
 def _load_courses() -> dict[str, Course]:
     courses = {}
-    for file in sorted(settings.courses.glob("*.yml")):
-        with file.open() as f:
-            _id = file.name.removesuffix(".yml")
-            logger.debug(f"loading course {_id}")
-            courses[_id] = pydantic.parse_obj_as(Course, {"id": _id} | safe_load(f))
+    directories = [settings.courses]
+    if private := settings.private_courses_directory:
+        if not private.is_absolute() or not private.is_dir() or private.is_symlink():
+            raise ValueError("The configured private course directory is unavailable")
+        directories.append(private)
+    for directory in directories:
+        for file in sorted(directory.glob("*.yml")):
+            if directory == settings.private_courses_directory and (not file.is_file() or file.is_symlink()):
+                raise ValueError("Private course definitions must be regular files")
+            with file.open() as f:
+                _id = file.name.removesuffix(".yml")
+                logger.debug(f"loading course {_id}")
+                try:
+                    definition = safe_load(f)
+                    if not isinstance(definition, dict) or ("id" in definition and definition["id"] != _id):
+                        raise ValueError("Course ID must match its filename")
+                    courses[_id] = pydantic.parse_obj_as(Course, {**definition, "id": _id})
+                except (ValueError, TypeError, YAMLError):
+                    # Pydantic/YAML errors may contain private teaching text.
+                    raise ValueError(f"Invalid course definition: {_id}") from None
     return courses
 
 

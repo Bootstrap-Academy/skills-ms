@@ -6,6 +6,7 @@ skills:
     name: Python Grundlagen
     dependencies: []
     courses:
+      - python-foundations
       - python
   java_grundlagen:
     name: Java Grundlagen

@@ -7,7 +7,7 @@ readme = "README.md"
 homepage = "https://github.com/Bootstrap-Academy/skills-ms"
 repository = "https://github.com/Bootstrap-Academy/skills-ms"
 packages = [{ include = "api" }]
-include = ["pyproject.toml", "templates/*"]
+include = ["pyproject.toml", "templates/*", "api/content/*.json"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
@@ -48,6 +48,7 @@ ruff = "^0.4.2"
 [tool.poetry.scripts]
 api = "api.main:main"
 sweep-deleted-users = "api.sweep:main"
+register-lesson-module = "api.register_lesson_module:main"
 alembic = "alembic.config:main"
 
 [tool.poe.tasks]

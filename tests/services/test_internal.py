@@ -7,6 +7,7 @@ from pytest_mock import MockerFixture
 
 from api.services.internal import InternalService, InternalServiceError
 from api.settings import settings
+from api.utils.jwt import decode_jwt
 
 
 async def test__internal_service__get_token(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> None:
@@ -72,3 +73,13 @@ async def test__internal_service__client(mocker: MockerFixture, monkeypatch: Mon
     event_hooks = args["event_hooks"]
     assert [*event_hooks] == ["response"]
     assert event_hooks["response"] == [service._handle_error]
+
+
+async def test_challenges_client_uses_bearer_and_its_own_audience(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "internal_jwt_secret_challenges", "synthetic challenge audience secret")
+    async with InternalService.CHALLENGES.client as client:
+        header = client.headers["Authorization"]
+        assert header.startswith("Bearer ")
+        token = header.removeprefix("Bearer ")
+        assert decode_jwt(token, audience=["challenges"], secret=settings.internal_jwt_secret_challenges)
+        assert decode_jwt(token, audience=["skills"], secret=settings.internal_jwt_secret_challenges) is None

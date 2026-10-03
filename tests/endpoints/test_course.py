@@ -1,12 +1,14 @@
 from typing import Any
 from unittest.mock import AsyncMock
 
+import pytest
+from pydantic import ValidationError
 from pytest_mock import MockerFixture
 
 from api import models
 from api.database import db, db_context
 from api.endpoints.course import get_accessible_courses, get_unlocked_courses, list_courses
-from api.schemas.course import Course
+from api.schemas.course import Course, Section, YoutubeLecture
 from api.schemas.user import User
 from api.utils.utc import utcnow
 
@@ -80,6 +82,23 @@ async def test__get_accessible_courses__premium_includes_paid_courses(mocker: Mo
 
 async def test__get_accessible_courses__reports_the_progress(mocker: MockerFixture) -> None:
     user = _setup(mocker, premium=True)
+    paid = COURSES["paid"].copy(
+        update={
+            "sections": [
+                Section(
+                    id="section",
+                    title="Section",
+                    description=None,
+                    lectures=[
+                        YoutubeLecture(
+                            id="lecture", title="Lecture", description=None, video_id="synthetic", duration=60
+                        )
+                    ],
+                )
+            ]
+        }
+    )
+    mocker.patch("api.endpoints.course.COURSES", {**COURSES, "paid": paid})
 
     async with db_context():
         await db.add(models.LectureProgress(user_id="user", course_id="paid", lecture_id="lecture", completed=utcnow()))
@@ -117,3 +136,21 @@ async def test__list_courses__owned_without_a_user(mocker: MockerFixture) -> Non
     async with db_context():
         assert _ids(await _list(None, True)) == set()
         assert _ids(await _list(None, False)) == set(COURSES)
+
+
+def test_learning_course_accepts_optional_video_and_localized_metadata() -> None:
+    source = {
+        **COURSES["free"].dict(exclude={"sections"}),
+        "learning_path_id": "explicit-path",
+        "translations": {"en": {"title": "Learn Python", "learning_goals": ["Use a variable"]}},
+    }
+    course = Course.parse_obj(source)
+    assert course.sections == []
+    summary = course.summary(set(), learning_completed=False)
+    assert summary.completed is False and summary.learning_path_id == "explicit-path"
+    assert summary.translations["en"].title == "Learn Python"
+    assert summary.translations["en"].learning_goals == ["Use a variable"]
+    assert course.to_user_course(set()).translations == course.translations
+    assert course.summary(set(), learning_completed=True).completed is True
+    with pytest.raises(ValidationError):
+        Course.parse_obj({**source, "learning_path_id": "../../not-a-path"})

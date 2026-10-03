@@ -25,13 +25,27 @@ class Settings(BaseSettings):
     internal_jwt_secret_auth: str = ""
     internal_jwt_secret_shop: str = ""
     internal_jwt_secret_skills: str = ""
+    internal_jwt_secret_challenges: str = ""
 
     auth_url: str = ""
     shop_url: str = ""
+    # Operator-owned service origin; room content and client requests supply only IDs.
+    challenges_url: str = Field("http://127.0.0.1:8005", regex=r"^https?://[^?#@]+$")
+    rooms_enabled: bool = False
+    # Disabled until the backend policy API is deployed. Never activates new terms.
+    daily_limit_policy_enabled: bool = False
+    learning_rooms_content: Path | None = None
+    learning_rooms_exercise_refs: dict[str, dict[str, str]] = Field(default_factory=dict)
+    lesson_module_origins: list[str] = Field(default_factory=list)
+    lesson_module_local_development: bool = False
+    private_lesson_modules_root: Path | None = None
+    private_lesson_module_grant_ttl: int = Field(3600, ge=60, le=8 * 60 * 60)
+    character_areas: Path = Path(__file__).parent / "content/character_areas.json"
 
     lecture_xp: int = 10
 
     courses: Path = Path("config/courses")
+    private_courses_directory: Path | None = None
 
     public_base_url: str = "http://localhost:8000"
     mp4_lectures: Path = Path("lectures")
@@ -73,6 +87,7 @@ class Settings(BaseSettings):
             "auth": self.internal_jwt_secret_auth,
             "shop": self.internal_jwt_secret_shop,
             "skills": self.internal_jwt_secret_skills,
+            "challenges": self.internal_jwt_secret_challenges,
         }
         return secrets_by_audience.get(audience, "") or self.jwt_secret
 

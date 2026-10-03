@@ -1,15 +1,31 @@
 from .bookmarks import SubSkillBookmark
 from .course_access import CourseAccess
+from .daily_limit import DailyLimitSettings, LessonStart, LessonStartRequest
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
+from .lesson_module import LessonModule
+from .purchase import CoursePurchase, PurchaseUser
+from .retained_right import CourseRightGrant, RetainedCourseRight
+from .room import RoomRequest, RoomState
 from .root_skill import RootSkill
 from .skill_course import SkillCourse
 from .sub_skill import SubSkill, SubSkillDependency
 from .tree_settings import TreeSettings
 from .xp import XP
+from .xp_operation import XPOperation
 
 
 __all__ = [
+    "DailyLimitSettings",
+    "LessonStart",
+    "LessonStartRequest",
+    "LessonModule",
+    "RoomRequest",
+    "RoomState",
+    "CoursePurchase",
+    "PurchaseUser",
+    "RetainedCourseRight",
+    "CourseRightGrant",
     "CourseAccess",
     "LastWatch",
     "LectureProgress",
@@ -19,5 +35,6 @@ __all__ = [
     "SubSkillDependency",
     "TreeSettings",
     "XP",
+    "XPOperation",
     "SubSkillBookmark",
 ]
