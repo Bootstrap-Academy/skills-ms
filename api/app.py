@@ -16,6 +16,7 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from . import __version__
 from .database import db, db_context
 from .endpoints import ROUTER, TAGS
+from .exceptions.api_exception import CodedAPIException
 from .logger import get_logger, setup_sentry
 from .settings import settings
 from .utils.cache import clear_cache
@@ -70,6 +71,8 @@ async def rollback_on_exception(request: Request, exc: HTTPException) -> Respons
             headers={"Cache-Control": "private, no-store"},
             content=jsonable_encoder({"detail": exc.detail, "code": exc.code, "daily": exc.daily}),
         )
+    if isinstance(exc, CodedAPIException):
+        return exc.response()
     return await http_exception_handler(request, exc)
 
 
@@ -83,14 +86,16 @@ async def on_startup() -> None:
         load_catalogue()
     await clear_cache("courses")
     app.state.purchase_recovery = asyncio.create_task(purchase_recovery())
+    app.state.milestone_recovery = asyncio.create_task(milestone_recovery())
 
 
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
     try:
-        if task := getattr(app.state, "purchase_recovery", None):
-            task.cancel()
-            await asyncio.gather(task, return_exceptions=True)
+        for name in ("purchase_recovery", "milestone_recovery"):
+            if task := getattr(app.state, name, None):
+                task.cancel()
+                await asyncio.gather(task, return_exceptions=True)
     finally:
         await db.dispose()
 
@@ -108,4 +113,15 @@ async def purchase_recovery() -> None:
             await recover()
         except Exception:
             logger.exception("Course purchase recovery unavailable")
+        await asyncio.sleep(30)
+
+
+async def milestone_recovery() -> None:
+    from api.services.lesson_milestones import recover
+
+    while True:
+        try:
+            await recover()
+        except Exception:
+            logger.exception("Lesson milestone delivery unavailable")
         await asyncio.sleep(30)

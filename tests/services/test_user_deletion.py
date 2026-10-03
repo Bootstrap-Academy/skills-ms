@@ -48,6 +48,50 @@ async def _add_user_data(user_id: str) -> None:
             created_at=utcnow(),
         )
     )
+    await db.add(
+        models.LlmVerdict(
+            user_id=user_id,
+            request_id="request",
+            unit_id="intro",
+            profile="grader",
+            profile_sha256="a" * 64,
+            answer_sha256="b" * 64,
+            locale="de",
+            score=3,
+            max_score=4,
+            model="gpt-6-sol",
+            graded_at=utcnow(),
+            used_at=utcnow(),
+        )
+    )
+    await db.add(
+        models.LessonMilestoneDelivery(
+            user_id=user_id,
+            unit_id="intro",
+            skill_id="sub",
+            xp=20,
+            completion="llm_verdict",
+            state="pending",
+            attempts=0,
+            next_attempt_at=utcnow(),
+            created_at=utcnow(),
+        )
+    )
+    await db.add(
+        models.CourseProject(
+            user_id=user_id, course_id="course", revision=1, state={"bot": {"name": "Klingel"}}, updated_at=utcnow()
+        )
+    )
+    await db.add(
+        models.CourseProjectRequest(
+            user_id=user_id,
+            request_id="request",
+            course_id="course",
+            revision=1,
+            fingerprint="f" * 64,
+            updated_at=utcnow(),
+        )
+    )
     await db.add(models.CourseAccess(user_id=user_id, course_id="course"))
     await db.add(models.LastWatch(user_id=user_id, course_id="course", timestamp=utcnow()))
     await db.add(models.LectureProgress(user_id=user_id, course_id="course", lecture_id="lecture", completed=utcnow()))

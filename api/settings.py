@@ -1,8 +1,8 @@
 import secrets
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import BaseSettings, Field
+from pydantic import BaseSettings, Field, validator
 
 
 class Settings(BaseSettings):
@@ -40,6 +40,20 @@ class Settings(BaseSettings):
     lesson_module_local_development: bool = False
     private_lesson_modules_root: Path | None = None
     private_lesson_module_grant_ttl: int = Field(3600, ge=60, le=8 * 60 * 60)
+    # LLM gateway (llm-ms). The grant key is shared only with llm-ms and signs lesson grants. Grading
+    # verdicts from llm-ms are checked with their own verdict key; there is no fallback to the grant key.
+    # Like in llm-ms, each key is at least 32 bytes and differs from every other key (also JWT_SECRET and
+    # INTERNAL_JWT_SECRET_*). Give each key either as a value or as a credential file (`*_FILE`, trailing
+    # CR/LF removed as llm-ms does), never both. Without a usable key, grants or graded completions are off.
+    llm_grant_secret: str = ""
+    llm_grant_secret_file: Path | None = None
+    llm_verdict_secret: str = ""
+    llm_verdict_secret_file: Path | None = None
+    # The environment whose verdicts count here (llm-ms `grading.environment`, claim `env`), e.g. "prod" on
+    # the production host and "test" on the test host; 1 to 32 characters a-z, 0-9 and -, starting with a
+    # letter. Empty or invalid: graded completions are off, like without a verdict key.
+    llm_verdict_env: str = ""
+    llm_grant_ttl: int = Field(2 * 60 * 60, ge=60, le=8 * 60 * 60)
     character_areas: Path = Path(__file__).parent / "content/character_areas.json"
 
     lecture_xp: int = 10
@@ -90,6 +104,12 @@ class Settings(BaseSettings):
             "challenges": self.internal_jwt_secret_challenges,
         }
         return secrets_by_audience.get(audience, "") or self.jwt_secret
+
+    @validator("llm_grant_secret_file", "llm_verdict_secret_file", pre=True)
+    @classmethod
+    def unset_empty_path(cls, value: Any) -> Any:
+        # An empty `*_FILE=` in an environment file means "not configured", not the working directory.
+        return None if value == "" else value
 
 
 settings = Settings()  # type: ignore
