@@ -260,6 +260,7 @@ async def test_large_snapshot_uses_one_postgres_array_bind() -> None:
     participants = IDS[1:] + tuple(str(UUID(int=number)) for number in range(100, 33100))
     async with db_context():
         await seed()
+        await db.session.flush()
         query = models.XP.published_participants(select(models.XP.user_id, func.sum(models.XP.xp)), participants)
         query = query.group_by(models.XP.user_id)
         compiled = query.compile(dialect=db.engine.dialect)
@@ -270,6 +271,7 @@ async def test_large_snapshot_uses_one_postgres_array_bind() -> None:
         if isinstance(plans, str):
             plans = json.loads(plans)
         plan = plans[0]
+        assert plan["Plan"]["Actual Rows"] == 5
         assert await models.XP.count_users(participants) == 5
         assert [rank for _, _, rank in await models.XP.get_leaderboard(100, 0, participants)] == [1, 2, 2, 4, 5]
         print(
