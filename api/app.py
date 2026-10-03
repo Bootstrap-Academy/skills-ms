@@ -22,6 +22,7 @@ from .utils.cache import clear_cache
 from .utils.debug import check_responses
 from .utils.docs import add_endpoint_links_to_openapi_docs
 from api.services.daily_limit import AccessError
+from api.services.internal import client_ssl_context
 
 
 T = TypeVar("T")
@@ -85,6 +86,8 @@ async def rollback_on_exception(request: Request, exc: HTTPException) -> Respons
 
 @app.on_event("startup")
 async def on_startup() -> None:
+    # Prepare verified internal TLS trust before the first learner request.
+    client_ssl_context()
     if settings.learning_rooms_content is not None:
         from api.services.rooms import load_catalogue
 
