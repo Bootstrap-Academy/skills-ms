@@ -16,7 +16,6 @@ from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, delete, filter_by
-from api.models import PurchaseUser
 from api.models.room import RoomRequest, RoomState
 from api.schemas.course import Course
 from api.schemas.daily_limit import DailyStatus
@@ -41,7 +40,7 @@ from api.schemas.user import User
 from api.services import daily_limit
 from api.services.courses import COURSES, get_owned_courses
 from api.services.lesson_modules import resolve_module
-from api.services.purchases import lock_user
+from api.services.purchases import lock_user, read_user_guard
 from api.services.shop import has_premium
 from api.settings import settings
 from api.utils.utc import utcnow
@@ -83,7 +82,7 @@ def catalogue(*, deep: bool = True) -> Catalogue:
 
 async def read_states(user_id: str, unit_ids: set[str] | None = None) -> dict[str, RoomState]:
     # Reads never create the durable user lock or a working-state row.
-    guard = await db.get(PurchaseUser, user_id=user_id)
+    guard = await read_user_guard(user_id)
     if guard is not None and guard.deleted:
         raise HTTPException(401, "This account is no longer available")
     query = filter_by(RoomState, user_id=user_id).execution_options(populate_existing=True)
