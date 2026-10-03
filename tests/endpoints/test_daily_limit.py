@@ -18,11 +18,13 @@ from api.database import db, db_context, filter_by
 from api.endpoints import course as course_endpoints
 from api.endpoints import curriculum as curriculum_endpoints
 from api.endpoints.daily_limit import router as daily_router
+from api.endpoints.internal.daily_limit import check_batch
 from api.endpoints.rooms import router as room_router
 from api.redis import redis
 from api.schemas.course import Course, Section
 from api.schemas.daily_limit import (
     ChallengeAdmission,
+    ChallengeReadBatch,
     LearningHistory,
     LearningPolicy,
     LectureBinding,
@@ -39,6 +41,37 @@ from api.utils.utc import utcnow
 
 USER = User(id="daily-user", admin=False, email_verified=True)
 REAL_POLICY = daily_limit.policy
+
+
+async def test_read_batch_keeps_catalogue_and_standalone_subtasks_distinct(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    task, locked, standalone = uuid4(), uuid4(), uuid4()
+    value = rooms.load_catalogue()
+    value.units[0].completion = None
+    value.units[0].room = "exercise"
+    monkeypatch.setattr(
+        settings,
+        "learning_rooms_exercise_refs",
+        {"unit-0": {"type": "coding", "task_id": str(task), "subtask_id": str(locked)}},
+    )
+    catalog.price = 1000
+    monkeypatch.setattr(courses, "get_owned_courses", AsyncMock(return_value=[]))
+    monkeypatch.setattr(shop, "has_premium", AsyncMock(return_value=False))
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(
+            return_value=LearningPolicy(mode="legacy", premium=False, single_course_sales=True, heart_sales=True)
+        ),
+    )
+    data = ChallengeReadBatch.parse_obj(
+        {"requests": [{"task_id": task, "subtask_id": locked}, {"task_id": task, "subtask_id": standalone}]}
+    )
+    async with db_context():
+        assert await check_batch(USER.id, data) == {"readable": [False, True]}
+        assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 0
+        assert await db.count(filter_by(models.LessonStartRequest, user_id=USER.id)) == 0
 
 
 @pytest.fixture
