@@ -1,3 +1,4 @@
+import ssl
 from datetime import timedelta
 from unittest.mock import AsyncMock, MagicMock
 
@@ -5,7 +6,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from pytest_mock import MockerFixture
 
-from api.services.internal import InternalService, InternalServiceError
+from api.services.internal import InternalService, InternalServiceError, client_ssl_context
 from api.settings import settings
 from api.utils.jwt import decode_jwt
 
@@ -83,3 +84,18 @@ async def test_challenges_client_uses_bearer_and_its_own_audience(monkeypatch: M
         token = header.removeprefix("Bearer ")
         assert decode_jwt(token, audience=["challenges"], secret=settings.internal_jwt_secret_challenges)
         assert decode_jwt(token, audience=["skills"], secret=settings.internal_jwt_secret_challenges) is None
+
+
+async def test_internal_clients_reuse_verified_trust_without_reusing_authority(monkeypatch: MonkeyPatch) -> None:
+    monkeypatch.setattr(settings, "internal_jwt_secret_challenges", "first synthetic audience key")
+    async with InternalService.CHALLENGES.client as first:
+        first_token = first.headers["Authorization"].removeprefix("Bearer ")
+    monkeypatch.setattr(settings, "internal_jwt_secret_challenges", "second synthetic audience key")
+    async with InternalService.CHALLENGES.client as second:
+        second_token = second.headers["Authorization"].removeprefix("Bearer ")
+    assert decode_jwt(first_token, audience=["challenges"], secret="first synthetic audience key")
+    assert decode_jwt(second_token, audience=["challenges"], secret="second synthetic audience key")
+    assert decode_jwt(second_token, audience=["challenges"], secret="first synthetic audience key") is None
+    assert client_ssl_context() is client_ssl_context()
+    assert client_ssl_context().verify_mode == ssl.CERT_REQUIRED
+    assert client_ssl_context().check_hostname is True

@@ -60,10 +60,14 @@ def load_catalogue() -> Catalogue:
         raise HTTPException(503, "Learning rooms are temporarily unavailable") from None
 
 
-def catalogue() -> Catalogue:
+def catalogue(*, deep: bool = True) -> Catalogue:
     if not settings.rooms_enabled:
         raise HTTPException(404, "Learning rooms are unavailable")
-    content = load_catalogue().copy(deep=True)
+    source = load_catalogue()
+    # Admission reads identities, never presentation content. Copy its unit
+    # records so exercise overrides remain request-local without cloning the
+    # nested lesson content. Callers that edit content retain the deep default.
+    content = source.copy(deep=True) if deep else source.copy(update={"units": [unit.copy() for unit in source.units]})
     by_id = {unit.id: unit for unit in content.units}
     try:
         for unit_id, reference in settings.learning_rooms_exercise_refs.items():
