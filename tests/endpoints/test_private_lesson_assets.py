@@ -11,6 +11,7 @@ import httpx
 import pytest
 from fastapi import Depends, FastAPI, HTTPException, Request
 from pytest import MonkeyPatch
+from redis.exceptions import RedisError
 
 from api import models
 from api.auth import user_auth
@@ -140,8 +141,10 @@ async def test_admission_expiry_renewal_and_mutation_keep_module_identity(
         assert asset.status_code == 200
         assert asset.headers["x-accel-redirect"] == f"/_private-lesson-modules/{directory.name}/entry.mjs"
         assert asset.headers["content-type"] == "application/javascript"
-        assert asset.headers["cache-control"] == "private, no-store"
-        assert asset.headers["referrer-policy"] == "no-referrer"
+        # Browser headers are composed once by Nginx after this authorization
+        # handoff; real Nginx tests in infrastructure cover the delivered bytes.
+        for header in ("cache-control", "referrer-policy", "x-content-type-options"):
+            assert header not in asset.headers
     cache.now += settings.private_lesson_module_grant_ttl + 1
     assert (await client.get(path)).status_code == 404
     # Expired/cleared Redis does not change the component identity during the
@@ -225,3 +228,18 @@ async def test_registry_replacement_keeps_old_grants_only_until_their_existing_e
     cache.now = settings.private_lesson_module_grant_ttl + 1
     assert (await client.get(old_path)).status_code == 404
     assert (await client.get(new_path)).status_code == 200
+
+
+@pytest.mark.parametrize("method", ["GET", "HEAD"])
+async def test_redis_failure_keeps_the_asset_service_error_contract(
+    setup_private: tuple[httpx.AsyncClient, IsolatedRedis, Path], monkeypatch: MonkeyPatch, method: str
+) -> None:
+    client, cache, _ = setup_private
+    opened = await client.get("/courses/composed/lessons/combined", headers={"Authorization": "Bearer owner"})
+    path = urlsplit(opened.json()["activities"][0]["module"]["entry_url"]).path.removeprefix("/skills")
+    monkeypatch.setattr(cache, "get", AsyncMock(side_effect=RedisError("Isolated Redis failure")))
+    response = await client.request(method, path, headers={"Range": "bytes=0-8"})
+    assert response.status_code == 503 and response.content == b""
+    assert "x-accel-redirect" not in response.headers
+    for header in ("cache-control", "referrer-policy", "x-content-type-options"):
+        assert header not in response.headers
