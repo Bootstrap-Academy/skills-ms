@@ -25,7 +25,6 @@ from api.services.user_export import export_user_data
 from api.settings import settings
 from api.utils.utc import utcnow
 
-
 REAL_CHALLENGE_STATUS = rooms.challenge_status
 USER = User(id="subject-a", email_verified=True, admin=False)
 REF = {"type": "coding", "task_id": str(uuid4()), "subtask_id": str(uuid4())}

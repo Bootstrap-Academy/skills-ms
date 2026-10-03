@@ -13,7 +13,6 @@ from api.logger import get_logger
 from api.schemas import BaseModel
 from api.services.courses import COURSES
 
-
 logger = get_logger(__name__)
 
 

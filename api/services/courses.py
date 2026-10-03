@@ -8,7 +8,6 @@ from api.logger import get_logger
 from api.schemas.course import Course
 from api.settings import settings
 
-
 logger = get_logger(__name__)
 
 

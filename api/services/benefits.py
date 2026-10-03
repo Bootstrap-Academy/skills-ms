@@ -18,7 +18,6 @@ from api.services.auth import get_user_status
 from api.services.purchases import lock_user
 from api.utils.utc import utcnow
 
-
 XPAmount = Annotated[int, Field(strict=True, ge=-9223372036854775808, le=9223372036854775807)]
 
 

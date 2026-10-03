@@ -4,7 +4,6 @@ from api.schemas.course import Course
 from api.services.courses import COURSES
 from api.utils.docs import responses
 
-
 router = APIRouter()
 
 

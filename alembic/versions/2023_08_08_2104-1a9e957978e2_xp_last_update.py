@@ -10,7 +10,6 @@ import sqlalchemy as sa
 
 from api.database.database import UTCDateTime
 
-
 # revision identifiers, used by Alembic.
 revision = "1a9e957978e2"
 down_revision = "31a8aabbe201"

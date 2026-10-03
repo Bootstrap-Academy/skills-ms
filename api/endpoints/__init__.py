@@ -6,7 +6,6 @@ from . import bookmarks, character_areas, course, curriculum, daily_limit, learn
 from .internal import INTERNAL_ROUTERS
 from ..auth import internal_auth
 
-
 ROUTER = APIRouter()
 TAGS: list[dict[str, Any]] = []
 

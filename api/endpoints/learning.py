@@ -20,7 +20,6 @@ from api.services.courses import COURSES
 from api.services.internal import InternalService
 from api.settings import settings
 
-
 router = APIRouter(prefix="/learning")
 
 

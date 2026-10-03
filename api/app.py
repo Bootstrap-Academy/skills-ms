@@ -24,7 +24,6 @@ from .utils.debug import check_responses
 from .utils.docs import add_endpoint_links_to_openapi_docs
 from api.services.daily_limit import AccessError
 
-
 T = TypeVar("T")
 
 logger = get_logger(__name__)

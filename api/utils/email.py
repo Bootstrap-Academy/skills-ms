@@ -16,7 +16,6 @@ from .async_thread import run_in_thread
 from ..logger import get_logger
 from ..settings import settings
 
-
 logger = get_logger(__name__)
 
 

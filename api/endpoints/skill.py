@@ -29,7 +29,6 @@ from api.services.courses import COURSES
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
 
-
 router = APIRouter()
 
 

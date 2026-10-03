@@ -3,7 +3,6 @@ import uvicorn
 from .logger import get_logger
 from .settings import settings
 
-
 get_logger(__name__)
 
 

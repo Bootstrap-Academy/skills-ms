@@ -4,7 +4,6 @@ from starlette.exceptions import HTTPException
 
 from api.app import app
 
-
 pytest_plugins = "tests.fixtures"
 
 Select.__eq__ = Select.compare  # type: ignore

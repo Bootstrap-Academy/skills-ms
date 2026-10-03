@@ -7,7 +7,6 @@ from api.logger import get_logger
 from api.settings import settings
 from api.utils.jwt import encode_jwt
 
-
 logger = get_logger(__name__)
 
 

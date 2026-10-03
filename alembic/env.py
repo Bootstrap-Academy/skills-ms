@@ -11,7 +11,6 @@ from api import models  # noqa
 from api.database.database import Base
 from api.settings import settings
 
-
 NAME = "skills"
 
 

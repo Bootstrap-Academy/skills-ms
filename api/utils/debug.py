@@ -9,7 +9,6 @@ from starlette.concurrency import iterate_in_threadpool
 
 from api.logger import get_logger
 
-
 logger = get_logger(__name__)
 
 

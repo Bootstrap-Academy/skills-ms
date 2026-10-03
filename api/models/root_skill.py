@@ -7,7 +7,6 @@ from sqlalchemy.orm import Mapped, relationship
 
 from api.database import Base
 
-
 if TYPE_CHECKING:
     from .sub_skill import SubSkill
 

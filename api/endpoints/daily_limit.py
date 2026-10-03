@@ -9,7 +9,6 @@ from api.schemas.daily_limit import DailyStatus, StartLesson, StartResult
 from api.schemas.user import User
 from api.services import daily_limit
 
-
 router = APIRouter(dependencies=[require_verified_email])
 
 

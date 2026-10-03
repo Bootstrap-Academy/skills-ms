@@ -8,7 +8,6 @@ from types import ModuleType
 from typing import AsyncContextManager, AsyncIterator, Callable, TypeVar, cast
 from unittest.mock import MagicMock
 
-
 T = TypeVar("T")
 
 

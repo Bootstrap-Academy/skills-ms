@@ -7,7 +7,6 @@ from api.services.user_deletion import delete_user_data
 from api.services.user_export import export_user_data
 from api.utils.docs import responses
 
-
 router = APIRouter()
 
 

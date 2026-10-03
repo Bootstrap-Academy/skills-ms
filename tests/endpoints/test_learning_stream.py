@@ -20,7 +20,6 @@ from api.redis import redis
 from api.schemas.user import User
 from api.settings import settings
 
-
 DATA = bytes(index % 256 for index in range(2225))
 URL = "/learning/lectures/synthetic-token/course_lecture.mp4"
 

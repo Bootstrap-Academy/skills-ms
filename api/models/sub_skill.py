@@ -9,7 +9,6 @@ from api.database import Base
 from api.models.root_skill import RootSkill
 from api.schemas import skill as schemas
 
-
 if TYPE_CHECKING:
     from .skill_course import SkillCourse
     from .xp import XP

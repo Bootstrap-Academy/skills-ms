@@ -25,7 +25,6 @@ from api.services.purchases import lock_user
 from api.settings import settings
 from api.utils.utc import utcnow
 
-
 logger = get_logger(__name__)
 BERLIN = ZoneInfo("Europe/Berlin")
 

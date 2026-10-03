@@ -10,7 +10,6 @@ import sqlalchemy as sa
 
 from api import models
 
-
 # revision identifiers, used by Alembic.
 revision = "4e5d21483ac8"
 down_revision = "e4a1b873b65a"

@@ -8,7 +8,6 @@ from redis.exceptions import RedisError
 
 from api.services.private_lesson_modules import asset_redirect
 
-
 router = APIRouter()
 
 

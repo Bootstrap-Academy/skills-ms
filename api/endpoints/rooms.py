@@ -8,7 +8,6 @@ from api.schemas.user import User
 from api.services import rooms
 from api.settings import settings
 
-
 router = APIRouter()
 
 

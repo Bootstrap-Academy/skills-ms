@@ -23,7 +23,6 @@ from api.schemas.course import Course
 from api.services.auth import get_user_status
 from api.services.internal import InternalService
 
-
 logger = get_logger(__name__)
 
 
