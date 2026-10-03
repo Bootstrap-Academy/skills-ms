@@ -203,6 +203,18 @@ events. Keep CORS/CSP and security headers in the actual evaluated Nginx config;
 an API-only test of the redirect header does not prove byte delivery or CORS.
 Disable public caching on success and failure, and reject direct internal URLs.
 
+The private Nginx locations are the single source of the browser header policy:
+exactly one `Cache-Control: private, no-store`, `Referrer-Policy: no-referrer`
+and `X-Content-Type-Options: nosniff`, with the existing frame, HSTS and CORS
+policy retained. Apply it to the proxy location and the internal file location,
+including HEAD, Range and failures. Skills supplies only authorization, the
+X-Accel target and MIME; it does not duplicate those browser headers. Deploy
+the matching infrastructure policy first: it also normalizes older Skills
+responses during the transition. Infrastructure's `private-lesson-header-tests`
+uses the actual evaluated locations and real Nginx responses; run it alongside
+these API admission tests. No asset CSP is added; the existing frontend policy
+continues to govern execution of an imported module.
+
 This feature changes neither prices nor native assessment authorization. The
 existing Challenges APIs require a verified account and enabled task, but do
 not universally enforce paid-course ownership. Before publishing new paid
