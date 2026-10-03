@@ -21,10 +21,14 @@ class ID(ConstrainedStr):
     regex = re.compile("^[a-z0-9_]+$")
 
 
+class CourseID(ConstrainedStr):
+    regex = re.compile("^[a-z0-9][a-z0-9_-]*$")
+
+
 class SubSkillDescription(BaseModel):
     name: str
     dependencies: list[ID] = []
-    courses: list[ID] = []
+    courses: list[CourseID] = []
 
 
 class RootSkillDescription(BaseModel):

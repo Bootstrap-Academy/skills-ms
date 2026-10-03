@@ -3,12 +3,14 @@
 See [Auth Microservice](/auth/docs).
 """
 
+import asyncio
 from typing import Awaitable, Callable, TypeVar
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.encoders import jsonable_encoder
 from fastapi.exception_handlers import http_exception_handler
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from . import __version__
@@ -19,6 +21,7 @@ from .settings import settings
 from .utils.cache import clear_cache
 from .utils.debug import check_responses
 from .utils.docs import add_endpoint_links_to_openapi_docs
+from api.services.daily_limit import AccessError
 
 
 T = TypeVar("T")
@@ -61,19 +64,48 @@ async def db_session(request: Request, call_next: Callable[..., Awaitable[T]]) -
 @app.exception_handler(StarletteHTTPException)
 async def rollback_on_exception(request: Request, exc: HTTPException) -> Response:
     await db.session.rollback()
+    if isinstance(exc, AccessError):
+        return JSONResponse(
+            status_code=exc.status_code,
+            headers={"Cache-Control": "private, no-store"},
+            content=jsonable_encoder({"detail": exc.detail, "code": exc.code, "daily": exc.daily}),
+        )
     return await http_exception_handler(request, exc)
 
 
 @app.on_event("startup")
 async def on_startup() -> None:
+    if settings.learning_rooms_content is not None:
+        from api.services.rooms import load_catalogue
+
+        # A configured private catalogue never silently falls back to public
+        # teaching content when missing or invalid.
+        load_catalogue()
     await clear_cache("courses")
+    app.state.purchase_recovery = asyncio.create_task(purchase_recovery())
 
 
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
-    pass
+    try:
+        if task := getattr(app.state, "purchase_recovery", None):
+            task.cancel()
+            await asyncio.gather(task, return_exceptions=True)
+    finally:
+        await db.dispose()
 
 
 @app.head("/status", include_in_schema=False)
 async def status() -> None:
     pass
+
+
+async def purchase_recovery() -> None:
+    from api.services.purchases import recover
+
+    while True:
+        try:
+            await recover()
+        except Exception:
+            logger.exception("Course purchase recovery unavailable")
+        await asyncio.sleep(30)

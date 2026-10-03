@@ -1,0 +1,28 @@
+title: Deine ersten Python-Programme
+description: Rechne mit Werten, verarbeite Eingaben und triff Entscheidungen im Code. Kurze Erklärungen, kleine Experimente und eigene Programme führen dich Schritt für Schritt bis zu einem einfachen Bestellrechner.
+category: Programmieren
+language: de
+image: null
+authors:
+  - name: Bootstrap Academy
+    url: https://bootstrap.academy
+price: 0
+learning_path_id: python-loops
+learning_goals:
+  - Werte speichern, berechnen und ausgeben
+  - Ganze Zahlen einlesen und mit Bedingungen verarbeiten
+  - Wiederholungen und laufende Summen verstehen
+  - Kleine Programme selbst schreiben und testen
+requirements: []
+last_update: 1789171200
+sections: []
+translations:
+  en:
+    title: Your first Python programs
+    description: Calculate with values, read input and make decisions in code. Short explanations, small experiments and your own programs take you step by step towards a simple order calculator.
+    learning_goals:
+      - Store, calculate and print values
+      - Read whole numbers and use conditions
+      - Understand loops and running totals
+      - Write and test small programs yourself
+    requirements: []

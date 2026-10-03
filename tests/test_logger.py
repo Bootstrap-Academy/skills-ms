@@ -34,6 +34,8 @@ async def test__setup_sentry(monkeypatch: MonkeyPatch, mocker: MockerFixture) ->
         integrations=[aiohttpintegration_patch(), sqlalchemyintegration_patch(), loggingintegration_patch()],
         release=f"{name}@{version}",
         environment="foobar42",
+        before_send=logger.redact_sentry_event,
+        before_send_transaction=logger.redact_sentry_event,
     )
     ignore_logger_patch.assert_called_once_with("uvicorn.error")
 

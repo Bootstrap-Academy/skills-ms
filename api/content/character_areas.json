@@ -1,0 +1,10 @@
+{
+  "areas": [
+    {
+      "id": "it",
+      "title": {"de": "IT", "en": "IT"},
+      "root_skill_ids": [],
+      "include_unassigned_roots": true
+    }
+  ]
+}

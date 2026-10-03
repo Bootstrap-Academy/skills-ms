@@ -6,6 +6,7 @@ import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from pytest_mock import MockerFixture
 from sqlalchemy.orm import DeclarativeMeta, registry
+from sqlalchemy.pool import NullPool
 
 from ._utils import import_module, mock_asynccontextmanager, mock_dict, mock_list
 from api import database
@@ -120,6 +121,56 @@ async def test__constructor(mocker: MockerFixture) -> None:
     assert isinstance(result._close_event, ContextVar)
     assert result._close_event.name == "close_event"
     assert result._close_event.get() is None
+
+
+@pytest.mark.parametrize(
+    "pool_size,max_overflow,reserved",
+    [(20, 20, 1), (10, 10, 1), (20, 100, 1), (2, 0, 1), (1, 1, 1), (1, 3, 1), (5, 0, 1)],
+)
+async def test_admission_reservation_keeps_finite_peak_budget(pool_size: int, max_overflow: int, reserved: int) -> None:
+    db = database.database.DB(
+        "postgresql+asyncpg://synthetic@127.0.0.1:1/synthetic",
+        reserve_admission_connection=True,
+        pool_size=pool_size,
+        max_overflow=max_overflow,
+    )
+    try:
+        assert db.admission_engine is not None
+        normal, admission = db.engine.pool, db.admission_engine.pool
+        assert normal is not admission
+        assert normal.size() + normal._max_overflow + admission.size() + admission._max_overflow == (  # type: ignore
+            pool_size + max_overflow
+        )
+        assert normal.size() + admission.size() == max(2, pool_size)  # type: ignore
+        assert admission.size() == reserved and admission._max_overflow == 0  # type: ignore
+    finally:
+        await db.dispose()
+
+
+@pytest.mark.parametrize(
+    "options",
+    [
+        {"pool_size": 0},
+        {"pool_size": 1, "max_overflow": 0},
+        {"max_overflow": -1},
+        {"poolclass": NullPool},
+        {"pool": object()},
+    ],
+)
+async def test_admission_rejects_unusable_or_unbounded_pool(options: dict[str, Any]) -> None:
+    with pytest.raises(ValueError, match="Course admission requires"):
+        database.database.DB(
+            "postgresql+asyncpg://synthetic@127.0.0.1:1/synthetic", reserve_admission_connection=True, **options
+        )
+
+
+async def test_disposal_attempts_admission_even_when_normal_disposal_fails() -> None:
+    db = MagicMock()
+    db.engine.dispose = AsyncMock(side_effect=RuntimeError("synthetic disposal failure"))
+    db.admission_engine.dispose = AsyncMock()
+    with pytest.raises(RuntimeError, match="synthetic disposal failure"):
+        await database.database.DB.dispose(db)
+    db.admission_engine.dispose.assert_awaited_once_with()
 
 
 async def test__create_tables(mocker: MockerFixture) -> None:
@@ -325,7 +376,7 @@ async def test__create_session(mocker: MockerFixture) -> None:
 
     result = database.database.DB.create_session(db)
 
-    async_session_patch.assert_called_once_with(db.engine)
+    async_session_patch.assert_called_once_with(db.engine, expire_on_commit=False)
     db._session.set.assert_called_with(async_session_patch())
     event_patch.assert_called_once_with()
     db._close_event.set.assert_called_with(event_patch())
@@ -374,6 +425,7 @@ async def test__get_database(mocker: MockerFixture, monkeypatch: MonkeyPatch) ->
 
     db_patch.assert_called_once_with(
         url=url_patch,
+        reserve_admission_connection=True,
         pool_pre_ping=True,
         pool_recycle=pool_recycle_patch,
         pool_size=pool_size_patch,

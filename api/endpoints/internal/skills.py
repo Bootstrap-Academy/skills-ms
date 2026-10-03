@@ -1,4 +1,5 @@
 from typing import Any
+from uuid import UUID
 
 from fastapi import APIRouter, Body, Query
 from pydantic import BaseModel
@@ -7,11 +8,22 @@ from api import models
 from api.database import db, filter_by, select
 from api.exceptions.skill import SkillNotFoundException
 from api.schemas.skill import SubSkill
+from api.services.benefits import XPAward, apply_xp
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
 
 
 router = APIRouter()
+
+
+@router.post("/xp-operations/{operation}/{user_id}/{skill_id}")
+async def apply_skill_benefit(operation: UUID, user_id: UUID, skill_id: str, award: XPAward) -> Any:
+    result = await apply_xp(str(operation), str(user_id), skill_id, award)
+    # A successful response is an existing committed receipt, not merely a
+    # mutation waiting for the outer request middleware to commit.
+    await db.commit()
+    await clear_cache("xp")
+    return result
 
 
 @router.get("/skills", responses=responses(list[SubSkill]))
