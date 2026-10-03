@@ -30,10 +30,11 @@ async def check(user_id: str, data: ChallengeAdmission) -> dict[str, Any]:
 @router.post("/learning-access/{user_id}/check-batch")
 async def check_batch(user_id: str, data: ChallengeReadBatch) -> dict[str, list[bool]]:
     """Keep each concrete decision and share the request's admission snapshot."""
+    context = daily_limit.ChallengeReadContext()
     readable = []
     for item in data.requests:
         try:
-            await daily_limit.challenge_admission(user_id, item, False)
+            await daily_limit.challenge_admission(user_id, item, False, context)
         except HTTPException as exc:
             if exc.status_code not in (403, 404):
                 raise

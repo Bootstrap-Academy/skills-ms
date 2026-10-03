@@ -4,6 +4,7 @@ GETs only inspect state. Historical progress is recognized without rewriting it;
 its admission is materialized on the next mutation, or by the operator backfill.
 """
 
+from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta, timezone
 from typing import Any, Literal, NamedTuple
 from uuid import UUID
@@ -19,6 +20,7 @@ from api.logger import get_logger
 from api.schemas.course import Course
 from api.schemas.curriculum import LectureSource, LessonDefinition, RoomSource
 from api.schemas.daily_limit import ChallengeAdmission, DailyStatus, LearningHistory, LearningPolicy, LimitConfiguration
+from api.schemas.rooms import Catalogue
 from api.schemas.user import User
 from api.services.internal import InternalService, InternalServiceError
 from api.services.purchases import lock_user
@@ -124,29 +126,32 @@ def lesson_definition(course: Course, lesson_id: str) -> LessonDefinition:
     return lesson
 
 
-def lecture_lesson(course: Course, lecture_id: str) -> LessonDefinition:
+def lecture_lesson(course: Course, lecture_id: str, content: Catalogue | None = None) -> LessonDefinition:
     from api.services.curriculum import definitions
 
-    definition, _ = definitions(course)
+    definition, _ = definitions(course, content)
     for lesson in definition.lessons:
         if any(isinstance(a.source, LectureSource) and a.source.lecture_id == lecture_id for a in lesson.activities):
             return lesson
     raise HTTPException(404, "Diese Lektion gibt es nicht.")
 
 
-def unit_lessons(unit_id: str, course_id: str | None = None) -> list[tuple[Course, LessonDefinition]]:
+def unit_lessons(
+    unit_id: str, course_id: str | None = None, content: Catalogue | None = None
+) -> list[tuple[Course, LessonDefinition]]:
     from api.services import rooms
     from api.services.courses import COURSES
     from api.services.curriculum import definitions
 
-    unit = next((item for item in rooms.catalogue().units if item.id == unit_id), None)
+    content = content if content is not None else rooms.catalogue()
+    unit = next((item for item in content.units if item.id == unit_id), None)
     if unit is None:
         return []
     result = []
     for course in sorted(COURSES.values(), key=lambda item: item.id):
         if course.learning_path_id != unit.path_id or (course_id is not None and course.id != course_id):
             continue
-        definition, _ = definitions(course)
+        definition, _ = definitions(course, content)
         for lesson in definition.lessons:
             if any(isinstance(a.source, RoomSource) and a.source.unit_id == unit_id for a in lesson.activities):
                 result.append((course, lesson))
@@ -564,24 +569,64 @@ async def course_daily_access(user: User, course: Course, lesson: LessonDefiniti
         raise
 
 
-async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bool) -> dict[str, Any]:
+@dataclass
+class ChallengeReadContext:
+    """One read-only HTTP batch; never shared with starts or later requests.
+
+    Resolve each task/subtask independently before reusing a decision for the
+    same ordered course/lesson scopes. Sibling lessons retain separate decisions
+    during policy outages. No task-wide entitlement or persistent cache exists.
+    """
+
+    content: Catalogue | None = None
+    unit_pairs: dict[str, list[tuple[Course, LessonDefinition]]] = field(default_factory=dict)
+    lectures: dict[tuple[str, str], LessonDefinition] = field(default_factory=dict)
+    decisions: dict[tuple[str, bool, tuple[tuple[str, str], ...], tuple[str, ...]], dict[str, Any] | HTTPException] = (
+        field(default_factory=dict)
+    )
+
+    def catalogue(self) -> Catalogue:
+        from api.services import rooms
+
+        if self.content is None:
+            self.content = rooms.catalogue()
+        return self.content
+
+    def for_unit(self, unit_id: str) -> list[tuple[Course, LessonDefinition]]:
+        if unit_id not in self.unit_pairs:
+            self.unit_pairs[unit_id] = unit_lessons(unit_id, content=self.catalogue())
+        return self.unit_pairs[unit_id]
+
+    def for_lecture(self, course: Course, lecture_id: str) -> LessonDefinition:
+        key = (course.id, lecture_id)
+        if key not in self.lectures:
+            content = self.catalogue() if course.learning_path_id is not None else None
+            self.lectures[key] = lecture_lesson(course, lecture_id, content)
+        return self.lectures[key]
+
+
+async def challenge_admission(
+    user_id: str, data: ChallengeAdmission, mutate: bool, read_context: ChallengeReadContext | None = None
+) -> dict[str, Any]:
     from api.services import rooms
-    from api.services.courses import COURSES, get_owned_courses
-    from api.services.shop import has_premium
+    from api.services.courses import COURSES
 
     user = User(id=user_id, admin=data.user_admin, email_verified=True)
     if mutate and data.request_id is None:
         raise HTTPException(422, "request_id is required")
+    if mutate and read_context is not None:
+        raise ValueError("A read batch cannot start lessons")
     candidates: list[tuple[Course, LessonDefinition]] = []
     if settings.rooms_enabled and data.task_id is not None:
-        for unit in rooms.catalogue().units:
+        content = read_context.catalogue() if read_context is not None else rooms.catalogue()
+        for unit in content.units:
             if (
                 not unit.retired
                 and unit.exercise is not None
                 and unit.exercise.task_id == data.task_id
                 and (data.subtask_id is None or unit.exercise.subtask_id == data.subtask_id)
             ):
-                candidates.extend(unit_lessons(unit.id))
+                candidates.extend(read_context.for_unit(unit.id) if read_context is not None else unit_lessons(unit.id))
     broad_courses = []
     for binding in data.lecture_bindings:
         course = COURSES.get(binding.course_id)
@@ -596,9 +641,49 @@ async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bo
                 for section in course.sections
             ):
                 raise HTTPException(404, "Diese Lektion gibt es nicht.")
-            candidates.append((course, lecture_lesson(course, binding.lecture_id)))
+            lesson = (
+                read_context.for_lecture(course, binding.lecture_id)
+                if read_context is not None
+                else lecture_lesson(course, binding.lecture_id)
+            )
+            candidates.append((course, lesson))
         else:
             broad_courses.append(course)
+    if read_context is None:
+        return await _challenge_scope_admission(user, candidates, broad_courses, mutate, data.request_id)
+    key = (
+        user.id,
+        user.admin,
+        tuple((c.id, lesson.id) for c, lesson in candidates),
+        tuple(c.id for c in broad_courses),
+    )
+    if key not in read_context.decisions:
+        try:
+            read_context.decisions[key] = await _challenge_scope_admission(
+                user, candidates, broad_courses, False, None, read_only=True
+            )
+        except HTTPException as exc:
+            if exc.status_code not in (403, 404):
+                raise
+            read_context.decisions[key] = exc
+    result = read_context.decisions[key]
+    if isinstance(result, HTTPException):
+        raise result
+    return result
+
+
+async def _challenge_scope_admission(
+    user: User,
+    candidates: list[tuple[Course, LessonDefinition]],
+    broad_courses: list[Course],
+    mutate: bool,
+    request_id: UUID | None,
+    *,
+    read_only: bool = False,
+) -> dict[str, Any]:
+    from api.services.courses import get_owned_courses
+    from api.services.shop import has_premium
+
     if not candidates and not broad_courses:
         return {"allowed": True, "lesson": None, "daily": None, "heart_policy": await heart_policy(user, None)}
 
@@ -618,6 +703,19 @@ async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bo
     broad_access = False
     for course in broad_courses:
         broad_access = await admitted(course) or broad_access
+    if read_only:
+        if not pairs and not broad_access:
+            raise HTTPException(403, "Für diese Aufgabe brauchst du Zugang zum Kurs.")
+        if settings.daily_limit_policy_enabled:
+            guard = await db.get(models.PurchaseUser, user_id=user.id)
+            if guard is not None and guard.deleted:
+                raise HTTPException(401, "Dieses Konto ist nicht mehr verfügbar.")
+        # Read batches return permissions only. Choosing a preferred start,
+        # quota display and billing evidence cannot change an admitted scope.
+        # Keep the policy's deleted-account refusal and tolerate only the same
+        # 503 uncertainty as the detail check's optional presentation fields.
+        await confirmed_policy_mode(user)
+        return {"allowed": True}
     pair = await choose(user, pairs)
     if pair is None:
         if not broad_access:
@@ -627,7 +725,7 @@ async def challenge_admission(user_id: str, data: ChallengeAdmission, mutate: bo
         # than inventing one quota unit per quiz or blocking the learner.
         daily = await optional_status(user)
         return {"allowed": True, "lesson": None, "daily": daily, "heart_policy": await heart_policy(user, None)}
-    daily = await start(user, *pair, data.request_id) if mutate else await optional_status(user, *pair)
+    daily = await start(user, *pair, request_id) if mutate else await optional_status(user, *pair)
     return {
         "allowed": True,
         "lesson": {"course_id": pair[0].id, "lesson_id": pair[1].id},

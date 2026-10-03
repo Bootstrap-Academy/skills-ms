@@ -2,7 +2,7 @@
 
 from datetime import datetime, timezone
 from typing import Any, AsyncIterator, Literal
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import httpx
@@ -72,6 +72,104 @@ async def test_read_batch_keeps_catalogue_and_standalone_subtasks_distinct(
         assert await check_batch(USER.id, data) == {"readable": [False, True]}
         assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 0
         assert await db.count(filter_by(models.LessonStartRequest, user_id=USER.id)) == 0
+
+
+async def test_read_batch_shares_work_only_after_concrete_resolution(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    catalog.curriculum = None
+    catalog.learning_path_id = None
+    catalog.sections = [
+        Section.parse_obj(
+            {
+                "id": "section",
+                "title": "Example",
+                "lectures": [{"id": "lecture", "title": "Example", "type": "mp4", "duration": 1}],
+            }
+        )
+    ]
+    catalogue = Mock(wraps=rooms.catalogue)
+    monkeypatch.setattr(rooms, "catalogue", catalogue)
+    status = AsyncMock(wraps=daily_limit.optional_status)
+    monkeypatch.setattr(daily_limit, "optional_status", status)
+    task = uuid4()
+    data = ChallengeReadBatch.parse_obj(
+        {
+            "requests": [
+                {
+                    "task_id": task,
+                    "subtask_id": uuid4(),
+                    "lecture_bindings": [{"course_id": catalog.id, "section_id": "section", "lecture_id": "lecture"}],
+                }
+                for _ in range(250)
+            ]
+        }
+    )
+    async with db_context():
+        assert await check_batch(USER.id, data) == {"readable": [True] * 250}
+        assert status.await_count == 0
+        assert catalogue.call_count <= 2
+        assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 0
+        assert await db.count(filter_by(models.LessonStartRequest, user_id=USER.id)) == 0
+
+
+async def test_read_batch_never_reuses_started_lesson_for_same_task_sibling(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    await begin(daily_client, 0)
+    task, started, sibling = uuid4(), uuid4(), uuid4()
+    content = rooms.load_catalogue()
+    for unit in content.units[:2]:
+        unit.completion = None
+        unit.room = "exercise"
+    monkeypatch.setattr(
+        settings,
+        "learning_rooms_exercise_refs",
+        {
+            "unit-0": {"type": "coding", "task_id": str(task), "subtask_id": str(started)},
+            "unit-1": {"type": "coding", "task_id": str(task), "subtask_id": str(sibling)},
+        },
+    )
+    catalog.price = 1000
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(side_effect=daily_limit.AccessError(503, "learning_access_unavailable", "Unavailable")),
+    )
+    data = ChallengeReadBatch.parse_obj(
+        {"requests": [{"task_id": task, "subtask_id": started}, {"task_id": task, "subtask_id": sibling}]}
+    )
+    async with db_context():
+        assert (await daily_limit.challenge_admission(USER.id, data.requests[0], False))["allowed"]
+        with pytest.raises(daily_limit.AccessError) as single:
+            await daily_limit.challenge_admission(USER.id, data.requests[1], False)
+        assert single.value.status_code == 503
+        with pytest.raises(daily_limit.AccessError) as batch:
+            await check_batch(USER.id, data)
+        assert batch.value.status_code == 503
+        assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == 1
+
+
+async def test_read_batch_refreshes_purchase_and_admin_rights(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    catalog.price = 1000
+    monkeypatch.setattr(
+        daily_limit,
+        "policy",
+        AsyncMock(
+            return_value=LearningPolicy(mode="legacy", premium=False, single_course_sales=True, heart_sales=True)
+        ),
+    )
+    monkeypatch.setattr(shop, "has_premium", AsyncMock(return_value=False))
+    binding = {"lecture_bindings": [{"course_id": catalog.id}]}
+    data = ChallengeReadBatch.parse_obj({"requests": [binding, {**binding, "user_admin": True}, binding]})
+    async with db_context():
+        assert await check_batch(USER.id, data) == {"readable": [False, True, False]}
+    async with db_context():
+        await db.add(models.CourseAccess(user_id=USER.id, course_id=catalog.id))
+    async with db_context():
+        assert await check_batch(USER.id, data) == {"readable": [True, True, True]}
 
 
 @pytest.fixture
