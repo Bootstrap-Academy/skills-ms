@@ -20,7 +20,7 @@ from api.logger import get_logger
 from api.schemas.course import Course
 from api.schemas.curriculum import LectureSource, LessonDefinition, RoomSource
 from api.schemas.daily_limit import ChallengeAdmission, DailyStatus, LearningHistory, LearningPolicy, LimitConfiguration
-from api.schemas.rooms import Catalogue
+from api.schemas.rooms import Catalogue, CatalogueUnit
 from api.schemas.user import User
 from api.services.internal import InternalService, InternalServiceError
 from api.services.purchases import lock_user
@@ -579,6 +579,7 @@ class ChallengeReadContext:
     """
 
     content: Catalogue | None = None
+    task_units: dict[UUID, list[CatalogueUnit]] | None = None
     unit_pairs: dict[str, list[tuple[Course, LessonDefinition]]] = field(default_factory=dict)
     lectures: dict[tuple[str, str], LessonDefinition] = field(default_factory=dict)
     decisions: dict[tuple[str, bool, tuple[tuple[str, str], ...], tuple[str, ...]], dict[str, Any] | HTTPException] = (
@@ -589,13 +590,25 @@ class ChallengeReadContext:
         from api.services import rooms
 
         if self.content is None:
-            self.content = rooms.catalogue()
+            self.content = rooms.catalogue(deep=False)
         return self.content
 
     def for_unit(self, unit_id: str) -> list[tuple[Course, LessonDefinition]]:
         if unit_id not in self.unit_pairs:
             self.unit_pairs[unit_id] = unit_lessons(unit_id, content=self.catalogue())
         return self.unit_pairs[unit_id]
+
+    def for_task(self, task_id: UUID, subtask_id: UUID | None) -> list[CatalogueUnit]:
+        if self.task_units is None:
+            self.task_units = {}
+            for unit in self.catalogue().units:
+                if not unit.retired and unit.exercise is not None:
+                    self.task_units.setdefault(unit.exercise.task_id, []).append(unit)
+        return [
+            unit
+            for unit in self.task_units.get(task_id, [])
+            if unit.exercise is not None and (subtask_id is None or unit.exercise.subtask_id == subtask_id)
+        ]
 
     def for_lecture(self, course: Course, lecture_id: str) -> LessonDefinition:
         key = (course.id, lecture_id)
@@ -618,8 +631,12 @@ async def challenge_admission(
         raise ValueError("A read batch cannot start lessons")
     candidates: list[tuple[Course, LessonDefinition]] = []
     if settings.rooms_enabled and data.task_id is not None:
-        content = read_context.catalogue() if read_context is not None else rooms.catalogue()
-        for unit in content.units:
+        units = (
+            read_context.for_task(data.task_id, data.subtask_id)
+            if read_context is not None
+            else rooms.catalogue().units
+        )
+        for unit in units:
             if (
                 not unit.retired
                 and unit.exercise is not None
