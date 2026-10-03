@@ -31,6 +31,7 @@
         projectDir = ./.;
         python = pkgs.python311;
         doCheck = false;
+        preferWheels = true;
         overrides = defaultPoetryOverrides.extend (self: super: {
           frozenlist = super.frozenlist.overridePythonAttrs (old: {
             buildInputs = (old.buildInputs or []) ++ [super.expandvars];
