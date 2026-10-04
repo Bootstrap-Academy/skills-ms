@@ -27,6 +27,16 @@ from api.services.internal import InternalService
 logger = get_logger(__name__)
 
 
+async def read_user_guard(user_id: str) -> PurchaseUser | None:
+    """Reuse the erasure guard within a read request, including a missing row."""
+    key = ("purchase_user_guard", user_id)
+    cached: tuple[PurchaseUser | None] | None = db.session.info.get(key)
+    if cached is None:
+        cached = (await db.get(PurchaseUser, user_id=user_id),)
+        db.session.info[key] = cached
+    return cached[0]
+
+
 class Acceptance(BaseModel):
     order_id: UUID
     offer_hash: str
@@ -39,6 +49,9 @@ class Acceptance(BaseModel):
 
 async def lock_user(user_id: str) -> PurchaseUser:
     # The same durable row serializes every course order and T10 deletion.
+    # Mutation must refresh an earlier read, especially a cached missing row.
+    key = ("purchase_user_guard", user_id)
+    db.session.info.pop(key, None)
     if await db.get(PurchaseUser, user_id=user_id) is None:
         try:
             async with db.session.begin_nested():
@@ -51,6 +64,7 @@ async def lock_user(user_id: str) -> PurchaseUser:
     )
     if row is None:
         raise AssertionError
+    db.session.info[key] = (row,)
     return cast(PurchaseUser, row)
 
 

@@ -1,8 +1,8 @@
 """Routed admission checks with a real disposable SQL database."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any, AsyncIterator, Literal
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, Mock, call
 from uuid import uuid4
 
 import httpx
@@ -11,6 +11,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 from pytest import MonkeyPatch
+from sqlalchemy import event
 
 from api import models
 from api.auth import user_auth
@@ -316,6 +317,144 @@ async def begin(client: httpx.AsyncClient, i: int, request_id: str | None = None
     return await client.post(
         f"/courses/daily-course/lessons/lesson-{i}/start", json={"request_id": request_id or str(uuid4())}
     )
+
+
+@pytest.mark.parametrize("size", [50, 500, 5000])
+@pytest.mark.parametrize("enabled", [False, True])
+async def test_large_curriculum_reads_have_constant_database_and_catalogue_cost(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch, size: int, enabled: bool
+) -> None:
+    task = uuid4()
+    subtasks = [uuid4() for _ in range(size)]
+    prototype = rooms.load_catalogue().units[0].dict()
+    content = Catalogue.parse_obj(
+        {
+            "paths": [
+                {"id": "daily-path", "title": {"de": "Pfad", "en": "Path"}, "units": [f"unit-{i}" for i in range(size)]}
+            ],
+            "units": [
+                {
+                    **prototype,
+                    "id": f"unit-{i}",
+                    "room": "exercise",
+                    "completion": None,
+                    "exercise": {"type": "coding", "task_id": task, "subtask_id": subtask},
+                }
+                for i, subtask in enumerate(subtasks)
+            ],
+        }
+    )
+    # Exercise the legacy adapter as well as the same explicit lesson statuses.
+    catalog.curriculum = None
+    monkeypatch.setattr(rooms, "load_catalogue", lambda: content)
+    monkeypatch.setattr(settings, "daily_limit_policy_enabled", enabled)
+    now = utcnow()
+    today = daily_limit.day_window(now)[0]
+    async with db_context():
+        for i in range(size - 3):
+            await db.add(
+                models.LessonStart(
+                    user_id=USER.id,
+                    course_id=catalog.id,
+                    lesson_id=f"unit-{i}",
+                    started_at=now,
+                    local_day=today if i < 3 else today - timedelta(days=1),
+                    charged=True,
+                    reason="daily",
+                    policy_mode="daily",
+                )
+            )
+        for i, status in [(size - 3, "skipped"), (size - 2, "in_progress")]:
+            await db.add(
+                models.RoomState(
+                    user_id=USER.id,
+                    unit_id=f"unit-{i}",
+                    revision=1,
+                    state={},
+                    status=status,
+                    result=None,
+                    updated_at=now,
+                )
+            )
+
+    async def history(_user: str, payload: dict[str, Any]) -> LearningHistory:
+        return LearningHistory(
+            attempted_subtask_ids=[subtasks[-1]] if str(subtasks[-1]) in payload["subtask_ids"] else [],
+            attempted_lecture_bindings=[],
+        )
+
+    remote = AsyncMock(side_effect=history)
+    monkeypatch.setattr(daily_limit, "read_history_batch", remote)
+    catalogue = Mock(wraps=rooms.catalogue)
+    monkeypatch.setattr(rooms, "catalogue", catalogue)
+    statements: list[str] = []
+
+    def record(_conn: Any, _cursor: Any, statement: str, _parameters: Any, _context: Any, _many: bool) -> None:
+        statements.append(statement)
+
+    event.listen(db.engine.sync_engine, "before_cursor_execute", record)
+    try:
+        response = await daily_client.get(f"/courses/{catalog.id}/curriculum")
+    finally:
+        event.remove(db.engine.sync_engine, "before_cursor_execute", record)
+    assert response.status_code == 200
+    lessons = response.json()["lessons"]
+    assert len(lessons) == size
+    assert [lesson["id"] for lesson in lessons] == [f"unit-{i}" for i in range(size)]
+    assert all(lesson["completed"] == (i == size - 3) for i, lesson in enumerate(lessons))
+    assert catalogue.call_args_list == [call(deep=False)]
+    assert sum(f"FROM {models.PurchaseUser.__tablename__}" in sql for sql in statements) == 1
+    assert sum(f"FROM {models.DailyLimitSettings.__tablename__}" in sql for sql in statements) == int(enabled)
+    assert len(statements) == (8 if enabled else 3)
+    if enabled:
+        for i, lesson in enumerate(lessons):
+            daily = lesson["daily"]
+            started = i != size - 3
+            assert daily["used"] == 3 and daily["remaining"] == 0 and daily["enforced"]
+            assert daily["started"] == started and daily["can_start"] == started
+            assert daily["exempt"] == ("started" if started else None)
+        assert remote.await_count == (size + 499) // 500
+        requested = [value for call in remote.call_args_list for value in call.args[1]["subtask_ids"]]
+        assert len(requested) == size and set(requested) == {str(value) for value in subtasks}
+    else:
+        assert all(lesson["daily"] is None for lesson in lessons)
+        remote.assert_not_awaited()
+    async with db_context():
+        assert await db.count(filter_by(models.LessonStart, user_id=USER.id)) == size - 3
+        assert await db.count(filter_by(models.LessonStartRequest, user_id=USER.id)) == 0
+    assert content.units[0].exercise is not None and content.units[0].exercise.subtask_id == subtasks[0]
+
+
+async def test_read_caches_refresh_after_start_configuration_and_erasure(
+    daily_client: httpx.AsyncClient, catalog: Course, monkeypatch: MonkeyPatch
+) -> None:
+    assert catalog.curriculum is not None
+    monkeypatch.setattr("api.services.user_deletion.clear_cache", AsyncMock())
+    monkeypatch.setattr("api.services.retained_rights.preserve_before_erasure", AsyncMock())
+    async with db_context():
+        assert (await daily_limit.status(USER)).used == 0
+        started = await daily_limit.start(USER, catalog, catalog.curriculum.lessons[0], uuid4())
+        assert started is not None and started.used == 1
+        await daily_limit.configure(LimitConfiguration(mode="enforce", limit=1, updated_by="test", note="Changed"))
+        assert not (await daily_limit.status(USER, catalog, catalog.curriculum.lessons[1])).can_start
+        with pytest.raises(daily_limit.AccessError) as limited:
+            await daily_limit.start(USER, catalog, catalog.curriculum.lessons[1], uuid4())
+        assert limited.value.status_code == 429
+        await delete_user_data(USER.id)
+        with pytest.raises(HTTPException) as deleted:
+            await daily_limit.status(USER)
+        assert deleted.value.status_code == 401
+
+
+async def test_read_caches_do_not_survive_requests(daily_client: httpx.AsyncClient) -> None:
+    assert (await daily_client.get("/daily-limit")).json()["limit"] == 3
+    async with db_context():
+        await daily_limit.configure(LimitConfiguration(mode="off", limit=8, updated_by="test", note="Changed"))
+    current = (await daily_client.get("/daily-limit")).json()
+    assert current["limit"] == 8 and not current["enforced"]
+    async with db_context():
+        await db.add(models.PurchaseUser(user_id=USER.id, deleted=True))
+    assert (await daily_client.get("/daily-limit")).status_code == 401
 
 
 @pytest.mark.parametrize("policy_enabled", [False, True])
