@@ -5,11 +5,13 @@ See [Auth Microservice](/auth/docs).
 
 import asyncio
 from contextlib import asynccontextmanager
+from math import isfinite
 from typing import AsyncIterator, Awaitable, Callable, TypeVar
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -17,12 +19,14 @@ from starlette.exceptions import HTTPException as StarletteHTTPException
 from . import __version__
 from .database import db, db_context
 from .endpoints import ROUTER, TAGS
+from .exceptions.api_exception import CodedAPIException
 from .logger import get_logger, setup_sentry
 from .settings import settings
 from .utils.cache import clear_cache
 from .utils.debug import check_responses
 from .utils.docs import add_endpoint_links_to_openapi_docs
 from api.services.daily_limit import AccessError
+from api.services.internal import client_ssl_context
 
 T = TypeVar("T")
 
@@ -69,7 +73,36 @@ if settings.debug:
 @app.middleware("http")
 async def db_session(request: Request, call_next: Callable[..., Awaitable[T]]) -> T:
     async with db_context():
-        return await call_next(request)
+        response = await call_next(request)
+        path = request.scope["path"].removeprefix(request.scope.get("root_path", ""))
+        if settings.profile_publications_enabled and path.startswith(
+            ("/_internal/leaderboard", "/_internal/published-leaderboard")
+        ):
+            from api.services.publications import HEADERS
+
+            # Cover dependency/validation errors as well as successful replies.
+            if isinstance(response, Response):
+                response.headers.update(HEADERS)
+        return response
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error_response(request: Request, exc: RequestValidationError) -> Response:
+    # Pydantic includes rejected inputs, even nested NaN/Infinity values, in
+    # errors. Rejected strings/bytes can also be invalid UTF-8. Normalize those
+    # values only in the error response, never in data accepted by a writer or
+    # used in an exact-replay fingerprint.
+    return JSONResponse(
+        status_code=422,
+        content=jsonable_encoder(
+            {"detail": exc.errors()},
+            custom_encoder={
+                float: lambda value: value if isfinite(value) else None,
+                str: lambda value: value.encode("utf-8", errors="backslashreplace").decode("utf-8"),
+                bytes: lambda value: value.decode("utf-8", errors="backslashreplace"),
+            },
+        ),
+    )
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -81,10 +114,14 @@ async def rollback_on_exception(request: Request, exc: HTTPException) -> Respons
             headers={"Cache-Control": "private, no-store"},
             content=jsonable_encoder({"detail": exc.detail, "code": exc.code, "daily": exc.daily}),
         )
+    if isinstance(exc, CodedAPIException):
+        return exc.response()
     return await http_exception_handler(request, exc)
 
 
 async def on_startup() -> None:
+    # Prepare verified internal TLS trust before the first learner request.
+    client_ssl_context()
     if settings.learning_rooms_content is not None:
         from api.services.rooms import load_catalogue
 
@@ -93,13 +130,15 @@ async def on_startup() -> None:
         load_catalogue()
     await clear_cache("courses")
     app.state.purchase_recovery = asyncio.create_task(purchase_recovery())
+    app.state.milestone_recovery = asyncio.create_task(milestone_recovery())
 
 
 async def on_shutdown() -> None:
     try:
-        if task := getattr(app.state, "purchase_recovery", None):
-            task.cancel()
-            await asyncio.gather(task, return_exceptions=True)
+        for name in ("purchase_recovery", "milestone_recovery"):
+            if task := getattr(app.state, name, None):
+                task.cancel()
+                await asyncio.gather(task, return_exceptions=True)
     finally:
         await db.dispose()
 
@@ -117,4 +156,15 @@ async def purchase_recovery() -> None:
             await recover()
         except Exception:
             logger.exception("Course purchase recovery unavailable")
+        await asyncio.sleep(30)
+
+
+async def milestone_recovery() -> None:
+    from api.services.lesson_milestones import recover
+
+    while True:
+        try:
+            await recover()
+        except Exception:
+            logger.exception("Lesson milestone delivery unavailable")
         await asyncio.sleep(30)

@@ -13,6 +13,7 @@ from uuid import UUID, uuid4
 
 from alembic import command
 from alembic.config import Config
+from alembic.script import ScriptDirectory
 
 from sqlalchemy import text
 
@@ -46,6 +47,8 @@ async def seed_pre_policy_starts() -> None:
 
 async def main() -> None:
     assert os.environ["DATABASE_URL"].startswith("postgresql+asyncpg://")
+    head = ScriptDirectory.from_config(Config("alembic.ini")).get_current_head()
+    assert head is not None
     settings.daily_limit_policy_enabled = True
     course = Course.model_validate(
         {
@@ -92,7 +95,7 @@ async def main() -> None:
 
     daily_limit.read_history_batch = history
     async with db_context():
-        assert (await db.exec(text("select version_num from skills_alembic_version"))).scalar() == "dailypolicy001"
+        assert (await db.exec(text("select version_num from skills_alembic_version"))).scalar_one() == head
         old = await db.all(filter_by(models.LessonStart, user_id="migration"))
         assert len(old) == 5
         assert {row.reason: row.policy_mode for row in old} == {
@@ -157,7 +160,7 @@ async def main() -> None:
     print(
         json.dumps(
             {
-                "migration": "dailypolicy001",
+                "migration": head,
                 "existing_starts_preserved": 5,
                 "only_proven_daily_migrated": True,
                 "last_slot": outcomes,

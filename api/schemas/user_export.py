@@ -45,6 +45,10 @@ class UserDataExport(BaseModel):
     purchases: list[dict[str, Any]] = Field(default_factory=list)
     room_states: list[dict[str, Any]] = Field(default_factory=list)
     room_requests: list[dict[str, Any]] = Field(default_factory=list)
+    llm_verdicts: list[dict[str, Any]] = Field(default_factory=list)
+    lesson_milestones: list[dict[str, Any]] = Field(default_factory=list)
+    course_projects: list[dict[str, Any]] = Field(default_factory=list)
+    course_project_requests: list[dict[str, Any]] = Field(default_factory=list)
     purchase_user: list[dict[str, Any]] = Field(default_factory=list)
     retained_course_rights: list[dict[str, Any]] = Field(default_factory=list)
     course_right_grants: list[dict[str, Any]] = Field(default_factory=list)
@@ -61,6 +65,10 @@ class UserDataExport(BaseModel):
         "purchases",
         "room_states",
         "room_requests",
+        "llm_verdicts",
+        "lesson_milestones",
+        "course_projects",
+        "course_project_requests",
         "purchase_user",
         "retained_course_rights",
         "course_right_grants",

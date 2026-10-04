@@ -30,6 +30,7 @@ from api.services.shop import has_premium
 from api.settings import settings
 from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
+from api.utils.mp4 import mp4_range_response
 
 router = APIRouter()
 
@@ -249,24 +250,15 @@ async def get_mp4_lecture_link(
 
 
 @router.get("/lectures/{token}/{file}", include_in_schema=False)
-async def download_mp4_lecture(
-    token: str, file: str, range: str = Header("bytes=0-", pattern=r"^bytes=\d{1,16}-(\d{1,16})?$")
-) -> Any:
+async def download_mp4_lecture(token: str, file: str, range: str = Header("bytes=0-")) -> Any:
     path = await redis.get(f"mp4_lecture:{token}:{file}")
     if not path:
         raise LectureNotFoundException
 
-    path = Path(path)
-    _start, _end = range.removeprefix("bytes=").split("-")
-    start = int(_start)
-    end = max(start, int(_end) + 1) if _end else start + settings.stream_chunk_size
-    filesize = path.stat().st_size
-    end = min(end, filesize)
-    with open(path, "rb") as video:
-        video.seek(start)
-        data = video.read(end - start)
-        headers = {"Content-Range": f"bytes {start}-{end - 1}/{filesize}", "Accept-Ranges": "bytes"}
-        return Response(data, status_code=206, headers=headers, media_type="video/mp4")
+    try:
+        return await mp4_range_response(Path(path), range)
+    except (FileNotFoundError, NotADirectoryError):
+        raise LectureNotFoundException from None
 
 
 @router.get(

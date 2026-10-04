@@ -1,9 +1,12 @@
 from .bookmarks import SubSkillBookmark
 from .course_access import CourseAccess
+from .course_project import CourseProject, CourseProjectRequest
 from .daily_limit import DailyLimitSettings, LessonStart, LessonStartRequest
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
+from .lesson_milestone import LessonMilestoneDelivery
 from .lesson_module import LessonModule
+from .llm_verdict import LlmVerdict
 from .purchase import CoursePurchase, PurchaseUser
 from .retained_right import CourseRightGrant, RetainedCourseRight
 from .room import RoomRequest, RoomState
@@ -18,7 +21,11 @@ __all__ = [
     "DailyLimitSettings",
     "LessonStart",
     "LessonStartRequest",
+    "CourseProject",
+    "CourseProjectRequest",
+    "LessonMilestoneDelivery",
     "LessonModule",
+    "LlmVerdict",
     "RoomRequest",
     "RoomState",
     "CoursePurchase",
