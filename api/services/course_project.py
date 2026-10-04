@@ -21,7 +21,6 @@ from api.services import rooms
 from api.services.purchases import lock_user
 from api.utils.utc import utcnow
 
-
 # Receipts hold no state, so exact retries of more than the latest save stay cheap to answer.
 KEPT_RECEIPTS = 16
 

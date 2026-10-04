@@ -30,7 +30,6 @@ from api.settings import settings
 from api.utils.jwt import encode_jwt
 from api.utils.utc import utcnow
 
-
 logger = get_logger(__name__)
 
 MilestoneCompletion = Literal["deterministic", "llm_verdict"]

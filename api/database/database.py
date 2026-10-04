@@ -19,7 +19,6 @@ from sqlalchemy.sql.selectable import Exists, Select
 from ..logger import get_logger
 from ..settings import settings
 
-
 T = TypeVar("T")
 
 logger = get_logger(__name__)

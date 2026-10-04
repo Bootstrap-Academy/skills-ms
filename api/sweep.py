@@ -12,7 +12,6 @@ from .services.internal import InternalServiceError
 from .services.user_deletion import USER_MODELS, delete_user_data
 from .settings import settings
 
-
 logger = get_logger(__name__)
 
 

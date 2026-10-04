@@ -8,7 +8,6 @@ from api.schemas.skill import SkillTreeResponse
 from api.schemas.user import User
 from api.services import character_areas
 
-
 router = APIRouter()
 
 

@@ -7,7 +7,6 @@ from fastapi import APIRouter, HTTPException
 from api.schemas.daily_limit import ChallengeAdmission, ChallengeReadBatch, LimitConfiguration
 from api.services import daily_limit
 
-
 router = APIRouter()
 
 

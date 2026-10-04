@@ -18,7 +18,6 @@ from . import (
 from .internal import INTERNAL_ROUTERS
 from ..auth import internal_auth
 
-
 ROUTER = APIRouter()
 TAGS: list[dict[str, Any]] = []
 

@@ -24,7 +24,6 @@ from api.services.user_deletion import delete_user_data
 from api.utils.docs import get_example
 from api.utils.jwt import encode_jwt
 
-
 FOO = "a8d95e0f-71ae-4c49-995e-695b7c93848c"
 
 

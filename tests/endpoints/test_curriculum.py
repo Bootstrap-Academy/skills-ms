@@ -29,7 +29,6 @@ from api.utils.utc import utcnow
 from tests.endpoints.test_rooms import content as room_content
 from tests.endpoints.test_rooms import payload
 
-
 content = room_content  # Keep the existing synthetic catalogue fixture.
 
 

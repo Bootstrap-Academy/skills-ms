@@ -5,7 +5,6 @@ from redis.asyncio import Redis, from_url
 from .logger import get_logger
 from .settings import settings
 
-
 logger = get_logger(__name__)
 
 # global redis connection

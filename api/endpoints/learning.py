@@ -21,7 +21,6 @@ from api.services.internal import InternalService
 from api.settings import settings
 from api.utils.mp4 import mp4_range_response
 
-
 router = APIRouter(prefix="/learning")
 
 

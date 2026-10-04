@@ -6,7 +6,6 @@ from api.database import Base, db, db_context
 from api.schemas.user_export import XP, CourseAccess, LastWatch, LectureProgress, SubSkillBookmark, UserDataExport
 from api.services.user_export import export_user_data
 
-
 TIMESTAMP = datetime(2026, 9, 3, 12, 34, 56, tzinfo=timezone.utc)
 
 # maps every field of the export to the model it is read from

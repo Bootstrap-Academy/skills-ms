@@ -19,7 +19,6 @@ from api.services.xp import (
 )
 from api.utils.cache import clear_cache, redis_cached
 
-
 router = APIRouter()
 
 

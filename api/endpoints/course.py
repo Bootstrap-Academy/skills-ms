@@ -32,7 +32,6 @@ from api.utils.cache import clear_cache, redis_cached
 from api.utils.docs import responses
 from api.utils.mp4 import mp4_range_response
 
-
 router = APIRouter()
 
 

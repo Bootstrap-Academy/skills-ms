@@ -7,7 +7,6 @@ from typing import Any, Awaitable, Callable, TypeVar, cast
 from api.redis import redis
 from api.settings import settings
 
-
 T = TypeVar("T")
 
 

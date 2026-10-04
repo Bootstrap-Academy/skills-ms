@@ -39,7 +39,6 @@ from api.services.user_export import export_user_data
 from api.settings import settings
 from api.utils.utc import utcnow
 
-
 USER = User(id="daily-user", admin=False, email_verified=True)
 REAL_POLICY = daily_limit.policy
 

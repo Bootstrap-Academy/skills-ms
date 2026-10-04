@@ -17,7 +17,6 @@ from .tree_settings import TreeSettings
 from .xp import XP
 from .xp_operation import XPOperation
 
-
 __all__ = [
     "DailyLimitSettings",
     "LessonStart",

@@ -10,7 +10,6 @@ import pytest
 from sqlalchemy import create_engine, inspect, text
 from sqlalchemy.engine import Connection
 
-
 ROOT = Path(__file__).parents[2]
 HEAD = "platformbasis001"
 

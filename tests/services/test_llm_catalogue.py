@@ -8,7 +8,6 @@ from pydantic import ValidationError
 from api.schemas.rooms import CatalogueUnit, IntroductionCompletion, LlmVerdictCompletion
 from api.services.rooms import load_catalogue
 
-
 GRADING = {"kind": "llm-verdict", "profile": "llmb-grade-prompt", "profile_sha256": "ab" * 32}
 
 

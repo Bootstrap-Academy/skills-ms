@@ -4,7 +4,6 @@ from typing import Any, AsyncIterator, Awaitable, Callable, TypeVar
 
 from .database import Base, delete, exists, filter_by, get_database, select
 
-
 T = TypeVar("T")
 
 

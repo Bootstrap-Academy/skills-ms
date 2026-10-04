@@ -7,7 +7,6 @@ from pydantic import Field, field_validator
 
 from api.schemas import BaseModel
 
-
 MODULE_ID_PATTERN = r"^[a-z0-9][a-z0-9-]{0,79}$"
 
 

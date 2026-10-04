@@ -27,7 +27,6 @@ from api.services import publications
 from api.settings import settings
 from api.utils.jwt import encode_jwt
 
-
 IDS = tuple(str(UUID(int=number)) for number in range(1, 7))
 
 

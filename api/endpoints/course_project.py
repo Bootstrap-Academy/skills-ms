@@ -8,7 +8,6 @@ from api.schemas.course_project import ProjectEnvelope, SaveProject
 from api.schemas.user import User
 from api.services import course_project
 
-
 router = APIRouter(prefix="/courses/{course_id}/project", dependencies=[Depends(enabled), require_verified_email])
 
 

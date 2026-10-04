@@ -11,7 +11,6 @@ from .services.auth import exists_user, ordinary_authority
 from .settings import settings
 from .utils.jwt import decode_jwt
 
-
 # the audience internal tokens have to be issued for to be accepted by this service
 INTERNAL_AUDIENCE = "skills"
 

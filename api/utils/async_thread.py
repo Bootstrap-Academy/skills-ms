@@ -3,7 +3,6 @@ from concurrent.futures import ThreadPoolExecutor
 from functools import wraps
 from typing import Any, Awaitable, Callable, TypeVar
 
-
 T = TypeVar("T")
 
 executor = ThreadPoolExecutor()

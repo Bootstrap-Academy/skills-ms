@@ -30,7 +30,6 @@ from api.settings import settings
 from tests.endpoints.test_curriculum import composed, course_definition
 from tests.endpoints.test_rooms import content, payload
 
-
 content = content
 
 
@@ -119,7 +118,7 @@ async def setup_private(
 
 
 async def test_admission_expiry_renewal_and_mutation_keep_module_identity(
-    setup_private: tuple[httpx.AsyncClient, IsolatedRedis, Path]
+    setup_private: tuple[httpx.AsyncClient, IsolatedRedis, Path],
 ) -> None:
     client, cache, directory = setup_private
     lesson = "/courses/composed/lessons/combined"

@@ -12,7 +12,6 @@ from api.schemas import BaseModel, Timestamp
 from api.schemas.daily_limit import DailyStatus
 from api.schemas.lesson_module import MODULE_ID_PATTERN, LessonModuleDescriptor
 
-
 # Same shape as llm-ms profile IDs (`academy_llm/src/profiles.rs`, `valid_id`).
 LLM_PROFILE_ID_PATTERN = r"^[a-z0-9][a-z0-9-]{0,79}$"
 MAX_LLM_PROFILES = 16

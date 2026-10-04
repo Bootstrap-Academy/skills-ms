@@ -40,18 +40,35 @@ redis = "^5.0.4"
 [tool.poetry.group.dev.dependencies]
 flake8 = "^7.0.0"
 isort = "^5.13.2"
-black = "^24.4.2"
-wemake-python-styleguide = "^0.19.2"
+black = "^26.5.1"
+# WPS checks are disabled in .flake8; retain their useful standalone plugins.
+flake8-commas = "^4.0.0"
+flake8-quotes = "^3.3.2"
+flake8-comprehensions = "^3.14.0"
+flake8-docstrings = "^1.7.0"
+flake8-string-format = "^0.3.0"
+flake8-bugbear = "^24.4.26"
+flake8-debugger = "^4.1.2"
+flake8-isort = "^6.1.1"
+flake8-eradicate = "^1.5.0"
+flake8-bandit = "^4.1.1"
+flake8-broken-line = "^1.0.0"
+flake8-rst-docstrings = "^0.3.0"
+pep8-naming = "^0.13.3"
+darglint = "^1.8.1"
 mypy = "^1.10"
 SQLAlchemy = { extras = ["mypy"], version = "^1.4.42" }
-pytest = "^8.2.0"
+pytest = "^9.1.1"
 coverage = "^7.5"
-pytest-asyncio = "^0.23.6"
+pytest-asyncio = "^1.4.0"
 pytest-mock = "^3.14.0"
 aiosqlite = "^0.20.0"
 rich = "^13.7.1"
 types-PyYAML = "^6.0.12"
 ruff = "^0.4.2"
+# Patched minimums for the linting and development dependency tree.
+GitPython = "^3.2.0"
+setuptools = "^84.0.0"
 
 [tool.poetry.scripts]
 api = "api.main:main"
@@ -126,7 +143,7 @@ skip-magic-trailing-comma = true
 profile = "black"
 py_version = 311
 line_length = 120
-lines_after_imports = 2
+lines_after_imports = -1
 reverse_relative = true
 known_local_folder = ["api", "tests"]
 sections = ["FUTURE", "STDLIB", "FIRSTPARTY", "THIRDPARTY", "LOCALFOLDER"]
@@ -139,6 +156,7 @@ exclude = ['^alembic/env\.py$', '^scripts/.+\.py$']
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 markers = []
 
 [tool.coverage.run]

@@ -32,7 +32,6 @@ from api.schemas import BaseModel
 from api.schemas.rooms import LLM_PROFILE_ID_PATTERN, CatalogueUnit, LlmGrant, LlmVerdictCompletion
 from api.settings import settings
 
-
 GRANT_AUDIENCE = "llm-grant"
 VERDICT_AUDIENCE = "llm-verdict"
 HEX_SHA256 = r"^[0-9a-f]{64}$"

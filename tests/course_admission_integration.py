@@ -18,7 +18,6 @@ from unittest.mock import patch
 from urllib.parse import urlparse
 from uuid import uuid4
 
-
 assert os.environ.get("L1_ADMISSION_SYNTHETIC") == "1", "requires owned synthetic fixtures"
 for name in ["DATABASE_URL", "AUTH_URL", "SHOP_URL", "REDIS_URL", "AUTH_REDIS_URL"]:
     assert urlparse(os.environ[name]).hostname in {"127.0.0.1", "localhost", "::1"}, name
@@ -39,7 +38,6 @@ from api.services.courses import COURSES  # noqa: E402
 from api.utils.cache import clear_cache, redis_cached  # noqa: E402
 from api.utils.docs import get_example  # noqa: E402
 from api.utils.jwt import encode_jwt  # noqa: E402
-
 
 OWNER = "e3f8a50a-a5a3-444a-9026-77336f716d03"
 

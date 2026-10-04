@@ -28,7 +28,6 @@ from api.schemas.lesson_module import LessonModuleDescriptor
 from api.schemas.user import User
 from api.settings import settings
 
-
 REFERENCE_PREFIX = "/private-lesson-modules/"
 ACCEL_PREFIX = "/_private-lesson-modules/"
 HASH = re.compile(r"[0-9a-f]{64}\Z")

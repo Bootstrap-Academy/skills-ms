@@ -6,7 +6,6 @@ from pydantic import field_validator
 from api.schemas import Timestamp
 from api.schemas.rooms import Mutation, RoomModel
 
-
 # Compact UTF-8 JSON, the size `JSON.stringify` produces in the browser; larger states get 413.
 PROJECT_STATE_LIMIT = 65536
 

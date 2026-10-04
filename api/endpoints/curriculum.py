@@ -9,7 +9,6 @@ from api.schemas.curriculum import Curriculum, Lesson
 from api.schemas.user import User
 from api.services import curriculum
 
-
 router = APIRouter(dependencies=[require_verified_email, has_course_access])
 
 

@@ -11,7 +11,6 @@ from api.exceptions.skill import SkillNotFoundException
 from api.schemas.user import User
 from api.utils.docs import responses
 
-
 router = APIRouter()
 
 

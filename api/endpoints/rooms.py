@@ -9,7 +9,6 @@ from api.schemas.user import User
 from api.services import lesson_milestones, rooms
 from api.settings import settings
 
-
 router = APIRouter()
 
 

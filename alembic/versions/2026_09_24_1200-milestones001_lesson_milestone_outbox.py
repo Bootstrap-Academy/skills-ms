@@ -4,7 +4,6 @@ from alembic import op
 
 import sqlalchemy as sa
 
-
 revision = "milestones001"
 down_revision = "courseproject001"
 branch_labels = None

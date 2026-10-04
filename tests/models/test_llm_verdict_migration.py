@@ -13,7 +13,6 @@ from sqlalchemy import create_engine, inspect, text
 from api.models import LlmVerdict
 from api.utils.utc import utcnow
 
-
 ROOT = Path(__file__).parents[2]
 
 

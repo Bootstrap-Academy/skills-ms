@@ -28,7 +28,6 @@ from .utils.docs import add_endpoint_links_to_openapi_docs
 from api.services.daily_limit import AccessError
 from api.services.internal import client_ssl_context
 
-
 T = TypeVar("T")
 
 logger = get_logger(__name__)
