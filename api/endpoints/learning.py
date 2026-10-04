@@ -6,7 +6,7 @@ from pathlib import Path
 from secrets import token_urlsafe
 from typing import Any
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
 from httpx import HTTPError
 from pydantic import ValidationError
 
@@ -19,6 +19,7 @@ from api.services import purchases
 from api.services.courses import COURSES
 from api.services.internal import InternalService
 from api.settings import settings
+from api.utils.mp4 import mp4_range_response
 
 
 router = APIRouter(prefix="/learning")
@@ -149,9 +150,7 @@ async def lecture_link(
 
 
 @router.get("/lectures/{token}/{file}", include_in_schema=False)
-async def stream(
-    request: Request, token: str, file: str, range: str = Header("bytes=0-", pattern=r"^bytes=\d{1,16}-(\d{1,16})?$")
-) -> Any:
+async def stream(request: Request, token: str, file: str, range: str = Header("bytes=0-")) -> Any:
     raw = await redis.get(f"learning_mp4:{token}:{file}")
     if raw is None:
         raise HTTPException(404, "Lecture link unavailable")
@@ -160,24 +159,9 @@ async def stream(
     if user.id != record["subject"] or record["course"] not in COURSES:
         raise HTTPException(404, "Lecture link unavailable")
     await courses.has_course_access.dependency(request=request, course=COURSES[record["course"]], user=user)
-    path = Path(record["path"])
-    if not path.is_file():
-        raise HTTPException(404, "Lecture unavailable")
-    start_text, end_text = range.removeprefix("bytes=").split("-")
-    start = int(start_text)
-    size = path.stat().st_size
-    end = min(int(end_text) + 1 if end_text else start + settings.stream_chunk_size, size)
-    headers = {"Accept-Ranges": "bytes", "Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
-    if start >= size or end <= start:
-        return Response(
-            status_code=416, media_type="video/mp4", headers={**headers, "Content-Range": f"bytes */{size}"}
+    try:
+        return await mp4_range_response(
+            Path(record["path"]), range, headers={"Cache-Control": "no-store", "Referrer-Policy": "no-referrer"}
         )
-    with path.open("rb") as source:
-        source.seek(start)
-        data = source.read(end - start)
-    return Response(
-        data,
-        status_code=206,
-        media_type="video/mp4",
-        headers={**headers, "Content-Range": f"bytes {start}-{end - 1}/{size}"},
-    )
+    except (FileNotFoundError, NotADirectoryError):
+        raise HTTPException(404, "Lecture unavailable") from None

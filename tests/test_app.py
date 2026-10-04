@@ -1,14 +1,15 @@
 import asyncio
+import json
 from typing import Any, Callable
 from unittest.mock import AsyncMock, MagicMock
 
-import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
 
 from ._utils import import_module, mock_asynccontextmanager
 from api import app
+from api.exceptions.verdict import StaleVerdictError
 
 
 def get_decorated_function(
@@ -62,33 +63,36 @@ async def test__rollback_on_exception(mocker: MockerFixture) -> None:
 
 
 async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> None:
-    mocker.patch("fastapi.FastAPI")
+    fastapi_patch = mocker.patch("fastapi.FastAPI")
     db_patch = mocker.patch("api.database.db")
     clear_cache_patch = mocker.patch("api.utils.cache.clear_cache")
 
-    module = import_module(app)
+    module, on_startup = get_decorated_function(fastapi_patch, "on_event", "startup")
     db_patch.create_tables = AsyncMock()
 
-    await module.on_startup()
+    await on_startup()
 
     db_patch.create_tables.assert_not_called()  # use alembic migrations instead
     clear_cache_patch.assert_called_once_with("courses")
-    task = module.app.state.purchase_recovery
-    task.cancel()
-    await asyncio.gather(task, return_exceptions=True)
+    tasks = [module.app.state.purchase_recovery, module.app.state.milestone_recovery]
+    for task in tasks:
+        task.cancel()
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 
 async def test__on_shutdown(mocker: MockerFixture) -> None:
-    mocker.patch("fastapi.FastAPI")
+    fastapi_patch = mocker.patch("fastapi.FastAPI")
     db_patch = mocker.patch("api.database.db")
     db_patch.dispose = AsyncMock()
 
-    module = import_module(app)
+    module, on_shutdown = get_decorated_function(fastapi_patch, "on_event", "shutdown")
     task = asyncio.create_task(asyncio.Event().wait())
     module.app.state.purchase_recovery = task
+    milestones = asyncio.create_task(asyncio.Event().wait())
+    module.app.state.milestone_recovery = milestones
 
-    await module.on_shutdown()
-    assert task.cancelled()
+    await on_shutdown()
+    assert task.cancelled() and milestones.cancelled()
     db_patch.dispose.assert_awaited_once_with()
 
 
@@ -97,26 +101,21 @@ async def test__status(client: AsyncClient) -> None:
     assert response.status_code == 200
 
 
-async def test__lifespan_stops_recovery_and_disposes_database_on_error(
-    mocker: MockerFixture, monkeypatch: MonkeyPatch
-) -> None:
-    started = asyncio.Event()
+async def test__rollback_on_exception_keeps_the_text_and_adds_the_code(mocker: MockerFixture) -> None:
+    fastapi_patch = mocker.patch("fastapi.FastAPI")
+    db_patch = mocker.patch("api.database.db")
+    db_patch.session.rollback = AsyncMock()
+    http_exception_patch = mocker.patch("starlette.exceptions.HTTPException")
+    http_exception_handler_patch = mocker.patch("fastapi.exception_handlers.http_exception_handler", AsyncMock())
 
-    async def recover() -> None:
-        started.set()
-        await asyncio.Event().wait()
+    _, rollback_on_exception = get_decorated_function(fastapi_patch, "exception_handler", http_exception_patch)
 
-    mocker.patch("api.services.purchases.recover", side_effect=recover)
-    clear_cache = mocker.patch("api.utils.cache.clear_cache", AsyncMock())
-    dispose = mocker.patch("api.database.db.dispose", AsyncMock())
-    module = import_module(app)
-    monkeypatch.setattr(module.settings, "learning_rooms_content", None)
-    with pytest.raises(RuntimeError, match="Synthetic lifespan error"):
-        async with module.app.router.lifespan_context(module.app):
-            await asyncio.wait_for(started.wait(), timeout=1)
-            clear_cache.assert_awaited_once_with("courses")
-            task = module.app.state.purchase_recovery
-            assert not task.done()
-            raise RuntimeError("Synthetic lifespan error")
-    assert task.cancelled()
-    dispose.assert_awaited_once_with()
+    result = await rollback_on_exception(MagicMock(), StaleVerdictError())
+
+    db_patch.session.rollback.assert_called_once_with()
+    http_exception_handler_patch.assert_not_called()
+    assert result.status_code == 409
+    assert json.loads(result.body) == {
+        "detail": "This grading is out of date. Check your answer again.",
+        "code": "verdict_stale",
+    }
