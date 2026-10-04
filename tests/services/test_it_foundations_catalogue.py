@@ -5,7 +5,7 @@ from uuid import uuid4
 import pytest
 from fastapi import HTTPException
 
-from api.schemas.rooms import Complete, Progress
+from api.schemas.rooms import Complete, IntroductionCompletion, Progress
 from api.services.courses import COURSES
 from api.services.rooms import completed_progress, load_catalogue
 
@@ -39,7 +39,7 @@ def test_all_it_labs_keep_localized_checks_consistent_without_claiming_solved() 
     units = [unit for unit in load_catalogue().units if unit.path_id == "it-foundations" and unit.room != "exercise"]
     assert len(units) == 26
     for unit in units:
-        assert unit.completion is not None and unit.exercise is None
+        assert isinstance(unit.completion, IntroductionCompletion) and unit.exercise is None
         expected = unit.completion.answer
         assert expected
         options_by_locale = {}

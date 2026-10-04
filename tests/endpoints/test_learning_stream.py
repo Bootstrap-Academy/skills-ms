@@ -122,7 +122,8 @@ async def test_stream_rejects_unsatisfiable_or_reversed_range(
 
 
 @pytest.mark.parametrize(
-    "refusal,status", [("token", 404), ("authority", 401), ("subject", 404), ("course", 403), ("file", 404)]
+    "refusal,status",
+    [("token", 404), ("authority", 401), ("subject", 404), ("unknown_course", 404), ("course", 403), ("file", 404)],
 )
 async def test_stream_checks_existing_admission_before_range(
     stream_fixture: dict[str, Any], refusal: str, status: int
@@ -134,6 +135,8 @@ async def test_stream_checks_existing_admission_before_range(
         f["authority"].side_effect = HTTPException(401, "Synthetic revoked learning key")
     elif refusal == "subject":
         f["authority"].return_value = User(id="other-subject", email_verified=True, admin=False)
+    elif refusal == "unknown_course":
+        f["redis"].return_value = json.dumps({**f["record"], "course": "unknown-course"})
     elif refusal == "course":
         f["admission"].side_effect = HTTPException(403, "Synthetic withdrawn course")
     elif refusal == "file":
@@ -143,12 +146,14 @@ async def test_stream_checks_existing_admission_before_range(
     assert "Content-Range" not in response.headers
     if refusal == "token":
         f["authority"].assert_not_awaited()
-    if refusal in ("token", "authority", "subject"):
+    if refusal in ("token", "authority", "subject", "unknown_course"):
         f["admission"].assert_not_awaited()
 
 
 @pytest.mark.parametrize("range_header", ["bytes=-32", "bytes=0-1,5-8", "bytes=x-3", "bytes=10000000000000000-"])
-async def test_stream_preserves_existing_header_validation(stream_fixture: dict[str, Any], range_header: str) -> None:
+async def test_stream_rejects_invalid_range_after_admission(stream_fixture: dict[str, Any], range_header: str) -> None:
     response = await stream_fixture["client"].get(URL, headers={"Range": range_header})
-    assert response.status_code == 422
-    stream_fixture["redis"].assert_not_awaited()
+    assert response.status_code == 416
+    assert response.headers["Content-Range"] == f"bytes */{len(DATA)}"
+    stream_fixture["authority"].assert_awaited_once_with("synthetic-digest")
+    stream_fixture["admission"].assert_awaited_once()

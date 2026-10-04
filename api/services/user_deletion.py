@@ -9,6 +9,10 @@ from api.utils.cache import clear_cache
 USER_MODELS: list[Any] = [
     models.LessonStartRequest,
     models.LessonStart,
+    models.CourseProjectRequest,
+    models.CourseProject,
+    models.LessonMilestoneDelivery,
+    models.LlmVerdict,
     models.RoomRequest,
     models.RoomState,
     models.CourseAccess,

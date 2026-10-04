@@ -17,7 +17,7 @@ from api.database import db, db_context, filter_by
 from api.endpoints import course as course_endpoints
 from api.endpoints.rooms import router
 from api.schemas.course import Course
-from api.schemas.rooms import Catalogue, CataloguePath, SaveState
+from api.schemas.rooms import Catalogue, CataloguePath, IntroductionCompletion, SaveState
 from api.schemas.user import User
 from api.services import rooms
 from api.services.user_deletion import delete_user_data
@@ -678,7 +678,7 @@ async def test_guided_lesson_uses_exact_server_answers_without_claiming_solved_s
 ) -> None:
     lesson = content.units[0]
     lesson.room = "guided-lesson"
-    assert lesson.completion is not None
+    assert isinstance(lesson.completion, IntroductionCompletion)
     lesson.completion.answer = {"checks": {"variable": "name", "amount": 3}}
     wrong = payload(action="complete", answer={"checks": {"variable": "name", "amount": True}})
     assert (await room_client.post("/rooms/intro/complete", json=wrong)).status_code == 422
