@@ -7,7 +7,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import load_only
 
 from api.database import db, filter_by
-from api.models import LectureProgress, PurchaseUser, RoomState
+from api.models import LectureProgress, RoomState
 from api.schemas.course import Course
 from api.schemas.course import Lecture as CourseLecture
 from api.schemas.curriculum import (
@@ -27,6 +27,7 @@ from api.schemas.curriculum import (
 from api.schemas.rooms import Catalogue, CatalogueUnit, LocalizedText
 from api.schemas.user import User
 from api.services import daily_limit, rooms
+from api.services.purchases import read_user_guard
 
 
 def localized(value: str) -> LocalizedText:
@@ -117,7 +118,7 @@ def definitions(course: Course, content: Catalogue | None = None) -> tuple[Curri
 async def room_states(
     user: User, references: list[ActivityReference], *, summary: bool = False
 ) -> dict[str, RoomState]:
-    guard = await db.get(PurchaseUser, user_id=user.id)
+    guard = await read_user_guard(user.id)
     if guard is not None and guard.deleted:
         raise HTTPException(401, "Dieses Konto ist nicht mehr verfügbar.")
     ids = {ref.source.unit_id for ref in references if isinstance(ref.source, RoomSource)}
@@ -141,7 +142,9 @@ def completed(ref: ActivityReference, states: dict[str, RoomState], lectures: se
 
 
 async def get_curriculum(course: Course, user: User) -> Curriculum:
-    definition, _ = definitions(course)
+    # Summary/history reads share one shallow catalogue and its identity index.
+    content = daily_limit.read_catalogue().content if course.learning_path_id is not None else None
+    definition, _ = definitions(course, content)
     refs = [activity for lesson in definition.lessons for activity in lesson.activities]
     states = await room_states(user, refs, summary=True)
     lectures = await LectureProgress.get_completed(user.id, course.id)

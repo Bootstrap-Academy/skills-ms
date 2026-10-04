@@ -40,6 +40,14 @@ Grouping preserves older unit-as-lesson URLs as aliases and recognizes old
 unit-keyed LessonStarts, including a start without a saved draft. Returned lesson
 IDs and RoomEnvelope `course_id`/`lesson_id` identify the canonical group.
 
+Curriculum summaries read the account guard and local configuration once per
+request. Admission snapshots index charged starts by day; historical room checks
+reuse one shallow catalogue with a unit-ID index. The shared source catalogue is
+unchanged. These caches live only in the current database session. Acquiring the
+account lock refreshes the guard, configuration writes invalidate their cached
+value, and starts reload the admission snapshot before and after mutation.
+With policy disabled, summaries still make no configuration or remote-history query.
+
 Internal configuration uses existing `aud=skills` authentication:
 
 - `GET /_internal/daily-limit` returns mode, limit and activation issues.

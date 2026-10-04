@@ -23,7 +23,7 @@ from api.schemas.daily_limit import ChallengeAdmission, DailyStatus, LearningHis
 from api.schemas.rooms import Catalogue, CatalogueUnit
 from api.schemas.user import User
 from api.services.internal import InternalService, InternalServiceError
-from api.services.purchases import lock_user
+from api.services.purchases import lock_user, read_user_guard
 from api.settings import settings
 from api.utils.utc import utcnow
 
@@ -72,8 +72,13 @@ async def policy(user_id: str) -> LearningPolicy:
 
 
 async def configuration() -> tuple[str, int]:
+    cached: tuple[str, int] | None = db.session.info.get("daily_configuration")
+    if cached is not None:
+        return cached
     row = await db.get(models.DailyLimitSettings, id=1)
-    return ("off", 3) if row is None else (row.mode, row.limit)
+    result = ("off", 3) if row is None else (row.mode, row.limit)
+    db.session.info["daily_configuration"] = result
+    return result
 
 
 def activation_issues() -> list[str]:
@@ -103,6 +108,7 @@ async def configure(data: LimitConfiguration) -> dict[str, Any]:
         for name, value in values.items():
             setattr(row, name, value)
     await db.session.flush()
+    db.session.info.pop("daily_configuration", None)
     logger.info("Daily lesson settings changed: mode=%s limit=%s operator=%s", data.mode, data.limit, data.updated_by)
     return {**data.dict(), "activation_issues": issues}
 
@@ -163,6 +169,7 @@ class AdmissionSnapshot(NamedTuple):
     purchases: set[str]
     rooms: dict[str, models.RoomState]
     lectures: set[tuple[str, str]]
+    charged_by_day: dict[date, int]
 
 
 async def snapshot(user: User) -> AdmissionSnapshot:
@@ -177,14 +184,38 @@ async def snapshot(user: User) -> AdmissionSnapshot:
             query = query.with_for_update().execution_options(populate_existing=True)
         return await db.all(query)
 
+    starts = {(row.course_id, row.lesson_id): row for row in await rows(models.LessonStart)}
+    charged_by_day: dict[date, int] = {}
+    for row in starts.values():
+        if row.charged:
+            charged_by_day[row.local_day] = charged_by_day.get(row.local_day, 0) + 1
     result = AdmissionSnapshot(
-        {(row.course_id, row.lesson_id): row for row in await rows(models.LessonStart)},
+        starts,
         {row.course_id for row in await rows(models.CourseAccess)},
         {row.unit_id: row for row in await rows(models.RoomState)},
         {(row.course_id, row.lecture_id) for row in await rows(models.LectureProgress)},
+        charged_by_day,
     )
     db.session.info[key] = result
     return result
+
+
+@dataclass
+class ReadCatalogue:
+    content: Catalogue
+    units: dict[str, CatalogueUnit]
+
+
+def read_catalogue() -> ReadCatalogue:
+    """Resolve admission identities once per database session without copying content."""
+    from api.services import rooms
+
+    cached: ReadCatalogue | None = db.session.info.get("daily_catalogue")
+    if cached is None:
+        content = rooms.catalogue(deep=False)
+        cached = ReadCatalogue(content, {unit.id: unit for unit in content.units})
+        db.session.info["daily_catalogue"] = cached
+    return cached
 
 
 async def purchased(user: User, course: Course) -> bool:
@@ -217,7 +248,6 @@ async def challenge_history(user: User) -> tuple[set[UUID], set[tuple[str, str]]
     if not settings.daily_limit_policy_enabled:
         return set(), set()
 
-    from api.services import rooms
     from api.services.courses import COURSES
 
     key = ("challenge_history", user.id)
@@ -228,7 +258,11 @@ async def challenge_history(user: User) -> tuple[set[UUID], set[tuple[str, str]]
         return cached  # type: ignore[no-any-return]
     subtasks = (
         sorted(
-            {str(unit.exercise.subtask_id) for unit in rooms.catalogue().units if not unit.retired and unit.exercise}
+            {
+                str(unit.exercise.subtask_id)
+                for unit in read_catalogue().content.units
+                if not unit.retired and unit.exercise
+            }
         )
         if settings.rooms_enabled
         else []
@@ -270,8 +304,6 @@ async def challenge_history(user: User) -> tuple[set[UUID], set[tuple[str, str]]
 async def historical_progress(
     user: User, course: Course, lesson: LessonDefinition, *, with_history: bool = True
 ) -> bool:
-    from api.services import rooms
-
     data = await snapshot(user)
     exercise_ids: set[UUID] = set()
     lecture_ids: set[tuple[str, str]] = set()
@@ -294,7 +326,7 @@ async def historical_progress(
             ):
                 return True
             if settings.rooms_enabled:
-                unit = next((item for item in rooms.catalogue().units if item.id == source.unit_id), None)
+                unit = read_catalogue().units.get(source.unit_id)
                 if unit is not None and unit.exercise is not None:
                     exercise_ids.add(unit.exercise.subtask_id)
     if with_history and (exercise_ids or lecture_ids):
@@ -308,13 +340,14 @@ async def begun(user: User, course: Course, lesson: LessonDefinition) -> bool:
 
 
 async def status(user: User, course: Course | None = None, lesson: LessonDefinition | None = None) -> DailyStatus:
-    guard = await db.get(models.PurchaseUser, user_id=user.id)
+    guard = await read_user_guard(user.id)
     if guard is not None and guard.deleted:
         raise HTTPException(401, "Dieses Konto ist nicht mehr verfügbar.")
     current = await policy(user.id)
     mode, limit = await configuration()
     day, reset = day_window(utcnow())
-    used = sum(row.charged and row.local_day == day for row in (await snapshot(user)).starts.values())
+    data = await snapshot(user)
+    used = data.charged_by_day.get(day, 0)
     exempt: Literal["admin", "premium", "purchase", "started"] | None = (
         "admin" if user.admin else "premium" if current.premium else None
     )
@@ -325,7 +358,7 @@ async def status(user: User, course: Course | None = None, lesson: LessonDefinit
         course is not None
         and lesson is not None
         and (
-            (course.id, lesson.id) in (await snapshot(user)).starts
+            (course.id, lesson.id) in data.starts
             or await historical_progress(user, course, lesson, with_history=not unlimited)
         )
     )
@@ -724,7 +757,7 @@ async def _challenge_scope_admission(
         if not pairs and not broad_access:
             raise HTTPException(403, "Für diese Aufgabe brauchst du Zugang zum Kurs.")
         if settings.daily_limit_policy_enabled:
-            guard = await db.get(models.PurchaseUser, user_id=user.id)
+            guard = await read_user_guard(user.id)
             if guard is not None and guard.deleted:
                 raise HTTPException(401, "Dieses Konto ist nicht mehr verfügbar.")
         # Read batches return permissions only. Choosing a preferred start,
