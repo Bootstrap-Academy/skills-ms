@@ -41,7 +41,6 @@ from api.schemas.user import User
 from api.services import llm, rooms
 from api.settings import settings
 
-
 URL = os.environ.get("LLM_CONTRACT_URL", "")
 OTHER_PROFILE = os.environ.get("LLM_CONTRACT_OTHER_PROFILE", "llmb-temperature-fan")
 ANSWER = "Du bist Reiseleiter. Plane mir drei Tage in Rom. Antworte als Tabelle mit Uhrzeiten."

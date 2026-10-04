@@ -14,7 +14,6 @@ from api.auth import internal_auth, user_auth
 from api.schemas.user import User
 from api.settings import settings
 
-
 REQUEST_ID = "a0000000-0000-0000-0000-000000000001"
 XP_OPERATION = f"/_internal/xp-operations/{REQUEST_ID}/{REQUEST_ID}/skill"
 

@@ -44,7 +44,6 @@ from tests.endpoints.test_llm_rooms import (
     verdict_claims,
 )
 
-
 CHALLENGES = "http://challenges.synthetic/base"
 INTERNAL_KEY = "synthetic-internal-challenges-key-for-tests-0123456789"
 SKILL = "prompting_basics"

@@ -28,7 +28,6 @@ from api.services.user_export import export_user_data
 from api.settings import settings
 from api.utils.utc import utcnow
 
-
 USER_A = "3f0c9a52-6a4e-4c1b-9d3e-5b8f2a7c1d01"
 USER_B = "8a2d4e61-0b7f-4d9c-a1e3-7c6b5d4f3e02"
 ADMIN = "5c1e7b93-2d4a-4f60-8e1b-9a3c7d5e2f03"

@@ -11,7 +11,6 @@ from api.schemas import BaseModel
 from api.services.internal import InternalService
 from api.settings import settings
 
-
 SCOPE_VERSION: Literal["academy-verified-v1"] = "academy-verified-v1"
 HEADERS = {"Cache-Control": "private, no-store", "Vary": "Authorization"}
 

@@ -34,7 +34,6 @@ from api.services.user_deletion import delete_user_data
 from api.services.user_export import export_user_data
 from api.settings import Settings, settings
 
-
 GRANT_KEY = "synthetic-grant-key-for-tests-only-0123456789"
 VERDICT_KEY = "synthetic-verdict-key-for-tests-only-0123456789"
 PROFILE = "llmb-grade-prompt"

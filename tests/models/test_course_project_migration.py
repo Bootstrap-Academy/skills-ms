@@ -14,7 +14,6 @@ from sqlalchemy import create_engine, inspect, text
 from api.models import CourseProject, CourseProjectRequest
 from api.utils.utc import utcnow
 
-
 ROOT = Path(__file__).parents[2]
 
 

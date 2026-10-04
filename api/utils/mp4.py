@@ -12,7 +12,6 @@ from starlette.responses import Response, StreamingResponse
 
 from api.settings import settings
 
-
 READ_SIZE = 64 * 1024
 
 
