@@ -32,5 +32,5 @@ def test_all_existing_courses_and_rooms_keep_their_source_order(monkeypatch: Mon
             for ref in refs
             if isinstance(ref.source, LectureSource)
         ] == expected_lectures, course.id
-        assert "curriculum" not in course.summary(None).dict()
+        assert "curriculum" not in course.summary(None).model_dump()
         assert course.summary(None).has_explicit_curriculum is False

@@ -49,7 +49,7 @@ async def _add_user_data(user_id: str) -> None:
 
 
 def test__export_covers_every_table_with_user_data() -> None:
-    assert set(EXPORTED_MODELS) == set(UserDataExport.__fields__)
+    assert set(EXPORTED_MODELS) == set(UserDataExport.model_fields)
     assert {model.__tablename__ for model in EXPORTED_MODELS.values()} == {
         table.name
         for table in Base.metadata.tables.values()
@@ -110,7 +110,7 @@ async def test__export_retained_purchase_evidence_is_owner_bound() -> None:
     assert export.purchases[0]["id"] == "purchase-user"
     assert export.purchases[0]["result"] == {"state": "paid"}
     assert export.purchases[0]["fulfillment"] is None
-    assert "other_user" not in export.json()
+    assert "other_user" not in export.model_dump_json()
 
 
 async def test__export_preserved_right_and_withdrawn_grant_remain_owner_bound() -> None:
@@ -149,6 +149,6 @@ async def test__export_preserved_right_and_withdrawn_grant_remain_owner_bound() 
         assert export.course_right_grants[0]["state"] == "withdrawn"
         assert export.course_right_grants[0]["result"] == {"state": "granted"}
         assert export.last_watch == []
-        assert "other_user" not in export.json()
+        assert "other_user" not in export.model_dump_json()
     assert unrelated_export.retained_course_rights == []
     assert unrelated_export.course_right_grants == []

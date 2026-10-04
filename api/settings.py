@@ -2,10 +2,13 @@ import secrets
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseSettings, Field, validator
+from pydantic import Field, field_validator
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(case_sensitive=False, extra="forbid", coerce_numbers_to_str=True)
+
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"] = "INFO"
 
     host: str = "0.0.0.0"  # noqa: S104
@@ -32,7 +35,7 @@ class Settings(BaseSettings):
     auth_url: str = ""
     shop_url: str = ""
     # Operator-owned service origin; room content and client requests supply only IDs.
-    challenges_url: str = Field("http://127.0.0.1:8005", regex=r"^https?://[^?#@]+$")
+    challenges_url: str = Field(default="http://127.0.0.1:8005", pattern=r"^https?://[^?#@]+$")
     rooms_enabled: bool = False
     # Disabled until the backend policy API is deployed. Never activates new terms.
     daily_limit_policy_enabled: bool = False
@@ -41,7 +44,7 @@ class Settings(BaseSettings):
     lesson_module_origins: list[str] = Field(default_factory=list)
     lesson_module_local_development: bool = False
     private_lesson_modules_root: Path | None = None
-    private_lesson_module_grant_ttl: int = Field(3600, ge=60, le=8 * 60 * 60)
+    private_lesson_module_grant_ttl: int = Field(default=3600, ge=60, le=8 * 60 * 60)
     # LLM gateway (llm-ms). The grant key is shared only with llm-ms and signs lesson grants. Grading
     # verdicts from llm-ms are checked with their own verdict key; there is no fallback to the grant key.
     # Like in llm-ms, each key is at least 32 bytes and differs from every other key (also JWT_SECRET and
@@ -55,7 +58,7 @@ class Settings(BaseSettings):
     # the production host and "test" on the test host; 1 to 32 characters a-z, 0-9 and -, starting with a
     # letter. Empty or invalid: graded completions are off, like without a verdict key.
     llm_verdict_env: str = ""
-    llm_grant_ttl: int = Field(2 * 60 * 60, ge=60, le=8 * 60 * 60)
+    llm_grant_ttl: int = Field(default=2 * 60 * 60, ge=60, le=8 * 60 * 60)
     character_areas: Path = Path(__file__).parent / "content/character_areas.json"
 
     lecture_xp: int = 10
@@ -82,16 +85,16 @@ class Settings(BaseSettings):
     smtp_starttls: bool = True
 
     database_url: str = Field(
-        "mysql+aiomysql://fastapi:fastapi@mariadb:3306/fastapi",
-        regex=r"^(mysql\+aiomysql|postgresql\+asyncpg|sqlite\+aiosqlite)://.*$",
+        default="mysql+aiomysql://fastapi:fastapi@mariadb:3306/fastapi",
+        pattern=r"^(mysql\+aiomysql|postgresql\+asyncpg|sqlite\+aiosqlite)://.*$",
     )
     pool_recycle: int = 300
     pool_size: int = 20
     max_overflow: int = 20
     sql_show_statements: bool = False
 
-    redis_url: str = Field("redis://redis:6379/1", regex=r"^redis://.*$")
-    auth_redis_url: str = Field("redis://redis:6379/0", regex=r"^redis://.*$")
+    redis_url: str = Field(default="redis://redis:6379/1", pattern=r"^redis://.*$")
+    auth_redis_url: str = Field(default="redis://redis:6379/0", pattern=r"^redis://.*$")
 
     sentry_dsn: str | None = None
     sentry_environment: str = "test"
@@ -107,11 +110,11 @@ class Settings(BaseSettings):
         }
         return secrets_by_audience.get(audience, "") or self.jwt_secret
 
-    @validator("llm_grant_secret_file", "llm_verdict_secret_file", pre=True)
+    @field_validator("llm_grant_secret_file", "llm_verdict_secret_file", mode="before")
     @classmethod
     def unset_empty_path(cls, value: Any) -> Any:
         # An empty `*_FILE=` in an environment file means "not configured", not the working directory.
         return None if value == "" else value
 
 
-settings = Settings()  # type: ignore
+settings = Settings()

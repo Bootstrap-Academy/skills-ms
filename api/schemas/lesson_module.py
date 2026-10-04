@@ -3,28 +3,27 @@
 from typing import Literal
 from urllib.parse import unquote, urlsplit
 
-from pydantic import BaseModel, Field, validator
+from pydantic import Field, field_validator
+
+from api.schemas import BaseModel
 
 
 MODULE_ID_PATTERN = r"^[a-z0-9][a-z0-9-]{0,79}$"
 
 
 class LessonModuleDescriptor(BaseModel):
-    id: str = Field(regex=MODULE_ID_PATTERN)
+    id: str = Field(pattern=MODULE_ID_PATTERN)
     api_version: Literal[1]
     entry_url: str = Field(max_length=2048)
 
-    class Config:
-        extra = "forbid"
-
-    @validator("api_version", pre=True)
+    @field_validator("api_version", mode="before")
     @classmethod
     def exact_version(cls, value: object) -> object:
         if not isinstance(value, int) or isinstance(value, bool) or value != 1:
             raise ValueError("Only module API version 1 is supported")
         return value
 
-    @validator("entry_url")
+    @field_validator("entry_url")
     @classmethod
     def browser_module_url(cls, value: str) -> str:
         parsed = urlsplit(value)

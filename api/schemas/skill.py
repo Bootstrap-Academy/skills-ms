@@ -1,5 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import Field
 
+from api.schemas import BaseModel
 from api.utils.docs import example, get_example
 
 
@@ -13,9 +14,9 @@ class RootSkill(BaseModel):
     column: int = Field(description="Column of the skill in the skill tree")
     sub_tree_rows: int = Field(description="Number of rows in the sub skill tree")
     sub_tree_columns: int = Field(description="Number of columns in the sub skill tree")
-    icon: str | None = Field(description="Icon of the skill")
+    icon: str | None = Field(default=None, description="Icon of the skill")
 
-    Config = example(
+    model_config = example(
         id="datenbank_experte",
         name="Datenbank-Experte",
         dependencies=["grundlagen_der_programmierung_und_datenhaltung"],
@@ -39,10 +40,10 @@ class RootSkillResponse(BaseModel):
     column: int = Field(description="Column of the skill in the skill tree")
     sub_tree_rows: int = Field(description="Number of rows in the sub skill tree")
     sub_tree_columns: int = Field(description="Number of columns in the sub skill tree")
-    icon: str | None = Field(description="Icon of the skill")
-    is_bookmarked: bool | None = Field(description="Indicates if the skill is bookmarked")
+    icon: str | None = Field(default=None, description="Icon of the skill")
+    is_bookmarked: bool | None = Field(default=None, description="Indicates if the skill is bookmarked")
 
-    Config = example(
+    model_config = example(
         id="datenbank_experte",
         name="Datenbank-Experte",
         dependencies=["grundlagen_der_programmierung_und_datenhaltung"],
@@ -62,7 +63,7 @@ class SkillTree(BaseModel):
     rows: int = Field(description="Number of rows in the skill tree")
     columns: int = Field(description="Number of columns in the skill tree")
 
-    Config = example(skills=get_example(RootSkill), rows=20, columns=20)
+    model_config = example(skills=get_example(RootSkill), rows=20, columns=20)
 
 
 class SkillTreeResponse(BaseModel):
@@ -70,12 +71,12 @@ class SkillTreeResponse(BaseModel):
     rows: int = Field(description="Number of rows in the skill tree")
     columns: int = Field(description="Number of columns in the skill tree")
 
-    Config = example(skills=[get_example(RootSkillResponse)], rows=20, columns=20)
+    model_config = example(skills=[get_example(RootSkillResponse)], rows=20, columns=20)
 
 
 class UpdateRootTree(BaseModel):
-    rows: int | None = Field(ge=1, lt=1 << 31, description="Number of rows in the skill tree")
-    columns: int | None = Field(ge=1, lt=1 << 31, description="Number of columns in the skill tree")
+    rows: int | None = Field(default=None, ge=1, lt=1 << 31, description="Number of rows in the skill tree")
+    columns: int | None = Field(default=None, ge=1, lt=1 << 31, description="Number of columns in the skill tree")
 
 
 class CreateRootSkill(BaseModel):
@@ -86,17 +87,21 @@ class CreateRootSkill(BaseModel):
     column: int = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
     sub_tree_rows: int = Field(ge=1, lt=1 << 31, description="Number of rows in the sub skill tree")
     sub_tree_columns: int = Field(ge=1, lt=1 << 31, description="Number of columns in the sub skill tree")
-    icon: str | None = Field(max_length=256, description="Icon of the skill")
+    icon: str | None = Field(default=None, max_length=256, description="Icon of the skill")
 
 
 class UpdateRootSkill(BaseModel):
-    name: str | None = Field(max_length=256, description="Name of the skill")
-    dependencies: set[str] | None = Field(description="List of skill dependencies")
-    row: int | None = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
-    column: int | None = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
-    sub_tree_rows: int | None = Field(ge=1, lt=1 << 31, description="Number of rows in the sub skill tree")
-    sub_tree_columns: int | None = Field(ge=1, lt=1 << 31, description="Number of columns in the sub skill tree")
-    icon: str | None = Field(max_length=256, description="Icon of the skill")
+    name: str | None = Field(default=None, max_length=256, description="Name of the skill")
+    dependencies: set[str] | None = Field(default=None, description="List of skill dependencies")
+    row: int | None = Field(default=None, ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
+    column: int | None = Field(default=None, ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
+    sub_tree_rows: int | None = Field(
+        default=None, ge=1, lt=1 << 31, description="Number of rows in the sub skill tree"
+    )
+    sub_tree_columns: int | None = Field(
+        default=None, ge=1, lt=1 << 31, description="Number of columns in the sub skill tree"
+    )
+    icon: str | None = Field(default=None, max_length=256, description="Icon of the skill")
 
 
 class SubSkill(BaseModel):
@@ -108,9 +113,9 @@ class SubSkill(BaseModel):
     courses: list[str] = Field(description="List of course ids")
     row: int = Field(description="Row of the skill in the skill tree")
     column: int = Field(description="Column of the skill in the skill tree")
-    icon: str | None = Field(description="Icon of the skill")
+    icon: str | None = Field(default=None, description="Icon of the skill")
 
-    Config = example(
+    model_config = example(
         id="datenanalyse_mit_python",
         parent_id="datenanalyse",
         name="Datenanalyse mit Python",
@@ -132,10 +137,10 @@ class SubSkillResponse(BaseModel):
     courses: list[str] = Field(description="List of course ids")
     row: int = Field(description="Row of the skill in the skill tree")
     column: int = Field(description="Column of the skill in the skill tree")
-    icon: str | None = Field(description="Icon of the skill")
-    is_bookmarked: bool | None = Field(description="Indicates if the skill is bookmarked")
+    icon: str | None = Field(default=None, description="Icon of the skill")
+    is_bookmarked: bool | None = Field(default=None, description="Indicates if the skill is bookmarked")
 
-    Config = example(
+    model_config = example(
         id="datenanalyse_mit_python",
         parent_id="datenanalyse",
         name="Datenanalyse mit Python",
@@ -154,7 +159,7 @@ class SubSkillTree(BaseModel):
     rows: int = Field(description="Number of rows in the sub skill tree")
     columns: int = Field(description="Number of columns in the sub skill tree")
 
-    Config = example(skills=[get_example(SubSkill)], rows=20, columns=20)
+    model_config = example(skills=[get_example(SubSkill)], rows=20, columns=20)
 
 
 class SubSkillTreeResponse(BaseModel):
@@ -162,7 +167,7 @@ class SubSkillTreeResponse(BaseModel):
     rows: int = Field(description="Number of rows in the sub skill tree")
     columns: int = Field(description="Number of columns in the sub skill tree")
 
-    Config = example(skills=[get_example(SubSkillResponse)], rows=20, columns=20)
+    model_config = example(skills=[get_example(SubSkillResponse)], rows=20, columns=20)
 
 
 class CreateSubSkill(BaseModel):
@@ -172,13 +177,13 @@ class CreateSubSkill(BaseModel):
     courses: set[str] = Field(description="List of course ids")
     row: int = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
     column: int = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
-    icon: str | None = Field(max_length=256, description="Icon of the skill")
+    icon: str | None = Field(default=None, max_length=256, description="Icon of the skill")
 
 
 class UpdateSubSkill(BaseModel):
-    name: str | None = Field(max_length=256, description="Name of the skill")
-    dependencies: set[str] | None = Field(description="List of skill dependencies")
-    courses: set[str] | None = Field(description="List of course ids")
-    row: int | None = Field(ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
-    column: int | None = Field(ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
-    icon: str | None = Field(max_length=256, description="Icon of the skill")
+    name: str | None = Field(default=None, max_length=256, description="Name of the skill")
+    dependencies: set[str] | None = Field(default=None, description="List of skill dependencies")
+    courses: set[str] | None = Field(default=None, description="List of course ids")
+    row: int | None = Field(default=None, ge=0, lt=1 << 31, description="Row of the skill in the skill tree")
+    column: int | None = Field(default=None, ge=0, lt=1 << 31, description="Column of the skill in the skill tree")
+    icon: str | None = Field(default=None, max_length=256, description="Icon of the skill")

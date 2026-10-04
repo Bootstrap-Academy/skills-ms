@@ -16,7 +16,7 @@ from api.settings import settings
 @lru_cache(maxsize=4)
 def load_areas(path: Path) -> CharacterAreaCatalogue:
     try:
-        return CharacterAreaCatalogue.parse_raw(path.read_text())
+        return CharacterAreaCatalogue.model_validate_json(path.read_text())
     except (OSError, ValueError):
         raise HTTPException(503, "Deine Lernbereiche können gerade nicht geladen werden.") from None
 

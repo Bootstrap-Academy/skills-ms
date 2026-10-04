@@ -48,7 +48,7 @@ async def test__export_user(auth_client: AsyncClient, mocker: MockerFixture) -> 
     response = await auth_client.get("/_internal/users/user42/export")
 
     assert response.status_code == 200
-    assert response.json() == export.dict()
+    assert response.json() == export.model_dump()
     export_user_data.assert_called_once_with("user42")
 
 

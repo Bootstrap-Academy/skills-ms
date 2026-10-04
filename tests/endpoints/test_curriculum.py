@@ -34,7 +34,7 @@ content = room_content  # Keep the existing synthetic catalogue fixture.
 
 
 def course_definition(**values: Any) -> Course:
-    return Course.parse_obj(
+    return Course.model_validate(
         {
             "id": "composed",
             "title": "Synthetic course",
@@ -91,7 +91,9 @@ async def curriculum_client(content: Catalogue, monkeypatch: MonkeyPatch) -> Asy
     for routes in (router, rooms_router, course_endpoints.router):
         app.include_router(routes, dependencies=[Depends(session)])
     async with httpx.AsyncClient(
-        app=app, base_url="http://synthetic", headers={"Authorization": "Bearer subject-a"}
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://synthetic",
+        headers={"Authorization": "Bearer subject-a"},
     ) as client:
         yield client
 
@@ -287,7 +289,7 @@ async def test_legacy_video_keeps_lecture_ids_progress_and_deferred_practice(
 async def test_custom_registry_and_video_work_through_existing_room_mutations(
     curriculum_client: httpx.AsyncClient, content: Catalogue, monkeypatch: MonkeyPatch
 ) -> None:
-    custom = CatalogueUnit.parse_obj(
+    custom = CatalogueUnit.model_validate(
         {
             "id": "own-simulation",
             "path_id": "python-loops",
@@ -302,7 +304,7 @@ async def test_custom_registry_and_video_work_through_existing_room_mutations(
             "completion": {"kind": "introduced", "answer": {"observed": True}, "allow_skip": False},
         }
     )
-    video = CatalogueUnit.parse_obj(
+    video = CatalogueUnit.model_validate(
         {
             "id": "new-video",
             "path_id": "python-loops",
@@ -327,10 +329,10 @@ async def test_custom_registry_and_video_work_through_existing_room_mutations(
     async with db_context():
         await register_module(descriptor)
     fetched = (await curriculum_client.get("/rooms?course=composed&unit=own-simulation")).json()
-    assert fetched["next"]["unit"]["module"] == descriptor.dict()
+    assert fetched["next"]["unit"]["module"] == descriptor.model_dump()
     lesson = (await curriculum_client.get("/courses/composed/lessons/combined")).json()
     assert [activity["kind"] for activity in lesson["activities"]] == ["custom", "video"]
-    assert lesson["activities"][0]["module"] == descriptor.dict()
+    assert lesson["activities"][0]["module"] == descriptor.model_dump()
     completed_video = await curriculum_client.post(
         "/rooms/new-video/complete?course=composed", json=payload(action="complete", answer={"viewed": True})
     )
@@ -341,11 +343,11 @@ async def test_custom_registry_and_video_work_through_existing_room_mutations(
 
 def test_explicit_definition_rejects_unbound_assessment_and_duplicate_work() -> None:
     with pytest.raises(ValidationError, match="room with an ExerciseRef"):
-        ActivityReference.parse_obj({"id": "new", "source": {"kind": "challenge"}})
+        ActivityReference.model_validate({"id": "new", "source": {"kind": "challenge"}})
     with pytest.raises(ValidationError, match="existing unit ID"):
-        ActivityReference.parse_obj({"id": "copy", "source": {"kind": "room", "unit_id": "old"}})
+        ActivityReference.model_validate({"id": "copy", "source": {"kind": "room", "unit_id": "old"}})
     with pytest.raises(ValidationError, match="same activity twice"):
-        CurriculumDefinition.parse_obj(composed("intro", "intro"))
+        CurriculumDefinition.model_validate(composed("intro", "intro"))
 
 
 def test_legacy_catalogue_projection_preserves_every_course_and_unit(content: Catalogue) -> None:
@@ -376,7 +378,7 @@ def test_mixed_legacy_id_collision_only_qualifies_presentation_ids(content: Cata
     assert definition.lessons[0].id == "intro"
     legacy = definition.lessons[-1]
     assert legacy.id != "intro"
-    assert legacy.activities[0].source.dict() == {
+    assert legacy.activities[0].source.model_dump() == {
         "kind": "lecture",
         "course_id": course.id,
         "section_id": "intro",
@@ -429,7 +431,7 @@ async def test_custom_assessment_uses_existing_proof_and_review_authority(
 )
 def test_native_video_rejects_malformed_content(source: Any) -> None:
     with pytest.raises(ValidationError, match="video requires"):
-        CatalogueUnit.parse_obj(
+        CatalogueUnit.model_validate(
             {
                 "id": "video",
                 "path_id": "path",

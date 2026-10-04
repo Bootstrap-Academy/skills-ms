@@ -2,13 +2,13 @@
 
 import json
 import re
-from datetime import datetime
-from typing import Any, Literal
+from typing import Annotated, Any, Literal, Self
 from urllib.parse import urlsplit
 from uuid import UUID
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import Field, field_validator, model_validator
 
+from api.schemas import BaseModel, Timestamp
 from api.schemas.daily_limit import DailyStatus
 from api.schemas.lesson_module import MODULE_ID_PATTERN, LessonModuleDescriptor
 
@@ -21,8 +21,7 @@ MAX_MILESTONE_XP = 50
 
 
 class RoomModel(BaseModel):
-    class Config:
-        extra = "forbid"
+    pass
 
 
 class LocalizedText(RoomModel):
@@ -37,9 +36,9 @@ class Exercise(RoomModel):
 
 
 class Unit(RoomModel):
-    id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
-    path_id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
-    chapter_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    path_id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    chapter_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
     room: Literal[
         "loop-explorer",
@@ -83,8 +82,8 @@ class LlmVerdictCompletion(RoomModel):
     """
 
     kind: Literal["llm-verdict"]
-    profile: str = Field(regex=LLM_PROFILE_ID_PATTERN)
-    profile_sha256: str = Field(regex=r"^[0-9a-f]{64}$")
+    profile: str = Field(pattern=LLM_PROFILE_ID_PATTERN)
+    profile_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     allow_skip: Literal[True] = True
     # Every graded activity stays completable without the model (G4), so this cannot be switched off.
     allow_fallback: Literal[True] = True
@@ -102,10 +101,10 @@ class LessonMilestone(RoomModel):
     amount (`challenges.lesson_milestones.max_xp`, default 50).
     """
 
-    skill_id: str = Field(regex=r"^[a-z0-9][a-z0-9_-]{0,255}$")
+    skill_id: str = Field(pattern=r"^[a-z0-9][a-z0-9_-]{0,255}$")
     xp: int = Field(ge=1, le=MAX_MILESTONE_XP)
 
-    @validator("xp", pre=True)
+    @field_validator("xp", mode="before")
     @classmethod
     def strict_xp(cls, value: Any) -> int:
         if not isinstance(value, int) or isinstance(value, bool):
@@ -116,49 +115,41 @@ class LessonMilestone(RoomModel):
 class CatalogueUnit(Unit):
     retired: bool
     completion: IntroductionCompletion | LlmVerdictCompletion | None = None
-    module_id: str | None = Field(default=None, regex=MODULE_ID_PATTERN)
+    module_id: str | None = Field(default=None, pattern=MODULE_ID_PATTERN)
     # Server-side only: the llm-ms profiles a lesson grant for this unit covers.
-    llm_profiles: list[str] = Field(default_factory=list, max_items=MAX_LLM_PROFILES)
+    llm_profiles: list[Annotated[str, Field(pattern=LLM_PROFILE_ID_PATTERN)]] = Field(
+        default_factory=list, max_length=MAX_LLM_PROFILES
+    )
     # Server-side only: lesson milestone XP (XP-02), booked in challenges-ms after a checked completion.
     milestone: LessonMilestone | None = None
 
-    @validator("llm_profiles", each_item=True)
-    @classmethod
-    def llm_profile_id(cls, value: str) -> str:
-        if not re.fullmatch(LLM_PROFILE_ID_PATTERN, value):
-            raise ValueError("Invalid LLM profile ID")
-        return value
-
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def completion_matches_room(cls, values: dict[str, Any]) -> dict[str, Any]:
-        if values.get("module") is not None:
+    @model_validator(mode="after")
+    def completion_matches_room(self) -> Self:
+        if self.module is not None:
             raise ValueError("Module URLs come from the operator registry, not content")
-        if values.get("completion_kind") is not None:
+        if self.completion_kind is not None:
             raise ValueError("The completion kind is derived from the completion, not content")
-        profiles = values["llm_profiles"]
+        profiles = self.llm_profiles
         if len(set(profiles)) != len(profiles):
             raise ValueError("Duplicate LLM profile")
-        if isinstance(values.get("completion"), LlmVerdictCompletion):
-            if values["room"] in ("exercise", "video"):
+        if isinstance(self.completion, LlmVerdictCompletion):
+            if self.room in ("exercise", "video"):
                 raise ValueError("A graded answer belongs to a lesson room")
-            if values["completion"].profile not in profiles:
+            if self.completion.profile not in profiles:
                 raise ValueError("The grading profile must be one of the unit's LLM profiles")
-        if values.get("milestone") is not None and (
-            values.get("completion") is None or values["room"] in ("exercise", "video")
-        ):
+        if self.milestone is not None and (self.completion is None or self.room in ("exercise", "video")):
             # Exercises earn XP through their subtask; a video records viewing, not mastery.
             raise ValueError("A lesson milestone needs a lesson with a server-side completion check")
-        if values["room"] != "custom" and values.get("module_id") is not None:
+        if self.room != "custom" and self.module_id is not None:
             raise ValueError("Only a custom room references a module")
-        if values["room"] in ("custom", "video"):
-            if values.get("completion") is not None and values.get("exercise") is not None:
+        if self.room in ("custom", "video"):
+            if self.completion is not None and self.exercise is not None:
                 raise ValueError("An activity has one server-side completion authority")
-            if values["room"] == "custom" and values.get("module_id") is None:
+            if self.room == "custom" and self.module_id is None:
                 raise ValueError("A custom activity requires a registered module ID")
-            if values["room"] == "video":
+            if self.room == "video":
                 for language in ("de", "en"):
-                    localized = values["content"].get(language)
+                    localized = self.content.get(language)
                     video = localized.get("video") if isinstance(localized, dict) else None
                     if not isinstance(video, dict):
                         raise ValueError("A video requires a supported source in each language")
@@ -182,30 +173,35 @@ class CatalogueUnit(Unit):
                             raise ValueError("A video requires an absolute HTTPS media URL")
                     else:
                         raise ValueError("A video requires a supported source in each language")
-                completion = values.get("completion")
-                if completion is not None and json.dumps(completion.answer, sort_keys=True) != '{"viewed": true}':
+                completion = self.completion
+                if (
+                    isinstance(completion, IntroductionCompletion)
+                    and json.dumps(completion.answer, sort_keys=True) != '{"viewed": true}'
+                ):
                     raise ValueError("A video introduction records viewed, not mastery")
-            return values
-        if (values["room"] != "exercise") != (values.get("completion") is not None):
+            return self
+        if (self.room != "exercise") != (self.completion is not None):
             raise ValueError("Introductions require an internal completion check")
-        if values["room"] != "exercise" and values.get("exercise") is not None:
+        if self.room != "exercise" and self.exercise is not None:
             raise ValueError("Exercise references require the exercise room")
-        return values
+        return self
 
     def public(self) -> Unit:
-        values = self.dict(exclude={"retired", "completion", "module_id", "llm_profiles", "milestone"})
-        return Unit.parse_obj({**values, "completion_kind": None if self.completion is None else self.completion.kind})
+        values = self.model_dump(exclude={"retired", "completion", "module_id", "llm_profiles", "milestone"})
+        return Unit.model_validate(
+            {**values, "completion_kind": None if self.completion is None else self.completion.kind}
+        )
 
 
 class LearningChapter(RoomModel):
-    id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
 
 
 class LearningPath(RoomModel):
-    id: str = Field(regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    id: str = Field(pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
-    direction_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    direction_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     chapters: list[LearningChapter] = Field(default_factory=list)
 
 
@@ -217,10 +213,9 @@ class Catalogue(RoomModel):
     paths: list[CataloguePath]
     units: list[CatalogueUnit]
 
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def references_are_consistent(cls, values: dict[str, Any]) -> dict[str, Any]:
-        paths, units = values["paths"], values["units"]
+    @model_validator(mode="after")
+    def references_are_consistent(self) -> Self:
+        paths, units = self.paths, self.units
         by_id = {unit.id: unit for unit in units}
         if len(by_id) != len(units) or len({path.id for path in paths}) != len(paths):
             raise ValueError("Duplicate learning-room identifiers")
@@ -246,7 +241,7 @@ class Catalogue(RoomModel):
                 seen.add(unit_id)
         if seen != set(by_id):
             raise ValueError("Every unit must belong to exactly one path")
-        return values
+        return self
 
 
 class Result(RoomModel):
@@ -274,17 +269,17 @@ class Rooms(RoomModel):
     daily: DailyStatus | None = None
     paths: list[LearningPath]
     path: LearningPath
-    next: RoomEnvelope | None
+    next: RoomEnvelope | None = None
     empty_reason: Literal["completed", "unavailable", "prerequisites", "limit_reached"] | None = None
 
 
 class CourseLearningUnit(RoomModel):
     id: str
-    chapter_id: str | None = Field(default=None, regex=r"^[a-z0-9][a-z0-9-]{0,79}$")
+    chapter_id: str | None = Field(default=None, pattern=r"^[a-z0-9][a-z0-9-]{0,79}$")
     title: LocalizedText
     room: str
     status: Literal["new", "in_progress", "completed", "skipped"]
-    result: Result | None
+    result: Result | None = None
     available: bool
     selectable: bool = False
 
@@ -292,7 +287,7 @@ class CourseLearningUnit(RoomModel):
 class CourseLearning(RoomModel):
     path: LearningPath
     units: list[CourseLearningUnit]
-    next: RoomEnvelope | None
+    next: RoomEnvelope | None = None
     completed: bool
     empty_reason: Literal["completed", "unavailable", "prerequisites", "limit_reached"] | None = None
 
@@ -313,7 +308,7 @@ class Mutation(RoomModel):
     request_id: UUID
     expected_revision: int = Field(ge=0, le=2147483646)
 
-    @validator("expected_revision", pre=True)
+    @field_validator("expected_revision", mode="before")
     @classmethod
     def strict_revision(cls, value: Any) -> int:
         if not isinstance(value, int) or isinstance(value, bool):
@@ -324,7 +319,7 @@ class Mutation(RoomModel):
 class SaveState(Mutation):
     review_id: UUID | None = None
     state: dict[str, Any]
-    _bounded_state = validator("state", pre=True, allow_reuse=True)(bounded_object)
+    _bounded_state = field_validator("state", mode="before")(bounded_object)
 
 
 class Complete(Mutation):
@@ -334,9 +329,9 @@ class Complete(Mutation):
     answer: dict[str, Any] = Field(default_factory=dict)
     # The signed grading verdict from llm-ms (`outputs[0].grading.receipt`) for `answer.text`.
     verdict: str | None = Field(
-        default=None, max_length=8192, regex=r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$"
+        default=None, max_length=8192, pattern=r"^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$"
     )
-    _bounded_answer = validator("answer", pre=True, allow_reuse=True)(bounded_object)
+    _bounded_answer = field_validator("answer", mode="before")(bounded_object)
 
 
 class StartReview(Mutation):
@@ -348,4 +343,4 @@ class LlmGrant(RoomModel):
 
     grant: str
     profiles: list[str]
-    expires_at: datetime
+    expires_at: Timestamp

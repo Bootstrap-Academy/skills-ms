@@ -4,11 +4,14 @@ See [Auth Microservice](/auth/docs).
 """
 
 import asyncio
-from typing import Awaitable, Callable, TypeVar
+from contextlib import asynccontextmanager
+from math import isfinite
+from typing import AsyncIterator, Awaitable, Callable, TypeVar
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -30,6 +33,16 @@ T = TypeVar("T")
 
 logger = get_logger(__name__)
 
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    await on_startup()
+    try:
+        yield
+    finally:
+        await on_shutdown()
+
+
 app = FastAPI(
     title="Bootstrap Academy Backend: Skills Microservice",
     description=__doc__,
@@ -38,6 +51,7 @@ app = FastAPI(
     root_path_in_servers=False,
     servers=[{"url": settings.root_path}] if settings.root_path else None,
     openapi_tags=TAGS,
+    lifespan=lifespan,
 )
 app.include_router(ROUTER)
 
@@ -73,6 +87,25 @@ async def db_session(request: Request, call_next: Callable[..., Awaitable[T]]) -
         return response
 
 
+@app.exception_handler(RequestValidationError)
+async def request_validation_error_response(request: Request, exc: RequestValidationError) -> Response:
+    # Pydantic includes rejected inputs, even nested NaN/Infinity values, in
+    # errors. Rejected strings/bytes can also be invalid UTF-8. Normalize those
+    # values only in the error response, never in data accepted by a writer or
+    # used in an exact-replay fingerprint.
+    return JSONResponse(
+        status_code=422,
+        content=jsonable_encoder(
+            {"detail": exc.errors()},
+            custom_encoder={
+                float: lambda value: value if isfinite(value) else None,
+                str: lambda value: value.encode("utf-8", errors="backslashreplace").decode("utf-8"),
+                bytes: lambda value: value.decode("utf-8", errors="backslashreplace"),
+            },
+        ),
+    )
+
+
 @app.exception_handler(StarletteHTTPException)
 async def rollback_on_exception(request: Request, exc: HTTPException) -> Response:
     await db.session.rollback()
@@ -87,7 +120,6 @@ async def rollback_on_exception(request: Request, exc: HTTPException) -> Respons
     return await http_exception_handler(request, exc)
 
 
-@app.on_event("startup")
 async def on_startup() -> None:
     # Prepare verified internal TLS trust before the first learner request.
     client_ssl_context()
@@ -102,7 +134,6 @@ async def on_startup() -> None:
     app.state.milestone_recovery = asyncio.create_task(milestone_recovery())
 
 
-@app.on_event("shutdown")
 async def on_shutdown() -> None:
     try:
         for name in ("purchase_recovery", "milestone_recovery"):

@@ -65,7 +65,7 @@ def load_catalogue() -> Catalogue:
             not path.is_absolute() or not path.is_file() or path.is_symlink()
         ):
             raise ValueError("Private catalogue must be an absolute regular file")
-        return Catalogue.parse_raw(path.read_text())
+        return Catalogue.model_validate_json(path.read_text())
     except (OSError, ValueError, ValidationError):
         raise HTTPException(503, "Learning rooms are temporarily unavailable") from None
 
@@ -77,7 +77,11 @@ def catalogue(*, deep: bool = True) -> Catalogue:
     # Admission reads identities, never presentation content. Copy its unit
     # records so exercise overrides remain request-local without cloning the
     # nested lesson content. Callers that edit content retain the deep default.
-    content = source.copy(deep=True) if deep else source.copy(update={"units": [unit.copy() for unit in source.units]})
+    content = (
+        source.model_copy(deep=True)
+        if deep
+        else source.model_copy(update={"units": [unit.model_copy() for unit in source.units]})
+    )
     by_id = {unit.id: unit for unit in content.units}
     try:
         for unit_id, reference in settings.learning_rooms_exercise_refs.items():
@@ -85,7 +89,7 @@ def catalogue(*, deep: bool = True) -> Catalogue:
                 raise ValueError("Unknown exercise mapping")
             if by_id[unit_id].completion is not None:
                 raise ValueError("An activity cannot have two completion authorities")
-            by_id[unit_id].exercise = Exercise.parse_obj(reference)
+            by_id[unit_id].exercise = Exercise.model_validate(reference)
     except (ValueError, ValidationError):
         raise HTTPException(503, "Learning-room exercises are temporarily unavailable") from None
     return content
@@ -112,7 +116,7 @@ def progress(row: RoomState | None) -> Progress:
         # Only introductions can originally be skipped. Completing their review
         # introduces the concept without rewriting the original achievement.
         result = {"kind": "introduced"}
-    return Progress.parse_obj(
+    return Progress.model_validate(
         {
             "revision": row.revision,
             "state": row.state,
@@ -363,14 +367,17 @@ async def next_room(
     if path.id not in accessible:
         await require_path_access(content, path.id, user, course_id, unit_id)
     content.paths = [candidate for candidate in content.paths if candidate.id in accessible]
-    choices = [LearningPath.parse_obj(candidate.dict(exclude={"units"})) for candidate in content.paths]
+    choices = [LearningPath.model_validate(candidate.model_dump(exclude={"units"})) for candidate in content.paths]
     if course_id is not None:
         if unit_id is not None:
             if unit_id not in path.units:
                 raise HTTPException(404, "This lesson is not part of that course")
             chosen = await get_room(unit_id, user, token, course_id)
             return Rooms(
-                paths=choices, path=LearningPath.parse_obj(path.dict(exclude={"units"})), next=chosen, daily=daily
+                paths=choices,
+                path=LearningPath.model_validate(path.model_dump(exclude={"units"})),
+                next=chosen,
+                daily=daily,
             )
         return await next_course_room(content, states, user, token, path, after, continuous, choices, course_id)
     content.paths = [candidate for candidate in content.paths if scope is None or candidate.direction_id == scope]
@@ -406,7 +413,10 @@ async def next_room(
     if selected is None:
         reason = "completed" if finished else "prerequisites" if blocked_by_prerequisite else "unavailable"
     return Rooms(
-        paths=choices, path=LearningPath.parse_obj(path.dict(exclude={"units"})), next=selected, empty_reason=reason
+        paths=choices,
+        path=LearningPath.model_validate(path.model_dump(exclude={"units"})),
+        next=selected,
+        empty_reason=reason,
     )
 
 
@@ -472,7 +482,7 @@ async def next_course_room(
         raise unavailable
     return Rooms(
         paths=choices,
-        path=LearningPath.parse_obj(path.dict(exclude={"units"})),
+        path=LearningPath.model_validate(path.model_dump(exclude={"units"})),
         next=selected,
         daily=daily,
         empty_reason=(
@@ -527,7 +537,7 @@ async def course_learning(course: Course, user: User, token: str) -> CourseLearn
             available = False
         row = states.get(uid)
         outline.append(
-            CourseLearningUnit.parse_obj(
+            CourseLearningUnit.model_validate(
                 {
                     "id": unit.id,
                     "chapter_id": unit.chapter_id,
@@ -594,7 +604,7 @@ async def continuous_room(
         return Rooms(
             paths=choices,
             daily=daily,
-            path=LearningPath.parse_obj(selected_path.dict(exclude={"units"})),
+            path=LearningPath.model_validate(selected_path.model_dump(exclude={"units"})),
             next=await room_envelope(
                 user,
                 None,
@@ -654,7 +664,7 @@ async def continuous_room(
         raise unavailable
     return Rooms(
         paths=choices,
-        path=LearningPath.parse_obj(ordered_paths[0].dict(exclude={"units"})),
+        path=LearningPath.model_validate(ordered_paths[0].model_dump(exclude={"units"})),
         next=None,
         daily=daily,
         empty_reason="limit_reached" if limited else "prerequisites" if blocked else "unavailable",
@@ -719,7 +729,7 @@ def request_fingerprint(unit_id: str, data: SaveState | Complete | StartReview, 
         payload["course_id"] = course_id
     return sha256(
         json.dumps(
-            {**payload, **json.loads(data.json(exclude_none=True))}, sort_keys=True, separators=(",", ":")
+            {**payload, **data.model_dump(mode="json", exclude_none=True)}, sort_keys=True, separators=(",", ":")
         ).encode()
     ).hexdigest()
 
@@ -744,27 +754,27 @@ def completed_progress(
     if data.action == "skip":
         if unit.completion is None or not unit.completion.allow_skip:
             raise HTTPException(403, "Only introductions can be skipped")
-        return current.copy(update={"status": "skipped", "result": None})
+        return current.model_copy(update={"status": "skipped", "result": None})
     if unit.exercise is not None:
         if not solved:
             raise HTTPException(409, "The exercise has not been solved yet")
-        return current.copy(update={"status": "completed", "result": Result(kind="solved")})
+        return current.model_copy(update={"status": "completed", "result": Result(kind="solved")})
     if isinstance(unit.completion, LlmVerdictCompletion):
         if verdict is None:
             if not fallback_completion(unit, data):
                 raise VerdictRequiredError
             # The learner compared their answer with the labelled model answer: introduced, like a skip.
-            return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
+            return current.model_copy(update={"status": "completed", "result": Result(kind="introduced")})
         # Otherwise only a checked, passing verdict completes. A failing one keeps the room open at no cost.
         if not verdict.passed:
             raise VerdictFailedError
-        return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
+        return current.model_copy(update={"status": "completed", "result": Result(kind="introduced")})
     # Canonical JSON distinguishes true from 1; the client cannot assert mastery.
     if unit.completion is None or json.dumps(data.answer, sort_keys=True) != json.dumps(
         unit.completion.answer, sort_keys=True
     ):
         raise HTTPException(422, "Check your answer and try again")
-    return current.copy(update={"status": "completed", "result": Result(kind="introduced")})
+    return current.model_copy(update={"status": "completed", "result": Result(kind="introduced")})
 
 
 async def graded_verdict(
@@ -831,7 +841,7 @@ async def mutate_room(
             user,
             course_id,
             unit=await public_unit(unit, user, course_id),
-            progress=Progress.parse_obj(receipt.progress),
+            progress=Progress.model_validate(receipt.progress),
         )
     row = states.get(unit_id)
     current = progress(row)
@@ -867,7 +877,7 @@ async def mutate_room(
     if not isinstance(data, Complete) or data.action != "skip":
         await daily_limit.start_unit(user, unit_id, course_id, locked=True)
     current.revision += 1
-    values: dict[str, Any] = {**json.loads(current.json()), "updated_at": utcnow()}
+    values: dict[str, Any] = {**current.model_dump(mode="json"), "updated_at": utcnow()}
     if current.review_id is not None and row is not None:
         values.update(status=row.status, result=row.result, review_status=current.status)
         if isinstance(data, StartReview):
@@ -910,7 +920,7 @@ async def mutate_room(
             unit_id=unit_id,
             revision=current.revision,
             fingerprint=fingerprint,
-            progress=json.loads(current.json()),
+            progress=current.model_dump(mode="json"),
             created_at=utcnow(),
         )
     )

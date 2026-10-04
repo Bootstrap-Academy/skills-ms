@@ -2,11 +2,11 @@ from typing import Any
 from uuid import UUID
 
 from fastapi import APIRouter, Body, HTTPException, Query, Response
-from pydantic import BaseModel
 
 from api import models
 from api.database import db, filter_by, select
 from api.exceptions.skill import SkillNotFoundException
+from api.schemas import BaseModel
 from api.schemas.skill import SubSkill
 from api.services import publications
 from api.services.benefits import XPAward, apply_xp
@@ -99,8 +99,8 @@ class PublishedLeaderboard(Leaderboard):
 
 class PublishedRank(BaseModel):
     xp: int
-    rank: int | None
-    public_rank: int | None
+    rank: int | None = None
+    public_rank: int | None = None
     scope_version: str
     publication_epoch: UUID
     epoch_revision: int

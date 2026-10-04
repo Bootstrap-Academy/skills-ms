@@ -1,9 +1,9 @@
 import json
-from datetime import datetime
 from typing import Any
 
-from pydantic import validator
+from pydantic import field_validator
 
+from api.schemas import Timestamp
 from api.schemas.rooms import Mutation, RoomModel
 
 
@@ -28,11 +28,11 @@ def state_size(state: dict[str, Any]) -> int:
 
 class SaveProject(Mutation):
     state: dict[str, Any]
-    _json_state = validator("state", pre=True, allow_reuse=True)(json_object)
+    _json_state = field_validator("state", mode="before")(json_object)
 
 
 class ProjectEnvelope(RoomModel):
     course_id: str
     revision: int
     state: dict[str, Any]
-    updated_at: datetime | None
+    updated_at: Timestamp | None = None

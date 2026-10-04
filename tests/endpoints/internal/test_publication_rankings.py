@@ -227,7 +227,7 @@ async def test_mounted_auth_and_parameter_errors_never_cache(
 async def test_persistent_policy_fences_disabled_reader(
     monkeypatch: MonkeyPatch, enabled: bool, active: bool, publishing: bool, expected: bool | int
 ) -> None:
-    shared = snapshot().epoch.copy(update={"policy_active": active, "publishing_enabled": publishing})
+    shared = snapshot().epoch.model_copy(update={"policy_active": active, "publishing_enabled": publishing})
     monkeypatch.setattr(settings, "profile_publications_enabled", enabled)
     monkeypatch.setattr(publications, "current_epoch", AsyncMock(return_value=shared))
     if expected == 503:
@@ -239,17 +239,17 @@ async def test_persistent_policy_fences_disabled_reader(
 
 
 async def test_legacy_wire_shape_and_scores_are_unchanged(monkeypatch: MonkeyPatch) -> None:
-    legacy = snapshot().epoch.copy(update={"policy_active": False, "publishing_enabled": False})
+    legacy = snapshot().epoch.model_copy(update={"policy_active": False, "publishing_enabled": False})
     monkeypatch.setattr(publications, "current_epoch", AsyncMock(return_value=legacy))
     monkeypatch.setattr(settings, "profile_publications_enabled", False)
     async with db_context():
         await seed()
         result = await skills.get_leaderboard(2, 0, Response())
-        assert result.dict() == {
+        assert result.model_dump() == {
             "leaderboard": [{"user": IDS[0], "xp": 1400, "rank": 1}, {"user": IDS[1], "xp": 30, "rank": 2}],
             "total": 6,
         }
-        assert (await skills.get_leaderboard_user(IDS[0], Response())).dict() == {"xp": 1400, "rank": 1}
+        assert (await skills.get_leaderboard_user(IDS[0], Response())).model_dump() == {"xp": 1400, "rank": 1}
 
 
 @pytest.mark.parametrize(
@@ -258,23 +258,23 @@ async def test_legacy_wire_shape_and_scores_are_unchanged(monkeypatch: MonkeyPat
 def test_old_authority_cannot_grant_publication(field: str) -> None:
     from pydantic import ValidationError
 
-    payload = snapshot().dict()
+    payload = snapshot().model_dump()
     del payload[field]
     with pytest.raises(ValidationError):
-        publications.Snapshot.parse_obj(payload)
+        publications.Snapshot.model_validate(payload)
 
 
 def test_invalid_identity_is_not_a_publishable_participant() -> None:
     from pydantic import ValidationError
 
-    payload = snapshot().dict()
+    payload = snapshot().model_dump()
     del payload["participants"][0]["avatar_url"]
     with pytest.raises(ValidationError):
-        publications.Snapshot.parse_obj(payload)
-    payload = snapshot().dict()
+        publications.Snapshot.model_validate(payload)
+    payload = snapshot().model_dump()
     payload["participants"] += (payload["participants"][0],)
     with pytest.raises(ValidationError):
-        publications.Snapshot.parse_obj(payload)
+        publications.Snapshot.model_validate(payload)
 
 
 async def test_large_snapshot_uses_one_postgres_array_bind() -> None:

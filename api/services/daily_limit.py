@@ -62,7 +62,7 @@ async def policy(user_id: str) -> LearningPolicy:
             raise HTTPException(401, "Dieses Konto ist nicht mehr verfügbar.")
         if response.status_code != 200:
             raise ValueError("Unexpected policy response")
-        result = LearningPolicy.parse_obj(response.json())
+        result = LearningPolicy.model_validate(response.json())
     except (httpx.HTTPError, InternalServiceError, ValueError, ValidationError):
         failure = AccessError(503, "learning_access_unavailable", "Dein Lernzugang ist gerade nicht erreichbar.")
         db.session.info[key] = failure
@@ -101,7 +101,7 @@ async def configure(data: LimitConfiguration) -> dict[str, Any]:
     if issues:
         raise HTTPException(409, {"code": "daily_limit_activation_blocked", "issues": issues})
     row = await db.get(models.DailyLimitSettings, id=1)
-    values = {**data.dict(), "updated_at": utcnow()}
+    values = {**data.model_dump(), "updated_at": utcnow()}
     if row is None:
         await db.add(models.DailyLimitSettings(id=1, **values))
     else:
@@ -110,7 +110,7 @@ async def configure(data: LimitConfiguration) -> dict[str, Any]:
     await db.session.flush()
     db.session.info.pop("daily_configuration", None)
     logger.info("Daily lesson settings changed: mode=%s limit=%s operator=%s", data.mode, data.limit, data.updated_by)
-    return {**data.dict(), "activation_issues": issues}
+    return {**data.model_dump(), "activation_issues": issues}
 
 
 def lesson_definition(course: Course, lesson_id: str) -> LessonDefinition:
@@ -230,7 +230,7 @@ async def read_history_batch(user_id: str, payload: dict[str, Any]) -> LearningH
             response = await client.post(f"/users/{user_id}/learning-history", json=payload, timeout=5)
         if response.status_code != 200:
             raise ValueError("Unexpected history response")
-        result = LearningHistory.parse_obj(response.json())
+        result = LearningHistory.model_validate(response.json())
         requested = set(payload["subtask_ids"])
         lectures = {(item["course_id"], item["lecture_id"]) for item in payload["lecture_bindings"]}
         if not {str(value) for value in result.attempted_subtask_ids}.issubset(requested) or not {

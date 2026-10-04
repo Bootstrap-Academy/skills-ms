@@ -29,7 +29,7 @@ def main() -> None:
     )
     args = parser.parse_args()
     try:
-        descriptor = checked_descriptor(LessonModuleDescriptor.parse_raw(args.manifest.read_text()))
+        descriptor = checked_descriptor(LessonModuleDescriptor.model_validate_json(args.manifest.read_text()))
         if reference := private_reference(descriptor):
             checked_asset(descriptor, reference[1])
         if not args.check:

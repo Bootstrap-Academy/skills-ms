@@ -66,7 +66,7 @@ async def test_read_batch_keeps_catalogue_and_standalone_subtasks_distinct(
             return_value=LearningPolicy(mode="legacy", premium=False, single_course_sales=True, heart_sales=True)
         ),
     )
-    data = ChallengeReadBatch.parse_obj(
+    data = ChallengeReadBatch.model_validate(
         {"requests": [{"task_id": task, "subtask_id": locked}, {"task_id": task, "subtask_id": standalone}]}
     )
     async with db_context():
@@ -81,7 +81,7 @@ async def test_read_batch_shares_work_only_after_concrete_resolution(
     catalog.curriculum = None
     catalog.learning_path_id = None
     catalog.sections = [
-        Section.parse_obj(
+        Section.model_validate(
             {
                 "id": "section",
                 "title": "Example",
@@ -94,7 +94,7 @@ async def test_read_batch_shares_work_only_after_concrete_resolution(
     status = AsyncMock(wraps=daily_limit.optional_status)
     monkeypatch.setattr(daily_limit, "optional_status", status)
     task = uuid4()
-    data = ChallengeReadBatch.parse_obj(
+    data = ChallengeReadBatch.model_validate(
         {
             "requests": [
                 {
@@ -137,7 +137,7 @@ async def test_read_batch_never_reuses_started_lesson_for_same_task_sibling(
         "policy",
         AsyncMock(side_effect=daily_limit.AccessError(503, "learning_access_unavailable", "Unavailable")),
     )
-    data = ChallengeReadBatch.parse_obj(
+    data = ChallengeReadBatch.model_validate(
         {"requests": [{"task_id": task, "subtask_id": started}, {"task_id": task, "subtask_id": sibling}]}
     )
     async with db_context():
@@ -164,7 +164,7 @@ async def test_read_batch_refreshes_purchase_and_admin_rights(
     )
     monkeypatch.setattr(shop, "has_premium", AsyncMock(return_value=False))
     binding = {"lecture_bindings": [{"course_id": catalog.id}]}
-    data = ChallengeReadBatch.parse_obj({"requests": [binding, {**binding, "user_admin": True}, binding]})
+    data = ChallengeReadBatch.model_validate({"requests": [binding, {**binding, "user_admin": True}, binding]})
     async with db_context():
         assert await check_batch(USER.id, data) == {"readable": [False, True, False]}
     async with db_context():
@@ -179,7 +179,7 @@ def test_read_catalogue_overrides_stay_local_and_refresh_between_batches(
     source = rooms.load_catalogue()
     source.units[0].room = "exercise"
     source.units[0].completion = None
-    before = source.dict()
+    before = source.model_dump()
     task, first, second = uuid4(), uuid4(), uuid4()
     monkeypatch.setattr(
         settings,
@@ -200,14 +200,14 @@ def test_read_catalogue_overrides_stay_local_and_refresh_between_batches(
     assert second_context.for_task(task, second) == [current.units[0]]
     assert original.units[0].exercise is not None and original.units[0].exercise.subtask_id == first
     assert current.units[0].exercise is not None and current.units[0].exercise.subtask_id == second
-    assert source.dict() == before
+    assert source.model_dump() == before
     # Invalid operator bindings remain a technical refusal and cannot mutate
     # the shared catalogue or the previous request's concrete exercise.
     monkeypatch.setattr(settings, "learning_rooms_exercise_refs", {"missing": {}})
     with pytest.raises(HTTPException) as failure:
         daily_limit.ChallengeReadContext().catalogue()
     assert failure.value.status_code == 503
-    assert source.dict() == before
+    assert source.model_dump() == before
     assert original.units[0].exercise.subtask_id == first
 
 
@@ -228,13 +228,13 @@ def catalog(monkeypatch: MonkeyPatch) -> Course:
         }
         for i in range(6)
     ]
-    content = Catalogue.parse_obj(
+    content = Catalogue.model_validate(
         {
             "paths": [{"id": "daily-path", "title": {"de": "Pfad", "en": "Path"}, "units": [u["id"] for u in units]}],
             "units": units,
         }
     )
-    course = Course.parse_obj(
+    course = Course.model_validate(
         {
             "id": "daily-course",
             "title": "Beispiel",
@@ -306,7 +306,9 @@ async def daily_client(catalog: Course) -> AsyncIterator[httpx.AsyncClient]:
             LimitConfiguration(mode="enforce", limit=3, updated_by="test", note="Synthetic test")
         )
     async with httpx.AsyncClient(
-        app=app, base_url="http://synthetic", headers={"Authorization": "Bearer synthetic"}
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://synthetic",
+        headers={"Authorization": "Bearer synthetic"},
     ) as client:
         yield client
 
@@ -324,8 +326,8 @@ async def test_large_curriculum_reads_have_constant_database_and_catalogue_cost(
 ) -> None:
     task = uuid4()
     subtasks = [uuid4() for _ in range(size)]
-    prototype = rooms.load_catalogue().units[0].dict()
-    content = Catalogue.parse_obj(
+    prototype = rooms.load_catalogue().units[0].model_dump()
+    content = Catalogue.model_validate(
         {
             "paths": [
                 {"id": "daily-path", "title": {"de": "Pfad", "en": "Path"}, "units": [f"unit-{i}" for i in range(size)]}
@@ -526,7 +528,7 @@ async def test_disabled_concrete_admission_preserves_course_rights_without_histo
     monkeypatch.setattr(shop, "has_premium", premium)
     catalog.curriculum = None
     catalog.sections = [
-        Section.parse_obj(
+        Section.model_validate(
             {
                 "id": "legacy-section",
                 "title": "Synthetic section",
@@ -1077,7 +1079,7 @@ async def test_historical_attempts_follow_grouping_and_legacy_lectures(
     catalog.curriculum = None
     catalog.learning_path_id = None
     catalog.sections = [
-        Section.parse_obj(
+        Section.model_validate(
             {
                 "id": "old-section",
                 "title": "Old",
@@ -1193,7 +1195,9 @@ async def test_non_enforcing_mode_does_not_block_on_history_outage(
     )
     async with db_context():
         await daily_limit.configure(
-            LimitConfiguration.parse_obj({"mode": mode, "limit": 3, "updated_by": "test", "note": "No enforcement"})
+            LimitConfiguration.model_validate(
+                {"mode": mode, "limit": 3, "updated_by": "test", "note": "No enforcement"}
+            )
         )
     result = await begin(daily_client, 0)
     assert result.status_code == 200 and result.json()["daily"]["started"], result.text
@@ -1221,13 +1225,15 @@ async def test_heart_policy_outage_requires_confirmed_lesson_contract(
     premium: bool,
     expected: str,
 ) -> None:
-    known = LearningPolicy.parse_obj(
+    known = LearningPolicy.model_validate(
         {"mode": policy_mode, "premium": premium, "single_course_sales": False, "heart_sales": False}
     )
     monkeypatch.setattr(daily_limit, "policy", AsyncMock(return_value=known))
     async with db_context():
         await daily_limit.configure(
-            LimitConfiguration.parse_obj({"mode": technical, "limit": 3, "updated_by": "test", "note": "Synthetic"})
+            LimitConfiguration.model_validate(
+                {"mode": technical, "limit": 3, "updated_by": "test", "note": "Synthetic"}
+            )
         )
     assert (await begin(daily_client, 0)).status_code == 200
     task, subtask = uuid4(), uuid4()

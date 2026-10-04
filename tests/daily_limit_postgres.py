@@ -50,7 +50,7 @@ async def main() -> None:
     head = ScriptDirectory.from_config(Config("alembic.ini")).get_current_head()
     assert head is not None
     settings.daily_limit_policy_enabled = True
-    course = Course.parse_obj(
+    course = Course.model_validate(
         {
             "id": "native",
             "title": "Synthetic",

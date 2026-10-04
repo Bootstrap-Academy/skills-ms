@@ -11,13 +11,14 @@ from typing import Any, cast
 from uuid import UUID
 
 from fastapi import HTTPException
-from pydantic import BaseModel, StrictBool
+from pydantic import StrictBool
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, db_wrapper, filter_by
 from api.logger import get_logger
 from api.models.course_access import CourseAccess
 from api.models.purchase import CoursePurchase, PurchaseUser
+from api.schemas import BaseModel
 from api.schemas.course import Course
 from api.services.auth import get_user_status
 from api.services.internal import InternalService
@@ -43,7 +44,7 @@ class Acceptance(BaseModel):
     early_performance_requested: StrictBool
 
     def payload(self) -> dict[str, Any]:
-        return cast(dict[str, Any], json.loads(self.json()))
+        return self.model_dump(mode="json")
 
 
 async def lock_user(user_id: str) -> PurchaseUser:
@@ -68,9 +69,9 @@ async def lock_user(user_id: str) -> PurchaseUser:
 
 
 def product(course: Course) -> dict[str, Any]:
-    facts = {
+    facts: dict[str, Any] = {
         "course_id": course.id,
-        "course": json.loads(course.summary(None).json()),
+        "course": course.summary(None).model_dump(mode="json"),
         "access": "Du erhältst Zugang zu diesem Kurs. Es gibt keine automatische Verlängerung.",
     }
     description = "\n".join(

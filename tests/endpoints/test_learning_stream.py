@@ -10,8 +10,8 @@ from typing import Any, AsyncIterator
 from unittest.mock import ANY, AsyncMock
 
 import pytest
-from fastapi import FastAPI, HTTPException
-from httpx import AsyncClient
+from fastapi import Depends, FastAPI, HTTPException
+from httpx import ASGITransport, AsyncClient
 from pytest import MonkeyPatch
 
 from api.endpoints import course as courses
@@ -43,11 +43,11 @@ async def stream_fixture(tmp_path: Path, monkeypatch: MonkeyPatch) -> AsyncItera
     monkeypatch.setattr(redis, "get", redis_get)
     monkeypatch.setattr(learning, "learning_subject", authority)
     monkeypatch.setattr(learning, "COURSES", {"course": course})
-    monkeypatch.setattr(courses.has_course_access, "dependency", admission)
+    monkeypatch.setattr(courses, "has_course_access", Depends(admission))
     monkeypatch.setattr(settings, "stream_chunk_size", 64)
     app = FastAPI()
     app.include_router(learning.router)
-    async with AsyncClient(app=app, base_url="http://stream.synthetic") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://stream.synthetic") as client:
         yield {
             "client": client,
             "path": path,

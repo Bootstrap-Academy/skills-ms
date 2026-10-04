@@ -1,6 +1,6 @@
 from typing import Any, Type, cast
 
-from pydantic import BaseConfig, BaseModel
+from pydantic import BaseModel, ConfigDict
 from uvicorn.protocols.http.h11_impl import STATUS_PHRASES
 
 from ..exceptions.api_exception import APIException
@@ -24,12 +24,12 @@ def responses(default: type, *args: Type[APIException]) -> dict[int | str, dict[
 
 
 def get_example(arg: Type[BaseModel]) -> dict[str, Any]:
-    return cast(dict[str, dict[str, Any]], arg.Config.schema_extra)["example"]
+    return cast(dict[str, dict[str, Any]], arg.model_config["json_schema_extra"])["example"]
 
 
-def example(*args: Type[BaseModel], **kwargs: Any) -> Type[BaseConfig]:
+def example(*args: Type[BaseModel], **kwargs: Any) -> ConfigDict:
     ex = dict(e for arg in args for e in get_example(arg).items())
-    return cast(Type[BaseConfig], type("Config", (BaseConfig,), {"schema_extra": {"example": ex | kwargs}}))
+    return ConfigDict(json_schema_extra={"example": ex | kwargs})
 
 
 def add_endpoint_links_to_openapi_docs(openapi_schema: dict[str, Any]) -> None:

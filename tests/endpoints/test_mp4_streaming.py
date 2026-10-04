@@ -10,8 +10,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import anyio
 import pytest
-from fastapi import FastAPI
-from httpx import AsyncClient
+from fastapi import Depends, FastAPI
+from httpx import ASGITransport, AsyncClient
 from pytest import MonkeyPatch
 
 from api.endpoints import course, learning
@@ -47,7 +47,7 @@ async def video_fixture(
     monkeypatch.setattr(redis, "get", lookup_mock)
     monkeypatch.setattr(learning, "learning_subject", authority)
     monkeypatch.setattr(learning, "COURSES", {"course": object()})
-    monkeypatch.setattr(course.has_course_access, "dependency", admission)
+    monkeypatch.setattr(course, "has_course_access", Depends(admission))
     monkeypatch.setattr(settings, "stream_chunk_size", 4 * 1024 * 1024)
     app = FastAPI()
     app.include_router(learning.router if scoped else course.router)
@@ -56,7 +56,7 @@ async def video_fixture(
     async def probe() -> dict[str, bool]:
         return {"responsive": True}
 
-    async with AsyncClient(app=app, base_url="http://video.synthetic") as client:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://video.synthetic") as client:
         yield {"path": path, "url": url, "client": client, "app": app, "authority": authority, "admission": admission}
 
 

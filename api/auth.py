@@ -63,7 +63,7 @@ internal_auth = Depends(InternalAuth(INTERNAL_AUDIENCE))
 @Depends
 async def public_auth(request: Request, data: dict[Any, Any] = jwt_auth) -> User | None:
     try:
-        token: UserAccessToken = UserAccessToken.parse_obj(data)
+        token: UserAccessToken = UserAccessToken.model_validate(data)
     except (InvalidTokenError, ValidationError):
         return None
 

@@ -112,7 +112,7 @@ def package_assets(descriptor: LessonModuleDescriptor) -> tuple[str, tuple[Asset
         raise ValueError("Private module storage is not configured")
     artifact, entry = reference
     manifest = json.loads(read_file(root, artifact, "manifest.json", limit=MAX_MANIFEST_BYTES))
-    published = LessonModuleDescriptor.parse_raw(read_file(root, artifact, "module.json", limit=8192))
+    published = LessonModuleDescriptor.model_validate_json(read_file(root, artifact, "module.json", limit=8192))
     definition = manifest["definition"]
     if (
         published != descriptor
@@ -206,7 +206,7 @@ async def issue_grant(
         await run_in_threadpool(checked_asset, descriptor, entry)
     except (OSError, ValueError, KeyError, TypeError):
         raise HTTPException(503, "Diese Lektion kann gerade nicht geladen werden.") from None
-    binding = {"user_id": user.id, "course_id": admitted, "unit_id": unit.id, "module": descriptor.dict()}
+    binding = {"user_id": user.id, "course_id": admitted, "unit_id": unit.id, "module": descriptor.model_dump()}
     serialized = json.dumps(binding, sort_keys=True, separators=(",", ":"))
     # A module URL is also the player's component identity. Keep it stable even
     # when Redis expires/restarts; only a newly authorized API response creates
@@ -217,7 +217,7 @@ async def issue_grant(
     token = base64.urlsafe_b64encode(digest).decode().rstrip("=")
     await redis.setex(grant_key(token), settings.private_lesson_module_grant_ttl, serialized)
     entry_url = f"{settings.public_base_url.rstrip('/')}/lesson-assets/{token}/{artifact}/{quote(entry, safe='/')}"
-    return descriptor.copy(update={"entry_url": entry_url})
+    return descriptor.model_copy(update={"entry_url": entry_url})
 
 
 async def asset_redirect(token: str, artifact: str, name: str) -> str:
@@ -227,7 +227,7 @@ async def asset_redirect(token: str, artifact: str, name: str) -> str:
     if raw is None:
         raise ValueError("Missing or expired asset grant")
     binding: dict[str, Any] = json.loads(raw)
-    descriptor = LessonModuleDescriptor.parse_obj(binding["module"])
+    descriptor = LessonModuleDescriptor.model_validate(binding["module"])
     reference = private_reference(descriptor)
     if reference is None or reference[0] != artifact:
         raise ValueError("Asset grant does not cover this package")

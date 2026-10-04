@@ -106,7 +106,7 @@ def content(monkeypatch: MonkeyPatch) -> Catalogue:
         }
 
     grading = {"kind": "llm-verdict", "profile": PROFILE, "profile_sha256": PROFILE_SHA256}
-    value = Catalogue.parse_obj(
+    value = Catalogue.model_validate(
         {
             "paths": [
                 {"id": "prompting", "title": {"de": "Pfad", "en": "Path"}, "units": ["graded", "checked", "plain"]}
@@ -142,7 +142,9 @@ async def client(content: Catalogue, challenges: Challenges) -> AsyncIterator[ht
     app = FastAPI()
     app.dependency_overrides[user_auth.dependency] = identity
     app.include_router(router, dependencies=[Depends(session)])
-    async with REAL_CLIENT(app=app, base_url="http://rooms.synthetic", headers={"Authorization": "Bearer a"}) as value:
+    async with REAL_CLIENT(
+        transport=httpx.ASGITransport(app=app), base_url="http://rooms.synthetic", headers={"Authorization": "Bearer a"}
+    ) as value:
         yield value
     # Deliveries started by a completion finish before the database goes away.
     await lesson_milestones.settle()
@@ -233,21 +235,21 @@ async def test_a_completion_without_a_verified_verdict_never_books(
     client: httpx.AsyncClient, challenges: Challenges, content: Catalogue
 ) -> None:
     unit = next(unit for unit in content.units if unit.id == "graded")
-    passed = llm.VerdictClaims.parse_obj({**verdict_claims(), "request_id": str(uuid4())})
-    complete = Complete.parse_obj(payload(action="complete", answer={"text": ANSWER}))
-    skip = Complete.parse_obj(payload(action="skip"))
-    fallback = Complete.parse_obj(payload(action="complete", answer=FALLBACK))
+    passed = llm.VerdictClaims.model_validate({**verdict_claims(), "request_id": str(uuid4())})
+    complete = Complete.model_validate(payload(action="complete", answer={"text": ANSWER}))
+    skip = Complete.model_validate(payload(action="skip"))
+    fallback = Complete.model_validate(payload(action="complete", answer=FALLBACK))
     assert rooms.fallback_completion(unit, fallback)
     for repeat in (False, True):
         assert lesson_milestones.checked_completion(unit, complete, passed, repeat=repeat) == "llm_verdict"
         assert lesson_milestones.checked_completion(unit, complete, None, repeat=repeat) is None
-        failed = passed.copy(update={"passed": False})
+        failed = passed.model_copy(update={"passed": False})
         assert lesson_milestones.checked_completion(unit, complete, failed, repeat=repeat) is None
         assert lesson_milestones.checked_completion(unit, skip, passed, repeat=repeat) is None
         assert lesson_milestones.checked_completion(unit, fallback, None, repeat=repeat) is None
     # An exact answer check counts only in the first round.
     checked = next(unit for unit in content.units if unit.id == "checked")
-    right = Complete.parse_obj(payload(action="complete", answer={"answer": 6}))
+    right = Complete.model_validate(payload(action="complete", answer={"answer": 6}))
     assert lesson_milestones.checked_completion(checked, right, None, repeat=False) == "deterministic"
     assert lesson_milestones.checked_completion(checked, right, None, repeat=True) is None
 
@@ -483,9 +485,9 @@ VIDEO = {"type": "youtube", "id": "dQw4w9WgXcQ"}
     ],
 )
 def test_milestones_need_a_lesson_with_a_server_check(room: dict[str, Any]) -> None:
-    assert CatalogueUnit.parse_obj({**UNIT, **room, "milestone": None}).milestone is None
+    assert CatalogueUnit.model_validate({**UNIT, **room, "milestone": None}).milestone is None
     with pytest.raises(ValidationError):
-        CatalogueUnit.parse_obj({**UNIT, **room})
+        CatalogueUnit.model_validate({**UNIT, **room})
 
 
 @pytest.mark.parametrize(
@@ -501,12 +503,12 @@ def test_milestones_need_a_lesson_with_a_server_check(room: dict[str, Any]) -> N
     ],
 )
 def test_catalogue_rejects_invalid_milestones(milestone: dict[str, Any]) -> None:
-    assert CatalogueUnit.parse_obj(UNIT).milestone is not None
-    assert CatalogueUnit.parse_obj({**UNIT, "milestone": {"skill_id": SKILL, "xp": 50}}).milestone is not None
+    assert CatalogueUnit.model_validate(UNIT).milestone is not None
+    assert CatalogueUnit.model_validate({**UNIT, "milestone": {"skill_id": SKILL, "xp": 50}}).milestone is not None
     with pytest.raises(ValidationError):
-        CatalogueUnit.parse_obj({**UNIT, "milestone": milestone})
+        CatalogueUnit.model_validate({**UNIT, "milestone": milestone})
 
 
 def test_milestone_stays_server_side(content: Catalogue) -> None:
     unit = next(unit for unit in content.units if unit.id == "graded")
-    assert unit.milestone is not None and "milestone" not in unit.public().dict()
+    assert unit.milestone is not None and "milestone" not in unit.public().model_dump()

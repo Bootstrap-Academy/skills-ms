@@ -55,7 +55,7 @@ async def test__responses() -> None:
 
 async def test__get_example() -> None:
     arg = MagicMock()
-    arg.Config.schema_extra = {"example": (expected := MagicMock())}
+    arg.model_config = {"json_schema_extra": {"example": (expected := MagicMock())}}
 
     assert docs.get_example(arg) == expected
 
@@ -71,7 +71,7 @@ async def test__example(mocker: MockerFixture) -> None:
 
     result = docs.example(*args, **kwargs)
 
-    assert result.schema_extra == {
+    assert result["json_schema_extra"] == {
         "example": {
             a.first.key: a.first.value,
             a.second.key: a.second.value,

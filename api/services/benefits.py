@@ -4,37 +4,31 @@ These transport-authorized awards do not grant login or purchase authority.
 An exact completed receipt precedes recipient lookup, including after erasure.
 """
 
-import json
-from typing import TYPE_CHECKING, Any
+from typing import Annotated, Any
 from uuid import UUID
 
 from fastapi import HTTPException
-from pydantic import BaseModel, conint
+from pydantic import Field
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, filter_by
 from api.models import XP, SubSkill, XPOperation
+from api.schemas import BaseModel
 from api.services.auth import get_user_status
 from api.services.purchases import lock_user
 from api.utils.utc import utcnow
 
 
-if TYPE_CHECKING:
-    XPAmount = int
-else:
-    XPAmount = conint(strict=True, ge=-9223372036854775808, le=9223372036854775807)
+XPAmount = Annotated[int, Field(strict=True, ge=-9223372036854775808, le=9223372036854775807)]
 
 
 class XPAward(BaseModel):
     xp: XPAmount
     earning_id: UUID
 
-    class Config:
-        extra = "forbid"
-
 
 async def apply_xp(operation: str, user_id: str, skill_id: str, award: XPAward) -> dict[str, Any]:
-    request = {"user_id": user_id, "skill_id": skill_id, **json.loads(award.json())}
+    request = {"user_id": user_id, "skill_id": skill_id, **award.model_dump(mode="json")}
     # Claim before the subject guard. A competing exact command waits for the
     # original transaction and then performs a current read even under InnoDB RR.
     try:

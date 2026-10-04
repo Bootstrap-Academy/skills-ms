@@ -82,7 +82,7 @@ async def test__get_accessible_courses__premium_includes_paid_courses(mocker: Mo
 
 async def test__get_accessible_courses__reports_the_progress(mocker: MockerFixture) -> None:
     user = _setup(mocker, premium=True)
-    paid = COURSES["paid"].copy(
+    paid = COURSES["paid"].model_copy(
         update={
             "sections": [
                 Section(
@@ -140,11 +140,11 @@ async def test__list_courses__owned_without_a_user(mocker: MockerFixture) -> Non
 
 def test_learning_course_accepts_optional_video_and_localized_metadata() -> None:
     source = {
-        **COURSES["free"].dict(exclude={"sections"}),
+        **COURSES["free"].model_dump(exclude={"sections"}),
         "learning_path_id": "explicit-path",
         "translations": {"en": {"title": "Learn Python", "learning_goals": ["Use a variable"]}},
     }
-    course = Course.parse_obj(source)
+    course = Course.model_validate(source)
     assert course.sections == []
     summary = course.summary(set(), learning_completed=False)
     assert summary.completed is False and summary.learning_path_id == "explicit-path"
@@ -153,4 +153,4 @@ def test_learning_course_accepts_optional_video_and_localized_metadata() -> None
     assert course.to_user_course(set()).translations == course.translations
     assert course.summary(set(), learning_completed=True).completed is True
     with pytest.raises(ValidationError):
-        Course.parse_obj({**source, "learning_path_id": "../../not-a-path"})
+        Course.model_validate({**source, "learning_path_id": "../../not-a-path"})
