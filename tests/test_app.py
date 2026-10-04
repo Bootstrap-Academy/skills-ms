@@ -1,4 +1,5 @@
 import asyncio
+import json
 from typing import Any, Callable
 from unittest.mock import AsyncMock, MagicMock
 
@@ -8,6 +9,7 @@ from pytest_mock import MockerFixture
 
 from ._utils import import_module, mock_asynccontextmanager
 from api import app
+from api.exceptions.verdict import StaleVerdictError
 
 
 def get_decorated_function(
@@ -72,9 +74,10 @@ async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> N
 
     db_patch.create_tables.assert_not_called()  # use alembic migrations instead
     clear_cache_patch.assert_called_once_with("courses")
-    task = module.app.state.purchase_recovery
-    task.cancel()
-    await asyncio.gather(task, return_exceptions=True)
+    tasks = [module.app.state.purchase_recovery, module.app.state.milestone_recovery]
+    for task in tasks:
+        task.cancel()
+    await asyncio.gather(*tasks, return_exceptions=True)
 
 
 async def test__on_shutdown(mocker: MockerFixture) -> None:
@@ -85,12 +88,34 @@ async def test__on_shutdown(mocker: MockerFixture) -> None:
     module, on_shutdown = get_decorated_function(fastapi_patch, "on_event", "shutdown")
     task = asyncio.create_task(asyncio.Event().wait())
     module.app.state.purchase_recovery = task
+    milestones = asyncio.create_task(asyncio.Event().wait())
+    module.app.state.milestone_recovery = milestones
 
     await on_shutdown()
-    assert task.cancelled()
+    assert task.cancelled() and milestones.cancelled()
     db_patch.dispose.assert_awaited_once_with()
 
 
 async def test__status(client: AsyncClient) -> None:
     response = await client.head("/status")
     assert response.status_code == 200
+
+
+async def test__rollback_on_exception_keeps_the_text_and_adds_the_code(mocker: MockerFixture) -> None:
+    fastapi_patch = mocker.patch("fastapi.FastAPI")
+    db_patch = mocker.patch("api.database.db")
+    db_patch.session.rollback = AsyncMock()
+    http_exception_patch = mocker.patch("starlette.exceptions.HTTPException")
+    http_exception_handler_patch = mocker.patch("fastapi.exception_handlers.http_exception_handler", AsyncMock())
+
+    _, rollback_on_exception = get_decorated_function(fastapi_patch, "exception_handler", http_exception_patch)
+
+    result = await rollback_on_exception(MagicMock(), StaleVerdictError())
+
+    db_patch.session.rollback.assert_called_once_with()
+    http_exception_handler_patch.assert_not_called()
+    assert result.status_code == 409
+    assert json.loads(result.body) == {
+        "detail": "This grading is out of date. Check your answer again.",
+        "code": "verdict_stale",
+    }

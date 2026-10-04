@@ -126,6 +126,7 @@ class Activity(RoomModel):
     progress: Progress | None = None
     completed: bool | None = None
     skip_allowed: bool = False
+    completion_kind: Literal["introduced", "llm-verdict"] | None = None
 
 
 class LegacyPractice(RoomModel):
