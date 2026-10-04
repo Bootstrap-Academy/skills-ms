@@ -74,10 +74,10 @@ def query_packages(
             group = pending[start:end]
             payload = []
             for (name, version), token in group:
-                item = {"package": {"name": name, "ecosystem": "PyPI"}, "version": version}
+                query = {"package": {"name": name, "ecosystem": "PyPI"}, "version": version}
                 if token:
-                    item["page_token"] = token
-                payload.append(item)
+                    query["page_token"] = token
+                payload.append(query)
             result = request(f"{OSV_API}/querybatch", {"queries": payload})
             if not isinstance(result, dict):
                 raise AuditError("OSV querybatch response must be an object")
@@ -125,8 +125,10 @@ def query_packages(
         for affected in advisory["affected"]:
             if not isinstance(affected, dict) or not isinstance(affected.get("package"), dict):
                 raise AuditError(f"OSV advisory {advisory_id} has invalid affected package metadata")
-            package = affected["package"]
-            if not isinstance(package.get("name"), str) or not isinstance(package.get("ecosystem"), str):
+            affected_package = affected["package"]
+            if not isinstance(affected_package.get("name"), str) or not isinstance(
+                affected_package.get("ecosystem"), str
+            ):
                 raise AuditError(f"OSV advisory {advisory_id} has invalid affected package metadata")
         advisories[advisory_id] = advisory
     for (name, _), ids in hits.items():
