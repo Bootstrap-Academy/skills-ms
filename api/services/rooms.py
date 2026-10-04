@@ -16,6 +16,7 @@ from sqlalchemy.engine import CursorResult
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, delete, filter_by
+from api.models import PurchaseUser
 from api.models.room import RoomRequest, RoomState
 from api.schemas.course import Course
 from api.schemas.daily_limit import DailyStatus
