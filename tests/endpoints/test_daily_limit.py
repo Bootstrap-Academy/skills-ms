@@ -326,8 +326,8 @@ async def test_large_curriculum_reads_have_constant_database_and_catalogue_cost(
 ) -> None:
     task = uuid4()
     subtasks = [uuid4() for _ in range(size)]
-    prototype = rooms.load_catalogue().units[0].dict()
-    content = Catalogue.parse_obj(
+    prototype = rooms.load_catalogue().units[0].model_dump()
+    content = Catalogue.model_validate(
         {
             "paths": [
                 {"id": "daily-path", "title": {"de": "Pfad", "en": "Path"}, "units": [f"unit-{i}" for i in range(size)]}

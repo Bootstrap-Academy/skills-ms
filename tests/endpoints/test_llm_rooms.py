@@ -33,6 +33,7 @@ from api.services import llm, rooms
 from api.services.user_deletion import delete_user_data
 from api.services.user_export import export_user_data
 from api.settings import Settings, settings
+from api.utils.utc import utcnow
 
 
 GRANT_KEY = "synthetic-grant-key-for-tests-only-0123456789"
@@ -396,16 +397,24 @@ async def test_verdict_is_refused_where_no_grading_applies_and_skip_stays_open(l
     assert skipped.status_code == 200 and skipped.json()["progress"]["status"] == "skipped"
 
 
-async def test_verdict_is_single_use_and_a_repeat_needs_a_new_grading(llm_client: httpx.AsyncClient) -> None:
-    first = sign(verdict_claims())
+async def test_verdict_is_single_use_and_a_repeat_needs_a_new_grading(
+    llm_client: httpx.AsyncClient, monkeypatch: MonkeyPatch
+) -> None:
+    # Pin the review start to the JWT's second precision to exercise the used-verdict check reliably.
+    grading_time = utcnow().replace(microsecond=0)
+    issued_at = int(grading_time.timestamp())
+    monkeypatch.setattr(rooms, "utcnow", lambda: grading_time)
+    first = sign(verdict_claims(iat=issued_at))
     assert (await llm_client.post("/rooms/graded/complete", json=graded(first))).status_code == 200
     start = payload(1)
     assert (await llm_client.post("/rooms/graded/review", json=start)).status_code == 200
     review = {"review_id": start["request_id"]}
     assert refused(await llm_client.post("/rooms/graded/complete", json=graded(first, 2, **review))) == USED
-    older = sign(verdict_claims(iat=int(time()) - 60))
+    older = sign(verdict_claims(iat=issued_at - 60))
     assert refused(await llm_client.post("/rooms/graded/complete", json=graded(older, 2, **review))) == STALE
-    fresh = await llm_client.post("/rooms/graded/complete", json=graded(sign(verdict_claims()), 2, **review))
+    fresh = await llm_client.post(
+        "/rooms/graded/complete", json=graded(sign(verdict_claims(iat=issued_at)), 2, **review)
+    )
     assert fresh.status_code == 200 and fresh.json()["progress"]["status"] == "completed"
     async with db_context():
         assert len(await db.all(filter_by(models.LlmVerdict, user_id=USER_A))) == 2
