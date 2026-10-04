@@ -257,6 +257,7 @@ async def get_lesson(course: Course, lesson_id: str, user: User, token: str) -> 
                     progress=rooms.progress(states.get(source.unit_id)),
                     completed=completed(ref, states, lecture_ids),
                     skip_allowed=unit.completion is not None and unit.completion.allow_skip,
+                    completion_kind=public.completion_kind,
                 )
             )
         elif isinstance(source, LectureSource):
