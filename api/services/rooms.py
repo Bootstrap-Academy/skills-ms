@@ -23,7 +23,7 @@ from sqlalchemy.exc import IntegrityError
 
 from api.database import db, delete, filter_by
 from api.exceptions.verdict import UsedVerdictError, VerdictFailedError, VerdictRequiredError, VerdictUnexpectedError
-from api.models import LlmVerdict, PurchaseUser
+from api.models import LlmVerdict
 from api.models.room import RoomRequest, RoomState
 from api.schemas.course import Course
 from api.schemas.daily_limit import DailyStatus
