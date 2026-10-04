@@ -114,6 +114,7 @@ async def test_composed_lesson_keeps_order_state_review_and_one_completion(
     assert lesson["activities"][0]["progress"]["state"] == {"private": "original-shape"}
     assert lesson["activities"][0]["kind"] == "legacy-room"
     assert lesson["activities"][1]["kind"] == "coding"
+    assert [activity["completion_kind"] for activity in lesson["activities"]] == ["introduced", None]
     assert lesson["completed"] is False
     finish = payload(revision=1, action="complete", answer={"answer": 6})
     first = await client.post("/rooms/intro/complete?course=composed", json=finish)
@@ -273,6 +274,7 @@ async def test_legacy_video_keeps_lecture_ids_progress_and_deferred_practice(
     assert lesson["explicit"] is False and lesson["completed"] is True
     assert lesson["activities"][0]["id"] == "original_lecture"
     assert lesson["activities"][0]["source"]["kind"] == "lecture"
+    assert lesson["activities"][0]["completion_kind"] is None
     assert lesson["legacy_practice"] == {
         "course_id": "composed",
         "section_id": "chapter_one",
