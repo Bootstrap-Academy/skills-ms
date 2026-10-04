@@ -29,7 +29,7 @@ def unit(**values: Any) -> dict[str, Any]:
 
 
 def test_existing_units_load_unchanged_without_llm_profiles() -> None:
-    parsed = CatalogueUnit.parse_obj(unit())
+    parsed = CatalogueUnit.model_validate(unit())
     assert parsed.llm_profiles == []
     assert isinstance(parsed.completion, IntroductionCompletion) and parsed.completion.allow_skip is False
     for shipped in load_catalogue().units:
@@ -38,22 +38,24 @@ def test_existing_units_load_unchanged_without_llm_profiles() -> None:
 
 
 def test_graded_unit_keeps_profiles_and_grading_server_side() -> None:
-    parsed = CatalogueUnit.parse_obj(
+    parsed = CatalogueUnit.model_validate(
         unit(llm_profiles=["llmb-grade-prompt", "llmb-temperature-fan"], completion=GRADING)
     )
     assert isinstance(parsed.completion, LlmVerdictCompletion)
     assert parsed.completion.allow_skip is True  # the grader can be wrong, skipping stays open
     assert parsed.completion.allow_fallback is True  # and without the model it completes as `introduced`
     assert parsed.llm_profiles == ["llmb-grade-prompt", "llmb-temperature-fan"]
-    public = parsed.public().dict()
+    public = parsed.public().model_dump()
     assert "llm_profiles" not in public and "completion" not in public
     # Only the kind of the check is public: no profile, rubric hash or answer.
     assert public["completion_kind"] == "llm-verdict"
     assert "llmb-grade-prompt" not in str(public) and GRADING["profile_sha256"] not in str(public)
-    assert CatalogueUnit.parse_obj(unit()).public().completion_kind == "introduced"
-    assert "answer" not in str(CatalogueUnit.parse_obj(unit()).public().dict())
+    assert CatalogueUnit.model_validate(unit()).public().completion_kind == "introduced"
+    assert "answer" not in str(CatalogueUnit.model_validate(unit()).public().model_dump())
     # A plain LLM unit (no grading) keeps its normal completion.
-    assert CatalogueUnit.parse_obj(unit(llm_profiles=["llmb-temperature-fan"])).llm_profiles == ["llmb-temperature-fan"]
+    assert CatalogueUnit.model_validate(unit(llm_profiles=["llmb-temperature-fan"])).llm_profiles == [
+        "llmb-temperature-fan"
+    ]
 
 
 @pytest.mark.parametrize(
@@ -87,4 +89,4 @@ def test_graded_unit_keeps_profiles_and_grading_server_side() -> None:
 )
 def test_invalid_llm_catalogue_entries_are_rejected(values: dict[str, Any]) -> None:
     with pytest.raises(ValidationError):
-        CatalogueUnit.parse_obj(unit(**values))
+        CatalogueUnit.model_validate(unit(**values))

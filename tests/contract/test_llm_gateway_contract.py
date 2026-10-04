@@ -168,7 +168,7 @@ async def skills(monkeypatch: MonkeyPatch, users: dict[str, str], gateway: Gatew
             "completion": grading,
         }
 
-    catalogue = Catalogue.parse_obj(
+    catalogue = Catalogue.model_validate(
         {
             "paths": [{"id": "prompting", "title": {"de": "Pfad", "en": "Path"}, "units": ["graded", "graded-too"]}],
             "units": [unit("graded"), unit("graded-too")],
@@ -216,7 +216,9 @@ async def skills(monkeypatch: MonkeyPatch, users: dict[str, str], gateway: Gatew
     app.add_exception_handler(CodedAPIException, lambda _, exc: exc.response())
     app.include_router(router, dependencies=[Depends(session)])
     async with httpx.AsyncClient(
-        app=app, base_url="http://skills.synthetic", headers={"Authorization": "Bearer a"}
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://skills.synthetic",
+        headers={"Authorization": "Bearer a"},
     ) as client:
         yield client
 
@@ -324,7 +326,7 @@ async def test_skills_ms_accepts_verdicts_from_llm_ms_and_refuses_tampered_ones(
         "exp", "aud", "uid", "unit_id", "course_id", "profile", "profile_hash", "request_id",
         "answer_sha256", "locale", "env", "score", "max_score", "pass_score", "passed", "model", "iat",
     }  # fmt: skip
-    claims = llm.VerdictClaims.parse_obj(payload)
+    claims = llm.VerdictClaims.model_validate(payload)
     assert str(claims.request_id) == passed["request_id"] and claims.answer_sha256 == llm.answer_sha256(ANSWER)
     assert claims.locale == "de" and claims.uid == UUID(user) and claims.env == gateway.environment
     grant_key = env_file("LLM_CONTRACT_GRANT_SECRET_FILE").read_bytes().rstrip(b"\r\n")

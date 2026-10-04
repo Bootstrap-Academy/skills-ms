@@ -10,21 +10,21 @@ from api.exceptions.api_exception import CodedAPIException
 
 
 class VerdictRequiredError(CodedAPIException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     detail = "Send your answer together with its grading"
     description = "An AI-graded room completes with `{text}` and its signed verdict, or with the fallback answer."
     code = "verdict_required"
 
 
 class VerdictUnexpectedError(CodedAPIException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     detail = "This room is not graded by the AI"
     description = "A verdict was sent for a room that is not graded by the AI."
     code = "verdict_unexpected"
 
 
 class VerdictFailedError(CodedAPIException):
-    status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    status_code = status.HTTP_422_UNPROCESSABLE_CONTENT
     detail = "Check your answer and try again"
     description = "The verdict is valid but did not pass; the room stays open."
     code = "verdict_failed"

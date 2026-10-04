@@ -5,11 +5,13 @@ See [Auth Microservice](/auth/docs).
 
 import asyncio
 from contextlib import asynccontextmanager
+from math import isfinite
 from typing import AsyncIterator, Awaitable, Callable, TypeVar
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exception_handlers import http_exception_handler
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -83,6 +85,25 @@ async def db_session(request: Request, call_next: Callable[..., Awaitable[T]]) -
             if isinstance(response, Response):
                 response.headers.update(HEADERS)
         return response
+
+
+@app.exception_handler(RequestValidationError)
+async def request_validation_error_response(request: Request, exc: RequestValidationError) -> Response:
+    # Pydantic includes rejected inputs, even nested NaN/Infinity values, in
+    # errors. Rejected strings/bytes can also be invalid UTF-8. Normalize those
+    # values only in the error response, never in data accepted by a writer or
+    # used in an exact-replay fingerprint.
+    return JSONResponse(
+        status_code=422,
+        content=jsonable_encoder(
+            {"detail": exc.errors()},
+            custom_encoder={
+                float: lambda value: value if isfinite(value) else None,
+                str: lambda value: value.encode("utf-8", errors="backslashreplace").decode("utf-8"),
+                bytes: lambda value: value.decode("utf-8", errors="backslashreplace"),
+            },
+        ),
+    )
 
 
 @app.exception_handler(StarletteHTTPException)

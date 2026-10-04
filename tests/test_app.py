@@ -3,6 +3,7 @@ import json
 from typing import Any, Callable
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
@@ -63,14 +64,14 @@ async def test__rollback_on_exception(mocker: MockerFixture) -> None:
 
 
 async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> None:
-    fastapi_patch = mocker.patch("fastapi.FastAPI")
+    mocker.patch("fastapi.FastAPI")
     db_patch = mocker.patch("api.database.db")
     clear_cache_patch = mocker.patch("api.utils.cache.clear_cache")
 
-    module, on_startup = get_decorated_function(fastapi_patch, "on_event", "startup")
+    module = import_module(app)
     db_patch.create_tables = AsyncMock()
 
-    await on_startup()
+    await module.on_startup()
 
     db_patch.create_tables.assert_not_called()  # use alembic migrations instead
     clear_cache_patch.assert_called_once_with("courses")
@@ -81,17 +82,17 @@ async def test__on_startup(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> N
 
 
 async def test__on_shutdown(mocker: MockerFixture) -> None:
-    fastapi_patch = mocker.patch("fastapi.FastAPI")
+    mocker.patch("fastapi.FastAPI")
     db_patch = mocker.patch("api.database.db")
     db_patch.dispose = AsyncMock()
 
-    module, on_shutdown = get_decorated_function(fastapi_patch, "on_event", "shutdown")
+    module = import_module(app)
     task = asyncio.create_task(asyncio.Event().wait())
     module.app.state.purchase_recovery = task
     milestones = asyncio.create_task(asyncio.Event().wait())
     module.app.state.milestone_recovery = milestones
 
-    await on_shutdown()
+    await module.on_shutdown()
     assert task.cancelled() and milestones.cancelled()
     db_patch.dispose.assert_awaited_once_with()
 
@@ -99,6 +100,34 @@ async def test__on_shutdown(mocker: MockerFixture) -> None:
 async def test__status(client: AsyncClient) -> None:
     response = await client.head("/status")
     assert response.status_code == 200
+
+
+async def test__lifespan_stops_recovery_and_disposes_database_on_error(
+    mocker: MockerFixture, monkeypatch: MonkeyPatch
+) -> None:
+    started = asyncio.Event()
+
+    async def recover() -> None:
+        started.set()
+        await asyncio.Event().wait()
+
+    mocker.patch("api.services.purchases.recover", side_effect=recover)
+    milestone_recover = mocker.patch("api.services.lesson_milestones.recover", AsyncMock())
+    clear_cache = mocker.patch("api.utils.cache.clear_cache", AsyncMock())
+    dispose = mocker.patch("api.database.db.dispose", AsyncMock())
+    module = import_module(app)
+    monkeypatch.setattr(module.settings, "learning_rooms_content", None)
+    with pytest.raises(RuntimeError, match="Synthetic lifespan error"):
+        async with module.app.router.lifespan_context(module.app):
+            await asyncio.wait_for(started.wait(), timeout=1)
+            clear_cache.assert_awaited_once_with("courses")
+            task = module.app.state.purchase_recovery
+            milestones = module.app.state.milestone_recovery
+            milestone_recover.assert_awaited_once()
+            assert not task.done()
+            raise RuntimeError("Synthetic lifespan error")
+    assert task.cancelled() and milestones.cancelled()
+    dispose.assert_awaited_once_with()
 
 
 async def test__rollback_on_exception_keeps_the_text_and_adds_the_code(mocker: MockerFixture) -> None:

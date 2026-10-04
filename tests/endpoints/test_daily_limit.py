@@ -80,7 +80,7 @@ async def test_read_batch_shares_work_only_after_concrete_resolution(
     catalog.curriculum = None
     catalog.learning_path_id = None
     catalog.sections = [
-        Section.parse_obj(
+        Section.model_validate(
             {
                 "id": "section",
                 "title": "Example",
@@ -93,7 +93,7 @@ async def test_read_batch_shares_work_only_after_concrete_resolution(
     status = AsyncMock(wraps=daily_limit.optional_status)
     monkeypatch.setattr(daily_limit, "optional_status", status)
     task = uuid4()
-    data = ChallengeReadBatch.parse_obj(
+    data = ChallengeReadBatch.model_validate(
         {
             "requests": [
                 {
@@ -136,7 +136,7 @@ async def test_read_batch_never_reuses_started_lesson_for_same_task_sibling(
         "policy",
         AsyncMock(side_effect=daily_limit.AccessError(503, "learning_access_unavailable", "Unavailable")),
     )
-    data = ChallengeReadBatch.parse_obj(
+    data = ChallengeReadBatch.model_validate(
         {"requests": [{"task_id": task, "subtask_id": started}, {"task_id": task, "subtask_id": sibling}]}
     )
     async with db_context():
@@ -163,7 +163,7 @@ async def test_read_batch_refreshes_purchase_and_admin_rights(
     )
     monkeypatch.setattr(shop, "has_premium", AsyncMock(return_value=False))
     binding = {"lecture_bindings": [{"course_id": catalog.id}]}
-    data = ChallengeReadBatch.parse_obj({"requests": [binding, {**binding, "user_admin": True}, binding]})
+    data = ChallengeReadBatch.model_validate({"requests": [binding, {**binding, "user_admin": True}, binding]})
     async with db_context():
         assert await check_batch(USER.id, data) == {"readable": [False, True, False]}
     async with db_context():
@@ -178,7 +178,7 @@ def test_read_catalogue_overrides_stay_local_and_refresh_between_batches(
     source = rooms.load_catalogue()
     source.units[0].room = "exercise"
     source.units[0].completion = None
-    before = source.dict()
+    before = source.model_dump()
     task, first, second = uuid4(), uuid4(), uuid4()
     monkeypatch.setattr(
         settings,
@@ -199,14 +199,14 @@ def test_read_catalogue_overrides_stay_local_and_refresh_between_batches(
     assert second_context.for_task(task, second) == [current.units[0]]
     assert original.units[0].exercise is not None and original.units[0].exercise.subtask_id == first
     assert current.units[0].exercise is not None and current.units[0].exercise.subtask_id == second
-    assert source.dict() == before
+    assert source.model_dump() == before
     # Invalid operator bindings remain a technical refusal and cannot mutate
     # the shared catalogue or the previous request's concrete exercise.
     monkeypatch.setattr(settings, "learning_rooms_exercise_refs", {"missing": {}})
     with pytest.raises(HTTPException) as failure:
         daily_limit.ChallengeReadContext().catalogue()
     assert failure.value.status_code == 503
-    assert source.dict() == before
+    assert source.model_dump() == before
     assert original.units[0].exercise.subtask_id == first
 
 

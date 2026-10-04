@@ -1,12 +1,13 @@
 """Fresh, fail-closed publication authority, separate from identity caches."""
 
-from typing import Literal, TypedDict, TypeVar, cast
+from typing import Literal, Self, TypedDict, TypeVar
 from uuid import UUID
 
 from fastapi import HTTPException
 from httpx import HTTPError
-from pydantic import BaseModel, Field, StrictBool, StrictStr, ValidationError, conint, root_validator
+from pydantic import Field, StrictBool, StrictStr, ValidationError, model_validator
 
+from api.schemas import BaseModel
 from api.services.internal import InternalService
 from api.settings import settings
 
@@ -28,19 +29,15 @@ class RankingMetadata(TypedDict):
 class Epoch(BaseModel):
     scope_version: Literal["academy-verified-v1"]
     publication_epoch: UUID
-    epoch_revision: conint(strict=True, ge=0)  # type: ignore[valid-type]
+    epoch_revision: int = Field(strict=True, ge=0)
     policy_active: StrictBool
     publishing_enabled: StrictBool
 
-    class Config:
-        extra = "forbid"
-
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def coherent_policy(cls, values: dict[str, object]) -> dict[str, object]:
-        if values["publishing_enabled"] and not values["policy_active"]:
+    @model_validator(mode="after")
+    def coherent_policy(self) -> Self:
+        if self.publishing_enabled and not self.policy_active:
             raise ValueError("Publication policy is not active")
-        return values
+        return self
 
     @property
     def ranking_metadata(self) -> RankingMetadata:
@@ -57,24 +54,19 @@ class Epoch(BaseModel):
 
 class Participant(BaseModel):
     user_id: UUID
-    visibility_revision: conint(strict=True, ge=1)  # type: ignore[valid-type]
+    visibility_revision: int = Field(strict=True, ge=1)
     display_name: StrictStr
     avatar_url: None = Field(...)
-
-    class Config:
-        extra = "forbid"
 
 
 class Snapshot(Epoch):
     participants: tuple[Participant, ...]
 
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def unique_participants(cls, values: dict[str, object]) -> dict[str, object]:
-        participants = cast(tuple[Participant, ...], values["participants"])
-        if len({person.user_id for person in participants}) != len(participants):
+    @model_validator(mode="after")
+    def unique_participants(self) -> Self:
+        if len({person.user_id for person in self.participants}) != len(self.participants):
             raise ValueError("Duplicate publication participant")
-        return values
+        return self
 
     @property
     def user_ids(self) -> tuple[str, ...]:
@@ -82,7 +74,7 @@ class Snapshot(Epoch):
 
     @property
     def epoch(self) -> Epoch:
-        return Epoch.parse_obj(self.dict(exclude={"participants"}))
+        return Epoch.model_validate(self.model_dump(exclude={"participants"}))
 
 
 E = TypeVar("E", bound=Epoch)
@@ -97,7 +89,7 @@ async def _read(path: str, model: type[E]) -> E:
             response = await client.get(f"/profile-publications/{path}")
         if response.status_code != 200:
             raise unavailable()
-        return model.parse_obj(response.json())
+        return model.model_validate(response.json())
     except (HTTPError, ValidationError, ValueError, TypeError):
         raise unavailable() from None
 

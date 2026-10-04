@@ -17,9 +17,11 @@ import httpx
 import jwt
 import pytest
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from pytest import MonkeyPatch
 
 from api import models
+from api.app import request_validation_error_response
 from api.auth import user_auth
 from api.database import db, db_context, filter_by
 from api.endpoints.rooms import router
@@ -108,7 +110,7 @@ def content(monkeypatch: MonkeyPatch) -> Catalogue:
         }
 
     grading = {"kind": "llm-verdict", "profile": PROFILE, "profile_sha256": PROFILE_SHA256}
-    value = Catalogue.parse_obj(
+    value = Catalogue.model_validate(
         {
             "paths": [
                 {"id": "prompting", "title": {"de": "Pfad", "en": "Path"}, "units": ["graded", "plain", "retired"]}
@@ -146,12 +148,13 @@ async def llm_client(content: Catalogue) -> AsyncIterator[httpx.AsyncClient]:
         return User(id=users[token], email_verified=True, admin=False)
 
     app = FastAPI()
+    app.exception_handler(RequestValidationError)(request_validation_error_response)
     app.dependency_overrides[user_auth.dependency] = identity
     # As in `api.app`: coded refusals answer `{"detail": ..., "code": ...}`.
     app.add_exception_handler(CodedAPIException, lambda _, exc: exc.response())
     app.include_router(router, dependencies=[Depends(session)])
     async with httpx.AsyncClient(
-        app=app, base_url="http://rooms.synthetic", headers={"Authorization": "Bearer a"}
+        transport=httpx.ASGITransport(app=app), base_url="http://rooms.synthetic", headers={"Authorization": "Bearer a"}
     ) as client:
         yield client
 
@@ -282,7 +285,7 @@ async def test_passing_verdict_completes_once_without_xp_or_answer_text(
             assert await db.all(filter_by(model, user_id=USER_A)) == []
         export = await export_user_data(USER_A)
         assert [item["request_id"] for item in export.llm_verdicts] == [claims["request_id"]]
-        assert ANSWER not in export.json()
+        assert ANSWER not in export.model_dump_json()
     monkeypatch.setattr("api.services.user_deletion.clear_cache", AsyncMock())
     async with db_context():
         await delete_user_data(USER_A)
@@ -453,7 +456,7 @@ async def test_keys_from_credential_files_match_llm_ms_and_fail_closed(
     monkeypatch.setattr(settings, "llm_grant_secret_file", tmp_path / "missing")
     assert llm.grant_key() is None
     monkeypatch.setenv("LLM_GRANT_SECRET_FILE", "")
-    assert Settings().llm_grant_secret_file is None  # type: ignore[call-arg]
+    assert Settings().llm_grant_secret_file is None
 
 
 @pytest.mark.parametrize("locale", ["de", "en"])

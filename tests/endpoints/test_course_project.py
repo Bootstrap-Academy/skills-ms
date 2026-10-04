@@ -9,9 +9,11 @@ from uuid import uuid4
 import httpx
 import pytest
 from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from pytest import MonkeyPatch
 
 from api import models
+from api.app import request_validation_error_response
 from api.auth import user_auth
 from api.database import db, db_context, filter_by
 from api.endpoints import course_project as project_endpoints
@@ -63,7 +65,7 @@ def course(course_id: str, price: int, path_id: str | None = "prompting") -> Cou
 
 @pytest.fixture
 def content(monkeypatch: MonkeyPatch) -> Catalogue:
-    value = Catalogue.parse_obj(
+    value = Catalogue.model_validate(
         {
             "paths": [
                 {"id": "prompting", "title": {"de": "Pfad", "en": "Path"}, "units": ["intro"]},
@@ -121,11 +123,14 @@ async def client(content: Catalogue) -> AsyncIterator[httpx.AsyncClient]:
         return users[token]
 
     app = FastAPI()
+    app.exception_handler(RequestValidationError)(request_validation_error_response)
     app.dependency_overrides[user_auth.dependency] = identity
     app.include_router(project_endpoints.router, dependencies=[Depends(session)])
     app.include_router(rooms_router, dependencies=[Depends(session)])
     async with httpx.AsyncClient(
-        app=app, base_url="http://skills.synthetic", headers={"Authorization": "Bearer a"}
+        transport=httpx.ASGITransport(app=app),
+        base_url="http://skills.synthetic",
+        headers={"Authorization": "Bearer a"},
     ) as client:
         yield client
 
@@ -293,7 +298,7 @@ async def test_state_is_private_per_user(client: httpx.AsyncClient) -> None:
     assert [row.state for row in await rows(models.CourseProject, USER_B)] == [{"b": 2}]
     async with db_context():
         export = await export_user_data(USER_B)
-    assert "Klingel" not in export.json() and USER_A not in export.json()
+    assert "Klingel" not in export.model_dump_json() and USER_A not in export.model_dump_json()
 
 
 async def test_no_course_access_is_403_on_read_and_write(client: httpx.AsyncClient) -> None:
@@ -393,7 +398,7 @@ async def test_export_and_erasure_include_the_project(client: httpx.AsyncClient,
     )
     [receipt] = export.course_project_requests
     assert receipt["request_id"] == request["request_id"] and receipt["revision"] == saved["revision"]
-    assert '"b": 1' not in export.json()
+    assert all(row["user_id"] == USER_A for row in export.course_projects)
     monkeypatch.setattr("api.services.user_deletion.clear_cache", AsyncMock())
     async with db_context():
         await delete_user_data(USER_A)
@@ -422,7 +427,7 @@ async def test_receipts_are_bounded_and_old_retries_still_conflict(client: httpx
 
 async def test_transaction_rollback_removes_state_and_receipt(content: Catalogue) -> None:
     user = User(id=USER_A, email_verified=True, admin=False)
-    data = SaveProject.parse_obj(body(0))
+    data = SaveProject.model_validate(body(0))
     with pytest.raises(RuntimeError):
         async with db_context():
             await course_project.save_project("llm-course", user, data)
@@ -448,7 +453,7 @@ async def test_concurrent_stale_writes_keep_one_revision(content: Catalogue, ini
     async def write(value: int) -> int:
         try:
             async with db_context():
-                data = SaveProject.parse_obj(body(initial_revision, {"value": value}))
+                data = SaveProject.model_validate(body(initial_revision, {"value": value}))
                 return (await course_project.save_project("llm-course", user, data)).revision
         except HTTPException as exc:
             return exc.status_code

@@ -94,3 +94,21 @@ def test__exports_and_daily_status_keep_isoformat_timestamps() -> None:
     assert DailyStatus.model_json_schema(mode="serialization")["properties"]["resets_at"]["format"] == "date-time"
     with pytest.raises(ValidationError):
         XP.model_validate({"skill_id": "missing", "xp": 0})
+
+
+@pytest.mark.parametrize("field", ["llm_verdicts", "lesson_milestones", "course_projects", "course_project_requests"])
+def test__p9_exports_keep_isoformat_timestamps_and_project_strings(field: str) -> None:
+    timestamp = datetime(2026, 9, 11, 12, 34, 56, 123456, tzinfo=timezone.utc)
+    export = UserDataExport.model_validate(
+        {
+            "course_access": [],
+            "last_watch": [],
+            "lecture_progress": [],
+            "sub_skill_bookmarks": [],
+            "xp": [],
+            field: [{"updated_at": timestamp, "state": {"text": "2026-09-11T12:34:56Z"}}],
+        }
+    )
+    assert jsonable_encoder(export)[field] == [
+        {"updated_at": timestamp.isoformat(), "state": {"text": "2026-09-11T12:34:56Z"}}
+    ]

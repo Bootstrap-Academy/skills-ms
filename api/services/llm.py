@@ -24,10 +24,11 @@ from uuid import UUID, uuid4
 
 import jwt
 from fastapi import HTTPException
-from pydantic import BaseModel, Field, StrictBool, StrictInt, ValidationError, validator
+from pydantic import ConfigDict, Field, StrictBool, StrictInt, ValidationError, field_validator
 
 from api.exceptions.verdict import ForeignVerdictError, PracticeVerdictError, StaleVerdictError, VerdictUnavailableError
 from api.logger import get_logger
+from api.schemas import BaseModel
 from api.schemas.rooms import LLM_PROFILE_ID_PATTERN, CatalogueUnit, LlmGrant, LlmVerdictCompletion
 from api.settings import settings
 
@@ -48,31 +49,30 @@ logger = get_logger(__name__)
 class VerdictClaims(BaseModel):
     """The binding verdict payload; all claims are always present (llm-ms 28d8ee9)."""
 
-    class Config:
-        # The binding format asks to ignore unknown claims so that an extension does not break the check.
-        extra = "ignore"
+    # The binding format asks to ignore unknown claims so that an extension does not break the check.
+    model_config = ConfigDict(extra="ignore")
 
     aud: Literal["llm-verdict"]
     exp: StrictInt
     iat: StrictInt
     uid: UUID
     unit_id: str
-    course_id: str | None
-    profile: str = Field(regex=LLM_PROFILE_ID_PATTERN)
-    profile_hash: str = Field(regex=HEX_SHA256)
+    course_id: str | None = None
+    profile: str = Field(pattern=LLM_PROFILE_ID_PATTERN)
+    profile_hash: str = Field(pattern=HEX_SHA256)
     request_id: UUID
-    answer_sha256: str = Field(regex=HEX_SHA256)
+    answer_sha256: str = Field(pattern=HEX_SHA256)
     # Language of the grader prompt; the client chooses it, so it is recorded, not bound (see the room).
     locale: Literal["de", "en"]
     # The environment that graded; only this service's own environment counts.
-    env: str = Field(regex=ENVIRONMENT_PATTERN)
+    env: str = Field(pattern=ENVIRONMENT_PATTERN)
     score: StrictInt
     max_score: StrictInt
     pass_score: StrictInt
     passed: StrictBool
     model: str = Field(max_length=128)
 
-    @validator("score", "max_score", "pass_score")
+    @field_validator("score", "max_score", "pass_score")
     @classmethod
     def points(cls, value: int) -> int:
         if value < 0:
@@ -217,7 +217,7 @@ def verify_verdict(
         )
         if marked_as_practice(payload):
             raise PracticeVerdictError
-        claims = VerdictClaims.parse_obj(payload)
+        claims = VerdictClaims.model_validate(payload)
     except jwt.ExpiredSignatureError:
         raise StaleVerdictError from None
     except (jwt.InvalidTokenError, ValidationError):
