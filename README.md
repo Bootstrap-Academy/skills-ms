@@ -119,3 +119,9 @@ Setup the run configuration:
 - Change the working directory to root path  ➔ `Edit Configurations`  ➔ `Working directory`
 - In the `EnvFile` tab add your `.env` file
 - Confirm with `OK`
+
+## License
+
+Copyright (C) 2023–2026 Cedric Mössner
+
+This project is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. See [`LICENSE`](LICENSE) for the full license text.
