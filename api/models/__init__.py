@@ -2,6 +2,7 @@ from .bookmarks import SubSkillBookmark
 from .course_access import CourseAccess
 from .course_project import CourseProject, CourseProjectRequest
 from .daily_limit import DailyLimitSettings, LessonStart, LessonStartRequest
+from .engine import EngineRevision, EngineSubmission, EngineTaskState
 from .last_watch import LastWatch
 from .lecture_progress import LectureProgress
 from .lesson_milestone import LessonMilestoneDelivery
@@ -23,6 +24,9 @@ __all__ = [
     "LessonStartRequest",
     "CourseProject",
     "CourseProjectRequest",
+    "EngineRevision",
+    "EngineSubmission",
+    "EngineTaskState",
     "LessonMilestoneDelivery",
     "LessonModule",
     "LlmVerdict",

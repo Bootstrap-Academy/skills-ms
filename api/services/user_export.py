@@ -38,6 +38,14 @@ async def export_user_data(user_id: str) -> UserDataExport:
             {column.name: getattr(row, column.name) for column in row.__table__.columns}
             for row in await db.all(filter_by(models.LessonMilestoneDelivery, user_id=user_id))
         ],
+        engine_task_states=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns}
+            for row in await db.all(filter_by(models.EngineTaskState, user_id=user_id))
+        ],
+        engine_submissions=[
+            {column.name: getattr(row, column.name) for column in row.__table__.columns if column.name != "job"}
+            for row in await db.all(filter_by(models.EngineSubmission, user_id=user_id))
+        ],
         course_projects=[
             {column.name: getattr(row, column.name) for column in row.__table__.columns}
             for row in await db.all(filter_by(models.CourseProject, user_id=user_id))

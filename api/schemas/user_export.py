@@ -47,6 +47,12 @@ class UserDataExport(BaseModel):
     room_requests: list[dict[str, Any]] = Field(default_factory=list)
     llm_verdicts: list[dict[str, Any]] = Field(default_factory=list)
     lesson_milestones: list[dict[str, Any]] = Field(default_factory=list)
+    engine_task_states: list[dict[str, Any]] = Field(default_factory=list)
+    engine_submissions: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="Submitted plans with their verdicts; without the frozen evaluation job, which only repeats "
+        "the revision, the public start and the band of the task state",
+    )
     course_projects: list[dict[str, Any]] = Field(default_factory=list)
     course_project_requests: list[dict[str, Any]] = Field(default_factory=list)
     purchase_user: list[dict[str, Any]] = Field(default_factory=list)
@@ -67,6 +73,8 @@ class UserDataExport(BaseModel):
         "room_requests",
         "llm_verdicts",
         "lesson_milestones",
+        "engine_task_states",
+        "engine_submissions",
         "course_projects",
         "course_project_requests",
         "purchase_user",

@@ -1,4 +1,7 @@
-"""Launch an isolated PostgreSQL, run the real migration/race tests, and clean up."""
+"""Launch an isolated PostgreSQL, run the real migration/race tests, and clean up.
+
+The tests are the module named as the first argument, `tests.daily_limit_postgres` by default.
+"""
 
 import os
 import shutil
@@ -45,7 +48,8 @@ def main() -> None:
                 stdout=subprocess.DEVNULL,
             )
             env = dict(os.environ, DATABASE_URL=f"postgresql+asyncpg://academy_daily_test@127.0.0.1:{port}/postgres")
-            subprocess.run([sys.executable, "-m", "tests.daily_limit_postgres"], env=env, check=True)  # noqa: S603
+            tests = sys.argv[1] if len(sys.argv) > 1 else "tests.daily_limit_postgres"
+            subprocess.run([sys.executable, "-m", tests], env=env, check=True)  # noqa: S603
         finally:
             if (data / "postmaster.pid").exists():
                 subprocess.run(  # noqa: S603
