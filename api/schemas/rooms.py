@@ -10,7 +10,7 @@ from pydantic import Field, field_validator, model_validator
 
 from api.schemas import BaseModel, Timestamp
 from api.schemas.daily_limit import DailyStatus
-from api.schemas.lesson_module import MODULE_ID_PATTERN, LessonModuleDescriptor
+from api.schemas.lesson_module import MODULE_ID_PATTERN, ModuleDescriptor
 
 # Same shape as llm-ms profile IDs (`academy_llm/src/profiles.rs`, `valid_id`).
 LLM_PROFILE_ID_PATTERN = r"^[a-z0-9][a-z0-9-]{0,79}$"
@@ -57,10 +57,10 @@ class Unit(RoomModel):
     practices: list[str]
     requires: list[str]
     exercise: Exercise | None = None
-    module: LessonModuleDescriptor | None = None
+    module: ModuleDescriptor | None = None
     # Public, derived by `CatalogueUnit.public()` and never authored: how the server checks a completion
     # (not the answer, profile or rubric). A host offers the completion without the model only at "llm-verdict".
-    completion_kind: Literal["introduced", "llm-verdict"] | None = None
+    completion_kind: Literal["introduced", "llm-verdict", "engine"] | None = None
 
 
 class IntroductionCompletion(RoomModel):
@@ -88,6 +88,17 @@ class LlmVerdictCompletion(RoomModel):
     allow_fallback: Literal[True] = True
 
 
+class EngineCompletion(RoomModel):
+    """Completion by the lesson engine: the server books a passed submission of every required task.
+
+    The tasks, their XP and sub-skills come from the active package revision, never from the catalogue or the
+    client. Nothing can be skipped, and a client cannot complete the unit itself.
+    """
+
+    kind: Literal["engine"]
+    allow_skip: Literal[False] = False
+
+
 # The answer of the completion without the model (the host's `LLM_FALLBACK_ANSWER`), as canonical JSON
 # (`json.dumps(answer, sort_keys=True)`, the form every fixed answer is compared in).
 LLM_FALLBACK_ANSWER = '{"fallback": "example"}'
@@ -113,7 +124,7 @@ class LessonMilestone(RoomModel):
 
 class CatalogueUnit(Unit):
     retired: bool
-    completion: IntroductionCompletion | LlmVerdictCompletion | None = None
+    completion: IntroductionCompletion | LlmVerdictCompletion | EngineCompletion | None = None
     module_id: str | None = Field(default=None, pattern=MODULE_ID_PATTERN)
     # Server-side only: the llm-ms profiles a lesson grant for this unit covers.
     llm_profiles: list[Annotated[str, Field(pattern=LLM_PROFILE_ID_PATTERN)]] = Field(
@@ -139,6 +150,11 @@ class CatalogueUnit(Unit):
         if self.milestone is not None and (self.completion is None or self.room in ("exercise", "video")):
             # Exercises earn XP through their subtask; a video records viewing, not mastery.
             raise ValueError("A lesson milestone needs a lesson with a server-side completion check")
+        if isinstance(self.completion, EngineCompletion):
+            if self.room != "custom":
+                raise ValueError("A lesson of the engine is a custom activity")
+            if self.milestone is not None:
+                raise ValueError("A lesson of the engine earns its XP per task, not as a lesson milestone")
         if self.room != "custom" and self.module_id is not None:
             raise ValueError("Only a custom room references a module")
         if self.room in ("custom", "video"):

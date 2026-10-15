@@ -5,7 +5,7 @@ from typing import Any, Literal, Self
 from pydantic import Field, model_validator
 
 from api.schemas.daily_limit import DailyStatus
-from api.schemas.lesson_module import LessonModuleDescriptor
+from api.schemas.lesson_module import ModuleDescriptor
 from api.schemas.rooms import Exercise, LocalizedText, Progress, RoomModel
 
 
@@ -120,11 +120,11 @@ class Activity(RoomModel):
     content: dict[str, Any]
     room: str | None = None
     exercise: Exercise | None = None
-    module: LessonModuleDescriptor | None = None
+    module: ModuleDescriptor | None = None
     progress: Progress | None = None
     completed: bool | None = None
     skip_allowed: bool = False
-    completion_kind: Literal["introduced", "llm-verdict"] | None = None
+    completion_kind: Literal["introduced", "llm-verdict", "engine"] | None = None
 
 
 class LegacyPractice(RoomModel):

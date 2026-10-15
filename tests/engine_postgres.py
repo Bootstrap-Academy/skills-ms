@@ -96,6 +96,23 @@ async def constraints(engine: AsyncEngine) -> None:
             await transaction.rollback()
 
 
+async def request_ids(engine: AsyncEngine) -> None:
+    """engine002: a request id of the protocol has up to 100 characters, and the column keeps every one."""
+    async with engine.connect() as connection:
+        transaction = await connection.begin()
+        try:
+            await insert(connection, module(), revision(), task_state("learner", start_request_id="r" * 100))
+            try:
+                await insert(connection, task_state("learner", goal_id="second", start_request_id="r" * 101))
+            except DBAPIError as error:
+                # asyncpg reports StringDataRightTruncationError, which SQLAlchemy passes on as a plain DBAPIError.
+                assert "value too long for type character varying(100)" in str(error), error
+            else:
+                raise AssertionError("a request id of 101 characters was kept")
+        finally:
+            await transaction.rollback()
+
+
 async def race(engine: AsyncEngine, base: list[Any], first: Any, second: Any, count: str) -> None:
     """Two transactions insert competing rows; the second waits for the first and is refused when it commits."""
     async with engine.begin() as connection:
@@ -169,6 +186,7 @@ async def main() -> None:
         async with engine.connect() as connection:
             version = (await connection.execute(text("SHOW server_version"))).scalar_one()
         await constraints(engine)
+        await request_ids(engine)
         await races(engine)
     except DBAPIError as error:
         raise AssertionError(f"unexpected database error: {error}") from error
@@ -177,7 +195,7 @@ async def main() -> None:
     await erasure()
     print(
         f"engine tables on PostgreSQL {version}: {len(VIOLATIONS)} refusals, {len(FOREIGN_KEYS) + 2} foreign keys, "
-        "3 races (active revision, open submission, plan per start), erasure"
+        "request ids up to 100 characters, 3 races (active revision, open submission, plan per start), erasure"
     )
 
 

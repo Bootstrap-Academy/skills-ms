@@ -9,6 +9,7 @@ from . import (
     course_project,
     curriculum,
     daily_limit,
+    engine,
     learning,
     lesson_assets,
     rooms,
@@ -33,6 +34,7 @@ for module in [
     daily_limit,
     character_areas,
     lesson_assets,
+    engine,
 ]:
     name = module.__name__.split(".")[-1]
     router = APIRouter(tags=[name])

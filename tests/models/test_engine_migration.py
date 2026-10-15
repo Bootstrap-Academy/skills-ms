@@ -123,3 +123,10 @@ def test_the_schema_refuses(connection: Connection, name: str) -> None:
     insert(connection, *valid)
     with pytest.raises(IntegrityError):
         insert(connection, refused)
+
+
+def test_engine002_lets_a_task_state_keep_any_request_id_of_the_protocol() -> None:
+    scripts = ScriptDirectory(str(ROOT / "alembic"))
+    revision = scripts.get_revision("engine002")
+    assert revision is not None and revision.down_revision == "engine001"
+    assert EngineTaskState.__table__.c.start_request_id.type.length == 100
