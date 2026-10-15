@@ -260,7 +260,8 @@ class Catalogue(RoomModel):
 
 
 class Result(RoomModel):
-    kind: Literal["introduced", "solved"]
+    # "passed": a unit of the lesson engine whose required tasks all have a booked pass (§9).
+    kind: Literal["introduced", "solved", "passed"]
 
 
 class Progress(RoomModel):

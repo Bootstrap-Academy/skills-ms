@@ -22,6 +22,7 @@ from api.schemas.rooms import CatalogueUnit
 from api.schemas.user import User
 from api.services import daily_limit, rooms
 from api.services.engine import is_engine_unit
+from api.services.engine_verdicts import room_completed, view
 from api.services.purchases import lock_user
 from api.utils.canonical import CanonicalError, canonical
 from api.utils.utc import utcnow
@@ -66,26 +67,6 @@ def _task(revision: EngineRevision, goal_id: str) -> dict[str, Any]:
     return task
 
 
-def view(submission: EngineSubmission, completed: bool) -> dict[str, Any]:
-    """The protocol's AssessmentView of a submission; XP stand only in the answer that booked them (Ä28)."""
-    if submission.state == "accepted":
-        return {"assessmentId": submission.id, "goalId": submission.goal_id, "status": "pending"}
-    return {
-        "assessmentId": submission.id,
-        "goalId": submission.goal_id,
-        "status": "final",
-        "outcome": submission.verdict,
-        "counts": submission.counts,
-        "feedback": submission.feedback,
-        **({"completed": True} if completed and submission.counts else {}),
-    }
-
-
-async def _completed(user_id: str, unit_id: str) -> bool:
-    room = await db.get(RoomState, user_id=user_id, unit_id=unit_id)
-    return room is not None and room.status == "completed"
-
-
 async def unit_assessments(user_id: str, unit_id: str) -> list[dict[str, Any]]:
     """Ä23: the pending submissions of the whole unit and the counted pass of each task, so a reopened unit knows
     every task; a pass says whether the unit is completed."""
@@ -95,7 +76,7 @@ async def unit_assessments(user_id: str, unit_id: str) -> list[dict[str, Any]]:
             or_(EngineSubmission.state == "accepted", EngineSubmission.counts.is_(True))
         )
     )
-    completed = await _completed(user_id, unit_id)
+    completed = await room_completed(user_id, unit_id)
     pending = [view(row, completed) for row in sorted(rows, key=lambda row: row.accepted_at) if row.state == "accepted"]
     passes: dict[str, EngineSubmission] = {}
     for row in sorted(rows, key=lambda row: row.booked_at or row.accepted_at):
@@ -201,7 +182,7 @@ async def submit(unit_id: str, goal_id: str, data: SubmitRequest, user: User) ->
         )
     )
     if same is not None:
-        return view(same, await _completed(user.id, unit.id)), 202 if same.state == "accepted" else 200
+        return view(same, await room_completed(user.id, unit.id)), 202 if same.state == "accepted" else 200
     if state.start_id != data.answer.startId:
         raise EngineRefusal(409, "start_required", "This start is used up; start the task again")
     taken = await db.first(
@@ -263,4 +244,4 @@ async def status(assessment_id: str, user: User) -> dict[str, Any]:
     row = await db.first(filter_by(EngineSubmission, id=assessment_id, user_id=user.id))
     if row is None:
         raise EngineRefusal(404, "not_found", "There is no such submission")
-    return view(row, await _completed(user.id, row.unit_id))
+    return view(row, await room_completed(user.id, row.unit_id))

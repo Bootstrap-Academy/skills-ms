@@ -146,7 +146,8 @@ def introduced_concepts(content: Catalogue, states: dict[str, RoomState]) -> set
             concepts.update(unit.teaches)
         elif row.status == "completed" and row.result == {"kind": "introduced"}:
             concepts.update(unit.teaches)
-        elif row.status == "completed" and row.result == {"kind": "solved"}:
+        # A passed unit of the engine was practised like a solved exercise.
+        elif row.status == "completed" and row.result in ({"kind": "solved"}, {"kind": "passed"}):
             concepts.update([*unit.teaches, *unit.practices])
     return concepts
 
