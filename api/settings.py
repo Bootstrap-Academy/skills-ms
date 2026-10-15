@@ -43,6 +43,8 @@ class Settings(BaseSettings):
     # frontend knows as well; it holds no session (the frontend refuses bootstrap.academy and its subdomains).
     engine_enabled: bool = False
     engine_content_origin: str | None = None
+    # Sandkasten, which evaluates submissions of the engine (Ä33); without it a submission stays pending.
+    sandkasten_url: str | None = Field(default=None, pattern=r"^https?://[^?#@]+$")
     # Disabled until the backend policy API is deployed. Never activates new terms.
     daily_limit_policy_enabled: bool = False
     learning_rooms_content: Path | None = None
