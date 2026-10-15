@@ -18,7 +18,7 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.exc import IntegrityError
 
 from api.models import EngineRevision, EngineSubmission, EngineTaskState
-from tests.engine_rows import VIOLATIONS, revision, submission, task_state
+from tests.engine_rows import VIOLATIONS, revision, start_id, submission, task_state
 
 ROOT = Path(__file__).parents[2]
 TABLES: tuple[Any, ...] = (EngineRevision, EngineTaskState, EngineSubmission)
@@ -92,12 +92,28 @@ def test_valid_rows_are_accepted(connection: Connection) -> None:
         revision("other-unit"),
         task_state("learner"),
         task_state("learner", goal_id="second"),
+        # A task that has no start yet.
+        task_state("learner", goal_id="fresh", start_id=None, start=None, start_band=None),
+        # One plan for each start: a fail, a pass that counts, and an open submission.
         submission("learner", "s-1", input_hash="1" * 64),
-        submission("learner", "s-2", input_hash="2" * 64),
-        submission("learner", "s-3", input_hash="3" * 64, booked=False),
+        submission("learner", "s-2", input_hash="2" * 64, start_id=start_id(2), verdict="passed", counts=True),
+        submission("learner", "s-3", input_hash="3" * 64, start_id=start_id(3), booked=False),
         submission("learner", "s-4", goal_id="second", booked=False),
     )
     assert connection.execute(text("SELECT count(*) FROM skills_engine_submissions")).scalar_one() == 4
+    # None in a JSON column is SQL NULL, not the JSON text null.
+    assert (
+        connection.execute(
+            text("SELECT count(*) FROM skills_engine_task_states WHERE start IS NULL AND goal_id = 'fresh'")
+        ).scalar_one()
+        == 1
+    )
+    assert (
+        connection.execute(
+            text("SELECT count(*) FROM skills_engine_submissions WHERE feedback IS NULL AND state = 'accepted'")
+        ).scalar_one()
+        == 2
+    )
 
 
 @pytest.mark.parametrize("name", VIOLATIONS)

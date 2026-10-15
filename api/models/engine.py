@@ -2,7 +2,9 @@
 
 Revisions hold no personal data. Task states and submissions belong to one learner and are erased with the
 account, submissions first. The database itself guards what must never happen twice: a second active revision of
-a unit, a second open submission of a task, and a second submission of the same plan for the same start.
+a unit, a second open submission of a task, and a second plan for the same start (§9: a start carries one plan; its
+exact repetition is found by start and plan hash). Task states and submissions point to a revision of their own
+unit only.
 """
 
 from datetime import datetime
@@ -38,6 +40,8 @@ class EngineRevision(Base):
         UniqueConstraint("unit_id", "server_sha256", "package_hash", name="uq_engine_revision_content"),
         # NULL for every inactive revision, the unit for the active one: at most one active revision per unit.
         UniqueConstraint("active_for", name="uq_engine_revision_active"),
+        # The target of the composite foreign keys that keep task states and submissions on their own unit.
+        UniqueConstraint("id", "unit_id", name="uq_engine_revision_unit"),
         CheckConstraint("active_for IS NULL OR active_for = unit_id", name="ck_engine_revision_active_for"),
         CheckConstraint("number >= 1", name="ck_engine_revision_number"),
         CheckConstraint(
@@ -69,6 +73,9 @@ class EngineTaskState(Base):
 
     __tablename__ = "skills_engine_task_states"
     __table_args__ = (
+        ForeignKeyConstraint(
+            ["revision_id", "unit_id"], [EngineRevision.id, EngineRevision.unit_id], name="fk_engine_task_revision"
+        ),
         CheckConstraint("fails >= 0 AND passes >= 0", name="ck_engine_task_counters"),
         CheckConstraint("xp_amount IS NULL OR xp_amount >= 0", name="ck_engine_task_xp_amount"),
         CheckConstraint(
@@ -87,15 +94,17 @@ class EngineTaskState(Base):
     user_id: Mapped[str] = Column(String(36), primary_key=True)
     unit_id: Mapped[str] = Column(String(80), primary_key=True)
     goal_id: Mapped[str] = Column(String(80), primary_key=True)
-    revision_id: Mapped[str] = Column(String(36), ForeignKey("skills_engine_revisions.id"), nullable=False)
-    band: Mapped[str] = Column(String(64), nullable=False)
+    revision_id: Mapped[str] = Column(String(36), nullable=False)
+    # As long as the band names of the engine (at most 80 characters).
+    band: Mapped[str] = Column(String(80), nullable=False)
     fails: Mapped[int] = Column(Integer, nullable=False, default=0)
     passes: Mapped[int] = Column(Integer, nullable=False, default=0)
     # The public start as the learner got it (startId, revisionId, goalId, caseId, config, initial, seed) and the
     # band it was drawn in. The band stays with the server.
     start_id: Mapped[str | None] = Column(String(36), nullable=True)
-    start: Mapped[dict[str, Any] | None] = Column(JSON, nullable=True)
-    start_band: Mapped[str | None] = Column(String(64), nullable=True)
+    # None is SQL NULL here, so that ck_engine_task_start sees a missing start.
+    start: Mapped[dict[str, Any] | None] = Column(JSON(none_as_null=True), nullable=True)
+    start_band: Mapped[str | None] = Column(String(80), nullable=True)
     start_request_id: Mapped[str | None] = Column(String(36), nullable=True)
     review_id: Mapped[str | None] = Column(String(36), nullable=True)
     passed_at: Mapped[datetime | None] = Column(UTCDateTime, nullable=True)
@@ -116,17 +125,25 @@ class EngineSubmission(Base):
             [EngineTaskState.user_id, EngineTaskState.unit_id, EngineTaskState.goal_id],
             name="fk_engine_submission_task",
         ),
-        # The same plan for the same start is the same submission, whatever request carried it.
-        UniqueConstraint("user_id", "unit_id", "goal_id", "start_id", "input_hash", name="uq_engine_submission_plan"),
+        ForeignKeyConstraint(
+            ["revision_id", "unit_id"],
+            [EngineRevision.id, EngineRevision.unit_id],
+            name="fk_engine_submission_revision",
+        ),
+        # A start carries one plan (§9). The same plan again is the same submission, found by start and plan hash.
+        UniqueConstraint("user_id", "unit_id", "goal_id", "start_id", name="uq_engine_submission_start"),
         # The goal while accepted, NULL once booked: at most one open submission per task.
         UniqueConstraint("user_id", "unit_id", "open_goal_id", name="uq_engine_submission_open"),
         CheckConstraint(
             f"state IN ({', '.join(repr(state) for state in SUBMISSION_STATES)})", name="ck_engine_submission_state"
         ),
+        # Accepted: open for its goal, nothing of a verdict yet. Booked: closed, with verdict, time and `counts`;
+        # only a pass counts (§7). `open_goal_id IS NOT NULL` matters: NULL = goal_id is not false.
         CheckConstraint(
-            "(state = 'accepted' AND open_goal_id = goal_id AND verdict IS NULL AND booked_at IS NULL) "
+            "(state = 'accepted' AND open_goal_id IS NOT NULL AND open_goal_id = goal_id AND verdict IS NULL "
+            "AND booked_at IS NULL AND counts IS NULL AND feedback IS NULL) "
             "OR (state = 'booked' AND open_goal_id IS NULL AND verdict IS NOT NULL AND booked_at IS NOT NULL "
-            "AND counts IS NOT NULL)",
+            "AND counts IS NOT NULL AND (NOT counts OR verdict = 'passed'))",
             name="ck_engine_submission_booking",
         ),
         CheckConstraint(
@@ -143,7 +160,7 @@ class EngineSubmission(Base):
     unit_id: Mapped[str] = Column(String(80), nullable=False)
     goal_id: Mapped[str] = Column(String(80), nullable=False)
     open_goal_id: Mapped[str | None] = Column(String(80), nullable=True)
-    revision_id: Mapped[str] = Column(String(36), ForeignKey("skills_engine_revisions.id"), nullable=False)
+    revision_id: Mapped[str] = Column(String(36), nullable=False)
     start_id: Mapped[str] = Column(String(36), nullable=False)
     input_hash: Mapped[str] = Column(String(64), nullable=False)
     input: Mapped[dict[str, Any]] = Column(JSON, nullable=False)
@@ -152,7 +169,9 @@ class EngineSubmission(Base):
     state: Mapped[str] = Column(String(16), nullable=False)
     verdict: Mapped[str | None] = Column(String(16), nullable=True)
     # The filtered feedback the learner may see; never case ids, seeds, coordinates or raw faults.
-    feedback: Mapped[dict[str, Any] | None] = Column(JSON, nullable=True)
+    feedback: Mapped[dict[str, Any] | None] = Column(JSON(none_as_null=True), nullable=True)
     counts: Mapped[bool | None] = Column(Boolean, nullable=True)
     accepted_at: Mapped[datetime] = Column(UTCDateTime, nullable=False)
     booked_at: Mapped[datetime | None] = Column(UTCDateTime, nullable=True)
+    # Until when an evaluation in the sandbox holds this submission (Ä33); a later one may take it over.
+    evaluating_until: Mapped[datetime | None] = Column(UTCDateTime, nullable=True)

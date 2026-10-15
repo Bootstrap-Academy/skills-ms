@@ -20,7 +20,16 @@ from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine, create_async_en
 from api import models
 from api.database import db, db_context, filter_by
 from api.services.user_deletion import delete_user_data
-from tests.engine_rows import VIOLATIONS, add_engine_rows, module, revision, submission, task_state
+from tests.engine_rows import (
+    VIOLATIONS,
+    add_engine_rows,
+    module,
+    revision,
+    revision_id,
+    start_id,
+    submission,
+    task_state,
+)
 
 
 def values(model: Any) -> dict[str, Any]:
@@ -48,13 +57,32 @@ async def refused(engine: AsyncEngine, rows: list[Any], *, with_module: bool = T
             await transaction.rollback()
 
 
+# Foreign keys, which SQLite does not enforce in the unit tests: every row but the last is valid.
+OTHER = "other-unit"
+FOREIGN_KEYS: dict[str, list[Any]] = {
+    "task state of an unknown revision": [task_state("learner")],
+    "submission without its task state": [revision(), submission("learner", "s-1")],
+    "task state on a revision of another unit": [
+        module(OTHER),
+        revision(OTHER),
+        task_state("learner", revision_id=revision_id(OTHER)),
+    ],
+    "submission on a revision of another unit": [
+        module(OTHER),
+        revision(),
+        revision(OTHER),
+        task_state("learner"),
+        submission("learner", "s-1", revision_id=revision_id(OTHER)),
+    ],
+}
+
+
 async def constraints(engine: AsyncEngine) -> None:
     for name, rows in VIOLATIONS.items():
         assert await refused(engine, rows()), name
-    # Foreign keys, which SQLite does not enforce in the unit tests.
     assert await refused(engine, [revision()], with_module=False), "revision of an unknown module"
-    assert await refused(engine, [task_state("learner")]), "task state of an unknown revision"
-    assert await refused(engine, [revision(), submission("learner", "s-1")]), "submission without its task state"
+    for name, chain in FOREIGN_KEYS.items():
+        assert await refused(engine, chain), name
     async with engine.connect() as connection:
         transaction = await connection.begin()
         await insert(connection, module(), revision(), task_state("learner"), submission("learner", "s-1"))
@@ -107,14 +135,14 @@ async def races(engine: AsyncEngine) -> None:
         engine,
         [module(), revision(), task_state("learner")],
         submission("learner", "s-1", booked=False, input_hash="1" * 64),
-        submission("learner", "s-2", booked=False, input_hash="2" * 64),
+        submission("learner", "s-2", booked=False, input_hash="2" * 64, start_id=start_id(2)),
         "SELECT count(*) FROM skills_engine_submissions WHERE state = 'accepted'",
     )
     await race(
         engine,
         [module(), revision(), task_state("learner")],
-        submission("learner", "s-1", booked=False),
-        submission("learner", "s-2", booked=True),
+        submission("learner", "s-1", booked=False, input_hash="1" * 64),
+        submission("learner", "s-2", booked=True, input_hash="2" * 64),
         "SELECT count(*) FROM skills_engine_submissions",
     )
 
@@ -147,7 +175,10 @@ async def main() -> None:
     finally:
         await engine.dispose()
     await erasure()
-    print(f"engine tables on PostgreSQL {version}: {len(VIOLATIONS)} refusals, 4 foreign keys, 3 races, erasure")
+    print(
+        f"engine tables on PostgreSQL {version}: {len(VIOLATIONS)} refusals, {len(FOREIGN_KEYS) + 2} foreign keys, "
+        "3 races (active revision, open submission, plan per start), erasure"
+    )
 
 
 if __name__ == "__main__":

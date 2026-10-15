@@ -29,6 +29,7 @@ def upgrade() -> None:
         sa.UniqueConstraint("unit_id", "number", name="uq_engine_revision_number"),
         sa.UniqueConstraint("unit_id", "server_sha256", "package_hash", name="uq_engine_revision_content"),
         sa.UniqueConstraint("active_for", name="uq_engine_revision_active"),
+        sa.UniqueConstraint("id", "unit_id", name="uq_engine_revision_unit"),
         sa.CheckConstraint("active_for IS NULL OR active_for = unit_id", name="ck_engine_revision_active_for"),
         sa.CheckConstraint("number >= 1", name="ck_engine_revision_number"),
         sa.CheckConstraint(
@@ -43,13 +44,13 @@ def upgrade() -> None:
         sa.Column("user_id", sa.String(36), primary_key=True),
         sa.Column("unit_id", sa.String(80), primary_key=True),
         sa.Column("goal_id", sa.String(80), primary_key=True),
-        sa.Column("revision_id", sa.String(36), sa.ForeignKey("skills_engine_revisions.id"), nullable=False),
-        sa.Column("band", sa.String(64), nullable=False),
+        sa.Column("revision_id", sa.String(36), nullable=False),
+        sa.Column("band", sa.String(80), nullable=False),
         sa.Column("fails", sa.Integer(), nullable=False),
         sa.Column("passes", sa.Integer(), nullable=False),
         sa.Column("start_id", sa.String(36), nullable=True),
         sa.Column("start", sa.JSON(), nullable=True),
-        sa.Column("start_band", sa.String(64), nullable=True),
+        sa.Column("start_band", sa.String(80), nullable=True),
         sa.Column("start_request_id", sa.String(36), nullable=True),
         sa.Column("review_id", sa.String(36), nullable=True),
         sa.Column("passed_at", sa.DateTime(), nullable=True),
@@ -58,6 +59,11 @@ def upgrade() -> None:
         sa.Column("xp_amount", sa.Integer(), nullable=True),
         sa.Column("xp_skill_id", sa.String(256), nullable=True),
         sa.Column("updated_at", sa.DateTime(), nullable=False),
+        sa.ForeignKeyConstraint(
+            ["revision_id", "unit_id"],
+            ["skills_engine_revisions.id", "skills_engine_revisions.unit_id"],
+            name="fk_engine_task_revision",
+        ),
         sa.CheckConstraint("fails >= 0 AND passes >= 0", name="ck_engine_task_counters"),
         sa.CheckConstraint("xp_amount IS NULL OR xp_amount >= 0", name="ck_engine_task_xp_amount"),
         sa.CheckConstraint(
@@ -79,7 +85,7 @@ def upgrade() -> None:
         sa.Column("unit_id", sa.String(80), nullable=False),
         sa.Column("goal_id", sa.String(80), nullable=False),
         sa.Column("open_goal_id", sa.String(80), nullable=True),
-        sa.Column("revision_id", sa.String(36), sa.ForeignKey("skills_engine_revisions.id"), nullable=False),
+        sa.Column("revision_id", sa.String(36), nullable=False),
         sa.Column("start_id", sa.String(36), nullable=False),
         sa.Column("input_hash", sa.String(64), nullable=False),
         sa.Column("input", sa.JSON(), nullable=False),
@@ -90,6 +96,12 @@ def upgrade() -> None:
         sa.Column("counts", sa.Boolean(), nullable=True),
         sa.Column("accepted_at", sa.DateTime(), nullable=False),
         sa.Column("booked_at", sa.DateTime(), nullable=True),
+        sa.Column("evaluating_until", sa.DateTime(), nullable=True),
+        sa.ForeignKeyConstraint(
+            ["revision_id", "unit_id"],
+            ["skills_engine_revisions.id", "skills_engine_revisions.unit_id"],
+            name="fk_engine_submission_revision",
+        ),
         sa.ForeignKeyConstraint(
             ["user_id", "unit_id", "goal_id"],
             [
@@ -99,15 +111,14 @@ def upgrade() -> None:
             ],
             name="fk_engine_submission_task",
         ),
-        sa.UniqueConstraint(
-            "user_id", "unit_id", "goal_id", "start_id", "input_hash", name="uq_engine_submission_plan"
-        ),
+        sa.UniqueConstraint("user_id", "unit_id", "goal_id", "start_id", name="uq_engine_submission_start"),
         sa.UniqueConstraint("user_id", "unit_id", "open_goal_id", name="uq_engine_submission_open"),
         sa.CheckConstraint("state IN ('accepted', 'booked')", name="ck_engine_submission_state"),
         sa.CheckConstraint(
-            "(state = 'accepted' AND open_goal_id = goal_id AND verdict IS NULL AND booked_at IS NULL) "
+            "(state = 'accepted' AND open_goal_id IS NOT NULL AND open_goal_id = goal_id AND verdict IS NULL "
+            "AND booked_at IS NULL AND counts IS NULL AND feedback IS NULL) "
             "OR (state = 'booked' AND open_goal_id IS NULL AND verdict IS NOT NULL AND booked_at IS NOT NULL "
-            "AND counts IS NOT NULL)",
+            "AND counts IS NOT NULL AND (NOT counts OR verdict = 'passed'))",
             name="ck_engine_submission_booking",
         ),
         sa.CheckConstraint(

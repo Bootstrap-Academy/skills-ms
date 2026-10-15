@@ -22,6 +22,11 @@ START = {
 }
 
 
+def start_id(number: int) -> str:
+    """The id of another public start of the same task."""
+    return f"00000000-0000-4000-8000-{number:012d}"
+
+
 def revision_id(unit_id: str = UNIT, number: int = 1) -> str:
     return str(uuid5(NAMESPACE_URL, f"engine-revision:{unit_id}:{number}"))
 
@@ -97,7 +102,8 @@ def submission(
         "state": "booked" if booked else "accepted",
         "verdict": "not_passed" if booked else None,
         "feedback": {"summary": "Prüf auch andere Weglängen.", "public_reasons": []} if booked else None,
-        "counts": True if booked else None,
+        # Only a pass counts (§7); the booked row of these tests is a fail.
+        "counts": False if booked else None,
         "accepted_at": utcnow(),
         "booked_at": utcnow() if booked else None,
     }
@@ -132,8 +138,15 @@ VIOLATIONS: dict[str, Violation] = {
     "short package hash": lambda: [revision(package_hash="abc")],
     "negative fails": lambda: [revision(), task_state("learner", fails=-1)],
     "start without its band": lambda: [revision(), task_state("learner", start_band=None)],
+    "start without its content": lambda: [revision(), task_state("learner", start=None)],
     "xp applied without its operation": lambda: [revision(), task_state("learner", xp_applied=True)],
     "negative xp": lambda: [revision(), task_state("learner", xp_amount=-1)],
+    "second plan for the same start": lambda: [
+        revision(),
+        task_state("learner"),
+        submission("learner", "s-1", input_hash="1" * 64),
+        submission("learner", "s-2", input_hash="2" * 64),
+    ],
     "same plan for the same start twice": lambda: [
         revision(),
         task_state("learner"),
@@ -144,8 +157,24 @@ VIOLATIONS: dict[str, Violation] = {
         revision(),
         task_state("learner"),
         submission("learner", "s-1", booked=False, input_hash="1" * 64),
-        submission("learner", "s-2", booked=False, input_hash="2" * 64),
+        submission("learner", "s-2", booked=False, input_hash="2" * 64, start_id=start_id(2)),
     ],
+    "accepted without its open goal": lambda: [
+        revision(),
+        task_state("learner"),
+        submission("learner", "s-1", booked=False, open_goal_id=None),
+    ],
+    "accepted with a count": lambda: [
+        revision(),
+        task_state("learner"),
+        submission("learner", "s-1", booked=False, counts=False),
+    ],
+    "accepted with feedback": lambda: [
+        revision(),
+        task_state("learner"),
+        submission("learner", "s-1", booked=False, feedback={"summary": "early", "public_reasons": []}),
+    ],
+    "a fail that counts": lambda: [revision(), task_state("learner"), submission("learner", "s-1", counts=True)],
     "booked without verdict": lambda: [revision(), task_state("learner"), submission("learner", "s-1", verdict=None)],
     "booked but still open": lambda: [
         revision(),
