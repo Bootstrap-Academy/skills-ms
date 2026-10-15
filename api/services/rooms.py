@@ -146,7 +146,8 @@ def introduced_concepts(content: Catalogue, states: dict[str, RoomState]) -> set
             concepts.update(unit.teaches)
         elif row.status == "completed" and row.result == {"kind": "introduced"}:
             concepts.update(unit.teaches)
-        elif row.status == "completed" and row.result == {"kind": "solved"}:
+        # A passed unit of the engine was practised like a solved exercise.
+        elif row.status == "completed" and row.result in ({"kind": "solved"}, {"kind": "passed"}):
             concepts.update([*unit.teaches, *unit.practices])
     return concepts
 
@@ -763,9 +764,6 @@ def completed_progress(
 ) -> Progress:
     if current.status in ("completed", "skipped"):
         raise HTTPException(409, "This room has already been finished")
-    if isinstance(unit.completion, EngineCompletion) and data.action == "complete":
-        # Only the booked passes of the required tasks complete a unit of the engine; a client cannot.
-        raise HTTPException(409, "This lesson is completed by the server once every required task has passed")
     if data.action == "skip":
         if unit.completion is None or not unit.completion.allow_skip:
             raise HTTPException(403, "Only introductions can be skipped")
@@ -879,6 +877,12 @@ async def mutate_room(
         current.state = data.state
         if current.status == "new":
             current.status = "in_progress"
+    elif isinstance(unit.completion, EngineCompletion) and data.action == "complete":
+        # Only the booking of the last required pass completes a unit of the engine (§9); a client cannot. This
+        # confirms a completed unit and writes nothing.
+        if row is None or row.status != "completed":
+            raise HTTPException(409, "This lesson is completed by the server once every required task has passed")
+        return await room_envelope(user, course_id, unit=await public_unit(unit, user, course_id), progress=current)
     else:
         if current.review_id is not None and unit.exercise is not None:
             solved = (

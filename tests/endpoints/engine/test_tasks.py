@@ -1,6 +1,8 @@
 """Lesson engine, PR 3: start, submission and reading a submission (§9, Ä23, Ä28, Ä32a, Ä37), the save limit (K5)
 and a fixed curriculum while units of the engine are unavailable (Ä38 a)."""
 
+import asyncio
+import time
 from typing import Any
 from uuid import uuid4
 
@@ -183,7 +185,10 @@ async def test_a_new_revision_gives_a_new_start_unless_a_submission_is_pending(c
     third = (await publish(client, request(document(parts=(PART, "// 3\n")), package_hash="e" * 64))).json()[
         "revision_id"
     ]
-    assert refusal(await start(client, third, request_id="start-3")) == (409, "pending", True)
+    waiting = await start(client, third, request_id="start-3")
+    # Ä40: a 409 is final, and this one names the pending submission the host can follow up.
+    assert refusal(waiting) == (409, "pending", False)
+    assert waiting.json()["assessments"] == [accepted.json()]
 
 
 async def test_saves_of_a_unit_of_the_engine_are_limited_per_window(
@@ -215,6 +220,16 @@ async def test_saves_of_a_unit_of_the_engine_are_limited_per_window(
         )
     ).status_code == 200
     assert list(counts) == [f"engine-saves:{LEARNER_ID}:{UNIT}"]
+
+    async def hanging(key: str) -> int:
+        await asyncio.sleep(5)
+        return 0
+
+    # A Redis that accepts and does not answer: the save goes through after a fifth of a second (P3-1).
+    monkeypatch.setattr(engine_service, "count_save", hanging)
+    began = time.monotonic()
+    revision = await save(client, {"reach": PLAN}, revision)
+    assert time.monotonic() - began < 2
 
     async def broken(key: str) -> int:
         raise OSError("no redis")
@@ -264,3 +279,34 @@ def test_a_fixed_curriculum_leaves_out_an_unavailable_unit_of_the_engine(
     # On and published: the lesson is there.
     monkeypatch.setattr(engine_service, "available", lambda item: item.id == UNIT)
     assert [lesson.id for lesson in curriculum.definitions(fixed)[0].lessons] == [f"lesson-{UNIT}", "lesson-plain"]
+
+
+async def test_a_start_answer_names_pending_submissions_and_counted_passes_only(client: httpx.AsyncClient) -> None:
+    from api.database import db, db_context
+    from tests.engine_rows import start_id, submission, task_state
+
+    revision_id = await published(client)
+    counted = str(uuid4())
+    async with db_context():
+        await db.add(task_state(LEARNER_ID, revision_id=revision_id, start_id=None, start=None, start_band=None))
+        await db.session.flush()
+        await db.add(
+            submission(LEARNER_ID, str(uuid4()), revision_id=revision_id, start_id=start_id(1), input_hash="1" * 64)
+        )
+        await db.add(
+            submission(
+                LEARNER_ID,
+                counted,
+                revision_id=revision_id,
+                start_id=start_id(2),
+                input_hash="2" * 64,
+                verdict="passed",
+                counts=True,
+            )
+        )
+        await db.session.flush()
+    body = (await start(client, revision_id)).json()
+    # The fail is not named; the pass is, and the new start answers next to it (P3-4 of the review of #431).
+    assert [(view["assessmentId"], view["status"], view["outcome"]) for view in body["assessments"]] == [
+        (counted, "final", "passed")
+    ]

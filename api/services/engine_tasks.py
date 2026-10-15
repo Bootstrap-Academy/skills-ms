@@ -1,8 +1,8 @@
 """A learner's tasks in a unit of the lesson engine: start, submission and reading a submission (§9, Ä23, Ä37).
 
 Start and submission run under the user guard (`lock_user`, also the erasure lock) and the row lock of the task
-state, like the room routes. Evaluation in the sandbox and booking of the verdict follow in the next change; until
-then a submission stays pending.
+state, like the room routes. A new submission is committed and then evaluated in the sandbox; reading a pending
+submission evaluates it again once no evaluation holds it (`engine_verdicts`).
 """
 
 from hashlib import sha256
@@ -11,6 +11,7 @@ from typing import Any
 from uuid import uuid4
 
 from fastapi import HTTPException
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, filter_by
@@ -21,6 +22,7 @@ from api.schemas.rooms import CatalogueUnit
 from api.schemas.user import User
 from api.services import daily_limit, rooms
 from api.services.engine import is_engine_unit
+from api.services.engine_verdicts import due, room_completed, settle, view
 from api.services.purchases import lock_user
 from api.utils.canonical import CanonicalError, canonical
 from api.utils.utc import utcnow
@@ -65,31 +67,16 @@ def _task(revision: EngineRevision, goal_id: str) -> dict[str, Any]:
     return task
 
 
-def view(submission: EngineSubmission, completed: bool) -> dict[str, Any]:
-    """The protocol's AssessmentView of a submission; XP stand only in the answer that booked them (Ä28)."""
-    if submission.state == "accepted":
-        return {"assessmentId": submission.id, "goalId": submission.goal_id, "status": "pending"}
-    return {
-        "assessmentId": submission.id,
-        "goalId": submission.goal_id,
-        "status": "final",
-        "outcome": submission.verdict,
-        "counts": submission.counts,
-        "feedback": submission.feedback,
-        **({"completed": True} if completed and submission.counts else {}),
-    }
-
-
-async def _completed(user_id: str, unit_id: str) -> bool:
-    room = await db.get(RoomState, user_id=user_id, unit_id=unit_id)
-    return room is not None and room.status == "completed"
-
-
 async def unit_assessments(user_id: str, unit_id: str) -> list[dict[str, Any]]:
     """Ä23: the pending submissions of the whole unit and the counted pass of each task, so a reopened unit knows
     every task; a pass says whether the unit is completed."""
-    rows = await db.all(filter_by(EngineSubmission, user_id=user_id, unit_id=unit_id))
-    completed = await _completed(user_id, unit_id)
+    # P3-4 of the review of #431: only pending submissions and counted passes, not every plan and job.
+    rows = await db.all(
+        filter_by(EngineSubmission, user_id=user_id, unit_id=unit_id).where(
+            or_(EngineSubmission.state == "accepted", EngineSubmission.counts.is_(True))
+        )
+    )
+    completed = await room_completed(user_id, unit_id)
     pending = [view(row, completed) for row in sorted(rows, key=lambda row: row.accepted_at) if row.state == "accepted"]
     passes: dict[str, EngineSubmission] = {}
     for row in sorted(rows, key=lambda row: row.booked_at or row.accepted_at):
@@ -131,7 +118,13 @@ async def start(unit_id: str, goal_id: str, data: StartRequest, user: User) -> d
     replay = state is not None and state.start is not None and state.start_request_id == data.requestId
     if pending is not None and not replay and state is not None and state.revision_id != revision.id:
         # A pending submission keeps its start; the frame waits for the verdict first.
-        raise EngineRefusal(409, "pending", "A submission of this task is still being checked", retryable=True)
+        # Ä40 H2: the answer names the pending submissions, so the host can follow them up instead of retrying.
+        raise EngineRefusal(
+            409,
+            "pending",
+            "A submission of this task is still being checked",
+            extra={"assessments": await unit_assessments(user.id, unit.id)},
+        )
 
     if state is None:
         state = EngineTaskState(
@@ -189,7 +182,7 @@ async def submit(unit_id: str, goal_id: str, data: SubmitRequest, user: User) ->
         )
     )
     if same is not None:
-        return view(same, await _completed(user.id, unit.id)), 202 if same.state == "accepted" else 200
+        return view(same, await room_completed(user.id, unit.id)), 202 if same.state == "accepted" else 200
     if state.start_id != data.answer.startId:
         raise EngineRefusal(409, "start_required", "This start is used up; start the task again")
     taken = await db.first(
@@ -235,8 +228,11 @@ async def submit(unit_id: str, goal_id: str, data: SubmitRequest, user: User) ->
     except IntegrityError:
         # Another submission of this task got in first; the next read finds it.
         await db.session.rollback()
-        raise EngineRefusal(409, "conflict", "Another submission of this task came first", retryable=True) from None
-    return view(row, False), 202
+        # Ä40 H1: a 409 is final for the host; reading the submission again finds the one that came first.
+        raise EngineRefusal(409, "conflict", "Another submission of this task came first") from None
+    # Committed before the sandbox is called; the verdict comes at once when the sandbox answers in time.
+    answer = await settle(row, user.id)
+    return answer, 202 if answer["status"] == "pending" else 200
 
 
 def _same(saved: Any, plan: dict[str, Any]) -> bool:
@@ -250,4 +246,7 @@ async def status(assessment_id: str, user: User) -> dict[str, Any]:
     row = await db.first(filter_by(EngineSubmission, id=assessment_id, user_id=user.id))
     if row is None:
         raise EngineRefusal(404, "not_found", "There is no such submission")
-    return view(row, await _completed(user.id, row.unit_id))
+    if due(row):
+        # Pending without a running evaluation: the sandbox gave no verdict before, or the lease has passed.
+        return await settle(row, user.id)
+    return view(row, await room_completed(user.id, row.unit_id))

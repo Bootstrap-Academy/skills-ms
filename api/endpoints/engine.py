@@ -47,7 +47,8 @@ async def start_task(
 async def submit_plan(
     data: SubmitRequest, response: Response, unit_id: str = UnitId, goal_id: str = GoalId, user: User = user_auth
 ) -> dict[str, Any]:
-    """Submit the saved plan for the open start; 202 while it is checked. The same plan again is the same submission."""
+    """Submit the saved plan for the open start: 200 with the verdict, 202 while it waits for one. The same plan
+    again is the same submission."""
     view, response.status_code = await engine_tasks.submit(unit_id, goal_id, data, user)
     return view
 
@@ -56,5 +57,6 @@ async def submit_plan(
 async def read_submission(
     assessment_id: str = Path(pattern=r"^[0-9a-f-]{36}$"), user: User = user_auth
 ) -> dict[str, Any]:
-    """The state of an own submission; another learner's is not found."""
+    """The state of an own submission, with `xp` only in the answer that booked them. A pending submission is
+    evaluated again once no evaluation holds it. Another learner's is not found."""
     return await engine_tasks.status(assessment_id, user)
