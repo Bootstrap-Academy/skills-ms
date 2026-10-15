@@ -1,8 +1,8 @@
 """A learner's tasks in a unit of the lesson engine: start, submission and reading a submission (§9, Ä23, Ä37).
 
 Start and submission run under the user guard (`lock_user`, also the erasure lock) and the row lock of the task
-state, like the room routes. Evaluation in the sandbox and booking of the verdict follow in the next change; until
-then a submission stays pending.
+state, like the room routes. A new submission is committed and then evaluated in the sandbox; reading a pending
+submission evaluates it again once no evaluation holds it (`engine_verdicts`).
 """
 
 from hashlib import sha256
@@ -22,7 +22,7 @@ from api.schemas.rooms import CatalogueUnit
 from api.schemas.user import User
 from api.services import daily_limit, rooms
 from api.services.engine import is_engine_unit
-from api.services.engine_verdicts import room_completed, view
+from api.services.engine_verdicts import due, room_completed, settle, view
 from api.services.purchases import lock_user
 from api.utils.canonical import CanonicalError, canonical
 from api.utils.utc import utcnow
@@ -230,7 +230,9 @@ async def submit(unit_id: str, goal_id: str, data: SubmitRequest, user: User) ->
         await db.session.rollback()
         # Ä40 H1: a 409 is final for the host; reading the submission again finds the one that came first.
         raise EngineRefusal(409, "conflict", "Another submission of this task came first") from None
-    return view(row, False), 202
+    # Committed before the sandbox is called; the verdict comes at once when the sandbox answers in time.
+    answer = await settle(row, user.id)
+    return answer, 202 if answer["status"] == "pending" else 200
 
 
 def _same(saved: Any, plan: dict[str, Any]) -> bool:
@@ -244,4 +246,7 @@ async def status(assessment_id: str, user: User) -> dict[str, Any]:
     row = await db.first(filter_by(EngineSubmission, id=assessment_id, user_id=user.id))
     if row is None:
         raise EngineRefusal(404, "not_found", "There is no such submission")
+    if due(row):
+        # Pending without a running evaluation: the sandbox gave no verdict before, or the lease has passed.
+        return await settle(row, user.id)
     return view(row, await room_completed(user.id, row.unit_id))

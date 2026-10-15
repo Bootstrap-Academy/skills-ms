@@ -7,25 +7,40 @@ the verdict for the band (§11), uses up the start, records the first pass with 
 has passed, completes the room in the same transaction. It does not raise the room's revision: only saves of the
 plan do (§9), and a later save keeps the fields because it reads them from the row under the same guard. Any
 failure rolls the whole booking back and leaves the submission accepted.
+
+Evaluation follows the commit of the acceptance (Ä33). `evaluating_until` is the lease of one evaluation: while it
+runs, no second one starts; once it has passed, the next read of the submission evaluates again. No transaction and
+no lock stays open while the sandbox runs. Evaluation is deterministic, so an evaluation that outlived its lease and
+finishes anyway books nothing twice.
 """
 
+from datetime import timedelta
 from typing import Any, cast
 from uuid import UUID, uuid5
 
-from sqlalchemy import update
+from fastapi import HTTPException
+from sqlalchemy import or_, update
 from sqlalchemy.engine import CursorResult
+from sqlalchemy.exc import SQLAlchemyError
 
 from api.database import db, filter_by, select
+from api.logger import get_logger
 from api.models import EngineRevision, EngineSubmission, EngineTaskState, RoomState
+from api.services import sandbox
 from api.services.benefits import XPAward, apply_xp
 from api.services.purchases import lock_user
 from api.services.sandbox import SandboxUnavailableError
+from api.settings import settings
 from api.utils.canonical import canonical
 from api.utils.utc import utcnow
+
+logger = get_logger(__name__)
 
 # §9: the XP of a task have one identity per learner, unit and task, whatever revision or submission earns them.
 XP_NAMESPACE = UUID("4666e0ec-8a60-5ca8-8914-7d61fd6dc388")
 SUMMARY = {"passed": "Dein Plan besteht alle Fälle.", "not_passed": "Dein Plan besteht noch nicht alle Fälle."}
+# Covers the wait for the gate of the sandbox client and its timeout (15 s each).
+LEASE_SECONDS = 30
 
 
 class ErasedError(Exception):
@@ -187,4 +202,54 @@ async def book(submission_id: str, user_id: str, result: dict[str, Any]) -> dict
     answer = view(row, completed)
     if first:
         answer["xp"] = {"awardId": operation, "xp": terms["xp"], "persisted": True}
+    return answer
+
+
+async def _claim(submission_id: str) -> bool:
+    """Takes the lease of an accepted submission that no running evaluation holds; whether it was taken."""
+    now = utcnow()
+    claimed = await db.exec(
+        update(EngineSubmission)
+        .where(
+            EngineSubmission.id == submission_id,
+            EngineSubmission.state == "accepted",
+            or_(EngineSubmission.evaluating_until.is_(None), EngineSubmission.evaluating_until <= now),
+        )
+        .values(evaluating_until=now + timedelta(seconds=LEASE_SECONDS))
+        .execution_options(synchronize_session=False)
+    )
+    return cast(CursorResult, claimed).rowcount == 1
+
+
+def due(row: EngineSubmission) -> bool:
+    """Whether a read evaluates the submission: accepted, and no evaluation holds it."""
+    return row.state == "accepted" and (row.evaluating_until is None or row.evaluating_until <= utcnow())
+
+
+async def settle(row: EngineSubmission, user_id: str) -> dict[str, Any]:
+    """Evaluates an accepted submission in the sandbox unless another evaluation holds it, and books the verdict.
+
+    Commits what the caller has written first, so the acceptance is durable before the sandbox is called. Answers
+    the view: final once booked, pending while another evaluation runs or as long as there is no verdict."""
+    pending = view(row, False)
+    claimed = settings.sandkasten_url is not None and await _claim(row.id)
+    if claimed:
+        revision = cast(EngineRevision, await db.get(EngineRevision, id=row.revision_id))
+        document, job = revision.server_document, sandbox.job_of(row.job, row.goal_id, row.input)
+    await db.commit()
+    if not claimed:
+        return pending
+    try:
+        answer = await book(row.id, user_id, await sandbox.evaluate(document, job))
+    except ErasedError:
+        await db.session.rollback()
+        raise HTTPException(401, "This account is no longer available") from None
+    except (SandboxUnavailableError, HTTPException, SQLAlchemyError) as error:
+        # No verdict this time (§13): the submission stays accepted, and a read after the lease tries again.
+        await db.session.rollback()
+        # A database error may carry plans and ids in its text; only its kind is logged.
+        reason = type(error).__name__ if isinstance(error, SQLAlchemyError) else str(error)
+        logger.warning("engine evaluation without verdict: %s", reason)
+        return pending
+    await db.commit()
     return answer
