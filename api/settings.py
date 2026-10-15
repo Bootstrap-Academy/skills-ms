@@ -1,6 +1,7 @@
 import secrets
 from pathlib import Path
 from typing import Any, Literal
+from urllib.parse import urlsplit
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -41,9 +42,7 @@ class Settings(BaseSettings):
     # unavailable like retired ones and its routes answer 404. Packages are served from this origin, which the
     # frontend knows as well; it holds no session (the frontend refuses bootstrap.academy and its subdomains).
     engine_enabled: bool = False
-    engine_content_origin: str | None = Field(
-        default=None, pattern=r"^(https://[a-z0-9.-]+|http://localhost|http://127\.0\.0\.1)(:[0-9]{1,5})?$"
-    )
+    engine_content_origin: str | None = None
     # Disabled until the backend policy API is deployed. Never activates new terms.
     daily_limit_policy_enabled: bool = False
     learning_rooms_content: Path | None = None
@@ -116,6 +115,36 @@ class Settings(BaseSettings):
             "challenges": self.internal_jwt_secret_challenges,
         }
         return secrets_by_audience.get(audience, "") or self.jwt_secret
+
+    @field_validator("engine_content_origin")
+    @classmethod
+    def session_free_origin(cls, value: str | None) -> str | None:
+        """The rule of the frontend (`lesson-protocol/browser.ts`, `packageLocation`): a bare origin over https,
+        outside bootstrap.academy, without a default port that the browser would drop; http only for 127.0.0.2."""
+        if value is None:
+            return None
+        parsed = urlsplit(value)
+        local = parsed.scheme == "http" and parsed.hostname == "127.0.0.2"
+        host = parsed.hostname or ""
+        default_port = {"https": 443, "http": 80}.get(parsed.scheme)
+        try:
+            port = parsed.port
+        except ValueError:
+            port = -1
+        if (
+            value != f"{parsed.scheme}://{parsed.netloc}"
+            or (parsed.scheme != "https" and not local)
+            or parsed.username is not None
+            or parsed.password is not None
+            or not host
+            or parsed.netloc != parsed.netloc.lower()
+            or port == -1
+            or port == default_port
+            or host == "bootstrap.academy"
+            or host.endswith(".bootstrap.academy")
+        ):
+            raise ValueError("engine_content_origin must be a session-free origin as the frontend accepts it")
+        return value
 
     @field_validator("llm_grant_secret_file", "llm_verdict_secret_file", mode="before")
     @classmethod
