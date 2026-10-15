@@ -6,6 +6,9 @@ from api.utils.cache import clear_cache
 
 # Live service data removed on account erasure. Purchase evidence is retained separately.
 USER_MODELS: list[Any] = [
+    # Submissions reference their task state, so they go first.
+    models.EngineSubmission,
+    models.EngineTaskState,
     models.LessonStartRequest,
     models.LessonStart,
     models.CourseProjectRequest,

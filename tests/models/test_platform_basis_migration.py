@@ -29,7 +29,8 @@ def upgrade(connection: Connection, scripts: ScriptDirectory, target: str) -> No
 @pytest.mark.parametrize("predecessor", ["lessonmodules001", "dailypolicy001", "milestones001", "both"])
 def test_forward_merge_preserves_predecessor_data(predecessor: str) -> None:
     scripts = ScriptDirectory(str(ROOT / "alembic"))
-    assert scripts.get_heads() == [HEAD]
+    # Later migrations build on the merge; the current head is checked with the newest migration.
+    assert len(scripts.get_heads()) == 1
     merged = scripts.get_revision(HEAD)
     assert merged is not None and merged.down_revision == ("dailypolicy001", "milestones001")
     engine = create_engine("sqlite://", future=True)
@@ -76,7 +77,9 @@ def test_forward_merge_preserves_predecessor_data(predecessor: str) -> None:
                 if table != "skills_alembic_version"
             }
             upgrade(connection, scripts, "head")
-            assert connection.execute(text("SELECT version_num FROM skills_alembic_version")).all() == [(HEAD,)]
+            assert connection.execute(text("SELECT version_num FROM skills_alembic_version")).all() == [
+                (scripts.get_current_head(),)
+            ]
             for table, rows in before.items():
                 assert connection.execute(text(f'SELECT * FROM "{table}"')).all() == rows  # noqa: S608
             assert {
@@ -90,6 +93,9 @@ def test_forward_merge_preserves_predecessor_data(predecessor: str) -> None:
             }.issubset(inspect(connection).get_table_names())
             # Repeating the normal startup migration is harmless.
             upgrade(connection, scripts, "head")
-            assert connection.execute(text("SELECT version_num FROM skills_alembic_version")).scalar_one() == HEAD
+            assert (
+                connection.execute(text("SELECT version_num FROM skills_alembic_version")).scalar_one()
+                == scripts.get_current_head()
+            )
     finally:
         engine.dispose()

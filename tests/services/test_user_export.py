@@ -5,6 +5,7 @@ from api import models
 from api.database import Base, db, db_context
 from api.schemas.user_export import XP, CourseAccess, LastWatch, LectureProgress, SubSkillBookmark, UserDataExport
 from api.services.user_export import export_user_data
+from tests.engine_rows import add_engine_rows, revision_id
 
 TIMESTAMP = datetime(2026, 9, 3, 12, 34, 56, tzinfo=timezone.utc)
 
@@ -16,6 +17,8 @@ EXPORTED_MODELS: dict[str, Any] = {
     "room_requests": models.RoomRequest,
     "llm_verdicts": models.LlmVerdict,
     "lesson_milestones": models.LessonMilestoneDelivery,
+    "engine_task_states": models.EngineTaskState,
+    "engine_submissions": models.EngineSubmission,
     "course_projects": models.CourseProject,
     "course_project_requests": models.CourseProjectRequest,
     "purchases": models.CoursePurchase,
@@ -71,6 +74,34 @@ async def test__export_user_data() -> None:
         sub_skill_bookmarks=[SubSkillBookmark(root_skill_id="root-user", sub_skill_id="sub-user")],
         xp=[XP(skill_id="sub-user", xp=42, last_update=TIMESTAMP)],
     )
+
+
+async def test__export_engine_rows_are_owner_bound_and_omit_the_frozen_job() -> None:
+    async with db_context():
+        await add_engine_rows("user")
+        await add_engine_rows("other_user")
+
+    async with db_context():
+        export = await export_user_data("user")
+
+    [state] = export.engine_task_states
+    assert (state["user_id"], state["goal_id"], state["band"], state["fails"], state["passes"]) == (
+        "user",
+        "reach",
+        "plus",
+        0,
+        0,
+    )
+    assert state["start"]["revisionId"] == revision_id()
+    [submission] = export.engine_submissions
+    assert (submission["user_id"], submission["verdict"], submission["input"]) == (
+        "user",
+        "not_passed",
+        {"kind": "program", "source": "move();"},
+    )
+    assert "job" not in submission
+    # Points in time leave as ISO 8601 text, like every other row of the export.
+    assert isinstance(export.model_dump(mode="json")["engine_submissions"][0]["accepted_at"], str)
 
 
 async def test__export_user_data__unknown_user() -> None:

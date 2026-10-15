@@ -6,6 +6,7 @@ from api import models
 from api.database import Base, db, db_context, filter_by
 from api.services.user_deletion import RETAINED_USER_MODELS, USER_CACHE_PREFIXES, USER_MODELS, delete_user_data
 from api.utils.utc import utcnow
+from tests.engine_rows import add_engine_rows
 
 
 async def _add_user_data(user_id: str) -> None:
@@ -97,6 +98,7 @@ async def _add_user_data(user_id: str) -> None:
     await db.add(models.LectureProgress(user_id=user_id, course_id="course", lecture_id="lecture", completed=utcnow()))
     await db.add(models.SubSkillBookmark(user_id=user_id, root_skill_id="root", sub_skill_id="sub"))
     await db.add(models.XP(id=f"xp-{user_id}", user_id=user_id, skill_id="sub", xp=42, last_update=utcnow()))
+    await add_engine_rows(user_id)
 
 
 def test__user_models() -> None:
