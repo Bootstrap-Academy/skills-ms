@@ -37,6 +37,13 @@ class Settings(BaseSettings):
     # Operator-owned service origin; room content and client requests supply only IDs.
     challenges_url: str = Field(default="http://127.0.0.1:8005", pattern=r"^https?://[^?#@]+$")
     rooms_enabled: bool = False
+    # Lesson engine, stage 1. Off until the end-to-end check passes (Ä29): while off, units of the engine are
+    # unavailable like retired ones and its routes answer 404. Packages are served from this origin, which the
+    # frontend knows as well; it holds no session (the frontend refuses bootstrap.academy and its subdomains).
+    engine_enabled: bool = False
+    engine_content_origin: str | None = Field(
+        default=None, pattern=r"^(https://[a-z0-9.-]+|http://localhost|http://127\.0\.0\.1)(:[0-9]{1,5})?$"
+    )
     # Disabled until the backend policy API is deployed. Never activates new terms.
     daily_limit_policy_enabled: bool = False
     learning_rooms_content: Path | None = None

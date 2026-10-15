@@ -4,6 +4,10 @@ from api import models
 from api.database import db, filter_by, select
 from api.schemas.user_export import XP, CourseAccess, LastWatch, LectureProgress, SubSkillBookmark, UserDataExport
 
+# What the export shows of the frozen job of a submission: its revision, its public start and its band. Later
+# starts and band changes replace them in the task state, so only the job still knows them for older submissions.
+EXPORTED_JOB_KEYS = ("revisionId", "publicStart", "band")
+
 
 async def export_user_data(user_id: str) -> UserDataExport:
     """
@@ -43,7 +47,11 @@ async def export_user_data(user_id: str) -> UserDataExport:
             for row in await db.all(filter_by(models.EngineTaskState, user_id=user_id))
         ],
         engine_submissions=[
-            {column.name: getattr(row, column.name) for column in row.__table__.columns if column.name != "job"}
+            {
+                **{column.name: getattr(row, column.name) for column in row.__table__.columns if column.name != "job"},
+                # A fixed list: the public start and band of this submission, never private starts or the package.
+                "job": {key: row.job[key] for key in EXPORTED_JOB_KEYS if key in row.job},
+            }
             for row in await db.all(filter_by(models.EngineSubmission, user_id=user_id))
         ],
         course_projects=[

@@ -50,8 +50,8 @@ class UserDataExport(BaseModel):
     engine_task_states: list[dict[str, Any]] = Field(default_factory=list)
     engine_submissions: list[dict[str, Any]] = Field(
         default_factory=list,
-        description="Submitted plans with their verdicts; without the frozen evaluation job, which only repeats "
-        "the revision, the public start and the band of the task state",
+        description="Submitted plans with their verdicts; `job` shows the revision, public start and band each "
+        "submission was evaluated with, nothing else of the frozen evaluation input",
     )
     course_projects: list[dict[str, Any]] = Field(default_factory=list)
     course_project_requests: list[dict[str, Any]] = Field(default_factory=list)

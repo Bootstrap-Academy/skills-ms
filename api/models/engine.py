@@ -105,7 +105,8 @@ class EngineTaskState(Base):
     # None is SQL NULL here, so that ck_engine_task_start sees a missing start.
     start: Mapped[dict[str, Any] | None] = Column(JSON(none_as_null=True), nullable=True)
     start_band: Mapped[str | None] = Column(String(80), nullable=True)
-    start_request_id: Mapped[str | None] = Column(String(36), nullable=True)
+    # A request id of the lesson protocol: up to 100 characters (engine002).
+    start_request_id: Mapped[str | None] = Column(String(100), nullable=True)
     review_id: Mapped[str | None] = Column(String(36), nullable=True)
     passed_at: Mapped[datetime | None] = Column(UTCDateTime, nullable=True)
     xp_applied: Mapped[bool] = Column(Boolean, nullable=False, default=False)

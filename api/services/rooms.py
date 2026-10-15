@@ -35,7 +35,9 @@ from api.schemas.rooms import (
     Complete,
     CourseLearning,
     CourseLearningUnit,
+    EngineCompletion,
     Exercise,
+    IntroductionCompletion,
     LearningPath,
     LlmGrant,
     LlmVerdictCompletion,
@@ -48,7 +50,7 @@ from api.schemas.rooms import (
     Unit,
 )
 from api.schemas.user import User
-from api.services import daily_limit, lesson_milestones, llm
+from api.services import daily_limit, engine, lesson_milestones, llm
 from api.services.courses import COURSES, get_owned_courses
 from api.services.lesson_modules import resolve_module
 from api.services.purchases import lock_user, read_user_guard
@@ -92,6 +94,11 @@ def catalogue(*, deep: bool = True) -> Catalogue:
             by_id[unit_id].exercise = Exercise.model_validate(reference)
     except (ValueError, ValidationError):
         raise HTTPException(503, "Learning-room exercises are temporarily unavailable") from None
+    if not settings.engine_enabled:
+        # Until the lesson engine is switched on, its units are unavailable everywhere, like retired ones (Ä29).
+        for unit in content.units:
+            if isinstance(unit.completion, EngineCompletion):
+                unit.retired = True
     return content
 
 
@@ -155,6 +162,9 @@ def find_unit(
 
 async def public_unit(unit: CatalogueUnit, user: User | None = None, course_id: str | None = None) -> Unit:
     public = unit.public()
+    if isinstance(unit.completion, EngineCompletion):
+        public.module = await engine.descriptor(unit)
+        return public
     if unit.room == "custom":
         if unit.module_id is None:
             raise HTTPException(503, "Diese Lektion kann gerade nicht geladen werden.")
@@ -751,6 +761,9 @@ def completed_progress(
 ) -> Progress:
     if current.status in ("completed", "skipped"):
         raise HTTPException(409, "This room has already been finished")
+    if isinstance(unit.completion, EngineCompletion) and data.action == "complete":
+        # Only the booked passes of the required tasks complete a unit of the engine; a client cannot.
+        raise HTTPException(409, "This lesson is completed by the server once every required task has passed")
     if data.action == "skip":
         if unit.completion is None or not unit.completion.allow_skip:
             raise HTTPException(403, "Only introductions can be skipped")
@@ -770,7 +783,7 @@ def completed_progress(
             raise VerdictFailedError
         return current.model_copy(update={"status": "completed", "result": Result(kind="introduced")})
     # Canonical JSON distinguishes true from 1; the client cannot assert mastery.
-    if unit.completion is None or json.dumps(data.answer, sort_keys=True) != json.dumps(
+    if not isinstance(unit.completion, IntroductionCompletion) or json.dumps(data.answer, sort_keys=True) != json.dumps(
         unit.completion.answer, sort_keys=True
     ):
         raise HTTPException(422, "Check your answer and try again")
@@ -852,6 +865,9 @@ async def mutate_room(
     solved = await challenge_status(unit, user, token)
     verdict: llm.VerdictClaims | None = None
     if isinstance(data, StartReview):
+        if isinstance(unit.completion, EngineCompletion):
+            # K2: the runtime of the engine has no practice round yet; each round will need new public starts.
+            raise HTTPException(409, "A lesson of the engine has no practice round yet")
         if row is None or row.status not in ("completed", "skipped") or row.review_status == "in_progress":
             raise HTTPException(409, "This room is already in progress")
         current = Progress(revision=current.revision, status="in_progress", review_id=data.request_id)

@@ -44,3 +44,22 @@ class LessonModuleDescriptor(BaseModel):
         ):
             raise ValueError("A canonical absolute browser-module URL is required")
         return value
+
+
+class EnginePackageDescriptor(BaseModel):
+    """A package of the lesson engine (protocol 2.1), as the frontend's `PackageDescriptor` reads it.
+
+    The bytes lie under `{content origin}/packages/{package_hash}/`; the frontend checks both hashes and the
+    location before it loads anything. `revision_id` names the server side that evaluates this package.
+    """
+
+    id: str = Field(pattern=MODULE_ID_PATTERN)
+    api_version: Literal[2]
+    entry_url: str = Field(max_length=2048)
+    manifest_url: str = Field(max_length=2048)
+    manifest_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    package_hash: str = Field(pattern=r"^[0-9a-f]{64}$")
+    revision_id: str = Field(pattern=r"^[0-9a-f-]{36}$")
+
+
+ModuleDescriptor = LessonModuleDescriptor | EnginePackageDescriptor

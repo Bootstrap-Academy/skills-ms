@@ -99,7 +99,13 @@ async def test__export_engine_rows_are_owner_bound_and_omit_the_frozen_job() -> 
         "not_passed",
         {"kind": "program", "source": "move();"},
     )
-    assert "job" not in submission
+    # The frozen job leaves only with its revision, public start and band; its server hash stays here.
+    assert submission["job"] == {
+        "revisionId": revision_id(),
+        "publicStart": submission["job"]["publicStart"],
+        "band": "plus",
+    }
+    assert submission["job"]["publicStart"]["caseId"] == "open-0"
     # Points in time leave as ISO 8601 text, like every other row of the export.
     assert isinstance(export.model_dump(mode="json")["engine_submissions"][0]["accepted_at"], str)
 
