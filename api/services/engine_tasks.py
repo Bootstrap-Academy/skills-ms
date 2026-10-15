@@ -11,6 +11,7 @@ from typing import Any
 from uuid import uuid4
 
 from fastapi import HTTPException
+from sqlalchemy import or_
 from sqlalchemy.exc import IntegrityError
 
 from api.database import db, filter_by
@@ -88,7 +89,12 @@ async def _completed(user_id: str, unit_id: str) -> bool:
 async def unit_assessments(user_id: str, unit_id: str) -> list[dict[str, Any]]:
     """Ä23: the pending submissions of the whole unit and the counted pass of each task, so a reopened unit knows
     every task; a pass says whether the unit is completed."""
-    rows = await db.all(filter_by(EngineSubmission, user_id=user_id, unit_id=unit_id))
+    # P3-4 of the review of #431: only pending submissions and counted passes, not every plan and job.
+    rows = await db.all(
+        filter_by(EngineSubmission, user_id=user_id, unit_id=unit_id).where(
+            or_(EngineSubmission.state == "accepted", EngineSubmission.counts.is_(True))
+        )
+    )
     completed = await _completed(user_id, unit_id)
     pending = [view(row, completed) for row in sorted(rows, key=lambda row: row.accepted_at) if row.state == "accepted"]
     passes: dict[str, EngineSubmission] = {}
@@ -131,7 +137,13 @@ async def start(unit_id: str, goal_id: str, data: StartRequest, user: User) -> d
     replay = state is not None and state.start is not None and state.start_request_id == data.requestId
     if pending is not None and not replay and state is not None and state.revision_id != revision.id:
         # A pending submission keeps its start; the frame waits for the verdict first.
-        raise EngineRefusal(409, "pending", "A submission of this task is still being checked", retryable=True)
+        # Ä40 H2: the answer names the pending submissions, so the host can follow them up instead of retrying.
+        raise EngineRefusal(
+            409,
+            "pending",
+            "A submission of this task is still being checked",
+            extra={"assessments": await unit_assessments(user.id, unit.id)},
+        )
 
     if state is None:
         state = EngineTaskState(
@@ -235,7 +247,8 @@ async def submit(unit_id: str, goal_id: str, data: SubmitRequest, user: User) ->
     except IntegrityError:
         # Another submission of this task got in first; the next read finds it.
         await db.session.rollback()
-        raise EngineRefusal(409, "conflict", "Another submission of this task came first", retryable=True) from None
+        # Ä40 H1: a 409 is final for the host; reading the submission again finds the one that came first.
+        raise EngineRefusal(409, "conflict", "Another submission of this task came first") from None
     return view(row, False), 202
 
 

@@ -7,6 +7,7 @@ descriptor (API 2) is derived from the active revision and its hashes, never fro
 no migration; the row is the anchor of the foreign key and of the lock.
 """
 
+import asyncio
 from contextvars import ContextVar
 from hashlib import sha256
 from typing import Any
@@ -49,8 +50,9 @@ async def load_active_units() -> None:
     if not settings.engine_enabled or settings.engine_content_origin is None:
         _ACTIVE_UNITS.set(frozenset())
         return
-    rows = await db.all(filter_by(EngineRevision).where(EngineRevision.active_for.is_not(None)))
-    _ACTIVE_UNITS.set(frozenset(row.unit_id for row in rows))
+    # Only the unit ids: a revision carries its server document of up to a megabyte (Ä41 a).
+    units = await db.all(select(EngineRevision.unit_id).where(EngineRevision.active_for.is_not(None)))
+    _ACTIVE_UNITS.set(frozenset(units))
 
 
 def available(unit: CatalogueUnit) -> bool:
@@ -73,10 +75,14 @@ async def count_save(key: str) -> int:
     return int(count)
 
 
+# A Redis that accepts and does not answer must not hold the save and the user guard (P3-1 of the review of #431).
+SAVE_COUNT_TIMEOUT_SECONDS = 0.2
+
+
 async def allow_save(user_id: str, unit_id: str) -> bool:
     try:
-        count = await count_save(f"engine-saves:{user_id}:{unit_id}")
-    except (RedisError, OSError):
+        count = await asyncio.wait_for(count_save(f"engine-saves:{user_id}:{unit_id}"), SAVE_COUNT_TIMEOUT_SECONDS)
+    except (RedisError, OSError, asyncio.TimeoutError):
         # A soft limit: without Redis the save goes through, as before this limit existed.
         logger.warning("engine save limit unavailable")
         return True
