@@ -24,7 +24,7 @@ from api.schemas.curriculum import (
     LessonSummary,
     RoomSource,
 )
-from api.schemas.rooms import Catalogue, CatalogueUnit, LocalizedText
+from api.schemas.rooms import Catalogue, CatalogueUnit, EngineCompletion, LocalizedText
 from api.schemas.user import User
 from api.services import daily_limit, rooms
 from api.services.purchases import read_user_guard
@@ -47,6 +47,33 @@ def adapter_id(original: str, occupied: set[str], kind: str) -> str:
     return candidate
 
 
+def without_unavailable_engine_units(
+    curriculum: CurriculumDefinition, content: Catalogue | None
+) -> CurriculumDefinition:
+    """A fixed curriculum leaves out the activities of units of the engine that are unavailable (switched off or
+    without an active revision), and a lesson that keeps no activity with them (Ä38 a). Other missing units still
+    make the course unavailable."""
+    hidden = (
+        set()
+        if content is None
+        else {unit.id for unit in content.units if unit.retired and isinstance(unit.completion, EngineCompletion)}
+    )
+    if not hidden:
+        return curriculum
+    lessons = []
+    for lesson in curriculum.lessons:
+        kept = [
+            ref
+            for ref in lesson.activities
+            if not (isinstance(ref.source, RoomSource) and ref.source.unit_id in hidden)
+        ]
+        if kept:
+            lessons.append(
+                lesson if len(kept) == len(lesson.activities) else lesson.model_copy(update={"activities": kept})
+            )
+    return curriculum.model_copy(update={"lessons": lessons})
+
+
 def definitions(course: Course, content: Catalogue | None = None) -> tuple[CurriculumDefinition, Catalogue | None]:
     if course.learning_path_id is None:
         content = None
@@ -54,7 +81,7 @@ def definitions(course: Course, content: Catalogue | None = None) -> tuple[Curri
         content = rooms.catalogue()
     units = {} if content is None else {unit.id: unit for unit in content.units if not unit.retired}
     if course.curriculum is not None:
-        curriculum = course.curriculum
+        curriculum = without_unavailable_engine_units(course.curriculum, content)
     else:
         chapters: list[CurriculumChapter] = []
         lessons: list[LessonDefinition] = []

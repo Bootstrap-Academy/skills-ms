@@ -131,3 +131,75 @@ class RevisionPublished(BaseModel):
     number: int
     active: bool
     created: bool
+
+
+# --- Start and submission ---------------------------------------------------------------------------------------
+# These bodies speak the shapes of the lesson protocol (camelCase), so the host passes them on unchanged.
+
+PLAN_BYTES = 65536
+
+
+class ProtocolModel(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True, coerce_numbers_to_str=False)
+
+
+class PlanAction(ProtocolModel):
+    name: str = Field(pattern=r"^[A-Za-z][A-Za-z0-9_]{0,63}$")
+    target: str = Field(min_length=1, max_length=80)
+    args: dict[str, Any]
+    actor: str = Field(min_length=1, max_length=80)
+    tick: int = Field(ge=0, le=2**31 - 1)
+
+
+class PlanStep(ProtocolModel):
+    step: Literal[True]
+    tick: int = Field(ge=0, le=2**31 - 1)
+
+
+class ProgramPlan(ProtocolModel):
+    kind: Literal["program"]
+    source: str
+
+    @field_validator("source")
+    @classmethod
+    def bounded_source(cls, value: str) -> str:
+        if len(value.encode("utf-8")) > PLAN_BYTES:
+            raise ValueError(f"A program has at most {PLAN_BYTES} bytes")
+        return value
+
+
+class ActionsPlan(ProtocolModel):
+    kind: Literal["actions"]
+    actions: list[PlanAction | PlanStep] = Field(max_length=4096)
+
+
+# Ä28: the service reads a plan with its own schema, never with the schema of the package.
+InputPlan = Annotated[ProgramPlan | ActionsPlan, Field(discriminator="kind")]
+
+
+class StartRequest(ProtocolModel):
+    requestId: OperationId  # noqa: N815
+    revisionId: str = Field(pattern=r"^[0-9a-f-]{36}$")  # noqa: N815
+    courseId: str | None = Field(default=None, max_length=256)  # noqa: N815
+
+
+class Answer(ProtocolModel):
+    startId: str = Field(pattern=r"^[0-9a-f-]{36}$")  # noqa: N815
+    input: InputPlan
+
+
+class SubmitRequest(ProtocolModel):
+    requestId: OperationId  # noqa: N815
+    stateRevision: int = Field(ge=0, le=2147483646)  # noqa: N815
+    answer: Answer
+    courseId: str | None = Field(default=None, max_length=256)  # noqa: N815
+
+
+class PublicStart(ProtocolModel):
+    startId: str  # noqa: N815
+    revisionId: str  # noqa: N815
+    goalId: str  # noqa: N815
+    caseId: str  # noqa: N815
+    config: dict[str, Any]
+    initial: Any
+    seed: str = Field(pattern=r"^[0-9a-f]{32}$")

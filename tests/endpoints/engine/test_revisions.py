@@ -1,108 +1,20 @@
 """Lesson engine, PR 2: the admin route for revisions, the API-2 descriptor, the switch and the completion kind."""
 
-from typing import Any, AsyncIterator
-from unittest.mock import AsyncMock
+from typing import Any
 from uuid import uuid4
 
 import httpx
 import pytest
-from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.exceptions import RequestValidationError
 from pydantic import TypeAdapter, ValidationError
 from pytest import MonkeyPatch
 
 from api import models
-from api.app import request_validation_error_response
-from api.auth import user_auth
 from api.database import db, db_context, delete, filter_by
-from api.endpoints import engine as engine_endpoints
-from api.endpoints import rooms as room_endpoints
-from api.exceptions.api_exception import CodedAPIException
 from api.schemas.engine import OperationId, ServerDocument
-from api.schemas.rooms import Catalogue, CatalogueUnit
-from api.schemas.user import User
-from api.services import rooms
-from api.settings import settings
+from api.schemas.rooms import CatalogueUnit
+from api.settings import Settings, settings
+from tests.endpoints.engine.support import ENGINE_UNIT, LEARNER, ORIGIN, active, publish
 from tests.engine_documents import PART, SUBSKILL, UNIT, document, request
-
-ORIGIN = "https://lessons.example"
-LEARNER = "3f0c9a52-6a4e-4c1b-9d3e-5b8f2a7c1d01"
-ADMIN = "8a2d4e61-0b7f-4d9c-a1e3-7c6b5d4f3e02"
-
-
-def unit(uid: str, **values: Any) -> dict[str, Any]:
-    return {
-        "id": uid,
-        "path_id": "engine-path",
-        "title": {"de": uid, "en": uid},
-        "room": "guided-lesson",
-        "content": {"de": {"text": "Synthetic"}},
-        "teaches": [uid],
-        "practices": [],
-        "requires": [],
-        "retired": False,
-        "completion": {"kind": "introduced", "answer": {"answer": 6}, "allow_skip": True},
-        **values,
-    }
-
-
-ENGINE_UNIT = unit(UNIT, room="custom", module_id=UNIT, completion={"kind": "engine"})
-
-
-@pytest.fixture
-def catalogue(monkeypatch: MonkeyPatch) -> Catalogue:
-    value = Catalogue.model_validate(
-        {
-            "paths": [{"id": "engine-path", "title": {"de": "Pfad", "en": "Path"}, "units": [UNIT, "plain"]}],
-            "units": [ENGINE_UNIT, unit("plain")],
-        }
-    )
-    monkeypatch.setattr(settings, "rooms_enabled", True)
-    monkeypatch.setattr(settings, "engine_enabled", True)
-    monkeypatch.setattr(settings, "engine_content_origin", ORIGIN)
-    monkeypatch.setattr(settings, "learning_rooms_exercise_refs", {})
-    monkeypatch.setattr(rooms, "load_catalogue", lambda: value)
-    monkeypatch.setattr(rooms, "challenge_status", AsyncMock(return_value=False))
-    return value
-
-
-@pytest.fixture
-async def client(catalogue: Catalogue) -> AsyncIterator[httpx.AsyncClient]:
-    async with db_context():
-        await db.add(models.LessonModule(id=UNIT, api_version=1, entry_url=f"https://lessons.example/{UNIT}/entry.mjs"))
-        await db.add(models.SubSkill(id=SUBSKILL, name="Engine"))
-        await db.add(models.SubSkill(id="other-subskill", name="Other"))
-
-    async def session() -> AsyncIterator[None]:
-        async with db_context():
-            yield
-
-    async def identity(http: Request) -> User:
-        users = {"Bearer learner": (LEARNER, False), "Bearer admin": (ADMIN, True)}
-        token = http.headers.get("Authorization", "")
-        if token not in users:
-            raise HTTPException(401, "Synthetic missing authority")
-        user_id, admin = users[token]
-        return User(id=user_id, email_verified=True, admin=admin)
-
-    app = FastAPI()
-    app.exception_handler(RequestValidationError)(request_validation_error_response)
-    app.add_exception_handler(CodedAPIException, lambda _, exc: exc.response())
-    app.dependency_overrides[user_auth.dependency] = identity
-    app.include_router(engine_endpoints.router, dependencies=[Depends(session)])
-    app.include_router(room_endpoints.router, dependencies=[Depends(session)])
-    async with httpx.AsyncClient(transport=httpx.ASGITransport(app=app), base_url="http://test") as value:
-        yield value
-
-
-async def publish(client: httpx.AsyncClient, body: dict[str, Any], token: str = "admin") -> httpx.Response:
-    return await client.post("/engine/admin/revisions", json=body, headers={"Authorization": f"Bearer {token}"})
-
-
-async def active() -> list[tuple[int, str | None]]:
-    async with db_context():
-        rows = await db.all(filter_by(models.EngineRevision, unit_id=UNIT))
-        return sorted((row.number, row.active_for) for row in rows)
 
 
 async def test_publishing_makes_the_newest_content_active_and_the_same_content_again_its_revision(
@@ -181,10 +93,17 @@ async def test_a_later_revision_keeps_tasks_required_set_xp_and_subskills(client
         document(xp=2, parts=("// xp\n",)),
         document(subskill="other-subskill", parts=("// subskill\n",)),
         document(goal="other", parts=("// goal\n",)),
+        {**document(parts=("// input\n",)), "tasks": [{**document()["tasks"][0], "input": "actions"}]},
     ]:
         response = await publish(client, request(changed))
         assert response.status_code == 409, response.text
-        assert "keeps the task ids, the required tasks, their XP and their sub-skills" in response.text
+        assert "keeps the task ids, the required tasks, their XP, their sub-skills and their input" in response.text
+    # Ä38 c: the bands stay too, so a task state never holds a band the revision does not know.
+    fewer = document(parts=("// bands\n",))
+    fewer["bandRule"] = {**fewer["bandRule"], "bands": ["plus"]}
+    fewer["tasks"][0]["practice"].pop("base")
+    response = await publish(client, request(fewer))
+    assert (response.status_code, "keeps the bands of the active one" in response.text) == (409, True)
     assert await active() == [(1, UNIT)]
 
 
@@ -205,8 +124,8 @@ async def test_the_unit_carries_the_package_of_its_active_revision(
     client: httpx.AsyncClient, monkeypatch: MonkeyPatch
 ) -> None:
     learner = {"Authorization": "Bearer learner"}
-    # Without an active revision the lesson cannot be loaded yet.
-    assert (await client.get(f"/rooms/{UNIT}", headers=learner)).status_code == 503
+    # Without an active revision the unit is unavailable like a retired one, never a 503 (Ä38 b).
+    assert (await client.get(f"/rooms/{UNIT}", headers=learner)).status_code == 404
     revision_id = (await publish(client, request())).json()["revision_id"]
     room = (await client.get(f"/rooms/{UNIT}", headers=learner)).json()
     base = f"{ORIGIN}/packages/{'a' * 64}/"
@@ -220,9 +139,9 @@ async def test_the_unit_carries_the_package_of_its_active_revision(
         "revision_id": revision_id,
     }
     assert room["unit"]["completion_kind"] == "engine"
-    # Without a content origin there is nowhere to load it from.
+    # Without a content origin there is nowhere to load it from: unavailable as well.
     monkeypatch.setattr(settings, "engine_content_origin", None)
-    assert (await client.get(f"/rooms/{UNIT}", headers=learner)).status_code == 503
+    assert (await client.get(f"/rooms/{UNIT}", headers=learner)).status_code == 404
     # While the engine is switched off, its unit is unavailable like a retired one; other units are not.
     monkeypatch.setattr(settings, "engine_enabled", False)
     assert (await client.get(f"/rooms/{UNIT}", headers=learner)).status_code == 404
@@ -289,3 +208,29 @@ def test_the_server_document_is_read_strictly(change: Any) -> None:
     change(value)
     with pytest.raises(ValidationError):
         ServerDocument.model_validate(value)
+
+
+@pytest.mark.parametrize(
+    "origin, accepted",
+    [
+        ("https://lessons.example", True),
+        ("https://lessons.example:8443", True),
+        ("http://127.0.0.2:3000", True),
+        ("https://lessons.example:443", False),
+        ("https://bootstrap.academy", False),
+        ("https://lessons.bootstrap.academy", False),
+        ("https://Lessons.example", False),
+        ("https://lessons.example/", False),
+        ("https://lessons.example/packages", False),
+        ("http://lessons.example", False),
+        ("http://localhost:3000", False),
+        ("http://127.0.0.1", False),
+        ("https://user@lessons.example", False),
+    ],
+)
+def test_the_content_origin_follows_the_rule_of_the_frontend(origin: str, accepted: bool) -> None:
+    if accepted:
+        assert Settings(engine_content_origin=origin).engine_content_origin == origin
+    else:
+        with pytest.raises(ValidationError, match="session-free origin"):
+            Settings(engine_content_origin=origin)

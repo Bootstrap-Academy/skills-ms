@@ -25,6 +25,7 @@ from .settings import settings
 from .utils.cache import clear_cache
 from .utils.debug import check_responses
 from .utils.docs import add_endpoint_links_to_openapi_docs
+from api.services import engine
 from api.services.daily_limit import AccessError
 from api.services.internal import client_ssl_context
 
@@ -73,6 +74,8 @@ if settings.debug:
 @app.middleware("http")
 async def db_session(request: Request, call_next: Callable[..., Awaitable[T]]) -> T:
     async with db_context():
+        # Which units of the lesson engine learners can open in this request (Ä38 b); nothing while switched off.
+        await engine.load_active_units()
         response = await call_next(request)
         path = request.scope["path"].removeprefix(request.scope.get("root_path", ""))
         if settings.profile_publications_enabled and path.startswith(

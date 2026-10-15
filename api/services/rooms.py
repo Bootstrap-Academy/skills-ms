@@ -72,7 +72,7 @@ def load_catalogue() -> Catalogue:
         raise HTTPException(503, "Learning rooms are temporarily unavailable") from None
 
 
-def catalogue(*, deep: bool = True) -> Catalogue:
+def catalogue(*, deep: bool = True, unpublished: bool = False) -> Catalogue:
     if not settings.rooms_enabled:
         raise HTTPException(404, "Learning rooms are unavailable")
     source = load_catalogue()
@@ -94,11 +94,13 @@ def catalogue(*, deep: bool = True) -> Catalogue:
             by_id[unit_id].exercise = Exercise.model_validate(reference)
     except (ValueError, ValidationError):
         raise HTTPException(503, "Learning-room exercises are temporarily unavailable") from None
-    if not settings.engine_enabled:
-        # Until the lesson engine is switched on, its units are unavailable everywhere, like retired ones (Ä29).
-        for unit in content.units:
-            if isinstance(unit.completion, EngineCompletion):
-                unit.retired = True
+    # A unit of the lesson engine is unavailable everywhere, like a retired one, until the engine is switched on
+    # (Ä29) and while it has no active revision (Ä38 b). Only its publisher sees it before the first revision.
+    for unit in content.units:
+        if isinstance(unit.completion, EngineCompletion) and not (
+            settings.engine_enabled and (unpublished or engine.available(unit))
+        ):
+            unit.retired = True
     return content
 
 
@@ -872,6 +874,8 @@ async def mutate_room(
             raise HTTPException(409, "This room is already in progress")
         current = Progress(revision=current.revision, status="in_progress", review_id=data.request_id)
     elif isinstance(data, SaveState):
+        if isinstance(unit.completion, EngineCompletion) and not await engine.allow_save(user.id, unit.id):
+            raise HTTPException(429, "Too many saves; the next one is taken in a moment", headers={"Retry-After": "30"})
         current.state = data.state
         if current.status == "new":
             current.status = "in_progress"
