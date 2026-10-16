@@ -82,7 +82,8 @@ poe sweep-deleted-users  # delete the data of users the auth service no longer k
 
 ## Account Deletion
 When an account is deleted, the auth service calls `DELETE /_internal/users/{user_id}` on this microservice.
-The endpoint requires an internal token with the `skills` audience, deletes every row that belongs to the user (course access, last watch, lecture progress, sub skill bookmarks and XP), drops the cache entries keyed on a user id, and answers `204` — also for a user that has no data here, so it can be retried safely.
+The endpoint requires an internal token with the `skills` audience, deletes every row that belongs to the user (course access, last watch, lecture progress, sub skill bookmarks, XP and the receipts of XP deliveries), drops the cache entries keyed on a user id, and answers `204` — also for a user that has no data here, so it can be retried safely.
+Purchase evidence and a deletion tombstone stay. The tombstone answers every later XP delivery for the account with `recipient_erased`, so a late or repeated delivery never grants XP and records no new receipt.
 
 Because the auth service logs and swallows a failing call, a periodic sweep catches the deletions that were lost:
 

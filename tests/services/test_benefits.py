@@ -22,25 +22,48 @@ async def seed(mocker: MockerFixture) -> tuple[str, str, XPAward]:
     return str(uuid4()), str(uuid4()), XPAward(xp=17, earning_id=uuid4())
 
 
-async def test__reply_loss_replay_and_erasure_preserve_receipt_without_new_xp(mocker: MockerFixture) -> None:
+async def test__reply_loss_replay_is_answered_from_the_receipt_without_new_xp(mocker: MockerFixture) -> None:
     operation, user, award = await seed(mocker)
     async with db_context():
         result = await apply_xp(operation, user, "skill", award)
-    async with db_context():
-        assert await apply_xp(operation, user, "skill", award) == result
-        assert await models.XP.get_user_skill_xp(user, "skill") == 17
-    async with db_context():
-        await delete_user_data(user)
     unavailable = mocker.patch(
         "api.services.benefits.get_user_status", AsyncMock(side_effect=AssertionError("Exact receipt first"))
     )
     async with db_context():
         assert await apply_xp(operation, user, "skill", award) == result
-        assert await models.XP.get_user_skill_xp(user, "skill") == 0
+        assert await models.XP.get_user_skill_xp(user, "skill") == 17
         export = await export_user_data(user)
         assert export.xp_operations[0]["result"] == result
         assert (await export_user_data("foreign")).xp_operations == []
     unavailable.assert_not_called()
+
+
+async def test__erasure_removes_the_receipts_and_a_late_replay_is_refused_without_xp(mocker: MockerFixture) -> None:
+    operation, user, award = await seed(mocker)
+    other_operation, other = str(uuid4()), str(uuid4())
+    async with db_context():
+        result = await apply_xp(operation, user, "skill", award)
+        other_result = await apply_xp(other_operation, other, "skill", award)
+    async with db_context():
+        await delete_user_data(user)
+    async with db_context():
+        assert await db.all(filter_by(models.XPOperation, user_id=user)) == []
+        assert (await export_user_data(user)).xp_operations == []
+        assert await db.exists(filter_by(models.XPOperation, id=other_operation, user_id=other))
+    status = mocker.patch(
+        "api.services.benefits.get_user_status", AsyncMock(side_effect=AssertionError("Local marker owns this fact"))
+    )
+    refusal = {**result, "state": "recipient_erased", "applied": False}
+    for _ in range(2):
+        async with db_context():
+            assert await apply_xp(operation, user, "skill", award) == refusal
+    async with db_context():
+        assert await models.XP.get_user_skill_xp(user, "skill") == 0
+        assert await db.all(filter_by(models.XPOperation, user_id=user)) == []
+        # The other account keeps its receipt, its XP and its exact answer.
+        assert await apply_xp(other_operation, other, "skill", award) == other_result
+        assert await models.XP.get_user_skill_xp(other, "skill") == 17
+    status.assert_not_called()
 
 
 async def test__failed_local_transaction_commits_neither_receipt_nor_effect(mocker: MockerFixture) -> None:
@@ -100,6 +123,9 @@ async def test__local_erasure_marker_is_distinct_from_remote_unavailability(mock
     async with db_context():
         assert await apply_xp(operation, user, "skill", award) == result
         assert await models.XP.get_user_skill_xp(user, "skill") == 0
+        # The refusal records nothing, so the erased account gets no row back.
+        assert not await db.exists(filter_by(models.XPOperation, id=operation))
+        assert await db.all(filter_by(models.XPOperation, user_id=user)) == []
     status.assert_not_called()
 
 

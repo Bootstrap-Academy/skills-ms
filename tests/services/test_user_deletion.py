@@ -97,6 +97,17 @@ async def _add_user_data(user_id: str) -> None:
     await db.add(models.LectureProgress(user_id=user_id, course_id="course", lecture_id="lecture", completed=utcnow()))
     await db.add(models.SubSkillBookmark(user_id=user_id, root_skill_id="root", sub_skill_id="sub"))
     await db.add(models.XP(id=f"xp-{user_id}", user_id=user_id, skill_id="sub", xp=42, last_update=utcnow()))
+    request = {"user_id": user_id, "skill_id": "sub", "xp": 42, "earning_id": f"earning-{user_id}"}
+    await db.add(
+        models.XPOperation(
+            id=f"operation-{user_id}",
+            user_id=user_id,
+            request=request,
+            result={"operation_id": f"operation-{user_id}", "request": request, "state": "applied", "applied": True},
+            received_at=utcnow(),
+            completed_at=utcnow(),
+        )
+    )
 
 
 def test__user_models() -> None:
@@ -120,6 +131,8 @@ async def test__delete_user_data(mocker: MockerFixture) -> None:
         for model in USER_MODELS:
             assert not await db.exists(filter_by(model, user_id="user"))
             assert await db.exists(filter_by(model, user_id="other_user"))
+        assert not await db.exists(filter_by(models.XPOperation, user_id="user"))
+        assert await db.exists(filter_by(models.XPOperation, user_id="other_user"))
 
     assert clear_cache.await_args_list == [call(prefix) for prefix in USER_CACHE_PREFIXES]
 
