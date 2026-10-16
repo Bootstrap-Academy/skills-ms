@@ -202,6 +202,10 @@ async def submit(unit_id: str, goal_id: str, data: SubmitRequest, user: User) ->
     revision = await db.get(EngineRevision, id=state.revision_id)
     if revision is None:
         raise EngineRefusal(503, "unavailable", "This lesson is being updated; try again", retryable=True)
+    if plan["kind"] != _task(revision, goal_id)["input"]:
+        # A plan of the other kind is no answer to this task; the engine forms no verdict for it either. A list of
+        # actions may name any actor and wait empty ticks, which a program of the task's editor cannot.
+        raise EngineRefusal(422, "plan_kind", "This task takes a plan of another kind")
     row = EngineSubmission(
         id=str(uuid4()),
         user_id=user.id,
