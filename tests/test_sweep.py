@@ -1,10 +1,11 @@
 from unittest.mock import AsyncMock, MagicMock, call
+from uuid import uuid4
 
 from _pytest.monkeypatch import MonkeyPatch
 from pytest_mock import MockerFixture
 
 from api import models, sweep
-from api.database import db, db_context, select
+from api.database import db, db_context, filter_by, select
 from api.services.internal import InternalServiceError
 from api.settings import settings
 from api.utils.utc import utcnow
@@ -16,11 +17,12 @@ async def test__user_ids_query() -> None:
         await db.add(models.LastWatch(user_id="bob", course_id="course", timestamp=utcnow()))
         await db.add(models.SubSkillBookmark(user_id="charlie", root_skill_id="root", sub_skill_id="sub"))
         await db.add(models.XP(id="xp", user_id="alice", skill_id="sub", xp=42, last_update=utcnow()))
+        await db.add(models.XPOperation(id="operation", user_id="dora", request={}, received_at=utcnow()))
 
     async with db_context():
         assert await db.all(sweep._user_ids_query(None, 2)) == ["alice", "bob"]
-        assert await db.all(sweep._user_ids_query("bob", 2)) == ["charlie"]
-        assert await db.all(sweep._user_ids_query("charlie", 2)) == []
+        assert await db.all(sweep._user_ids_query("bob", 2)) == ["charlie", "dora"]
+        assert await db.all(sweep._user_ids_query("dora", 2)) == []
 
 
 async def test__sweep_deleted_users(mocker: MockerFixture, monkeypatch: MonkeyPatch) -> None:
@@ -68,6 +70,46 @@ async def test__main(mocker: MockerFixture) -> None:
     sweep.main()
 
     run_patch.assert_called_once_with(sweep_patch.return_value)
+
+
+async def test__sweep_removes_receipts_left_by_an_earlier_erasure(
+    mocker: MockerFixture, monkeypatch: MonkeyPatch
+) -> None:
+    # Before receipts went with the account, an erasure left the tombstone and the
+    # receipts and nothing else. The sweep reaches such an account through its receipts.
+    monkeypatch.setattr(settings, "deleted_user_sweep_rate_limit", 0)
+    mocker.patch("api.services.user_deletion.clear_cache", AsyncMock())
+    async with db_context():
+        await db.add(models.PurchaseUser(user_id="erased", deleted=True))
+        for user_id in ("erased", "erased", "alive"):
+            await db.add(
+                models.XPOperation(
+                    id=str(uuid4()),
+                    user_id=user_id,
+                    request={"user_id": user_id},
+                    result={"state": "applied", "applied": True},
+                    received_at=utcnow(),
+                    completed_at=utcnow(),
+                )
+            )
+        await db.add(models.XP(id="xp-alive", user_id="alive", skill_id="sub", xp=42, last_update=utcnow()))
+    status = mocker.patch(
+        "api.sweep.get_user_status", AsyncMock(side_effect=lambda user_id: 404 if user_id == "erased" else 200)
+    )
+    logger = mocker.patch("api.sweep.logger")
+
+    await sweep.sweep_deleted_users()
+
+    assert sorted(item.args[0] for item in status.await_args_list) == ["alive", "erased"]
+    logger.info.assert_called_once_with("sweep finished: checked=2 missing=1 deleted=1 errors=0")
+    async with db_context():
+        assert [row.user_id for row in await db.all(select(models.XPOperation))] == ["alive"]
+        assert await db.exists(filter_by(models.XP, user_id="alive"))
+        guard = await db.get(models.PurchaseUser, user_id="erased")
+        assert guard is not None and guard.deleted
+    status.reset_mock()
+    await sweep.sweep_deleted_users()
+    assert [item.args[0] for item in status.await_args_list] == ["alive"]
 
 
 async def test__one_cache_failure_rolls_back_and_does_not_starve_next_user(

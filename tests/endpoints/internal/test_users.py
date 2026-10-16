@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock
+from uuid import uuid4
 
 from httpx import AsyncClient
 from pytest_mock import MockerFixture
@@ -30,6 +31,37 @@ async def test__delete_user__deletes_all_data(auth_client: AsyncClient, mocker: 
 
         assert response.status_code == 204
         assert not await db.exists(filter_by(models.XP, user_id="user"))
+
+
+async def test__delete_user__removes_xp_receipts_and_refuses_a_late_delivery(
+    auth_client: AsyncClient, mocker: MockerFixture
+) -> None:
+    mocker.patch("api.services.user_deletion.clear_cache", AsyncMock())
+    mocker.patch("api.endpoints.internal.skills.clear_cache", AsyncMock())
+    status = mocker.patch("api.services.benefits.get_user_status", AsyncMock(return_value=200))
+    user, operation = str(uuid4()), str(uuid4())
+    award = {"xp": 17, "earning_id": str(uuid4())}
+    delivery = f"/_internal/xp-operations/{operation}/{user}/sub"
+    async with db_context():
+        await db.add(models.SubSkill(id="sub", name="Sub"))
+
+    async with db_context():
+        applied = await auth_client.post(delivery, json=award)
+    assert applied.status_code == 200 and applied.json()["state"] == "applied"
+    async with db_context():
+        assert (await auth_client.delete(f"/_internal/users/{user}")).status_code == 204
+    status.side_effect = AssertionError("The local tombstone answers")
+
+    for _ in range(2):
+        async with db_context():
+            late = await auth_client.post(delivery, json=award)
+        assert late.status_code == 200
+        assert late.json() == {**applied.json(), "state": "recipient_erased", "applied": False}
+    async with db_context():
+        assert await db.all(filter_by(models.XPOperation, user_id=user)) == []
+        assert await db.all(filter_by(models.XP, user_id=user)) == []
+        guard = await db.get(models.PurchaseUser, user_id=user)
+        assert guard is not None and guard.deleted
 
 
 async def test__delete_user__unknown_user(auth_client: AsyncClient, mocker: MockerFixture) -> None:
