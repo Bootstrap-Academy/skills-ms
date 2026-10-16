@@ -8,6 +8,7 @@ no migration; the row is the anchor of the foreign key and of the lock.
 """
 
 import asyncio
+import re
 from contextvars import ContextVar
 from hashlib import sha256
 from typing import Any
@@ -214,6 +215,17 @@ async def publish(data: RevisionRequest) -> RevisionPublished:
     return RevisionPublished(revision_id=row.id, number=row.number, active=True, created=True)
 
 
+# The frontend's loader drops `index.html` or `.html` from the manifest's entry and accepts only that address
+# (frontend `lesson-protocol/browser.ts`, `verifyLessonPackage`); any other one is a "Package binding mismatch".
+_ENTRY_DOCUMENT = re.compile(r"(?:index)?\.html\Z")
+
+
+def entry_url(base: str, entry_path: str) -> str:
+    """The address of a package's entry document below `base`, as the frontend derives it from the manifest:
+    `index.html` is the package directory itself."""
+    return base + _ENTRY_DOCUMENT.sub("", entry_path, count=1)
+
+
 async def descriptor(unit: CatalogueUnit) -> EnginePackageDescriptor:
     """The package of the unit's active revision, at the content origin the frontend loads it from.
 
@@ -227,7 +239,7 @@ async def descriptor(unit: CatalogueUnit) -> EnginePackageDescriptor:
     return EnginePackageDescriptor(
         id=row.module_id,
         api_version=2,
-        entry_url=base + row.entry_path,
+        entry_url=entry_url(base, row.entry_path),
         manifest_url=base + "manifest.json",
         manifest_hash=row.manifest_hash,
         package_hash=row.package_hash,
