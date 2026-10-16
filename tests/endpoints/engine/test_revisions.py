@@ -1,6 +1,8 @@
 """Lesson engine, PR 2: the admin route for revisions, the API-2 descriptor, the switch and the completion kind."""
 
+import re
 from typing import Any
+from urllib.parse import urljoin
 from uuid import uuid4
 
 import httpx
@@ -132,7 +134,8 @@ async def test_the_unit_carries_the_package_of_its_active_revision(
     assert room["unit"]["module"] == {
         "id": UNIT,
         "api_version": 2,
-        "entry_url": base + "index.html",
+        # The entry `index.html` is the package directory itself, as the frontend's loader requires.
+        "entry_url": base,
         "manifest_url": base + "manifest.json",
         "manifest_hash": "b" * 64,
         "package_hash": "a" * 64,
@@ -146,6 +149,48 @@ async def test_the_unit_carries_the_package_of_its_active_revision(
     monkeypatch.setattr(settings, "engine_enabled", False)
     assert (await client.get(f"/rooms/{UNIT}", headers=learner)).status_code == 404
     assert (await client.get("/rooms/plain", headers=learner)).status_code == 200
+
+
+def frontend_accepts(descriptor: dict[str, Any], entry: str, origin: str = ORIGIN) -> bool:
+    """The frontend's checks of a descriptor's addresses against the manifest's `entry`, written down from
+    frontend `lesson-protocol/browser.ts` (`packageLocation`, `verifyLessonPackage`); independent of the code
+    under test on purpose."""
+    base = f"{origin}/packages/{descriptor['package_hash']}/"
+    entry_url: str = descriptor["entry_url"]
+    # packageLocation: "Package location mismatch."
+    if descriptor["manifest_url"] != base + "manifest.json" or not entry_url.startswith(base):
+        return False
+    # verifyLessonPackage: `entry.replace(/(?:index)?\.html$/, "")`, else "Package binding mismatch."
+    stripped = re.sub(r"(?:index)?\.html\Z", "", entry, count=1)
+    if entry_url != base + stripped:
+        return False
+    # verifyLessonPackage, the entry asset: `new URL(stripped, base).href` must be `entry_url` again.
+    return urljoin(base, stripped) == entry_url
+
+
+@pytest.mark.parametrize(
+    "entry, address",
+    [
+        ("index.html", ""),
+        ("lesson.html", "lesson"),
+        ("units/index.html", "units/"),
+        ("units/intro.html", "units/intro"),
+        ("start.htm", "start.htm"),
+        # The frontend's expression has no boundary before `index`.
+        ("myindex.html", "my"),
+    ],
+)
+async def test_the_frontend_accepts_the_entry_address_of_the_descriptor(
+    client: httpx.AsyncClient, entry: str, address: str
+) -> None:
+    await publish(client, request(entry_path=entry))
+    module = (await client.get(f"/rooms/{UNIT}", headers={"Authorization": "Bearer learner"})).json()["unit"]["module"]
+    base = f"{ORIGIN}/packages/{'a' * 64}/"
+    assert (module["entry_url"], module["manifest_url"]) == (base + address, base + "manifest.json")
+    assert frontend_accepts(module, entry)
+    # The earlier form, the entry path appended as it is, fails in the frontend.
+    if address != entry:
+        assert not frontend_accepts({**module, "entry_url": base + entry}, entry)
 
 
 async def test_a_client_cannot_complete_skip_or_repeat_a_unit_of_the_engine(client: httpx.AsyncClient) -> None:
