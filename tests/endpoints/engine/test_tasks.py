@@ -169,6 +169,23 @@ async def test_a_plan_of_another_form_is_refused(client: httpx.AsyncClient, plan
     assert response.status_code == 422, response.text
 
 
+async def test_a_plan_of_the_other_kind_than_the_task_takes_is_refused(client: httpx.AsyncClient) -> None:
+    # The task "reach" takes a program. A list of direct actions is no answer to it, even when it is the saved plan:
+    # a list may name any actor and wait empty ticks, which a program of the editor cannot.
+    revision_id = await published(client)
+    actions = {
+        "kind": "actions",
+        "actions": [{"name": "move", "target": "robot", "args": {}, "actor": "robot", "tick": 0}],
+    }
+    state_revision = await save(client, {"reach": actions}, 0)
+    start_id = (await start(client, revision_id)).json()["start"]["startId"]
+    assert refusal(await submit(client, start_id, state_revision, plan=actions)) == (422, "plan_kind", False)
+    # Nothing was taken: the same start takes the program the learner saves next.
+    program = await save(client, {"reach": PLAN}, state_revision)
+    accepted = await submit(client, start_id, program, request_id="submit-2")
+    assert accepted.status_code == 202, accepted.text
+
+
 async def test_a_new_revision_gives_a_new_start_unless_a_submission_is_pending(client: httpx.AsyncClient) -> None:
     first = await published(client)
     state_revision = await save(client, {"reach": PLAN}, 0)
