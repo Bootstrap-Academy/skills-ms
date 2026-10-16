@@ -1,7 +1,9 @@
 """Keyed XP receipt and effect share the caller's owning transaction.
 
 These transport-authorized awards do not grant login or purchase authority.
-An exact completed receipt precedes recipient lookup, including after erasure.
+An exact completed receipt precedes recipient lookup. Account erasure removes the
+receipts; from then on the local erasure tombstone answers every delivery for the
+account with `recipient_erased`, and no receipt is recorded for it again.
 """
 
 from typing import Annotated, Any
@@ -50,8 +52,12 @@ async def apply_xp(operation: str, user_id: str, skill_id: str, award: XPAward) 
     if guard.deleted:
         # This is an actual local erasure marker. A remote 404 can instead mean
         # an unavailable joined recipient or route and must not create this fact.
-        result = {"operation_id": operation, "request": request, "state": "recipient_erased", "applied": False}
-    elif await get_user_status(user_id) == 200:
+        # The tombstone is permanent, so every retry gets the same refusal without a
+        # receipt. The claim is dropped, and an erased account keeps no rows here.
+        await db.delete(row)
+        await db.session.flush()
+        return {"operation_id": operation, "request": request, "state": "recipient_erased", "applied": False}
+    if await get_user_status(user_id) == 200:
         if not await db.exists(filter_by(SubSkill, id=skill_id)):
             # No receipt/effect is committed for a temporarily unavailable skill.
             raise HTTPException(404, "Benefit skill unavailable")

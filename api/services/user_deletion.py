@@ -22,6 +22,9 @@ USER_MODELS: list[Any] = [
     models.LectureProgress,
     models.SubSkillBookmark,
     models.XP,
+    # XP receipts go with the account. Afterwards the tombstone in PurchaseUser
+    # refuses every late delivery for it (`apply_xp`, `XP.add_xp`).
+    models.XPOperation,
 ]
 
 # Durable claims and deletion tombstones must not recreate service access.
@@ -30,7 +33,6 @@ RETAINED_USER_MODELS: list[Any] = [
     models.PurchaseUser,
     models.RetainedCourseRight,
     models.CourseRightGrant,
-    models.XPOperation,
 ]
 
 # all cache prefixes that contain data which belongs to a specific user
@@ -40,10 +42,18 @@ USER_CACHE_PREFIXES = ["course_access", "lecture_progress", "skills", "user", "x
 async def delete_user_data(user_id: str) -> None:
     """Remove live service data and retain purchase obligations with a deletion tombstone."""
 
-    from api.database import filter_by
+    from api.database import filter_by, select
     from api.models.purchase import CoursePurchase
     from api.services.purchases import lock_user
 
+    # A delivery locks its receipt before the subject guard (`apply_xp`). Locking the
+    # receipts first as well lets a delivery that holds one finish instead of deadlocking.
+    await db.all(
+        select(models.XPOperation.id)
+        .where(models.XPOperation.user_id == user_id)
+        .order_by(models.XPOperation.id)
+        .with_for_update()
+    )
     guard = await lock_user(user_id)
     from api.services.retained_rights import preserve_before_erasure
 

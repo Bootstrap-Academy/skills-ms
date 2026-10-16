@@ -1,4 +1,4 @@
-"""Exact benefit receipts survive removal of the mutable XP counter."""
+"""Exact benefit receipts of a live account; account erasure removes them with the XP counter."""
 
 from datetime import datetime
 from typing import Any
