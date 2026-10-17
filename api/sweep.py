@@ -7,6 +7,7 @@ from sqlalchemy.sql.selectable import Select
 
 from .database import db, db_context
 from .logger import get_logger
+from .redis import close_redis
 from .services.auth import get_user_status
 from .services.internal import InternalServiceError
 from .services.user_deletion import USER_MODELS, delete_user_data
@@ -69,5 +70,17 @@ async def sweep_deleted_users() -> None:
     logger.info(f"sweep finished: checked={checked} missing={missing} deleted={deleted} errors={errors}")
 
 
+async def run_sweep() -> None:
+    """Run the sweep and release its Redis and database connections before the event loop ends."""
+
+    try:
+        await sweep_deleted_users()
+    finally:
+        try:
+            await close_redis()
+        finally:
+            await db.dispose()
+
+
 def main() -> None:
-    asyncio.run(sweep_deleted_users())
+    asyncio.run(run_sweep())
