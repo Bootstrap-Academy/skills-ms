@@ -8,8 +8,11 @@ from api.schemas.course import Course
 from api.schemas.curriculum import Curriculum, Lesson
 from api.schemas.user import User
 from api.services import curriculum
+from api.utils.docs import error_responses
 
-router = APIRouter(dependencies=[require_verified_email, has_course_access])
+router = APIRouter(
+    dependencies=[require_verified_email, has_course_access], responses=error_responses(401, 403, 404, 503)
+)
 
 
 @router.get("/courses/{course_id}/curriculum", response_model=Curriculum)

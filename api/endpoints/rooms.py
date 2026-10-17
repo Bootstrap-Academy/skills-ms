@@ -8,6 +8,7 @@ from api.schemas.rooms import Complete, LlmGrant, RoomEnvelope, Rooms, SaveState
 from api.schemas.user import User
 from api.services import lesson_milestones, rooms
 from api.settings import settings
+from api.utils.docs import error_responses
 
 router = APIRouter()
 
@@ -24,7 +25,13 @@ async def capabilities(response: Response) -> dict[str, bool]:
     return {"enabled": settings.rooms_enabled}
 
 
-private = APIRouter(prefix="/rooms", dependencies=[Depends(enabled), require_verified_email])
+private = APIRouter(
+    prefix="/rooms",
+    dependencies=[Depends(enabled), require_verified_email],
+    responses=error_responses(401, 403, 404, 503),
+)
+# Saves of the room state can also conflict or come too often.
+CHANGES = error_responses(409, 429)
 
 
 @private.get("", response_model=Rooms)
@@ -46,14 +53,14 @@ async def get_room(unit_id: str, request: Request, course: str | None = None, us
     return await rooms.get_room(unit_id, user, get_token(request), course)
 
 
-@private.put("/{unit_id}/state", response_model=RoomEnvelope)
+@private.put("/{unit_id}/state", response_model=RoomEnvelope, responses=CHANGES)
 async def save_state(
     unit_id: str, data: SaveState, request: Request, course: str | None = None, user: User = user_auth
 ) -> RoomEnvelope:
     return await rooms.mutate_room(unit_id, user, get_token(request), data, course)
 
 
-@private.post("/{unit_id}/complete", response_model=RoomEnvelope)
+@private.post("/{unit_id}/complete", response_model=RoomEnvelope, responses=CHANGES)
 async def complete(
     unit_id: str, data: Complete, request: Request, course: str | None = None, user: User = user_auth
 ) -> RoomEnvelope:
@@ -66,7 +73,7 @@ async def complete(
     return envelope
 
 
-@private.post("/{unit_id}/review", response_model=RoomEnvelope)
+@private.post("/{unit_id}/review", response_model=RoomEnvelope, responses=CHANGES)
 async def start_review(
     unit_id: str, data: StartReview, request: Request, course: str | None = None, user: User = user_auth
 ) -> RoomEnvelope:

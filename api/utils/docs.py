@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from typing import Any, Type, cast
 
 from pydantic import BaseModel, ConfigDict
@@ -21,6 +22,22 @@ def responses(default: type, *args: Type[APIException]) -> dict[int | str, dict[
         out[code] = {"description": STATUS_PHRASES[code], "content": {"application/json": {"examples": examples}}}
 
     return out | {200: {"model": default}}
+
+
+class ErrorBody(BaseModel):
+    """The body of an error answer: always `detail`. Coded refusals add `code`, and some add fields of their own
+    (the lesson engine `message` and `retryable`, the daily limit `daily`)."""
+
+    model_config = ConfigDict(extra="allow")
+
+    detail: Any
+    code: str | None = None
+
+
+def error_responses(*codes: int) -> dict[int | str, dict[str, Any]]:
+    """Document error answers whose texts vary with the case; every one has the shape of `ErrorBody`."""
+
+    return {code: {"model": ErrorBody, "description": HTTPStatus(code).phrase} for code in codes}
 
 
 def get_example(arg: Type[BaseModel]) -> dict[str, Any]:
