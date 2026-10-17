@@ -38,7 +38,11 @@ logger = get_logger(__name__)
 
 # §9: the XP of a task have one identity per learner, unit and task, whatever revision or submission earns them.
 XP_NAMESPACE = UUID("4666e0ec-8a60-5ca8-8914-7d61fd6dc388")
-SUMMARY = {"passed": "Dein Plan besteht alle Fälle.", "not_passed": "Dein Plan besteht noch nicht alle Fälle."}
+# The frame writes the outcome itself ("Bestanden." or "Noch nicht bestanden.") and puts the summary right after it,
+# so the summary never repeats the outcome. Nor does it speak of cases: a task of direct actions without private
+# cases is judged on its start alone, other tasks also on the private cases of the band, and this service does not
+# see how many cases a runner played. A pass needs no sentence of its own; after a fail the next start is a new one.
+SUMMARY = {"passed": "", "not_passed": "Probier es noch einmal."}
 # Covers the wait for the gate of the sandbox client and its timeout (15 s each).
 LEASE_SECONDS = 30
 

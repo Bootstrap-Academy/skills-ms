@@ -131,7 +131,8 @@ async def test_a_pass_earns_the_xp_once_uses_up_the_start_and_completes_the_unit
         "status": "final",
         "outcome": "passed",
         "counts": True,
-        "feedback": {"source": "server", "summary": "Dein Plan besteht alle Fälle.", "public_reasons": []},
+        # The frame says "Bestanden." itself; the summary adds nothing to that.
+        "feedback": {"source": "server", "summary": "", "public_reasons": []},
         "completed": True,
         "xp": {"awardId": OPERATION, "xp": 1, "persisted": True},
     }
@@ -196,7 +197,7 @@ async def test_two_fails_in_a_row_lower_the_band_and_show_the_texts_of_the_packa
         "counts": False,
         "feedback": {
             "source": "server",
-            "summary": "Dein Plan besteht noch nicht alle Fälle.",
+            "summary": "Probier es noch einmal.",
             "public_reasons": ["Prüf auch andere Weglängen."],
         },
     }
