@@ -211,7 +211,7 @@ async def test_a_fail_shows_the_texts_of_the_package_and_the_next_start_is_a_new
     )
     assert view["feedback"] == {
         "source": "server",
-        "summary": "Dein Plan besteht noch nicht alle Fälle.",
+        "summary": "Probier es noch einmal.",
         "public_reasons": ["Prüf auch andere Weglängen."],
     }
     # The start is used up; the next one is new and names no fail (Ä23 names counted passes only).
