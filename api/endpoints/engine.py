@@ -9,6 +9,7 @@ from api.schemas.engine import ID_PATTERN, RevisionPublished, RevisionRequest, S
 from api.schemas.user import User
 from api.services import engine, engine_tasks
 from api.settings import settings
+from api.utils.docs import error_responses
 
 
 async def enabled(response: Response) -> None:
@@ -17,10 +18,17 @@ async def enabled(response: Response) -> None:
         raise HTTPException(404, "The lesson engine is unavailable")
 
 
-router = APIRouter(prefix="/engine", dependencies=[Depends(enabled)])
+router = APIRouter(prefix="/engine", dependencies=[Depends(enabled)], responses=error_responses(401, 403, 404))
+# Refusals of a start or a submission (`EngineRefusal`): final conflicts and retryable outages.
+REFUSALS = error_responses(409, 503)
 
 
-@router.post("/admin/revisions", dependencies=[admin_auth], response_model=RevisionPublished)
+@router.post(
+    "/admin/revisions",
+    dependencies=[admin_auth],
+    response_model=RevisionPublished,
+    responses={201: {"model": RevisionPublished, "description": "Created"}, **error_responses(409, 413)},
+)
 async def publish_revision(data: RevisionRequest, response: Response) -> RevisionPublished:
     """Publish the server side of a package of the lesson engine and make it the unit's active revision.
 
@@ -35,7 +43,7 @@ UnitId = Path(pattern=ID_PATTERN)
 GoalId = Path(pattern=ID_PATTERN)
 
 
-@router.post("/units/{unit_id}/tasks/{goal_id}/start", dependencies=[require_verified_email])
+@router.post("/units/{unit_id}/tasks/{goal_id}/start", dependencies=[require_verified_email], responses=REFUSALS)
 async def start_task(
     data: StartRequest, unit_id: str = UnitId, goal_id: str = GoalId, user: User = user_auth
 ) -> dict[str, Any]:
@@ -43,7 +51,11 @@ async def start_task(
     return await engine_tasks.start(unit_id, goal_id, data, user)
 
 
-@router.post("/units/{unit_id}/tasks/{goal_id}/submissions", dependencies=[require_verified_email])
+@router.post(
+    "/units/{unit_id}/tasks/{goal_id}/submissions",
+    dependencies=[require_verified_email],
+    responses={202: {"model": dict[str, Any], "description": "Accepted; the verdict is pending"}, **REFUSALS},
+)
 async def submit_plan(
     data: SubmitRequest, response: Response, unit_id: str = UnitId, goal_id: str = GoalId, user: User = user_auth
 ) -> dict[str, Any]:

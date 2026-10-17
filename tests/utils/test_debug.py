@@ -40,10 +40,36 @@ async def test___check_response_schema(
     responses: Any, in_schema: bool, status_code: int, body: Any, ok: bool, mocker: MockerFixture
 ) -> None:
     logger = mocker.patch("api.utils.debug.logger")
+    route = MagicMock(responses=responses, include_in_schema=in_schema, response_model=None, status_code=None)
 
-    _check_response_schema(
-        "GET", MagicMock(responses=responses, include_in_schema=in_schema), status_code, json.dumps(body).encode()
-    )
+    _check_response_schema("GET", route, status_code, json.dumps(body).encode())
+
+    if ok:
+        logger.error.assert_not_called()
+    else:
+        logger.error.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "declared_status,status_code,body,ok",
+    [
+        # FastAPI documents the response model for the route's success status; the check reads it there too.
+        (None, 200, {"foo": "bar"}, True),
+        (None, 200, {"foo": 1}, False),
+        (201, 201, {"foo": "bar"}, True),
+        # Only for that status: any other one still needs its own entry in `responses`.
+        (201, 200, {"foo": "bar"}, False),
+        (None, 404, {"detail": "Not Found"}, False),
+    ],
+)
+async def test___check_response_schema__response_model(
+    declared_status: int | None, status_code: int, body: Any, ok: bool, mocker: MockerFixture
+) -> None:
+    logger = mocker.patch("api.utils.debug.logger")
+    model = create_model("test", foo=(str, ...))
+    route = MagicMock(responses={}, include_in_schema=True, response_model=model, status_code=declared_status)
+
+    _check_response_schema("GET", route, status_code, json.dumps(body).encode())
 
     if ok:
         logger.error.assert_not_called()

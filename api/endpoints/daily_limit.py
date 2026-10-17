@@ -8,8 +8,9 @@ from api.schemas.course import Course
 from api.schemas.daily_limit import DailyStatus, StartLesson, StartResult
 from api.schemas.user import User
 from api.services import daily_limit
+from api.utils.docs import error_responses
 
-router = APIRouter(dependencies=[require_verified_email])
+router = APIRouter(dependencies=[require_verified_email], responses=error_responses(401, 403, 503))
 
 
 @router.get("/daily-limit", response_model=DailyStatus)
@@ -19,7 +20,10 @@ async def daily_status(response: Response, user: User = user_auth) -> DailyStatu
 
 
 @router.post(
-    "/courses/{course_id}/lessons/{lesson_id}/start", response_model=StartResult, dependencies=[has_course_access]
+    "/courses/{course_id}/lessons/{lesson_id}/start",
+    response_model=StartResult,
+    dependencies=[has_course_access],
+    responses=error_responses(404, 409, 429),
 )
 async def start_lesson(
     lesson_id: str, data: StartLesson, response: Response, course: Course = get_course, user: User = user_auth
