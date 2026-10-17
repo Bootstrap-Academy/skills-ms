@@ -1,6 +1,7 @@
-from unittest.mock import AsyncMock, MagicMock, call
+from unittest.mock import AsyncMock, call
 from uuid import uuid4
 
+import pytest
 from _pytest.monkeypatch import MonkeyPatch
 from pytest_mock import MockerFixture
 
@@ -64,12 +65,32 @@ async def test__sweep_deleted_users__no_rate_limit(mocker: MockerFixture, monkey
 
 
 async def test__main(mocker: MockerFixture) -> None:
+    # The connections must be released inside the loop that `asyncio.run` drives. Left to the garbage
+    # collector, a Redis connection that the erasure opened prints "RuntimeError: Event loop is closed".
+    steps: list[str] = []
+    mocker.patch("api.sweep.sweep_deleted_users", AsyncMock(side_effect=lambda: steps.append("sweep")))
+    mocker.patch("api.sweep.close_redis", AsyncMock(side_effect=lambda: steps.append("redis")))
+    mocker.patch.object(db, "dispose", AsyncMock(side_effect=lambda: steps.append("database")))
     run_patch = mocker.patch("asyncio.run")
-    sweep_patch = mocker.patch("api.sweep.sweep_deleted_users", MagicMock())
 
     sweep.main()
 
-    run_patch.assert_called_once_with(sweep_patch.return_value)
+    run_patch.assert_called_once()
+    assert steps == []
+    await run_patch.call_args.args[0]
+    assert steps == ["sweep", "redis", "database"]
+
+
+async def test__run_sweep__releases_the_connections_when_the_sweep_fails(mocker: MockerFixture) -> None:
+    mocker.patch("api.sweep.sweep_deleted_users", AsyncMock(side_effect=RuntimeError("sweep failed")))
+    close_redis_patch = mocker.patch("api.sweep.close_redis", AsyncMock(side_effect=ConnectionError("redis gone")))
+    dispose_patch = mocker.patch.object(db, "dispose", AsyncMock())
+
+    with pytest.raises(ConnectionError):
+        await sweep.run_sweep()
+
+    close_redis_patch.assert_awaited_once_with()
+    dispose_patch.assert_awaited_once_with()
 
 
 async def test__sweep_removes_receipts_left_by_an_earlier_erasure(
