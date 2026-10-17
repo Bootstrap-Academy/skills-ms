@@ -20,7 +20,7 @@ async def get_configuration() -> dict[str, Any]:
     return {"mode": mode, "limit": limit, "activation_issues": daily_limit.activation_issues()}
 
 
-@router.put("/daily-limit")
+@router.put("/daily-limit", responses=error_responses(409))
 async def configure(data: LimitConfiguration) -> dict[str, Any]:
     return await daily_limit.configure(data)
 

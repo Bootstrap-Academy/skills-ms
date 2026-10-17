@@ -1,7 +1,7 @@
 """The routes of learning rooms, curriculum, daily limit and lesson engine document every answer they give.
 
 With `DEBUG` set, `api.utils.debug.check_responses` logs an undocumented or mismatching answer at ERROR. The pairs
-below are the ones it reported on a test deployment before these routes documented them.
+below are the ones it reported on a test deployment before these routes documented them, and one found in review.
 """
 
 import json
@@ -52,7 +52,10 @@ SEEN = [
     ("POST", "/rooms/{unit_id}/complete", 200),
     ("POST", "/learning-access/{user_id}/start", 200),
     ("POST", SUBMISSIONS, 409),
+    # Found in review: the internal configuration refuses an activation with open issues.
+    ("PUT", "/daily-limit", 409),
 ]
+ACTIVATION_BLOCKED = {"detail": {"code": "daily_limit_activation_blocked", "issues": ["curriculum_required:c"]}}
 
 
 def find(method: str, path: str) -> APIRoute:
@@ -113,6 +116,8 @@ def body(value: Any) -> bytes:
             503,
             {"detail": "unavailable", "code": "learning_access_unavailable", "daily": None},
         ),
+        # The body of `daily_limit.configure` for an activation with open issues: `detail` is an object here.
+        ("PUT", "/daily-limit", 409, ACTIVATION_BLOCKED),
     ],
 )
 def test_the_error_and_accepted_answers_match_their_documentation(
@@ -123,6 +128,26 @@ def test_the_error_and_accepted_answers_match_their_documentation(
     _check_response_schema(method, find(method, path), status, body(answer))
 
     logger.error.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "method,path,status,answer",
+    [
+        ("GET", "/rooms", 401, {"code": "invalid_token"}),
+        ("POST", START, 409, {"code": "conflict", "message": "Another submission came first", "retryable": False}),
+        ("PUT", "/daily-limit", 409, ACTIVATION_BLOCKED["detail"]),
+    ],
+)
+def test_an_error_answer_without_detail_is_reported(
+    method: str, path: str, status: int, answer: Any, mocker: MockerFixture
+) -> None:
+    # Every error answer of these routes carries `detail`; `ErrorBody` requires it, so a body without is reported.
+    logger = mocker.patch("api.utils.debug.logger")
+
+    _check_response_schema(method, find(method, path), status, body(answer))
+
+    logger.error.assert_called_once()
+    assert "response schema validation failed" in logger.error.call_args.args[0]
 
 
 @pytest.mark.parametrize(
