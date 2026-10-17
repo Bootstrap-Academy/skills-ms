@@ -302,6 +302,9 @@ async def challenge_status(unit: CatalogueUnit, user: User, token: str) -> bool:
 async def room_envelope(
     user: User, course_id: str | None, *, unit: Unit, progress: Progress, review_available: bool = False
 ) -> RoomEnvelope:
+    # A lesson of the engine has no practice round, and `…/review` refuses one (K2). Its passed tasks are played
+    # again in the unit itself (Ä43), so no answer offers a round.
+    review_available = review_available and unit.completion_kind != "engine"
     if not settings.daily_limit_policy_enabled:
         return RoomEnvelope(unit=unit, progress=progress, review_available=review_available)
     pair = await daily_limit.choose(user, daily_limit.unit_lessons(unit.id, course_id))

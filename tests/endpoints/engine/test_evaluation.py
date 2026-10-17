@@ -12,13 +12,13 @@ from pytest import MonkeyPatch
 
 from api import models
 from api.database import db, db_context
-from api.services import sandbox
+from api.services import rooms, sandbox
 from api.services.engine_verdicts import xp_operation_id
 from api.services.sandbox import SandboxUnavailableError
 from api.settings import settings
 from api.utils.utc import utcnow
 from tests.endpoints.engine.support import LEARNER as LEARNER_ID
-from tests.endpoints.engine.test_tasks import LEARNER, PLAN, published, save, start, submit
+from tests.endpoints.engine.test_tasks import LEARNER, PLAN, course, published, save, start, submit
 from tests.engine_documents import SUBSKILL, UNIT, document
 
 PASS = {
@@ -136,6 +136,43 @@ async def test_a_pass_is_booked_in_the_answer_of_the_submission_and_completes_th
     assert await save(client, {"reach": PLAN}, state_revision) == state_revision + 1
     assert (await room(client))["status"] == "completed"
     assert len(fake.calls) == 1
+
+
+async def test_a_completed_unit_offers_no_practice_round_and_a_passed_task_is_played_again(
+    client: httpx.AsyncClient, monkeypatch: MonkeyPatch, accounts: AsyncMock
+) -> None:
+    # Browser run on Test, F1: the reopened unit offered a practice round, `…/review` refused it with 409, and the
+    # page showed a conflict instead of the unit.
+    linked = course([UNIT, "plain"])
+    monkeypatch.setattr(rooms, "COURSES", {linked.id: linked})
+    runs(monkeypatch, PASS, PASS)
+    revision_id, _, state_revision, answer = await submitted(client)
+    assert answer.json()["completed"] is True
+    for route in (
+        f"/rooms/{UNIT}?course={linked.id}",
+        f"/rooms?path=engine-path&course={linked.id}&unit={UNIT}&continuous=true",
+        # The stream repeats completed units after the new ones.
+        "/rooms?path=engine-path&after=plain&continuous=true",
+    ):
+        body = (await client.get(route, headers=LEARNER)).json()
+        envelope = body.get("next", body)
+        assert (envelope["unit"]["id"], envelope["progress"]["status"], envelope["review_available"]) == (
+            UNIT,
+            "completed",
+            False,
+        ), route
+    # Ä43: the unit itself plays a passed task again. A new start, a save, a booked pass without XP; the completion
+    # stays.
+    again = (await start(client, revision_id, request_id="start-2")).json()["start"]
+    revision = await save(client, {"reach": PLAN}, state_revision)
+    replay = await submit(client, again["startId"], revision, request_id="submit-2")
+    assert replay.status_code == 200, replay.text
+    view = replay.json()
+    assert (view["outcome"], view["counts"], view["completed"], "xp" in view) == ("passed", True, True, False)
+    progress = await room(client)
+    assert (progress["status"], progress["result"], progress["revision"]) == ("completed", {"kind": "passed"}, revision)
+    async with db_context():
+        assert await models.XP.get_user_skill_xp(LEARNER_ID, SUBSKILL) == 1
 
 
 async def test_without_a_verdict_the_submission_stays_pending_until_a_read_after_the_lease(
