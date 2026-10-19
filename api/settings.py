@@ -40,7 +40,8 @@ class Settings(BaseSettings):
     rooms_enabled: bool = False
     # Lesson engine, stage 1. Off until the end-to-end check passes (Ä29): while off, units of the engine are
     # unavailable like retired ones and its routes answer 404. Packages are served from this origin, which the
-    # frontend knows as well; it holds no session (the frontend refuses bootstrap.academy and its subdomains).
+    # frontend knows as well. The frontend runs them in a frame with an opaque origin and refuses its own host;
+    # a host inside bootstrap.academy (the API host) must send the policy `sandbox allow-scripts` with them.
     engine_enabled: bool = False
     engine_content_origin: str | None = None
     # Sandkasten, which evaluates submissions of the engine (Ä33); without it a submission stays pending.
@@ -122,7 +123,8 @@ class Settings(BaseSettings):
     @classmethod
     def session_free_origin(cls, value: str | None) -> str | None:
         """The rule of the frontend (`lesson-protocol/browser.ts`, `packageLocation`): a bare origin over https,
-        outside bootstrap.academy, without a default port that the browser would drop; http only for 127.0.0.2."""
+        without a default port that the browser would drop; http only for 127.0.0.2. The frontend refuses its own
+        host, so neither app host (bootstrap.academy, test.bootstrap.academy) is a content origin."""
         if value is None:
             return None
         parsed = urlsplit(value)
@@ -142,8 +144,7 @@ class Settings(BaseSettings):
             or parsed.netloc != parsed.netloc.lower()
             or port == -1
             or port == default_port
-            or host == "bootstrap.academy"
-            or host.endswith(".bootstrap.academy")
+            or host in ("bootstrap.academy", "test.bootstrap.academy")
         ):
             raise ValueError("engine_content_origin must be a session-free origin as the frontend accepts it")
         return value
