@@ -55,6 +55,10 @@ class UserDataExport(BaseModel):
     )
     course_projects: list[dict[str, Any]] = Field(default_factory=list)
     course_project_requests: list[dict[str, Any]] = Field(default_factory=list)
+    learning_plan: list[dict[str, Any]] = Field(
+        default_factory=list,
+        description="The learner's own learning plan: character, preference and steps as saved, with its revision",
+    )
     purchase_user: list[dict[str, Any]] = Field(default_factory=list)
     retained_course_rights: list[dict[str, Any]] = Field(default_factory=list)
     course_right_grants: list[dict[str, Any]] = Field(default_factory=list)
@@ -77,6 +81,7 @@ class UserDataExport(BaseModel):
         "engine_submissions",
         "course_projects",
         "course_project_requests",
+        "learning_plan",
         "purchase_user",
         "retained_course_rights",
         "course_right_grants",

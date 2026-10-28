@@ -46,6 +46,7 @@
       };
 
       courses = ./config/courses;
+      tracks = ./config/tracks;
     });
 
     nixosModules.default = {

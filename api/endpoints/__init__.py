@@ -11,9 +11,11 @@ from . import (
     daily_limit,
     engine,
     learning,
+    learning_plan,
     lesson_assets,
     rooms,
     skill,
+    tracks,
     xp,
 )
 from .internal import INTERNAL_ROUTERS
@@ -35,6 +37,8 @@ for module in [
     character_areas,
     lesson_assets,
     engine,
+    tracks,
+    learning_plan,
 ]:
     name = module.__name__.split(".")[-1]
     router = APIRouter(tags=[name])

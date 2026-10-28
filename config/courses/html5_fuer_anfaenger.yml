@@ -3,6 +3,7 @@ title: "HTML 5"
 description: "HTML bildet die Grundlage jeder Website. Mit HTML ist auf jeder Website definiert, was der Inhalt ist. HTML ist leicht zu lernen, aber ein absolutes Must-Have, da es mittlerweile sogar häufig außerhalb der Web-Entwicklung zum Einsatz kommt."
 category:
 language: de
+level: einsteiger
 image: https://static.bootstrap.academy/thumbnails/html.jpg
 authors:
   - name: "The Morpheus Tutorials"

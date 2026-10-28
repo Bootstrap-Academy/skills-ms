@@ -129,6 +129,7 @@ async def test__export_user__unknown_user(auth_client: AsyncClient) -> None:
         "engine_submissions": [],
         "course_projects": [],
         "course_project_requests": [],
+        "learning_plan": [],
         "purchases": [],
         "purchase_user": [],
         "retained_course_rights": [],

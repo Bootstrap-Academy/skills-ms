@@ -18,9 +18,12 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 from api.app import app
 from api.exceptions.engine import EngineRefusal
+from api.exceptions.learning_plan import PlanRefusal
 from api.schemas.engine import RevisionPublished
+from api.schemas.learning_plan import Plan
 from api.settings import settings
 from api.utils.debug import _check_response_schema, _documented, check_responses
+from api.utils.docs import get_example
 
 START = "/engine/units/{unit_id}/tasks/{goal_id}/start"
 SUBMISSIONS = "/engine/units/{unit_id}/tasks/{goal_id}/submissions"
@@ -54,6 +57,17 @@ SEEN = [
     ("POST", SUBMISSIONS, 409),
     # Found in review: the internal configuration refuses an activation with open issues.
     ("PUT", "/daily-limit", 409),
+    # The learning plan and the tracks, documented from the start.
+    ("GET", "/tracks", 200),
+    ("GET", "/tracks/{track_id}", 200),
+    ("GET", "/tracks/{track_id}", 404),
+    ("GET", "/plan", 200),
+    ("GET", "/plan", 401),
+    ("GET", "/plan", 403),
+    ("PUT", "/plan", 200),
+    ("PUT", "/plan", 409),
+    ("PUT", "/plan", 413),
+    ("GET", "/plan/suggestions", 200),
 ]
 ACTIVATION_BLOCKED = {"detail": {"code": "daily_limit_activation_blocked", "issues": ["curriculum_required:c"]}}
 
@@ -118,6 +132,14 @@ def body(value: Any) -> bytes:
         ),
         # The body of `daily_limit.configure` for an activation with open issues: `detail` is an object here.
         ("PUT", "/daily-limit", 409, ACTIVATION_BLOCKED),
+        (
+            "PUT",
+            "/plan",
+            409,
+            PlanRefusal(409, "plan_conflict", "changed", {"plan": get_example(Plan)}).response().body,
+        ),
+        ("PUT", "/plan", 413, PlanRefusal(413, "plan_too_large", "too large").response().body),
+        ("GET", "/tracks/{track_id}", 404, {"detail": "There is no track with this id"}),
     ],
 )
 def test_the_error_and_accepted_answers_match_their_documentation(
@@ -161,6 +183,11 @@ def test_an_error_answer_without_detail_is_reported(
         ("POST", "/engine/admin/revisions", {"engine_enabled": True}, 401),
         ("POST", "/engine/admin/revisions", {"engine_enabled": False}, 404),
         ("POST", "/_internal/learning-access/someone/check-batch", {}, 401),
+        ("GET", "/tracks", {}, 200),
+        ("GET", "/tracks/einstieg-it", {}, 200),
+        ("GET", "/tracks/unknown", {}, 404),
+        ("GET", "/plan", {}, 401),
+        ("GET", "/plan/suggestions", {}, 401),
     ],
 )
 async def test_real_answers_pass_the_debug_check(

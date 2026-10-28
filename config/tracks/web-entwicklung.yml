@@ -1,0 +1,37 @@
+title:
+  de: Web-Entwicklung
+  en: Web development
+description:
+  de: Von der ersten HTML-Seite über JavaScript und TypeScript bis zum eigenen Server mit Node.js.
+  en: From your first HTML page through JavaScript and TypeScript to your own server with Node.js.
+provider: null
+level: einsteiger
+stages:
+  - id: fundamentals
+    title:
+      de: Grundlagen
+      en: Fundamentals
+    kind: fundamentals
+    items:
+      - course: html5_fuer_anfaenger
+      - course: css3_fuer_anfaenger
+      - course: javascript
+      - course: git_und_github
+  - id: practitioner
+    title:
+      de: Praxis
+      en: Practice
+    kind: practitioner
+    items:
+      - course: sass_scss
+      - course: typescript
+      - course: react_js
+  - id: mastery
+    title:
+      de: Vertiefung
+      en: Mastery
+    kind: mastery
+    items:
+      - course: nodejs
+      - course: javascript_express
+      - course: javascript_jest

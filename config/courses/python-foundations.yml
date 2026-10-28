@@ -2,6 +2,7 @@ title: Deine ersten Python-Programme
 description: Rechne mit Werten, verarbeite Eingaben und triff Entscheidungen im Code. Kurze Erklärungen, kleine Experimente und eigene Programme führen dich Schritt für Schritt bis zu einem einfachen Bestellrechner.
 category: Programmieren
 language: de
+level: einsteiger
 image: null
 authors:
   - name: Bootstrap Academy

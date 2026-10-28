@@ -1,0 +1,55 @@
+title:
+  de: Cloud Engineer
+  en: Cloud Engineer
+description:
+  de: Vom ersten Linux-Server bis zum eigenen Container in der Cloud. Die Grundlagen lernst du hier, Workshop, Vertiefung und Zertifizierung finden außerhalb der Academy statt.
+  en: From your first Linux server to your own container in the cloud. You learn the fundamentals here; the workshop, advanced topics and certification take place outside the academy.
+provider: null
+level: einsteiger
+stages:
+  - id: fundamentals
+    title: Fundamentals
+    kind: fundamentals
+    items:
+      - course: cloud
+      - course: linux
+      - course: netzwerktechnik
+      - course: docker
+      - course: iam
+  - id: practitioner
+    title: Practitioner
+    kind: practitioner
+    items:
+      - external:
+          id: workshop-practitioner
+          title:
+            de: Workshop Practitioner
+            en: Practitioner workshop
+  - id: mastery
+    title: Mastery
+    kind: mastery
+    items:
+      - external:
+          id: finops
+          title: FinOps
+      - external:
+          id: kubernetes-operator-development
+          title: Kubernetes Operator Development
+  - id: refresher
+    title:
+      de: Auffrischung
+      en: Refresher
+    kind: refresher
+    repeat_after_months: 18
+    items: []
+  - id: certification
+    title:
+      de: Zertifizierung
+      en: Certification
+    kind: certification
+    items:
+      - external:
+          id: certification-cloud-engineer
+          title:
+            de: Zertifizierung Cloud Engineer
+            en: Cloud Engineer certification

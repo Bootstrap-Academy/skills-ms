@@ -3,6 +3,7 @@ title: "Git und Github"
 description: "Ihr entwickelt eure Programme noch ohne Git? Oh oh... Die Versionierungssoftware Git - und ihr zugehörige Cloud Variante Github - können euch helfen, ungewollte Änderungen rückgängig zu machen, im Team zu arbeiten und gleichzeitig noch das Deployment immens stabiler zu halten. Absolutes Must-Have für jeden in der IT."
 category:
 language: de
+level: einsteiger
 image: https://static.bootstrap.academy/thumbnails/git.jpg
 authors:
   - name: "The Morpheus Tutorials"
