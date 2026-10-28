@@ -21,6 +21,7 @@ EXPORTED_MODELS: dict[str, Any] = {
     "engine_submissions": models.EngineSubmission,
     "course_projects": models.CourseProject,
     "course_project_requests": models.CourseProjectRequest,
+    "learning_plan": models.LearningPlan,
     "purchases": models.CoursePurchase,
     "purchase_user": models.PurchaseUser,
     "retained_course_rights": models.RetainedCourseRight,
@@ -108,6 +109,35 @@ async def test__export_engine_rows_are_owner_bound_and_omit_the_frozen_job() -> 
     assert submission["job"]["publicStart"]["caseId"] == "open-0"
     # Points in time leave as ISO 8601 text, like every other row of the export.
     assert isinstance(export.model_dump(mode="json")["engine_submissions"][0]["accepted_at"], str)
+
+
+async def test__export_learning_plan_is_owner_bound() -> None:
+    async with db_context():
+        for owner in ["user", "other_user"]:
+            await db.add(
+                models.LearningPlan(
+                    user_id=owner,
+                    revision=3,
+                    state={"preference": "tief", "steps": [{"type": "course", "course": f"course-{owner}"}]},
+                    request_id=f"request-{owner}",
+                    request_fingerprint="f" * 64,
+                    updated_at=TIMESTAMP,
+                )
+            )
+    async with db_context():
+        export = await export_user_data("user")
+    assert export.learning_plan == [
+        {
+            "user_id": "user",
+            "revision": 3,
+            "state": {"preference": "tief", "steps": [{"type": "course", "course": "course-user"}]},
+            "request_id": "request-user",
+            "request_fingerprint": "f" * 64,
+            "updated_at": TIMESTAMP,
+        }
+    ]
+    assert export.model_dump(mode="json")["learning_plan"][0]["updated_at"] == TIMESTAMP.isoformat()
+    assert "other_user" not in export.model_dump_json()
 
 
 async def test__export_user_data__unknown_user() -> None:

@@ -3,6 +3,7 @@ title: "TypeScript: Volle Typisierung für JavaScript"
 description: "Was ist das größte Problem von JavaScript? Viele werden hier 'keine Typisierung' schreien. Und deswegen gibt's TypeScript. TypeScript ist mittlerweile so verbreitet, dass die allermeisten großen Webframeworks es genauso wie JavaScript unterstützen."
 category:
 language: de
+level: fortgeschritten
 image: https://static.bootstrap.academy/thumbnails/typescript.jpg
 authors:
   - name: "The Morpheus Tutorials"

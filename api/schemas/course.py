@@ -8,6 +8,10 @@ from api.schemas import BaseModel
 from api.schemas.curriculum import CurriculumDefinition
 from api.utils.docs import example, get_example
 
+# Difficulty of a course and the character (self-chosen difficulty) of a learner, easiest first.
+Level = Literal["einsteiger", "fortgeschritten", "profi"]
+LEVELS: tuple[Level, ...] = ("einsteiger", "fortgeschritten", "profi")
+
 
 class YoutubeLecture(BaseModel):
     id: str = Field(description="ID of the lecture")
@@ -101,6 +105,10 @@ class BaseCourse(BaseModel):
     )
     has_explicit_curriculum: bool = Field(
         default=False, description="Whether this course has explicitly composed lessons"
+    )
+    level: Level | None = Field(
+        default=None,
+        description="Difficulty of the course, when set; without it suggestions derive it from the skill tree",
     )
 
     model_config = example(

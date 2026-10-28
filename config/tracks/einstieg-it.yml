@@ -1,0 +1,25 @@
+title:
+  de: Einstieg in die IT
+  en: Getting started in IT
+description:
+  de: Verstehe, wie Computer arbeiten, bewege dich sicher im Netz und mach deine ersten Schritte mit Linux und Netzwerken.
+  en: Understand how computers work, move safely online and take your first steps with Linux and networks.
+provider: null
+level: einsteiger
+stages:
+  - id: fundamentals
+    title:
+      de: Grundlagen
+      en: Fundamentals
+    kind: fundamentals
+    items:
+      - course: it-foundations
+      - course: medienkompetenz
+  - id: practitioner
+    title:
+      de: Erste Praxis
+      en: First practice
+    kind: practitioner
+    items:
+      - course: linux
+      - course: netzwerktechnik

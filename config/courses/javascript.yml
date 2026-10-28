@@ -3,6 +3,7 @@ title: "JavaScript Programmierung"
 description: "JavaScript - die Sprache ohne die kaum eine Website heutzutage noch läuft. Die Sprache, die für die meisten Web-Frameworks zum Einsatz kommt und auch die Sprache, in der mittlerweile eine wahre Vielzahl an Servern(!) geschrieben wurden. Jap. Essentiell."
 category:
 language: de
+level: einsteiger
 image: https://static.bootstrap.academy/thumbnails/javascript.jpg
 authors:
   - name: "The Morpheus Tutorials"

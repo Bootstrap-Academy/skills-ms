@@ -4,6 +4,7 @@ description: >-
   Willkommen zum Kurs "Identitäts- und Zugriffsmanagement für Informatiker". Dieser umfassende Kurs richtet sich an Informatiker und Fachleute aus dem Bereich IT-Sicherheit, die ihre Kenntnisse im Bereich Identitäts- und Zugriffsmanagement (IAM) vertiefen möchten. In diesem Kurs lernst du, wie du effektive IAM-Strategien entwickeln und umsetzen kannst, um die Sicherheit in deinem Unternehmen oder auch privat zu erhöhen und den unbefugten Zugriff auf sensible Daten und Systeme zu verhindern. Wir werden hier die grundlegenden Konzepte, Technologien und Best Practices vermitteln, die für ein erfolgreiches IAM-Programm erforderlich sind. Dieser Kurs konzentriert sich auf die theoretischen Grundlagen, die für die Verwendung von konkreten Technologien nötig sind.
 category:
 language: de
+level: fortgeschritten
 image: https://static.bootstrap.academy/thumbnails/iam.jpg
 authors:
   - name: "The Morpheus Tutorials"

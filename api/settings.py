@@ -74,6 +74,9 @@ class Settings(BaseSettings):
 
     courses: Path = Path("config/courses")
     private_courses_directory: Path | None = None
+    # Curated tracks over courses ("Lernpfade"), loaded like the courses; a private directory adds or replaces tracks.
+    tracks: Path = Path("config/tracks")
+    private_tracks_directory: Path | None = None
 
     public_base_url: str = "http://localhost:8000"
     mp4_lectures: Path = Path("lectures")

@@ -13,6 +13,7 @@ USER_MODELS: list[Any] = [
     models.LessonStart,
     models.CourseProjectRequest,
     models.CourseProject,
+    models.LearningPlan,
     models.LessonMilestoneDelivery,
     models.LlmVerdict,
     models.RoomRequest,

@@ -3,6 +3,7 @@ title: "React JS"
 description: "React, das Frontend Framework von Facebook, ist ein bisschen kleiner und flexibler, aber dennoch genauso mächtig wie Angular!"
 category:
 language: de
+level: fortgeschritten
 image: https://static.bootstrap.academy/thumbnails/javascript.jpg
 authors:
   - name: "The Morpheus Tutorials"

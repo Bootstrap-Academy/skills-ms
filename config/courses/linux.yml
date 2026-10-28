@@ -3,6 +3,7 @@ title: "Erste Schritte mit Linux"
 description: "Linux ist überall - auf Servern, auf eurem Handy und vermutlich nach dieser Serie auch auf eurem Rechner :) Viel Spaß."
 category:
 language: de
+level: einsteiger
 image: https://static.bootstrap.academy/thumbnails/linux.jpg
 authors:
   - name: "The Morpheus Tutorials"
